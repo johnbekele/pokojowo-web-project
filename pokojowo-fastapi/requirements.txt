@@ -1,48 +1,75 @@
-# FastAPI and server
+# ===========================================
+# FastAPI and Server (Performance Optimized)
+# ===========================================
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
+gunicorn==21.2.0
+uvloop==0.19.0
+httptools==0.6.1
 python-multipart==0.0.6
 
-# Database
-motor==3.3.2  # Async MongoDB driver
-beanie==1.24.0  # ODM for MongoDB with Pydantic
+# Faster JSON serialization
+orjson==3.9.12
+
+# ===========================================
+# Database (Connection Pooling Optimized)
+# ===========================================
+motor==3.3.2
+beanie==1.24.0
 pymongo==4.6.1
 
+# ===========================================
 # Authentication & Security
+# ===========================================
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.1.2
 pyjwt==2.8.0
 
+# ===========================================
 # OAuth
+# ===========================================
 authlib==1.3.0
 httpx==0.26.0
 itsdangerous==2.1.2
 
+# ===========================================
 # Email
+# ===========================================
 aiosmtplib==3.0.1
 email-validator==2.1.0
 
+# ===========================================
 # WebSocket/Socket.IO
+# ===========================================
 python-socketio==5.11.0
 aiofiles==23.2.1
 
+# ===========================================
 # Google AI (Gemini)
+# ===========================================
 google-generativeai==0.3.2
 
+# ===========================================
 # File uploads
+# ===========================================
 python-magic==0.4.27
 pillow==10.2.0
 
-# CORS
-fastapi-cors==0.0.6
-
-# Caching
+# ===========================================
+# Caching (Redis support for production)
+# ===========================================
 aiocache==0.12.2
+redis==5.0.1
 
-# Utils
+# ===========================================
+# Core Utils
+# ===========================================
 pydantic==2.5.3
 pydantic-settings==2.1.0
-
-#dotenv
 python-dotenv==1.2.1
+
+# ===========================================
+# Monitoring & Logging (Production)
+# ===========================================
+structlog==24.1.0
