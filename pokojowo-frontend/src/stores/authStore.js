@@ -3,8 +3,19 @@ import { persist } from 'zustand/middleware';
 import api from '@/lib/api';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 
-// API URL for OAuth redirects (must be set in production)
+// API URL for regular requests
 const API_URL = import.meta.env.VITE_API_URL;
+
+// For OAuth redirects, we need a full URL (not relative)
+// In development, construct from window.location; in production, use the full API URL
+const getOAuthBaseUrl = () => {
+  // If API_URL is a full URL (starts with http), use it
+  if (API_URL?.startsWith('http')) {
+    return API_URL;
+  }
+  // Otherwise, construct from current origin (development with proxy)
+  return `${window.location.origin}${API_URL}`;
+};
 
 /**
  * Auth store for managing authentication state
@@ -81,8 +92,8 @@ const useAuthStore = create(
 
       // Google OAuth
       loginWithGoogle: () => {
-        // Use the API URL directly - it already includes /api prefix
-        window.location.href = `${API_URL}/auth/google`;
+        const oauthUrl = `${getOAuthBaseUrl()}/auth/google`;
+        window.location.href = oauthUrl;
       },
 
       // Handle OAuth callback
