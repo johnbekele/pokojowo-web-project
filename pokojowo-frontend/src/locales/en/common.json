@@ -1,0 +1,73 @@
+{
+  "appName": "Pokojowo",
+  "tagline": "Find Your Perfect Flatmate",
+  "nav": {
+    "home": "Home",
+    "listings": "Listings",
+    "matches": "Matches",
+    "chat": "Chat",
+    "profile": "Profile",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "logout": "Log Out",
+    "dashboard": "Dashboard",
+    "favorites": "Favorites",
+    "likes": "Likes"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "continue": "Continue",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "viewAll": "View All",
+    "viewProfile": "View Profile",
+    "remove": "Remove",
+    "keepBrowsing": "Keep Browsing",
+    "sendMessage": "Send Message"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Please enter a valid email",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be at most {{max}} characters",
+    "passwordMatch": "Passwords do not match"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "Please log in to continue.",
+    "forbidden": "You don't have permission to do this.",
+    "notFound": "The requested resource was not found."
+  },
+  "empty": {
+    "noData": "No data available",
+    "noResults": "No results found"
+  },
+  "language": {
+    "en": "English",
+    "pl": "Polish"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "clear": "Clear",
+    "empty": "No notifications yet",
+    "newMessage": "New message"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hours ago",
+    "daysAgo": "{{count}} days ago"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "title": "Profil",
+  "completion": {
+    "title": "Uzupełnij swój profil",
+    "subtitle": "Pomóż nam znaleźć idealne dopasowanie",
+    "badge": "Prawie gotowe!",
+    "step": "Krok",
+    "of": "z",
+    "progress": "{{percentage}}% ukończone",
+    "success": {
+      "title": "Profil zaktualizowany",
+      "description": "Twój profil został pomyślnie zapisany."
+    },
+    "error": {
+      "title": "Błąd",
+      "description": "Nie udało się zapisać profilu. Spróbuj ponownie."
+    }
+  },
+  "basicInfo": {
+    "title": "Podstawowe informacje",
+    "subtitle": "Opowiedz nam o sobie",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "age": "Wiek",
+    "gender": "Płeć",
+    "selectGender": "Wybierz płeć",
+    "genderOptions": {
+      "male": "Mężczyzna",
+      "female": "Kobieta",
+      "other": "Inna",
+      "preferNotToSay": "Wolę nie podawać"
+    },
+    "bio": "O mnie",
+    "bioPlaceholder": "Napisz kilka zdań o sobie, swoich zainteresowaniach i czego szukasz..."
+  },
+  "contact": {
+    "title": "Dane kontaktowe",
+    "subtitle": "Jak można się z Tobą skontaktować?",
+    "phone": "Numer telefonu",
+    "location": "Miasto / Lokalizacja",
+    "preferredContact": "Preferowany sposób kontaktu"
+  },
+  "preferences": {
+    "title": "Twoje preferencje",
+    "subtitle": "Czego szukasz?",
+    "budget": "Miesięczny budżet",
+    "budgetMin": "Min budżet",
+    "budgetMax": "Max budżet",
+    "location": "Preferowana lokalizacja",
+    "leaseDuration": "Okres najmu",
+    "months": "miesięcy",
+    "moveInDate": "Data wprowadzenia"
+  },
+  "lifestyle": {
+    "title": "Styl życia i nawyki",
+    "subtitle": "Pomóż nam znaleźć kompatybilnych współlokatorów",
+    "selectLevel": "Wybierz poziom",
+    "selectFrequency": "Wybierz częstotliwość",
+    "cleanliness": {
+      "label": "Poziom czystości",
+      "veryClean": "Bardzo czysty",
+      "clean": "Czysty",
+      "moderate": "Umiarkowany",
+      "relaxed": "Wyluzowany"
+    },
+    "socialLevel": {
+      "label": "Poziom towarzyskości",
+      "verySocial": "Bardzo towarzyski",
+      "social": "Towarzyski",
+      "moderate": "Umiarkowany",
+      "quiet": "Cichy"
+    },
+    "guests": {
+      "label": "Częstotliwość gości",
+      "often": "Często",
+      "sometimes": "Czasami",
+      "rarely": "Rzadko",
+      "never": "Nigdy"
+    },
+    "smoking": {
+      "label": "Palenie",
+      "yes": "Tak",
+      "no": "Nie",
+      "outside": "Tylko na zewnątrz"
+    },
+    "pets": {
+      "label": "Zwierzęta",
+      "have": "Mam zwierzęta",
+      "ok": "Zwierzęta są OK",
+      "no": "Bez zwierząt"
+    }
+  },
+  "dealBreakers": {
+    "title": "Wykluczone",
+    "subtitle": "Co jest absolutnie niedopuszczalne?",
+    "noSmokers": "Bez palaczy",
+    "noPets": "Bez zwierząt",
+    "noParties": "Bez imprez",
+    "sameGenderOnly": "Tylko ta sama płeć",
+    "quietHoursRequired": "Wymagane godziny ciszy"
+  },
+  "languages": {
+    "title": "Języki",
+    "subtitle": "Jakimi językami mówisz?",
+    "select": "Wybierz języki którymi mówisz",
+    "preferredLanguage": "Preferowany język",
+    "selectPreferred": "Wybierz preferowany język"
+  },
+  "photo": {
+    "title": "Zdjęcie profilowe",
+    "upload": "Prześlij zdjęcie",
+    "change": "Zmień zdjęcie",
+    "remove": "Usuń zdjęcie"
+  },
+  "actions": {
+    "save": "Zapisz profil",
+    "complete": "Ukończ profil",
+    "next": "Dalej",
+    "back": "Wstecz",
+    "skip": "Pomiń na razie",
+    "saving": "Zapisywanie..."
+  }
+}

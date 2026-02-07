@@ -1,0 +1,173 @@
+{
+  "title": "Twoje dopasowania",
+  "subtitle": "Osoby, które mogą być świetnym wyborem",
+  "score": {
+    "label": "Kompatybilność",
+    "excellent": "Doskonałe dopasowanie",
+    "good": "Dobre dopasowanie",
+    "moderate": "Średnie dopasowanie"
+  },
+  "breakdown": {
+    "budget": "Budżet",
+    "lifestyle": "Styl życia",
+    "personality": "Osobowość",
+    "schedule": "Harmonogram",
+    "interests": "Zainteresowania",
+    "location": "Lokalizacja",
+    "preferences": "Preferencje"
+  },
+  "card": {
+    "viewProfile": "Zobacz profil",
+    "sendMessage": "Napisz",
+    "chat": "Czat",
+    "compatible": "{{score}}% Zgodność",
+    "yearsOld": "{{age}} lat",
+    "whyYouMatch": "Dlaczego pasujesz",
+    "matchMessages": {
+      "perfect": "Możecie być świetnymi współlokatorami!",
+      "great": "Macie wiele wspólnego!",
+      "good": "Może być dobre dopasowanie",
+      "fair": "Warto się poznać"
+    }
+  },
+  "detail": {
+    "whyMatch": "Dlaczego to dopasowanie?",
+    "sharedInterests": "Wspólne zainteresowania",
+    "sharedLanguages": "Wspólne języki",
+    "compatibility": "Analiza kompatybilności",
+    "overallMatch": "Ogólne dopasowanie",
+    "about": "O mnie"
+  },
+  "empty": {
+    "title": "Brak dopasowań",
+    "subtitle": "Uzupełnij profil aby zacząć dopasowywanie",
+    "completeProfile": "Uzupełnij profil"
+  },
+  "filters": {
+    "minScore": "Minimalny wynik",
+    "location": "Lokalizacja",
+    "budget": "Zakres budżetu"
+  },
+  "error": {
+    "title": "Błąd",
+    "loadingFailed": "Nie udało się załadować dopasowań. Spróbuj ponownie.",
+    "notFound": "Nie znaleziono dopasowania"
+  },
+  "dashboard": {
+    "welcome": "Witaj ponownie, {{name}}!",
+    "overview": "Oto przegląd Twojej aktywności dopasowań",
+    "pleaseLogin": "Zaloguj się",
+    "loginRequired": "Musisz być zalogowany, aby zobaczyć panel.",
+    "completeProfile": "Uzupełnij swój profil",
+    "profileIncomplete": "Twój profil jest niekompletny. Uzupełnij go, aby zacząć dopasowywanie.",
+    "continueSetup": "Kontynuuj konfigurację profilu",
+    "stats": {
+      "compatibleMatches": "Zgodne dopasowania",
+      "highCompatibility": "{{count}} wysoka zgodność",
+      "mutualMatches": "Wzajemne dopasowania",
+      "bothLiked": "Oboje się polubili",
+      "likesReceived": "Otrzymane polubienia",
+      "pending": "{{count}} oczekujących",
+      "peopleWhoLiked": "Osoby, które Cię polubiły",
+      "savedProfiles": "Zapisane profile",
+      "bookmarkedForLater": "Zapisane na później"
+    },
+    "topMatches": {
+      "title": "Najlepsze dopasowania",
+      "subtitle": "Twoje najwyższe dopasowania",
+      "viewAll": "Zobacz wszystko",
+      "empty": "Nie znaleziono jeszcze dopasowań. Aktualizuj swój profil!"
+    },
+    "pendingLikes": {
+      "title": "Osoby, które Cię lubią",
+      "viewAll": "Zobacz wszystkie polubienia"
+    },
+    "mutualMatches": {
+      "title": "Wzajemne dopasowania"
+    },
+    "quickActions": {
+      "title": "Szybkie akcje",
+      "browseMatches": "Przeglądaj dopasowania",
+      "viewLikes": "Zobacz polubienia",
+      "savedProfiles": "Zapisane profile",
+      "messages": "Wiadomości"
+    },
+    "unknownLocation": "Nieznana lokalizacja"
+  },
+  "likes": {
+    "title": "Polubienia i dopasowania",
+    "tabs": {
+      "received": "Otrzymane",
+      "sent": "Wysłane",
+      "mutual": "Wzajemne"
+    },
+    "stats": {
+      "likesReceived": "Otrzymane polubienia",
+      "likesSent": "Wysłane polubienia",
+      "mutualMatches": "Wzajemne dopasowania",
+      "pending": "Oczekujące"
+    },
+    "received": {
+      "empty": {
+        "title": "Brak otrzymanych polubień",
+        "subtitle": "Gdy ktoś polubi Twój profil, pojawi się tutaj."
+      },
+      "waitingForResponse": "Oczekuje na Twoją odpowiedź",
+      "allLikes": "Wszystkie otrzymane polubienia",
+      "likedYou": "Polubił/a Cię {{time}}"
+    },
+    "sent": {
+      "empty": {
+        "title": "Brak wysłanych polubień",
+        "subtitle": "Zacznij lubić profile, aby je tu zobaczyć."
+      },
+      "browseMatches": "Przeglądaj dopasowania",
+      "liked": "Polubiono {{time}}"
+    },
+    "mutual": {
+      "empty": {
+        "title": "Brak wzajemnych dopasowań",
+        "subtitle": "Gdy Ty i ktoś inny polubicie się nawzajem, to dopasowanie!"
+      },
+      "findMatches": "Znajdź dopasowania",
+      "matched": "Dopasowano {{time}}",
+      "matchBadge": "Dopasowanie!"
+    },
+    "actions": {
+      "like": "Polub",
+      "liked": "Polubiono",
+      "matched": "Dopasowano!",
+      "unliked": "Twoje polubienie zostało usunięte.",
+      "likeSent": "Twoje polubienie zostało wysłane."
+    },
+    "match": {
+      "title": "Masz dopasowanie!",
+      "subtitle": "Ty i {{name}} polubiliście się nawzajem!",
+      "startChatting": "Oboje się polubiliście. Zacznijcie rozmawiać!"
+    }
+  },
+  "favorites": {
+    "title": "Zapisane dopasowania",
+    "profilesSaved": "{{count}} zapisanych profili",
+    "searchPlaceholder": "Szukaj zapisanych...",
+    "empty": {
+      "title": "Brak zapisanych dopasowań",
+      "noSearchResults": "Nie znaleziono dopasowań dla Twojego wyszukiwania.",
+      "subtitle": "Zapisuj interesujące profile, aby je tu zobaczyć."
+    },
+    "browseMatches": "Przeglądaj dopasowania",
+    "remove": {
+      "title": "Usunąć z zapisanych?",
+      "description": "To usunie {{name}} z Twoich zapisanych dopasowań.",
+      "confirm": "Usuń",
+      "cancel": "Anuluj"
+    },
+    "saved": "Zapisano {{time}}",
+    "actions": {
+      "save": "Zapisz",
+      "saved": "Zapisano",
+      "removed": "Ten profil został usunięty z Twojej listy zapisanych.",
+      "added": "Ten profil został dodany do Twojej listy zapisanych."
+    }
+  }
+}

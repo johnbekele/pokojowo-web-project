@@ -1,0 +1,83 @@
+{
+  "title": "Find Your Perfect Room",
+  "hero": {
+    "badge": "Discover amazing places",
+    "subtitle": "Browse through verified room listings in Poland. Find your next home with ease.",
+    "searchButton": "Search"
+  },
+  "search": {
+    "placeholder": "Search by location, city, or neighborhood...",
+    "filter": "Filters",
+    "sort": "Sort by",
+    "sortOptions": {
+      "newest": "Newest first",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low"
+    }
+  },
+  "results": {
+    "count": "listings found"
+  },
+  "filters": {
+    "title": "Search Filters",
+    "description": "Refine your search to find the perfect place",
+    "priceRange": "Price Range",
+    "price": "Price Range (PLN/month)",
+    "size": "Size (m²)",
+    "roomType": "Room Type",
+    "roomTypes": {
+      "private": "Private Room",
+      "shared": "Shared Room",
+      "studio": "Studio"
+    },
+    "buildingType": "Building Type",
+    "rentFor": "Suitable For",
+    "maxTenants": "Maximum Tenants",
+    "anyTenants": "Any number",
+    "amenities": "Amenities",
+    "available": "Available Now",
+    "apply": "Apply Filters",
+    "reset": "Reset All",
+    "clear": "Clear All"
+  },
+  "card": {
+    "perMonth": "/month",
+    "available": "Available",
+    "viewDetails": "View Details",
+    "beds": "beds",
+    "baths": "baths"
+  },
+  "details": {
+    "description": "Description",
+    "amenities": "Amenities",
+    "location": "Location",
+    "landlord": "Landlord",
+    "contactLandlord": "Contact Landlord",
+    "available": "Available from",
+    "deposit": "Deposit",
+    "utilities": "Utilities",
+    "utilitiesIncluded": "Included",
+    "utilitiesExtra": "Extra"
+  },
+  "empty": {
+    "title": "No listings found",
+    "subtitle": "Try adjusting your filters or search criteria to find more results"
+  },
+  "error": {
+    "title": "Oops! Something went wrong",
+    "loadingFailed": "Failed to load listings. Please try again.",
+    "retry": "Try Again"
+  },
+  "interestedUsers": {
+    "title": "Also interested",
+    "singleMatch": "{{name}} ({{score}}% match) is also interested",
+    "multipleMatches": "{{count}} compatible roommates are also interested",
+    "viewAll": "View all",
+    "noMatches": "Be the first to show interest!"
+  },
+  "actions": {
+    "like": "Save listing",
+    "unlike": "Remove from saved",
+    "liked": "Saved"
+  }
+}

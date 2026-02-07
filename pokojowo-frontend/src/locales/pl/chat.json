@@ -1,0 +1,50 @@
+{
+  "title": "Wiadomości",
+  "subtitle": "Rozmawiaj ze swoimi dopasowaniami",
+  "search": {
+    "placeholder": "Szukaj rozmów..."
+  },
+  "empty": {
+    "title": "Brak wiadomości",
+    "subtitle": "Rozpocznij rozmowę ze swoimi dopasowaniami, aby znaleźć idealnego współlokatora",
+    "findMatches": "Znajdź dopasowania"
+  },
+  "noMessages": "Brak wiadomości",
+  "startConversation": "Wyślij wiadomość, aby rozpocząć rozmowę",
+  "loading": "Ładowanie czatu...",
+  "loadingMessages": "Ładowanie wiadomości...",
+  "replyPlaceholder": "Napisz odpowiedź...",
+  "conversation": {
+    "online": "Online",
+    "offline": "Offline",
+    "typing": "pisze...",
+    "lastSeen": "Ostatnio widziano {{time}}"
+  },
+  "input": {
+    "placeholder": "Napisz wiadomość...",
+    "send": "Wyślij"
+  },
+  "inputPlaceholder": "Napisz wiadomość...",
+  "message": {
+    "sent": "Wysłano",
+    "delivered": "Dostarczono",
+    "read": "Przeczytano"
+  },
+  "error": {
+    "title": "Błąd",
+    "loadFailed": "Nie udało się załadować rozmów. Spróbuj ponownie.",
+    "chatNotFound": "Nie znaleziono czatu",
+    "sendFailed": "Nie udało się wysłać wiadomości",
+    "connectionLost": "Utracono połączenie"
+  },
+  "connection": {
+    "connected": "Połączono",
+    "reconnecting": "Ponowne łączenie...",
+    "offline": "Offline"
+  },
+  "backToChats": "Wróć do czatów",
+  "viewProfile": "Zobacz profil",
+  "online": "Online",
+  "offline": "Offline",
+  "typing": "pisze..."
+}

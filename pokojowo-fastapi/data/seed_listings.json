@@ -1,0 +1,140 @@
+{
+  "listings": [
+    {
+      "address": "ul. Rynek 15, Warsaw, Poland",
+      "price": 2500,
+      "size": 45,
+      "maxTenants": 2,
+      "images": [],
+      "description": {
+        "en": "Cozy room in the heart of Warsaw's Old Town. Perfect for students or young professionals. Close to public transport, restaurants, and cultural attractions. Fully furnished with modern amenities.",
+        "pl": "Przytulny pokój w sercu warszawskiego Starego Miasta. Idealny dla studentów lub młodych profesjonalistów. Blisko transportu publicznego, restauracji i atrakcji kulturalnych. W pełni umeblowany z nowoczesnymi udogodnieniami."
+      },
+      "availableFrom": "2025-02-01T00:00:00Z",
+      "roomType": "Single",
+      "buildingType": "Apartment",
+      "rentForOnly": ["Open to All"],
+      "canBeContacted": ["email", "phone"],
+      "closeTo": ["city center", "shops", "walking paths"]
+    },
+    {
+      "address": "ul. Mokotowska 28, Warsaw, Poland",
+      "price": 3200,
+      "size": 55,
+      "maxTenants": 2,
+      "images": [],
+      "description": {
+        "en": "Spacious double room in the trendy Mokotow district. Modern building with elevator, underground parking available. Great neighborhood with cafes, parks, and easy metro access.",
+        "pl": "Przestronny pokój dwuosobowy w modnej dzielnicy Mokotów. Nowoczesny budynek z windą, dostępny parking podziemny. Świetna okolica z kawiarniami, parkami i łatwym dostępem do metra."
+      },
+      "availableFrom": "2025-01-15T00:00:00Z",
+      "roomType": "Double",
+      "buildingType": "Apartment",
+      "rentForOnly": ["Student", "Open to All"],
+      "canBeContacted": ["email", "whatsapp"],
+      "closeTo": ["shops", "city center", "cycling paths"]
+    },
+    {
+      "address": "ul. Krakowskie Przedmieście 5, Warsaw, Poland",
+      "price": 2800,
+      "size": 35,
+      "maxTenants": 1,
+      "images": [],
+      "description": {
+        "en": "Charming single room on Warsaw's most prestigious street. Historic building with modern renovations. Walking distance to universities, theaters, and the Royal Castle.",
+        "pl": "Urokliwy pokój jednoosobowy przy najbardziej prestiżowej ulicy Warszawy. Zabytkowy budynek z nowoczesnym remontem. W odległości spaceru od uniwersytetów, teatrów i Zamku Królewskiego."
+      },
+      "availableFrom": "2025-02-15T00:00:00Z",
+      "roomType": "Single",
+      "buildingType": "Block",
+      "rentForOnly": ["Student"],
+      "canBeContacted": ["email", "sms"],
+      "closeTo": ["city center", "walking paths"]
+    },
+    {
+      "address": "ul. Nowy Świat 42, Warsaw, Poland",
+      "price": 3500,
+      "size": 60,
+      "maxTenants": 2,
+      "images": [],
+      "description": {
+        "en": "Premium suite on famous Nowy Świat street. Luxury apartment with balcony, air conditioning, and high-speed internet. Perfect for professionals seeking central location.",
+        "pl": "Luksusowy apartament przy słynnej ulicy Nowy Świat. Luksusowe mieszkanie z balkonem, klimatyzacją i szybkim internetem. Idealny dla profesjonalistów szukających centralnej lokalizacji."
+      },
+      "availableFrom": "2025-03-01T00:00:00Z",
+      "roomType": "Suite",
+      "buildingType": "Apartment",
+      "rentForOnly": ["Open to All"],
+      "canBeContacted": ["email", "phone", "whatsapp"],
+      "closeTo": ["city center", "shops", "service points"]
+    },
+    {
+      "address": "ul. Żoliborska 10, Warsaw, Poland",
+      "price": 2200,
+      "size": 40,
+      "maxTenants": 1,
+      "images": [],
+      "description": {
+        "en": "Quiet single room in the peaceful Żoliborz district. Family-friendly neighborhood with green spaces and excellent public transport connections.",
+        "pl": "Cichy pokój jednoosobowy w spokojnej dzielnicy Żoliborz. Przyjazna dla rodzin okolica z terenami zielonymi i doskonałymi połączeniami komunikacji miejskiej."
+      },
+      "availableFrom": "2025-01-20T00:00:00Z",
+      "roomType": "Single",
+      "buildingType": "Block",
+      "rentForOnly": ["Open to All"],
+      "canBeContacted": ["email", "phone"],
+      "closeTo": ["walking paths", "cycling paths", "shops"]
+    },
+    {
+      "address": "ul. Wola 77, Warsaw, Poland",
+      "price": 1900,
+      "size": 30,
+      "maxTenants": 1,
+      "images": [],
+      "description": {
+        "en": "Budget-friendly room in up-and-coming Wola district. New metro station nearby, surrounded by modern office buildings and shopping centers. Great for young professionals.",
+        "pl": "Pokój w przystępnej cenie w rozwijającej się dzielnicy Wola. W pobliżu nowa stacja metra, otoczony nowoczesnymi biurowcami i centrami handlowymi. Idealny dla młodych profesjonalistów."
+      },
+      "availableFrom": "2025-02-01T00:00:00Z",
+      "roomType": "Single",
+      "buildingType": "Loft",
+      "rentForOnly": ["Open to All"],
+      "canBeContacted": ["email"],
+      "closeTo": ["shops", "service points"]
+    },
+    {
+      "address": "ul. Praga Północ 23, Warsaw, Poland",
+      "price": 1800,
+      "size": 38,
+      "maxTenants": 1,
+      "images": [],
+      "description": {
+        "en": "Artistic room in the bohemian Praga district. Converted industrial building with character. Close to galleries, clubs, and the Vistula riverbank.",
+        "pl": "Artystyczny pokój w bohemicznej dzielnicy Praga. Przekształcony budynek przemysłowy z charakterem. Blisko galerii, klubów i bulwarów wiślanych."
+      },
+      "availableFrom": "2025-01-25T00:00:00Z",
+      "roomType": "Single",
+      "buildingType": "Loft",
+      "rentForOnly": ["Open to All"],
+      "canBeContacted": ["email", "whatsapp"],
+      "closeTo": ["walking paths"]
+    },
+    {
+      "address": "ul. Ursynów 156, Warsaw, Poland",
+      "price": 2000,
+      "size": 42,
+      "maxTenants": 2,
+      "images": [],
+      "description": {
+        "en": "Comfortable room in student-friendly Ursynów. Near SGGW and metro, with shopping mall and park nearby. Quiet residential area perfect for studying.",
+        "pl": "Wygodny pokój w przyjaznym studentom Ursynowie. Blisko SGGW i metra, z centrum handlowym i parkiem w pobliżu. Cicha dzielnica mieszkalna idealna do nauki."
+      },
+      "availableFrom": "2025-02-10T00:00:00Z",
+      "roomType": "Double",
+      "buildingType": "Block",
+      "rentForOnly": ["Student"],
+      "canBeContacted": ["email", "phone", "sms"],
+      "closeTo": ["shops", "walking paths", "cycling paths"]
+    }
+  ]
+}

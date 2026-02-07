@@ -1,0 +1,83 @@
+{
+  "title": "Znajdź Idealny Pokój",
+  "hero": {
+    "badge": "Odkryj niesamowite miejsca",
+    "subtitle": "Przeglądaj zweryfikowane ogłoszenia pokoi w Polsce. Znajdź swój nowy dom z łatwością.",
+    "searchButton": "Szukaj"
+  },
+  "search": {
+    "placeholder": "Szukaj po lokalizacji, mieście lub dzielnicy...",
+    "filter": "Filtry",
+    "sort": "Sortuj",
+    "sortOptions": {
+      "newest": "Najnowsze",
+      "priceAsc": "Cena: od najniższej",
+      "priceDesc": "Cena: od najwyższej"
+    }
+  },
+  "results": {
+    "count": "znalezionych ogłoszeń"
+  },
+  "filters": {
+    "title": "Filtry wyszukiwania",
+    "description": "Doprecyzuj wyszukiwanie, aby znaleźć idealne miejsce",
+    "priceRange": "Zakres cen",
+    "price": "Zakres cen (PLN/miesiąc)",
+    "size": "Powierzchnia (m²)",
+    "roomType": "Typ pokoju",
+    "roomTypes": {
+      "private": "Pokój prywatny",
+      "shared": "Pokój dzielony",
+      "studio": "Kawalerka"
+    },
+    "buildingType": "Typ budynku",
+    "rentFor": "Odpowiedni dla",
+    "maxTenants": "Maksymalna liczba lokatorów",
+    "anyTenants": "Dowolna liczba",
+    "amenities": "Udogodnienia",
+    "available": "Dostępne teraz",
+    "apply": "Zastosuj filtry",
+    "reset": "Resetuj wszystko",
+    "clear": "Wyczyść wszystko"
+  },
+  "card": {
+    "perMonth": "/miesiąc",
+    "available": "Dostępny",
+    "viewDetails": "Zobacz szczegóły",
+    "beds": "łóżka",
+    "baths": "łazienki"
+  },
+  "details": {
+    "description": "Opis",
+    "amenities": "Udogodnienia",
+    "location": "Lokalizacja",
+    "landlord": "Właściciel",
+    "contactLandlord": "Skontaktuj się",
+    "available": "Dostępny od",
+    "deposit": "Kaucja",
+    "utilities": "Media",
+    "utilitiesIncluded": "W cenie",
+    "utilitiesExtra": "Dodatkowo"
+  },
+  "empty": {
+    "title": "Brak ogłoszeń",
+    "subtitle": "Spróbuj zmienić filtry lub kryteria wyszukiwania, aby znaleźć więcej wyników"
+  },
+  "error": {
+    "title": "Ups! Coś poszło nie tak",
+    "loadingFailed": "Nie udało się załadować ogłoszeń. Spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
+  },
+  "interestedUsers": {
+    "title": "Również zainteresowani",
+    "singleMatch": "{{name}} ({{score}}% dopasowania) jest również zainteresowany/a",
+    "multipleMatches": "{{count}} dopasowanych współlokatorów jest zainteresowanych",
+    "viewAll": "Zobacz wszystkich",
+    "noMatches": "Bądź pierwszym zainteresowanym!"
+  },
+  "actions": {
+    "like": "Zapisz ogłoszenie",
+    "unlike": "Usuń z zapisanych",
+    "liked": "Zapisano"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "title": "Profile",
+  "completion": {
+    "title": "Complete Your Profile",
+    "subtitle": "Help us find your perfect match",
+    "badge": "Almost there!",
+    "step": "Step",
+    "of": "of",
+    "progress": "{{percentage}}% complete",
+    "success": {
+      "title": "Profile Updated",
+      "description": "Your profile has been saved successfully."
+    },
+    "error": {
+      "title": "Error",
+      "description": "Failed to save profile. Please try again."
+    }
+  },
+  "basicInfo": {
+    "title": "Basic Information",
+    "subtitle": "Tell us about yourself",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "age": "Age",
+    "gender": "Gender",
+    "selectGender": "Select gender",
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "preferNotToSay": "Prefer not to say"
+    },
+    "bio": "About Me",
+    "bioPlaceholder": "Write a few sentences about yourself, your interests, and what you're looking for..."
+  },
+  "contact": {
+    "title": "Contact Information",
+    "subtitle": "How can people reach you?",
+    "phone": "Phone Number",
+    "location": "City / Location",
+    "preferredContact": "Preferred Contact Method"
+  },
+  "preferences": {
+    "title": "Your Preferences",
+    "subtitle": "What are you looking for?",
+    "budget": "Monthly Budget",
+    "budgetMin": "Min Budget",
+    "budgetMax": "Max Budget",
+    "location": "Preferred Location",
+    "leaseDuration": "Lease Duration",
+    "months": "months",
+    "moveInDate": "Move-in Date"
+  },
+  "lifestyle": {
+    "title": "Lifestyle & Habits",
+    "subtitle": "Help us find compatible flatmates",
+    "selectLevel": "Select level",
+    "selectFrequency": "Select frequency",
+    "cleanliness": {
+      "label": "Cleanliness Level",
+      "veryClean": "Very Clean",
+      "clean": "Clean",
+      "moderate": "Moderate",
+      "relaxed": "Relaxed"
+    },
+    "socialLevel": {
+      "label": "Social Level",
+      "verySocial": "Very Social",
+      "social": "Social",
+      "moderate": "Moderate",
+      "quiet": "Quiet"
+    },
+    "guests": {
+      "label": "Guest Frequency",
+      "often": "Often",
+      "sometimes": "Sometimes",
+      "rarely": "Rarely",
+      "never": "Never"
+    },
+    "smoking": {
+      "label": "Smoking",
+      "yes": "Yes",
+      "no": "No",
+      "outside": "Outside only"
+    },
+    "pets": {
+      "label": "Pets",
+      "have": "I have pets",
+      "ok": "Pets are OK",
+      "no": "No pets"
+    }
+  },
+  "dealBreakers": {
+    "title": "Deal Breakers",
+    "subtitle": "What's absolutely not acceptable?",
+    "noSmokers": "No smokers",
+    "noPets": "No pets",
+    "noParties": "No parties",
+    "sameGenderOnly": "Same gender only",
+    "quietHoursRequired": "Quiet hours required"
+  },
+  "languages": {
+    "title": "Languages",
+    "subtitle": "What languages do you speak?",
+    "select": "Select languages you speak",
+    "preferredLanguage": "Preferred Language",
+    "selectPreferred": "Select preferred language"
+  },
+  "photo": {
+    "title": "Profile Photo",
+    "upload": "Upload Photo",
+    "change": "Change Photo",
+    "remove": "Remove Photo"
+  },
+  "actions": {
+    "save": "Save Profile",
+    "complete": "Complete Profile",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip for now",
+    "saving": "Saving..."
+  }
+}

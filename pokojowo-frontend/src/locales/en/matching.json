@@ -1,0 +1,173 @@
+{
+  "title": "Your Matches",
+  "subtitle": "People who might be a great fit",
+  "score": {
+    "label": "Compatibility",
+    "excellent": "Excellent Match",
+    "good": "Good Match",
+    "moderate": "Moderate Match"
+  },
+  "breakdown": {
+    "budget": "Budget",
+    "lifestyle": "Lifestyle",
+    "personality": "Personality",
+    "schedule": "Schedule",
+    "interests": "Interests",
+    "location": "Location",
+    "preferences": "Preferences"
+  },
+  "card": {
+    "viewProfile": "View Profile",
+    "sendMessage": "Message",
+    "chat": "Chat",
+    "compatible": "{{score}}% Compatible",
+    "yearsOld": "{{age}} years old",
+    "whyYouMatch": "Why you match",
+    "matchMessages": {
+      "perfect": "You two could be great roommates!",
+      "great": "You have a lot in common!",
+      "good": "Could be a good match",
+      "fair": "Worth getting to know"
+    }
+  },
+  "detail": {
+    "whyMatch": "Why this match?",
+    "sharedInterests": "Shared Interests",
+    "sharedLanguages": "Shared Languages",
+    "compatibility": "Compatibility Breakdown",
+    "overallMatch": "Overall Match",
+    "about": "About"
+  },
+  "empty": {
+    "title": "No matches yet",
+    "subtitle": "Complete your profile to start matching with others",
+    "completeProfile": "Complete Your Profile"
+  },
+  "filters": {
+    "minScore": "Minimum Score",
+    "location": "Location",
+    "budget": "Budget Range"
+  },
+  "error": {
+    "title": "Error",
+    "loadingFailed": "Failed to load matches. Please try again.",
+    "notFound": "Match not found"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}!",
+    "overview": "Here's an overview of your matching activity",
+    "pleaseLogin": "Please log in",
+    "loginRequired": "You need to be logged in to view your dashboard.",
+    "completeProfile": "Complete Your Profile",
+    "profileIncomplete": "Your profile is incomplete. Complete it to start matching with potential roommates.",
+    "continueSetup": "Continue Profile Setup",
+    "stats": {
+      "compatibleMatches": "Compatible Matches",
+      "highCompatibility": "{{count}} high compatibility",
+      "mutualMatches": "Mutual Matches",
+      "bothLiked": "Both liked each other",
+      "likesReceived": "Likes Received",
+      "pending": "{{count}} pending",
+      "peopleWhoLiked": "People who liked you",
+      "savedProfiles": "Saved Profiles",
+      "bookmarkedForLater": "Bookmarked for later"
+    },
+    "topMatches": {
+      "title": "Top Matches",
+      "subtitle": "Your highest compatibility matches",
+      "viewAll": "View All",
+      "empty": "No matches found yet. Keep your profile updated!"
+    },
+    "pendingLikes": {
+      "title": "People Who Like You",
+      "viewAll": "View All Likes"
+    },
+    "mutualMatches": {
+      "title": "Mutual Matches"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "browseMatches": "Browse Matches",
+      "viewLikes": "View Likes",
+      "savedProfiles": "Saved Profiles",
+      "messages": "Messages"
+    },
+    "unknownLocation": "Unknown location"
+  },
+  "likes": {
+    "title": "Likes & Matches",
+    "tabs": {
+      "received": "Received",
+      "sent": "Sent",
+      "mutual": "Mutual"
+    },
+    "stats": {
+      "likesReceived": "Likes Received",
+      "likesSent": "Likes Sent",
+      "mutualMatches": "Mutual Matches",
+      "pending": "Pending"
+    },
+    "received": {
+      "empty": {
+        "title": "No Likes Received Yet",
+        "subtitle": "When someone likes your profile, they'll appear here."
+      },
+      "waitingForResponse": "Waiting for your response",
+      "allLikes": "All received likes",
+      "likedYou": "Liked you {{time}}"
+    },
+    "sent": {
+      "empty": {
+        "title": "No Likes Sent Yet",
+        "subtitle": "Start liking profiles to see them here."
+      },
+      "browseMatches": "Browse Matches",
+      "liked": "Liked {{time}}"
+    },
+    "mutual": {
+      "empty": {
+        "title": "No Mutual Matches Yet",
+        "subtitle": "When you and someone both like each other, it's a match!"
+      },
+      "findMatches": "Find Matches",
+      "matched": "Matched {{time}}",
+      "matchBadge": "Match!"
+    },
+    "actions": {
+      "like": "Like",
+      "liked": "Liked",
+      "matched": "Matched!",
+      "unliked": "Your like has been removed.",
+      "likeSent": "Your like has been sent."
+    },
+    "match": {
+      "title": "It's a Match!",
+      "subtitle": "You and {{name}} both liked each other!",
+      "startChatting": "You both liked each other. Start chatting now!"
+    }
+  },
+  "favorites": {
+    "title": "Saved Matches",
+    "profilesSaved": "{{count}} profiles saved",
+    "searchPlaceholder": "Search saved...",
+    "empty": {
+      "title": "No Saved Matches",
+      "noSearchResults": "No matches found for your search.",
+      "subtitle": "Save profiles you're interested in to view them here."
+    },
+    "browseMatches": "Browse Matches",
+    "remove": {
+      "title": "Remove from saved?",
+      "description": "This will remove {{name}} from your saved matches.",
+      "confirm": "Remove",
+      "cancel": "Cancel"
+    },
+    "saved": "Saved {{time}}",
+    "actions": {
+      "save": "Save",
+      "saved": "Saved",
+      "removed": "This profile has been removed from your saved list.",
+      "added": "This profile has been added to your saved list."
+    }
+  }
+}

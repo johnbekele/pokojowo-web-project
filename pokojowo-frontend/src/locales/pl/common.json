@@ -1,0 +1,73 @@
+{
+  "appName": "Pokojowo",
+  "tagline": "Znajdź Idealnego Współlokatora",
+  "nav": {
+    "home": "Strona główna",
+    "listings": "Ogłoszenia",
+    "matches": "Dopasowania",
+    "chat": "Czat",
+    "profile": "Profil",
+    "login": "Zaloguj się",
+    "signup": "Zarejestruj się",
+    "logout": "Wyloguj się",
+    "dashboard": "Panel",
+    "favorites": "Ulubione",
+    "likes": "Polubienia"
+  },
+  "actions": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "submit": "Wyślij",
+    "next": "Dalej",
+    "back": "Wstecz",
+    "skip": "Pomiń",
+    "continue": "Kontynuuj",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "search": "Szukaj",
+    "filter": "Filtruj",
+    "clear": "Wyczyść",
+    "loading": "Ładowanie...",
+    "retry": "Ponów",
+    "viewAll": "Zobacz wszystko",
+    "viewProfile": "Zobacz profil",
+    "remove": "Usuń",
+    "keepBrowsing": "Kontynuuj przeglądanie",
+    "sendMessage": "Wyślij wiadomość"
+  },
+  "validation": {
+    "required": "To pole jest wymagane",
+    "email": "Podaj prawidłowy adres email",
+    "minLength": "Musi mieć co najmniej {{min}} znaków",
+    "maxLength": "Może mieć maksymalnie {{max}} znaków",
+    "passwordMatch": "Hasła nie są zgodne"
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "network": "Błąd sieci. Sprawdź połączenie.",
+    "unauthorized": "Zaloguj się, aby kontynuować.",
+    "forbidden": "Nie masz uprawnień do tej akcji.",
+    "notFound": "Żądany zasób nie został znaleziony."
+  },
+  "empty": {
+    "noData": "Brak danych",
+    "noResults": "Nie znaleziono wyników"
+  },
+  "language": {
+    "en": "Angielski",
+    "pl": "Polski"
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "markAllRead": "Oznacz jako przeczytane",
+    "clear": "Wyczyść",
+    "empty": "Brak powiadomień",
+    "newMessage": "Nowa wiadomość"
+  },
+  "time": {
+    "justNow": "Przed chwilą",
+    "minutesAgo": "{{count}} minut temu",
+    "hoursAgo": "{{count}} godzin temu",
+    "daysAgo": "{{count}} dni temu"
+  }
+}
