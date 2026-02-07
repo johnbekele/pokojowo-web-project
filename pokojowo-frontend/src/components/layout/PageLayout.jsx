@@ -1,27 +1,42 @@
-import { Outlet } from 'react-router-dom';
-import Header from './Header';
+import { Outlet, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import FloatingHeader from './FloatingHeader';
 import BottomNavigation from './BottomNavigation';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
 
 export default function PageLayout() {
+  const location = useLocation();
+
   return (
-    <div className="min-h-screen-safe bg-background transition-colors duration-200 flex flex-col">
-      <Header />
-      {/* Main content with bottom padding for mobile nav */}
-      <main className="container mx-auto px-4 py-6 md:py-8 max-w-7xl flex-1 pb-20 md:pb-8">
-        <Outlet />
+    <div className="min-h-screen-safe bg-background flex flex-col">
+      <FloatingHeader />
+
+      <main className="flex-1 pt-20 lg:pt-24 pb-28 lg:pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
-      {/* Global mutual match modal for real-time notifications */}
+
       <MutualMatchModal />
-      {/* Footer - hidden on mobile for app-like feel */}
-      <footer className="hidden md:block border-t border-border bg-card mt-auto transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+
+      <footer className="hidden lg:block border-t border-border bg-card mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-                P
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                <span className="text-xs font-bold text-background">P</span>
               </div>
-              <span className="text-lg font-semibold text-foreground">Pokojowo</span>
+              <span className="font-semibold">Pokojowo</span>
             </div>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Pokojowo. All rights reserved.
@@ -29,7 +44,7 @@ export default function PageLayout() {
           </div>
         </div>
       </footer>
-      {/* Bottom Navigation for mobile */}
+
       <BottomNavigation />
     </div>
   );
