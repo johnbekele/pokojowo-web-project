@@ -1,0 +1,69 @@
+
+services:
+  # FastAPI Backend Service
+  backend:
+    build:
+      context: ./pokojowo-fastapi
+      dockerfile: Dockerfile.dev
+    container_name: pokojowo-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DEBUG=True
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174,http://frontend:5173
+    env_file:
+      - ./pokojowo-fastapi/.env
+    volumes:
+      # Mount source code for hot reload
+      - ./pokojowo-fastapi:/app
+      # Exclude Python cache
+      - /app/__pycache__
+      # Persist uploads directory
+      - pokojowo-uploads:/app/uploads
+    networks:
+      - pokojowo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # React/Vite Frontend Service
+  frontend:
+    build:
+      context: ./pokojowo-frontend
+      dockerfile: Dockerfile
+    container_name: pokojowo-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+      - VITE_API_BASE_URL=http://localhost:3000/api
+      - VITE_SOCKET_URL=http://localhost:3000
+    env_file:
+      - ./pokojowo-frontend/.env.development
+    volumes:
+      # Mount source code for hot reload
+      - ./pokojowo-frontend:/app
+      # Exclude node_modules (use container's version)
+      - /app/node_modules
+    networks:
+      - pokojowo-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+networks:
+  pokojowo-network:
+    driver: bridge
+    name: pokojowo-network
+
+volumes:
+  pokojowo-uploads:
+    name: pokojowo-uploads
