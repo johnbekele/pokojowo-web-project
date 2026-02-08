@@ -37,8 +37,7 @@ const LandlordDashboard = lazy(() => import('@/features/landlord/pages/LandlordD
 const CreateListing = lazy(() => import('@/features/landlord/pages/CreateListing'));
 const MyListings = lazy(() => import('@/features/landlord/pages/MyListings'));
 
-// Admin pages
-const ScraperDashboard = lazy(() => import('@/features/scraper-dashboard'));
+// Admin pages - Scraper dashboard is now separate at localhost:5174
 
 /**
  * Application routes
@@ -93,10 +92,6 @@ export default function AppRouter() {
           <Route path="/landlord/listings/new" element={<CreateListing />} />
           <Route path="/landlord/listings/:id/edit" element={<CreateListing />} />
 
-          {/* Admin routes */}
-          <Route element={<PageLayout />}>
-            <Route path="/admin/scraper" element={<ScraperDashboard />} />
-          </Route>
         </Route>
       </Routes>
     </Suspense>
