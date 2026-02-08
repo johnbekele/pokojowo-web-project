@@ -11,7 +11,6 @@ import {
   Heart,
   Languages,
   Sparkles,
-  ChevronDown,
   ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,10 +20,19 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import UserAvatar from '@/components/shared/UserAvatar';
-import LikeButton from '@/features/likes/components/LikeButton';
-import SaveButton from '@/features/favorites/components/SaveButton';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
+
+// Labels for score breakdown categories
+const BREAKDOWN_LABELS = {
+  budgetScore: 'Budget',
+  lifestyleScore: 'Lifestyle',
+  personalityScore: 'Personality',
+  scheduleScore: 'Schedule',
+  locationScore: 'Location',
+  preferencesScore: 'Preferences',
+  interestsScore: 'Interests',
+};
 
 export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSkip }) {
   const { t } = useTranslation('matching');
@@ -69,43 +77,29 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
     negative: rawExplanations?.filter(e => e.impact === 'negative') || [],
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 85) return 'text-green-500';
-    if (score >= 70) return 'text-blue-500';
-    if (score >= 55) return 'text-yellow-500';
+  // Filter and format score breakdown for display
+  const breakdownItems = score_breakdown
+    ? Object.entries(score_breakdown)
+        .filter(([key]) => key !== 'totalScore' && BREAKDOWN_LABELS[key])
+        .map(([key, value]) => ({
+          key,
+          label: BREAKDOWN_LABELS[key],
+          value: Math.round(value),
+        }))
+        .sort((a, b) => b.value - a.value)
+    : [];
+
+  const getScoreColor = (s) => {
+    if (s >= 85) return 'text-green-500';
+    if (s >= 70) return 'text-blue-500';
+    if (s >= 55) return 'text-yellow-500';
     return 'text-muted-foreground';
   };
 
-  const getScoreBg = (score) => {
-    if (score >= 85) return 'bg-green-500';
-
-  // Labels for score breakdown categories
-  const breakdownLabels = {
-    budgetScore: 'Budget',
-    lifestyleScore: 'Lifestyle',
-    personalityScore: 'Personality',
-    scheduleScore: 'Schedule',
-    locationScore: 'Location',
-    preferencesScore: 'Preferences',
-    interestsScore: 'Interests',
-  };
-
-  // Filter and format score breakdown for display
-  const getBreakdownItems = () => {
-    if (!score_breakdown) return [];
-    return Object.entries(score_breakdown)
-      .filter(([key]) => key !== 'totalScore' && breakdownLabels[key])
-      .map(([key, value]) => ({
-        key,
-        label: breakdownLabels[key],
-        value: Math.round(value),
-      }))
-      .sort((a, b) => b.value - a.value);
-  };
-
-  const breakdownItems = getBreakdownItems();
-    if (score >= 70) return 'bg-blue-500';
-    if (score >= 55) return 'bg-yellow-500';
+  const getScoreBg = (s) => {
+    if (s >= 85) return 'bg-green-500';
+    if (s >= 70) return 'bg-blue-500';
+    if (s >= 55) return 'bg-yellow-500';
     return 'bg-muted-foreground';
   };
 
