@@ -68,7 +68,7 @@ export default function FloatingHeader() {
             : [
                 { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
                 { to: '/discover', label: 'Discover', icon: Search },
-                { to: '/matches', label: 'Matches', icon: Users },
+                { to: '/matches', label: 'Find Flatmate', icon: Users },
               ]),
           { to: '/chat', label: 'Messages', icon: MessageSquare },
         ]

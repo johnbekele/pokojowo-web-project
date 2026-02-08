@@ -19,6 +19,8 @@ export default function ProfileCompletionLandlord() {
   const { toast } = useToast();
   const { user, fetchUser } = useAuthStore();
 
+  const isEditMode = user?.isProfileComplete;
+
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
@@ -26,13 +28,6 @@ export default function ProfileCompletionLandlord() {
     location: '',
     bio: '',
   });
-
-  // Redirect if profile is already complete
-  useEffect(() => {
-    if (user?.isProfileComplete) {
-      navigate('/landlord/dashboard', { replace: true });
-    }
-  }, [user?.isProfileComplete, navigate]);
 
   // Initialize form with user data
   useEffect(() => {

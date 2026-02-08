@@ -43,13 +43,8 @@ export default function ProfileCompletionTenant() {
   const { user, fetchUser } = useAuthStore();
 
   const [currentStep, setCurrentStep] = useState(0);
+  const isEditMode = user?.isProfileComplete;
 
-  // Redirect if profile is already complete
-  useEffect(() => {
-    if (user?.isProfileComplete) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [user?.isProfileComplete, navigate]);
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',

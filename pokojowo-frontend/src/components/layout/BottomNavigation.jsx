@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Home, Search, MessageSquare, User, Building2 } from 'lucide-react';
+import { Home, Search, MessageSquare, User, Building2, Users } from 'lucide-react';
 import useAuthStore from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +28,7 @@ export default function BottomNavigation() {
       ]
     : [
         { to: '/', label: t('nav.home'), icon: Home },
-        { to: '/discover', label: 'Discover', icon: Search },
+        { to: '/matches', label: 'Flatmates', icon: Users },
         { to: '/chat', label: t('nav.chat'), icon: MessageSquare },
         { to: '/profile', label: t('nav.profile'), icon: User },
       ];
