@@ -137,8 +137,8 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
               <X className="h-5 w-5" />
             </button>
 
-            <ScrollArea className="max-h-[calc(90vh-60px)]">
-              <div className="px-6 pb-32">
+            <ScrollArea className="h-[calc(90vh-140px)]">
+              <div className="px-6 pb-40">
                 {/* Header with photo and score */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
                   {/* Photo */}
@@ -308,35 +308,35 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
             </ScrollArea>
 
             {/* Fixed action buttons */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent pt-12">
-              <div className="flex gap-3">
+            <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-background border-t border-border">
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  size="lg"
-                  className="flex-1 h-14 border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white"
+                  size="default"
+                  className="flex-1 h-12 border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white"
                   onClick={() => {
                     onSkip?.(user_id);
                     onClose();
                   }}
                 >
-                  <X className="h-5 w-5 mr-2" />
+                  <X className="h-4 w-4 mr-1" />
                   Skip
                 </Button>
                 <Button
-                  size="lg"
-                  className="flex-1 h-14 bg-green-500 hover:bg-green-600"
+                  size="default"
+                  className="flex-1 h-12 bg-green-500 hover:bg-green-600"
                   onClick={() => {
                     onLike?.(user_id);
                     onClose();
                   }}
                 >
-                  <Heart className="h-5 w-5 mr-2" />
+                  <Heart className="h-4 w-4 mr-1" />
                   Like
                 </Button>
                 <Link to={`/chat/with/${user_id}`} className="flex-1">
-                  <Button variant="outline" size="lg" className="w-full h-14">
-                    <MessageSquare className="h-5 w-5 mr-2" />
-                    Message
+                  <Button variant="outline" size="default" className="w-full h-12">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Chat
                   </Button>
                 </Link>
               </div>
