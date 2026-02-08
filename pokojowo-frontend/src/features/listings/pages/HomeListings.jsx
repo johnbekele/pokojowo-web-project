@@ -22,7 +22,7 @@ const PROMO_SECTIONS = [
   {
     id: 'roommates',
     image: '/images/promo/roomate1.webp',
-    fallbackImage: '/images/promo/Roommate-Finder.webp',
+    fallbackImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80',
     title: 'Find Your Vibe',
     subtitle: 'Match with roommates who get you. Same energy, same lifestyle.',
     ctaText: 'Find Roommates',
@@ -32,7 +32,7 @@ const PROMO_SECTIONS = [
   {
     id: 'rooms',
     image: '/images/promo/apartment-hotels.jpg',
-    fallbackImage: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
+    fallbackImage: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
     title: 'Score Your Space',
     subtitle: 'Discover rooms that fit your budget and your vibe. No cap.',
     ctaText: 'Browse Rooms',
