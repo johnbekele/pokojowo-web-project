@@ -48,6 +48,7 @@ export default function AppRouter() {
         {/* Public routes with layout */}
         <Route element={<PageLayout />}>
           <Route path="/" element={<HomeListings />} />
+          <Route path="/discover" element={<HomeListings />} />
           <Route path="/listing/:id" element={<ListingDetails />} />
           <Route path="/tenant/:username" element={<TenantDashboard />} />
         </Route>
