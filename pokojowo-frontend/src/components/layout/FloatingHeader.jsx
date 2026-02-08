@@ -274,7 +274,7 @@ export default function FloatingHeader() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setMobileNavOpen(false)}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm lg:hidden"
             />
 
             {/* Drawer */}
@@ -283,7 +283,7 @@ export default function FloatingHeader() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[320px] bg-background border-l border-border shadow-2xl lg:hidden"
+              className="fixed right-0 top-0 bottom-0 z-[60] w-full max-w-[320px] bg-background border-l border-border shadow-2xl lg:hidden"
             >
               <div className="flex flex-col h-full">
                 {/* Drawer Header */}
