@@ -36,12 +36,14 @@ app.add_middleware(
 )
 
 # CORS Configuration
+cors_origins = settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"]
+logger.info(f"CORS Origins configured: {cors_origins}")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
 )
 
 # Mount static files (uploads)
@@ -111,6 +113,19 @@ async def api_info():
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "version": settings.APP_VERSION}
+
+
+# Debug endpoint to check CORS configuration
+@app.get("/debug/cors")
+async def debug_cors():
+    """Debug endpoint to check CORS configuration"""
+    import os
+    return {
+        "cors_origins": settings.CORS_ORIGINS,
+        "cors_origins_env": os.getenv('CORS_ORIGINS', 'NOT SET'),
+        "frontend_url": settings.FRONTEND_URL,
+        "frontend_url_env": os.getenv('FRONTEND_URL', 'NOT SET'),
+    }
 
 
 # Create Socket.IO ASGI app

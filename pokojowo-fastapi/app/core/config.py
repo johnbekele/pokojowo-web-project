@@ -45,14 +45,23 @@ class Settings(BaseSettings):
     # CORS - Accept either string or list
     CORS_ORIGINS: Union[str, List[str]] = "http://localhost:5173,http://127.0.0.1:5173,http://frontend:5173"
 
-    @field_validator('CORS_ORIGINS', mode='after')
+    @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
     def parse_cors_origins(cls, v):
+        import os
+        # Also check environment variable directly as backup
+        env_cors = os.getenv('CORS_ORIGINS', '')
+        if env_cors:
+            v = env_cors
+
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(',') if origin.strip()]
+            # Remove any quotes that might be around the value
+            v = v.strip().strip('"').strip("'")
+            origins = [origin.strip() for origin in v.split(',') if origin.strip()]
+            return origins
         elif isinstance(v, list):
             return v
-        return []
+        return ["http://localhost:5173"]
 
     # Google OAuth
     GOOGLE_CLIENT_ID: Optional[str] = None
