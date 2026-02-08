@@ -8,18 +8,21 @@ export default function PageLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen-safe bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <FloatingHeader />
 
-      <main className="flex-1 pt-20 lg:pt-24 pb-28 lg:pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Main content with responsive padding */}
+      {/* Mobile: pt-16 (header) + pb-24 (bottom nav ~60px + safe area + buffer) */}
+      {/* Desktop: pt-20 (larger header) + pb-8 (footer only) */}
+      <main className="flex-1 pt-16 pb-24 lg:pt-20 lg:pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
             >
               <Outlet />
             </motion.div>
@@ -29,6 +32,7 @@ export default function PageLayout() {
 
       <MutualMatchModal />
 
+      {/* Desktop footer only */}
       <footer className="hidden lg:block border-t border-border bg-card mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -45,6 +49,7 @@ export default function PageLayout() {
         </div>
       </footer>
 
+      {/* Mobile bottom navigation */}
       <BottomNavigation />
     </div>
   );

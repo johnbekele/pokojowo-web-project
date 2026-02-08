@@ -83,14 +83,16 @@ export default function FloatingHeader() {
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          isScrolled
-            ? "bg-background/80 backdrop-blur-2xl border-b border-border/40 shadow-sm"
-            : "bg-transparent"
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "bg-background/95 backdrop-blur-xl border-b border-border/50",
+          isScrolled && "shadow-sm"
         )}
       >
+        {/* Safe area spacer for iOS notch */}
+        <div className="h-[env(safe-area-inset-top)]" />
+
         <div className="max-w-7xl mx-auto">
-          <div className="flex h-16 lg:h-18 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex h-14 lg:h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <motion.div
@@ -284,11 +286,14 @@ export default function FloatingHeader() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-              className="fixed right-0 top-0 bottom-0 z-[60] w-full max-w-[320px] bg-background border-l border-border shadow-2xl lg:hidden"
+              className="fixed right-0 top-0 bottom-0 z-[60] w-full max-w-[300px] bg-background border-l border-border shadow-2xl lg:hidden"
             >
               <div className="flex flex-col h-full">
+                {/* Safe area spacer */}
+                <div className="h-[env(safe-area-inset-top)]" />
+
                 {/* Drawer Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-foreground flex items-center justify-center">
                       <span className="text-base font-black text-background">P</span>
@@ -380,7 +385,7 @@ export default function FloatingHeader() {
                       <button
                         onClick={() => i18n.changeLanguage('en')}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-semibold transition-colors",
+                          "px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
                           i18n.language === 'en'
                             ? "bg-foreground text-background"
                             : "text-muted-foreground hover:text-foreground"
@@ -391,7 +396,7 @@ export default function FloatingHeader() {
                       <button
                         onClick={() => i18n.changeLanguage('pl')}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-semibold transition-colors",
+                          "px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
                           i18n.language === 'pl'
                             ? "bg-foreground text-background"
                             : "text-muted-foreground hover:text-foreground"
@@ -407,7 +412,7 @@ export default function FloatingHeader() {
                     <Button
                       variant="outline"
                       onClick={() => { handleLogout(); setMobileNavOpen(false); }}
-                      className="w-full justify-center gap-2 h-12 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                      className="w-full justify-center gap-2 h-12 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive touch-manipulation"
                     >
                       <LogOut className="h-4 w-4" />
                       Log out
@@ -417,20 +422,23 @@ export default function FloatingHeader() {
                       <Button
                         variant="outline"
                         asChild
-                        className="h-12"
+                        className="h-12 touch-manipulation"
                         onClick={() => setMobileNavOpen(false)}
                       >
                         <Link to="/login">Sign in</Link>
                       </Button>
                       <Button
                         asChild
-                        className="h-12"
+                        className="h-12 touch-manipulation"
                         onClick={() => setMobileNavOpen(false)}
                       >
                         <Link to="/signup">Get Started</Link>
                       </Button>
                     </div>
                   )}
+
+                  {/* Safe area spacer */}
+                  <div className="h-[env(safe-area-inset-bottom)]" />
                 </div>
               </div>
             </motion.div>
