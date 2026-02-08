@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, MessageSquare, MapPin, Heart, Languages, LayoutGrid, Layers } from 'lucide-react';
+import { Users, MessageSquare, MapPin, Home, Languages, LayoutGrid, Layers, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -211,6 +211,7 @@ function MatchCard({ match, onClick }) {
     explanations,
     shared_languages,
     shared_interests,
+    is_new_user,
   } = match;
 
   const score = compatibility_score;
@@ -243,9 +244,17 @@ function MatchCard({ match, onClick }) {
     >
       {/* Header with score */}
       <div className={cn('p-4 text-white', getMatchColor(score))}>
-        <div className="flex items-center gap-2">
-          <Heart className="h-4 w-4" />
-          <span className="text-sm font-medium">{t('card.compatible', { score: Math.round(score) })}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            <span className="text-sm font-medium">{t('card.compatible', { score: Math.round(score) })}</span>
+          </div>
+          {is_new_user && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500 text-white text-xs font-bold">
+              <Sparkles className="h-3 w-3" />
+              NEW
+            </div>
+          )}
         </div>
       </div>
 

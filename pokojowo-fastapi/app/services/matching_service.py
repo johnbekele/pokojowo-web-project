@@ -20,6 +20,7 @@ The algorithm evaluates 10+ compatibility dimensions including:
 """
 
 from typing import List, Dict, Tuple, Optional, Set
+from datetime import datetime, timedelta
 from app.models.user import (
     User,
     CleanlinessEnum,
@@ -30,6 +31,9 @@ from app.models.user import (
     PersonalityEnum,
     GenderEnum,
 )
+
+# Number of days a user is considered "new" for prioritization
+NEW_USER_DAYS = 14
 
 
 # Enhanced weight configuration for comprehensive matching
@@ -128,6 +132,14 @@ class MatchingService:
             # Determine match tier
             match_tier = self._get_match_tier(score)
 
+            # Check if candidate is a new user (registered within NEW_USER_DAYS)
+            is_new_user = False
+            created_at = None
+            if hasattr(candidate, 'created_at') and candidate.created_at:
+                created_at = candidate.created_at
+                cutoff_date = datetime.utcnow() - timedelta(days=NEW_USER_DAYS)
+                is_new_user = candidate.created_at > cutoff_date
+
             # Build match result
             results.append({
                 "user_id": str(candidate.id),
@@ -151,10 +163,12 @@ class MatchingService:
                 "shared_interests": self._get_shared_interests(user, candidate),
                 "shared_languages": self._get_shared_languages(user, candidate),
                 "compatible": True,
+                "is_new_user": is_new_user,
+                "joined_at": created_at.isoformat() if created_at else None,
             })
 
-        # Sort by compatibility score (descending)
-        results.sort(key=lambda x: x["compatibility_score"], reverse=True)
+        # Sort: New users first (sorted by compatibility), then others by compatibility
+        results.sort(key=lambda x: (not x["is_new_user"], -x["compatibility_score"]))
 
         # Calculate match statistics
         stats = self._calculate_match_stats(results)

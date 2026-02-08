@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, useAnimation } from 'framer-motion';
-import { ThumbsUp, X, MapPin, Languages, Info, Home } from 'lucide-react';
+import { ThumbsUp, X, MapPin, Languages, Info, Home, Sparkles } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,7 @@ export default function SwipeCard({
     compatibility_score,
     explanations,
     shared_languages,
+    is_new_user,
   } = match;
 
   const score = Math.round(compatibility_score || 0);
@@ -145,7 +146,13 @@ export default function SwipeCard({
         </motion.div>
 
         {/* Compatibility Score Badge */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+          {is_new_user && (
+            <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-amber-500 text-white shadow-lg">
+              <Sparkles className="h-3 w-3" />
+              <span className="text-xs font-bold">NEW</span>
+            </div>
+          )}
           <div className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 backdrop-blur-sm shadow-lg"
           )}>
