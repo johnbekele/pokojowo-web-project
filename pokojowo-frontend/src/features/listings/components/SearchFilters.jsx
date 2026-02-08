@@ -281,14 +281,14 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
               <Label className="font-medium">{t('filters.maxTenants', 'Maximum Tenants')}</Label>
             </div>
             <Select
-              value={localFilters.maxTenants?.toString() || ''}
-              onValueChange={(value) => updateFilter('maxTenants', value ? parseInt(value) : null)}
+              value={localFilters.maxTenants?.toString() || 'any'}
+              onValueChange={(value) => updateFilter('maxTenants', value === 'any' ? null : parseInt(value))}
             >
               <SelectTrigger>
                 <SelectValue placeholder={t('filters.anyTenants', 'Any number')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('filters.anyTenants', 'Any number')}</SelectItem>
+                <SelectItem value="any">{t('filters.anyTenants', 'Any number')}</SelectItem>
                 <SelectItem value="1">1 tenant</SelectItem>
                 <SelectItem value="2">2 tenants</SelectItem>
                 <SelectItem value="3">3 tenants</SelectItem>
