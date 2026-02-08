@@ -58,6 +58,7 @@ export default function FloatingHeader() {
   };
 
   const isLandlord = user?.role?.some(r => r.toLowerCase() === 'landlord');
+  const isAdmin = user?.role?.some(r => r.toLowerCase() === 'admin');
 
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
@@ -66,7 +67,7 @@ export default function FloatingHeader() {
           ...(isLandlord
             ? [{ to: '/landlord/dashboard', label: 'Dashboard', icon: Building2 }]
             : [
-                { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                ...(isAdmin ? [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
                 { to: '/discover', label: 'Discover', icon: Search },
                 { to: '/matches', label: 'Find Flatmate', icon: Users },
               ]),

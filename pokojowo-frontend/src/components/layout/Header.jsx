@@ -276,19 +276,6 @@ export default function Header() {
                           <Bookmark className="h-5 w-5" />
                           {t('nav.favorites', 'Saved')}
                         </Link>
-                        <Link
-                          to="/dashboard"
-                          onClick={() => setMobileNavOpen(false)}
-                          className={cn(
-                            "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors min-h-[48px]",
-                            isActiveLink('/dashboard')
-                              ? "bg-primary/10 text-primary"
-                              : "text-foreground hover:bg-accent"
-                          )}
-                        >
-                          <LayoutDashboard className="h-5 w-5" />
-                          {t('nav.dashboard', 'Dashboard')}
-                        </Link>
                       </>
                     )}
                     <div className="h-px bg-border my-3" />

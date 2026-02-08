@@ -111,8 +111,8 @@ export default function ProfileCompletionTenant() {
         title: t('completion.success.title'),
         description: t('completion.success.description'),
       });
-      // Always redirect to dashboard after successful completion
-      navigate('/dashboard', { replace: true });
+      // Redirect to matches page after successful completion
+      navigate('/matches', { replace: true });
     },
     onError: (error) => {
       toast({
