@@ -1,16 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Home, MessageSquare, X, Users, Check, MapPin } from 'lucide-react';
+import { MessageSquare, X, Handshake, Check, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import UserAvatar from '@/components/shared/UserAvatar';
 import useLikesStore from '@/stores/likesStore';
 import useAuthStore from '@/stores/authStore';
@@ -38,165 +34,169 @@ export default function MutualMatchModal() {
   const compatibilityScore = matchData?.compatibility_score || 0;
   const sharedInterests = matchData?.shared_interests || [];
   const sharedLanguages = matchData?.shared_languages || [];
-  const scoreBreakdown = matchData?.score_breakdown || {};
+  const explanations = matchData?.explanations || [];
 
-  // Get top compatibility factors
-  const topFactors = Object.entries(scoreBreakdown)
-    .filter(([key]) => key !== 'totalScore')
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([key, value]) => ({
-      label: key.replace('Score', '').replace(/([A-Z])/g, ' $1').trim(),
-      value: Math.round(value),
-    }));
+  // Get common traits (positive impacts)
+  const commonTraits = explanations
+    .filter(e => e.impact === 'positive')
+    .slice(0, 4);
+
+  // Get differences (negative/neutral impacts)
+  const differences = explanations
+    .filter(e => e.impact === 'negative' || e.impact === 'neutral')
+    .slice(0, 3);
 
   return (
     <Dialog open={showMutualMatchModal} onOpenChange={closeMutualMatchModal}>
-      <DialogContent className="sm:max-w-lg overflow-hidden p-0">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-teal-500 to-emerald-500 p-6 text-white">
-          <button
-            onClick={closeMutualMatchModal}
-            className="absolute right-4 top-4 rounded-full p-1 bg-white/20 hover:bg-white/30 transition-colors"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </button>
+      <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0">
+        {/* Close button */}
+        <button
+          onClick={closeMutualMatchModal}
+          className="absolute right-3 top-3 z-10 rounded-full p-1.5 bg-black/20 hover:bg-black/30 transition-colors text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
 
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Users className="h-5 w-5" />
-            <span className="text-sm font-medium uppercase tracking-wider">Flatmate Connection</span>
+        {/* Header with photos and match percent */}
+        <div className="bg-gradient-to-br from-teal-500 via-teal-600 to-emerald-600 p-8 text-white">
+          {/* Title */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-sm mb-3">
+              <Handshake className="h-4 w-4" />
+              <span>You're Connected!</span>
+            </div>
+            <p className="text-white/80 text-sm">You both showed interest</p>
           </div>
-          <DialogHeader className="text-center">
-            <DialogTitle className="text-2xl font-bold text-white">
-              You're Both Interested!
-            </DialogTitle>
-            <DialogDescription className="text-white/90 text-base">
-              Start a conversation to see if you'd be good flatmates
-            </DialogDescription>
-          </DialogHeader>
-        </div>
 
-        <div className="p-6">
-          {/* Profile pictures side by side */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            {/* Current user */}
-            <div className="flex flex-col items-center">
+          {/* Photos side by side with match percent in center */}
+          <div className="flex items-center justify-center gap-3">
+            {/* Current user photo */}
+            <div className="text-center">
               <UserAvatar
                 user={currentUser}
-                size="lg"
-                className="h-20 w-20 ring-4 ring-teal-100 dark:ring-teal-900"
+                size="xl"
+                className="h-24 w-24 ring-4 ring-white/30 shadow-xl"
               />
-              <p className="mt-2 text-sm font-medium text-center">
+              <p className="mt-2 text-sm font-medium truncate max-w-[100px]">
                 {currentUser?.firstname || 'You'}
               </p>
             </div>
 
-            {/* Connection indicator */}
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
-                <Check className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+            {/* Match percent circle in center */}
+            <div className="flex flex-col items-center mx-2">
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
+                <span className="text-xl font-bold text-teal-600">
+                  {Math.round(compatibilityScore)}%
+                </span>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">Connected</p>
+              <p className="mt-1 text-xs text-white/70">Match</p>
             </div>
 
-            {/* Matched user */}
-            <div className="flex flex-col items-center">
+            {/* Matched user photo */}
+            <div className="text-center">
               <UserAvatar
                 user={matchedUser}
-                size="lg"
-                className="h-20 w-20 ring-4 ring-teal-100 dark:ring-teal-900"
+                size="xl"
+                className="h-24 w-24 ring-4 ring-white/30 shadow-xl"
               />
-              <p className="mt-2 text-sm font-medium text-center">
+              <p className="mt-2 text-sm font-medium truncate max-w-[100px]">
                 {matchedUser?.firstname || 'User'}
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Compatibility Score */}
-          {compatibilityScore > 0 && (
-            <div className="bg-muted/50 rounded-xl p-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium flex items-center gap-2">
-                  <Home className="h-4 w-4 text-teal-600" />
-                  Flatmate Compatibility
-                </span>
-                <span className="text-2xl font-bold text-teal-600">
-                  {Math.round(compatibilityScore)}%
-                </span>
+        {/* Content - Common interests and differences */}
+        <div className="p-5 space-y-4 max-h-[300px] overflow-y-auto">
+          {/* Common Interests */}
+          {(sharedInterests.length > 0 || sharedLanguages.length > 0 || commonTraits.length > 0) && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Check className="h-4 w-4 text-teal-600" />
+                <span className="text-sm font-semibold text-foreground">What You Have in Common</span>
               </div>
-              <Progress value={compatibilityScore} className="h-2" />
+
+              {/* Shared interests badges */}
+              {(sharedInterests.length > 0 || sharedLanguages.length > 0) && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {sharedInterests.slice(0, 4).map((interest) => (
+                    <Badge
+                      key={interest}
+                      className="bg-teal-100 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-0 text-xs"
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                  {sharedLanguages.slice(0, 2).map((lang) => (
+                    <Badge
+                      key={lang}
+                      variant="outline"
+                      className="border-teal-300 dark:border-teal-700 text-xs"
+                    >
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Common traits from explanations */}
+              {commonTraits.length > 0 && (
+                <ul className="space-y-1">
+                  {commonTraits.map((trait, idx) => (
+                    <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <span className="text-teal-500 mt-0.5">•</span>
+                      <span>{trait.reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 
-          {/* Top compatibility factors */}
-          {topFactors.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                Top Compatibility Factors
-              </p>
-              <div className="grid grid-cols-3 gap-2">
-                {topFactors.map((factor) => (
-                  <div
-                    key={factor.label}
-                    className="bg-muted/50 rounded-lg p-2 text-center"
-                  >
-                    <p className="text-lg font-bold text-teal-600">{factor.value}%</p>
-                    <p className="text-xs text-muted-foreground capitalize">{factor.label}</p>
-                  </div>
-                ))}
+          {/* Differences */}
+          {differences.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-semibold text-foreground">Things to Discuss</span>
               </div>
-            </div>
-          )}
-
-          {/* Shared traits */}
-          {(sharedInterests.length > 0 || sharedLanguages.length > 0) && (
-            <div className="mb-6">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                What You Have in Common
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {sharedInterests.slice(0, 4).map((interest) => (
-                  <Badge key={interest} variant="secondary" className="bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300 border-0">
-                    {interest}
-                  </Badge>
+              <ul className="space-y-1">
+                {differences.map((diff, idx) => (
+                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <span className="text-amber-500 mt-0.5">•</span>
+                    <span>{diff.reason}</span>
+                  </li>
                 ))}
-                {sharedLanguages.slice(0, 2).map((lang) => (
-                  <Badge key={lang} variant="outline" className="border-teal-200 dark:border-teal-800">
-                    {lang}
-                  </Badge>
-                ))}
-              </div>
+              </ul>
             </div>
           )}
 
-          {/* Location if available */}
-          {matchedUser?.location && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-              <MapPin className="h-4 w-4" />
-              <span>{matchedUser.location}</span>
-            </div>
+          {/* Empty state if no data */}
+          {sharedInterests.length === 0 && sharedLanguages.length === 0 && commonTraits.length === 0 && differences.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-2">
+              Start chatting to learn more about each other!
+            </p>
           )}
+        </div>
 
-          {/* Actions */}
-          <div className="flex gap-3">
+        {/* Actions */}
+        <div className="p-4 border-t bg-muted/30 flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={closeMutualMatchModal}
+          >
+            Keep Browsing
+          </Button>
+          <Link to={matchedUserId ? `/chat/with/${matchedUserId}` : '/chat'} className="flex-1">
             <Button
-              variant="outline"
-              className="flex-1"
+              className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
               onClick={closeMutualMatchModal}
             >
-              Keep Browsing
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Start Chat
             </Button>
-            <Link to={matchedUserId ? `/chat/with/${matchedUserId}` : '/chat'} className="flex-1">
-              <Button
-                className="w-full bg-teal-500 hover:bg-teal-600"
-                onClick={closeMutualMatchModal}
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Start Chat
-              </Button>
-            </Link>
-          </div>
+          </Link>
         </div>
       </DialogContent>
     </Dialog>
