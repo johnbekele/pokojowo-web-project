@@ -28,10 +28,10 @@ export default function AuthCallback() {
         const user = await fetchUser();
 
         // Determine where to redirect
-        if (isNewUser || !user?.role || user.role.length === 0) {
+        if (isNewUser || !user?.role || user.role.length === 0 || (user.role.length === 1 && user.role[0] === 'User')) {
           // New user needs to select role
           navigate('/select-role', { replace: true });
-        } else if (requiresProfileCompletion || !user?.is_profile_complete) {
+        } else if (requiresProfileCompletion || !user?.isProfileComplete) {
           // User needs to complete profile
           const role = user.role.some(r => r.toLowerCase() === 'landlord') ? 'landlord' : 'tenant';
           navigate(`/profile-completion/${role}`, { replace: true });
