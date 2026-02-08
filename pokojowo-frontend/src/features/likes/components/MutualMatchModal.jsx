@@ -4,6 +4,8 @@ import { MessageSquare, X, Handshake, Check, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +50,8 @@ export default function MutualMatchModal() {
 
   return (
     <Dialog open={showMutualMatchModal} onOpenChange={closeMutualMatchModal}>
-      <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0 [&>button]:hidden">
+      <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0 [&>button]:hidden" aria-describedby={undefined}>
+        <DialogTitle className="sr-only">You're Connected!</DialogTitle>
         {/* Close button */}
         <button
           onClick={closeMutualMatchModal}
