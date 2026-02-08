@@ -10,6 +10,7 @@ from app.models.saved_match import SavedMatch
 from app.models.like import Like, LikeStatusEnum
 from app.models.mutual_match import MutualMatch, MatchStatusEnum
 from app.models.listing_interaction import ListingInteraction, InteractionTypeEnum, INTEREST_WEIGHTS
+from app.models.notification import Notification, NotificationTypeEnum
 
 __all__ = [
     "User",
@@ -25,4 +26,6 @@ __all__ = [
     "ListingInteraction",
     "InteractionTypeEnum",
     "INTEREST_WEIGHTS",
+    "Notification",
+    "NotificationTypeEnum",
 ]

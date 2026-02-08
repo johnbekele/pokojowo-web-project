@@ -11,6 +11,7 @@ from app.models.like import Like, LikeStatusEnum
 from app.models.mutual_match import MutualMatch, MatchStatusEnum
 from app.models.user import User
 from app.services.email_service import email_service
+from app.services.notification_service import notification_service
 
 logger = logging.getLogger(__name__)
 
@@ -527,28 +528,48 @@ class LikesService:
         user_1_id: str,
         user_2_id: str
     ):
-        """Send mutual match notifications to both users (email + real-time)."""
+        """Send mutual match notifications to both users (email + real-time + database)."""
         try:
             user_1 = await User.get(user_1_id)
             user_2 = await User.get(user_2_id)
 
             if user_1 and user_2:
+                user_1_name = f"{user_1.firstname or ''} {user_1.lastname or ''}".strip() or user_1.username
+                user_2_name = f"{user_2.firstname or ''} {user_2.lastname or ''}".strip() or user_2.username
+                user_1_photo = user_1.photo.dict() if user_1.photo else None
+                user_2_photo = user_2.photo.dict() if user_2.photo else None
+
                 # Send real-time socket notifications to both users
                 await _send_socket_notification(user_1_id, {
                     "type": "mutual_match",
                     "matchedUserId": user_2_id,
-                    "matchedUserName": f"{user_2.firstname or ''} {user_2.lastname or ''}".strip() or user_2.username,
-                    "matchedUserPhoto": user_2.photo.dict() if user_2.photo else None,
+                    "matchedUserName": user_2_name,
+                    "matchedUserPhoto": user_2_photo,
                     "message": f"You matched with {user_2.firstname or user_2.username}!"
                 })
 
                 await _send_socket_notification(user_2_id, {
                     "type": "mutual_match",
                     "matchedUserId": user_1_id,
-                    "matchedUserName": f"{user_1.firstname or ''} {user_1.lastname or ''}".strip() or user_1.username,
-                    "matchedUserPhoto": user_1.photo.dict() if user_1.photo else None,
+                    "matchedUserName": user_1_name,
+                    "matchedUserPhoto": user_1_photo,
                     "message": f"You matched with {user_1.firstname or user_1.username}!"
                 })
+
+                # Store notifications in database (for users who miss real-time)
+                await notification_service.store_mutual_match_notification(
+                    user_id=user_1_id,
+                    matched_user_id=user_2_id,
+                    matched_user_name=user_2_name,
+                    matched_user_photo=user_2_photo
+                )
+
+                await notification_service.store_mutual_match_notification(
+                    user_id=user_2_id,
+                    matched_user_id=user_1_id,
+                    matched_user_name=user_1_name,
+                    matched_user_photo=user_1_photo
+                )
 
                 # Send email notifications (async, don't block)
                 asyncio.create_task(email_service.send_mutual_match_notification(
@@ -572,20 +593,31 @@ class LikesService:
         liker_id: str,
         liked_user_id: str
     ):
-        """Send notification about new like (email + real-time)."""
+        """Send notification about new like (email + real-time + database)."""
         try:
             liker = await User.get(liker_id)
             liked_user = await User.get(liked_user_id)
 
             if liker and liked_user:
+                liker_name = f"{liker.firstname or ''} {liker.lastname or ''}".strip() or liker.username
+                liker_photo = liker.photo.dict() if liker.photo else None
+
                 # Send real-time socket notification
                 await _send_socket_notification(liked_user_id, {
                     "type": "new_like",
                     "likerId": liker_id,
-                    "likerName": f"{liker.firstname or ''} {liker.lastname or ''}".strip() or liker.username,
-                    "likerPhoto": liker.photo.dict() if liker.photo else None,
+                    "likerName": liker_name,
+                    "likerPhoto": liker_photo,
                     "message": f"{liker.firstname or liker.username} liked your profile!"
                 })
+
+                # Store notification in database (for users who miss real-time)
+                await notification_service.store_like_notification(
+                    user_id=liked_user_id,
+                    liker_id=liker_id,
+                    liker_name=liker_name,
+                    liker_photo=liker_photo
+                )
 
                 # Send email notification (async, don't block)
                 asyncio.create_task(email_service.send_new_like_notification(

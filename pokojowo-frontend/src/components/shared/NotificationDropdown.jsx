@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bell, MessageSquare, ThumbsUp, Handshake, User } from 'lucide-react';
+import { Bell, MessageSquare, ThumbsUp, Handshake, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { getSocket, connectSocket } from '@/lib/socket';
 import { formatRelativeTime } from '@/lib/utils';
 import useAuthStore from '@/stores/authStore';
+import api from '@/lib/api';
 
 export default function NotificationDropdown() {
   const { t } = useTranslation('common');
@@ -19,8 +20,50 @@ export default function NotificationDropdown() {
   const { isAuthenticated, token } = useAuthStore();
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
-  // Listen for notifications from socket
+  // Fetch stored notifications from API
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      setIsLoading(true);
+      const response = await api.get('/notifications/', {
+        params: { limit: 50, offset: 0 }
+      });
+
+      // Transform API notifications to local format
+      const apiNotifications = response.data.notifications.map((n) => ({
+        id: n.id,
+        type: n.type,
+        userId: n.data?.likerId || n.data?.matchedUserId,
+        userName: n.data?.likerName || n.data?.matchedUserName,
+        userPhoto: n.data?.likerPhoto || n.data?.matchedUserPhoto,
+        chatId: n.data?.chatId,
+        preview: n.data?.preview,
+        message: n.message,
+        createdAt: n.created_at,
+        read: n.is_read,
+      }));
+
+      setNotifications(apiNotifications);
+      setHasFetched(true);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  // Fetch notifications on mount and when authenticated
+  useEffect(() => {
+    if (isAuthenticated && !hasFetched) {
+      fetchNotifications();
+    }
+  }, [isAuthenticated, hasFetched, fetchNotifications]);
+
+  // Listen for real-time notifications from socket
   useEffect(() => {
     if (!isAuthenticated || !token) return;
 
@@ -103,6 +146,8 @@ export default function NotificationDropdown() {
 
     const handleConnect = () => {
       console.log('NotificationDropdown: Socket connected');
+      // Refresh notifications on reconnect
+      fetchNotifications();
     };
 
     socket.on('notification', handleNotification);
@@ -112,15 +157,20 @@ export default function NotificationDropdown() {
       socket.off('notification', handleNotification);
       socket.off('connect', handleConnect);
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, fetchNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleNotificationClick = (notification) => {
-    // Mark as read
+  const handleNotificationClick = async (notification) => {
+    // Mark as read locally
     setNotifications((prev) =>
       prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
     );
+
+    // Mark as read in API (don't wait for it)
+    if (notification.id && !notification.id.startsWith('msg-') && !notification.id.startsWith('like-') && !notification.id.startsWith('match-')) {
+      api.post(`/notifications/${notification.id}/read`).catch(() => {});
+    }
 
     // Navigate based on notification type
     switch (notification.type) {
@@ -203,11 +253,19 @@ export default function NotificationDropdown() {
     return 'bg-muted text-muted-foreground';
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    // Mark all as read in API
+    api.post('/notifications/read-all').catch(() => {});
   };
 
-  const clearAll = () => {
+  const clearAll = async () => {
+    // Delete all notifications from API
+    for (const n of notifications) {
+      if (n.id && !n.id.startsWith('msg-') && !n.id.startsWith('like-') && !n.id.startsWith('match-')) {
+        api.delete(`/notifications/${n.id}`).catch(() => {});
+      }
+    }
     setNotifications([]);
   };
 
@@ -251,7 +309,12 @@ export default function NotificationDropdown() {
 
         {/* Notifications List */}
         <ScrollArea className="max-h-[400px]">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin opacity-50" />
+              <p className="text-sm">Loading notifications...</p>
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-10 w-10 mx-auto mb-2 opacity-30" />
               <p className="text-sm">{t('notifications.empty')}</p>

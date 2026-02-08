@@ -1,11 +1,13 @@
 """
 Notification service for sending match and message notifications.
+Also handles storing notifications in database for users who miss real-time notifications.
 """
 import logging
 from typing import List, Optional
 from datetime import datetime, timedelta
 
 from app.models.user import User
+from app.models.notification import Notification, NotificationTypeEnum
 from app.services.email_service import email_service
 from app.services.matching_service import matching_service
 
@@ -202,6 +204,176 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Failed to send message notification: {e}")
             return False
+
+    # ========== Database notification storage methods ==========
+
+    async def store_notification(
+        self,
+        user_id: str,
+        notification_type: NotificationTypeEnum,
+        title: str,
+        message: str,
+        data: Optional[dict] = None
+    ) -> Notification:
+        """
+        Store a notification in the database.
+
+        Args:
+            user_id: ID of the user to notify
+            notification_type: Type of notification
+            title: Notification title
+            message: Notification message
+            data: Additional data (user info, IDs, etc.)
+
+        Returns:
+            The created notification
+        """
+        notification = Notification(
+            user_id=user_id,
+            type=notification_type,
+            title=title,
+            message=message,
+            data=data
+        )
+        await notification.insert()
+        logger.info(f"Stored {notification_type.value} notification for user {user_id}")
+        return notification
+
+    async def store_like_notification(
+        self,
+        user_id: str,
+        liker_id: str,
+        liker_name: str,
+        liker_photo: Optional[dict] = None
+    ) -> Notification:
+        """Store a notification for a new like."""
+        return await self.store_notification(
+            user_id=user_id,
+            notification_type=NotificationTypeEnum.NEW_LIKE,
+            title="Someone is interested!",
+            message=f"{liker_name} wants to be your flatmate",
+            data={
+                "likerId": liker_id,
+                "likerName": liker_name,
+                "likerPhoto": liker_photo,
+                "type": "new_like"
+            }
+        )
+
+    async def store_mutual_match_notification(
+        self,
+        user_id: str,
+        matched_user_id: str,
+        matched_user_name: str,
+        matched_user_photo: Optional[dict] = None
+    ) -> Notification:
+        """Store a notification for a mutual match."""
+        return await self.store_notification(
+            user_id=user_id,
+            notification_type=NotificationTypeEnum.MUTUAL_MATCH,
+            title="You're Connected!",
+            message=f"You and {matched_user_name} are both interested!",
+            data={
+                "matchedUserId": matched_user_id,
+                "matchedUserName": matched_user_name,
+                "matchedUserPhoto": matched_user_photo,
+                "type": "mutual_match"
+            }
+        )
+
+    async def get_user_notifications(
+        self,
+        user_id: str,
+        limit: int = 50,
+        offset: int = 0,
+        unread_only: bool = False
+    ) -> dict:
+        """
+        Get notifications for a user from database.
+
+        Args:
+            user_id: ID of the user
+            limit: Max notifications to return
+            offset: Skip first N notifications
+            unread_only: Only return unread notifications
+
+        Returns:
+            Dict with notifications list and metadata
+        """
+        query = {"userId": user_id}
+        if unread_only:
+            query["isRead"] = False
+
+        notifications = await Notification.find(query).sort(
+            "-createdAt"
+        ).skip(offset).limit(limit).to_list()
+
+        total = await Notification.find(query).count()
+        unread_count = await Notification.find({
+            "userId": user_id,
+            "isRead": False
+        }).count()
+
+        return {
+            "notifications": [self._format_notification(n) for n in notifications],
+            "total": total,
+            "unread_count": unread_count,
+            "limit": limit,
+            "offset": offset
+        }
+
+    async def mark_as_read(self, notification_id: str, user_id: str) -> bool:
+        """Mark a notification as read."""
+        notification = await Notification.get(notification_id)
+        if not notification or notification.user_id != user_id:
+            return False
+
+        notification.is_read = True
+        notification.read_at = datetime.utcnow()
+        await notification.save()
+        return True
+
+    async def mark_all_as_read(self, user_id: str) -> int:
+        """Mark all notifications as read for a user."""
+        result = await Notification.find({
+            "userId": user_id,
+            "isRead": False
+        }).update_many({
+            "$set": {
+                "isRead": True,
+                "readAt": datetime.utcnow()
+            }
+        })
+        return result.modified_count if result else 0
+
+    async def get_unread_count(self, user_id: str) -> int:
+        """Get count of unread notifications for a user."""
+        return await Notification.find({
+            "userId": user_id,
+            "isRead": False
+        }).count()
+
+    async def delete_notification(self, notification_id: str, user_id: str) -> bool:
+        """Delete a notification."""
+        notification = await Notification.get(notification_id)
+        if not notification or notification.user_id != user_id:
+            return False
+
+        await notification.delete()
+        return True
+
+    def _format_notification(self, notification: Notification) -> dict:
+        """Format notification for API response."""
+        return {
+            "id": str(notification.id),
+            "type": notification.type.value,
+            "title": notification.title,
+            "message": notification.message,
+            "data": notification.data,
+            "is_read": notification.is_read,
+            "created_at": notification.created_at.isoformat() if notification.created_at else None,
+            "read_at": notification.read_at.isoformat() if notification.read_at else None
+        }
 
 
 # Singleton instance

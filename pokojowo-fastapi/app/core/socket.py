@@ -394,8 +394,18 @@ async def typing(sid, data):
 async def send_notification(user_id: str, notification: dict):
     """Send notification to a specific user (all their connections)"""
     sids = await get_sids_for_user(user_id)
+    logger.info(f"Sending notification to user {user_id}, found {len(sids)} socket connections: {sids}")
+    logger.info(f"Notification data: {notification}")
+
+    if not sids:
+        logger.warning(f"No active socket connections for user {user_id}, notification will not be delivered in real-time")
+
     for sid in sids:
-        await sio.emit('notification', notification, room=sid)
+        try:
+            await sio.emit('notification', notification, room=sid)
+            logger.info(f"Notification sent to socket {sid} for user {user_id}")
+        except Exception as e:
+            logger.error(f"Failed to send notification to socket {sid}: {e}")
 
 
 async def broadcast_message(room: str, message: dict):
