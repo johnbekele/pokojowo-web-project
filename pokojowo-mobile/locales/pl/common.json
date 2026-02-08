@@ -1,0 +1,150 @@
+{
+  "appName": "Pokojowo",
+  "tagline": "Znajdź Idealnego Współlokatora",
+  "welcome": "Witaj w Pokojowo",
+  "nav": {
+    "home": "Start",
+    "listings": "Ogłoszenia",
+    "matches": "Dopasowania",
+    "chat": "Wiadomości",
+    "profile": "Profil",
+    "login": "Zaloguj",
+    "signup": "Załóż konto",
+    "logout": "Wyloguj",
+    "dashboard": "Panel",
+    "favorites": "Zapisane",
+    "likes": "Polubienia",
+    "settings": "Ustawienia"
+  },
+  "actions": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "submit": "Wyślij",
+    "next": "Dalej",
+    "back": "Wstecz",
+    "skip": "Pomiń",
+    "continue": "Kontynuuj",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "search": "Szukaj",
+    "filter": "Filtruj",
+    "clear": "Wyczyść",
+    "loading": "Ładowanie...",
+    "retry": "Ponów",
+    "viewAll": "Zobacz wszystko",
+    "viewProfile": "Zobacz profil",
+    "remove": "Usuń",
+    "keepBrowsing": "Przeglądaj dalej",
+    "sendMessage": "Wyślij wiadomość",
+    "confirm": "Potwierdź",
+    "close": "Zamknij",
+    "refresh": "Odśwież",
+    "seeMore": "Zobacz więcej",
+    "seeLess": "Zwiń",
+    "done": "Gotowe",
+    "apply": "Zastosuj",
+    "reset": "Resetuj"
+  },
+  "validation": {
+    "required": "To pole jest wymagane",
+    "email": "Podaj prawidłowy adres e-mail",
+    "minLength": "Minimum {{min}} znaków",
+    "maxLength": "Maksymalnie {{max}} znaków",
+    "passwordMatch": "Hasła nie są zgodne",
+    "invalidPhone": "Podaj prawidłowy numer telefonu",
+    "invalidUrl": "Podaj prawidłowy adres URL",
+    "minValue": "Minimalna wartość to {{min}}",
+    "maxValue": "Maksymalna wartość to {{max}}"
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+    "network": "Błąd połączenia. Sprawdź internet.",
+    "unauthorized": "Zaloguj się, aby kontynuować.",
+    "forbidden": "Brak uprawnień do tej akcji.",
+    "notFound": "Nie znaleziono.",
+    "timeout": "Przekroczono czas oczekiwania. Spróbuj ponownie.",
+    "serverError": "Błąd serwera. Spróbuj później."
+  },
+  "empty": {
+    "noData": "Brak danych",
+    "noResults": "Brak wyników",
+    "tryAgain": "Spróbuj zmienić kryteria wyszukiwania"
+  },
+  "language": {
+    "title": "Język",
+    "en": "Angielski",
+    "pl": "Polski",
+    "select": "Wybierz język"
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "markAllRead": "Oznacz jako przeczytane",
+    "clear": "Wyczyść wszystko",
+    "empty": "Brak powiadomień",
+    "newMessage": "Nowa wiadomość",
+    "newMatch": "Nowe dopasowanie",
+    "newLike": "Ktoś Cię polubił",
+    "settings": "Ustawienia powiadomień",
+    "push": "Powiadomienia push",
+    "email": "Powiadomienia e-mail"
+  },
+  "time": {
+    "justNow": "Przed chwilą",
+    "minutesAgo": "{{count}} min temu",
+    "minutesAgo_one": "1 min temu",
+    "minutesAgo_few": "{{count}} min temu",
+    "minutesAgo_many": "{{count}} min temu",
+    "hoursAgo": "{{count}} godz. temu",
+    "hoursAgo_one": "1 godz. temu",
+    "hoursAgo_few": "{{count}} godz. temu",
+    "hoursAgo_many": "{{count}} godz. temu",
+    "daysAgo": "{{count}} dni temu",
+    "daysAgo_one": "1 dzień temu",
+    "daysAgo_few": "{{count}} dni temu",
+    "daysAgo_many": "{{count}} dni temu",
+    "weeksAgo": "{{count}} tyg. temu",
+    "weeksAgo_one": "1 tydzień temu",
+    "weeksAgo_few": "{{count}} tyg. temu",
+    "weeksAgo_many": "{{count}} tyg. temu",
+    "today": "Dzisiaj",
+    "yesterday": "Wczoraj"
+  },
+  "currency": {
+    "pln": "zł",
+    "perMonth": "/mies."
+  },
+  "units": {
+    "sqm": "m²",
+    "km": "km"
+  },
+  "confirmation": {
+    "areYouSure": "Czy na pewno?",
+    "cannotBeUndone": "Tej akcji nie można cofnąć.",
+    "yes": "Tak",
+    "no": "Nie"
+  },
+  "menu": {
+    "editProfile": "Edytuj profil",
+    "landlordDashboard": "Panel właściciela",
+    "favorites": "Zapisane profile",
+    "language": "Język",
+    "settings": "Ustawienia",
+    "logout": "Wyloguj się",
+    "help": "Pomoc",
+    "about": "O aplikacji"
+  },
+  "welcome": {
+    "slide1": {
+      "title": "Znajdź Idealnego Współlokatora",
+      "description": "Nasz algorytm dopasowuje współlokatorów na podstawie Twojego stylu życia i preferencji"
+    },
+    "slide2": {
+      "title": "Odkryj Świetne Pokoje",
+      "description": "Przeglądaj zweryfikowane ogłoszenia i znajdź idealne miejsce do życia"
+    },
+    "slide3": {
+      "title": "Połącz się i Rozmawiaj",
+      "description": "Czatuj z dopasowaniami i właścicielami, aby znaleźć idealną sytuację mieszkaniową"
+    }
+  }
+}

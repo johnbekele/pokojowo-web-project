@@ -1,0 +1,148 @@
+{
+  "title": "Find Your Room",
+  "hero": {
+    "badge": "Smart Roommate Matching",
+    "subtitle": "Our AI-powered matching finds compatible roommates based on lifestyle, interests, and preferences. Join thousands finding their ideal living situation.",
+    "searchButton": "Search"
+  },
+  "cta": {
+    "tenant": {
+      "title": "Find Your Perfect Roommate",
+      "description": "Our smart matching algorithm finds compatible roommates based on lifestyle, interests, and preferences.",
+      "badge1": "AI Matching",
+      "badge2": "Compatibility Score",
+      "button": "Find Roommates"
+    },
+    "landlord": {
+      "title": "Find the Perfect Tenant",
+      "description": "List your property and let our AI match you with verified, compatible tenants.",
+      "badge1": "Smart Matching",
+      "badge2": "Verified Tenants",
+      "button": "List Your Property"
+    }
+  },
+  "search": {
+    "placeholder": "Search by location, city, or neighborhood...",
+    "filter": "Filters",
+    "sort": "Sort by",
+    "sortOptions": {
+      "newest": "Newest first",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low",
+      "closest": "Closest"
+    }
+  },
+  "results": {
+    "count": "{{count}} listings found",
+    "count_one": "1 listing found",
+    "count_other": "{{count}} listings found"
+  },
+  "filters": {
+    "title": "Filters",
+    "description": "Refine your search",
+    "priceRange": "Price Range",
+    "price": "Price (PLN/month)",
+    "size": "Size (m²)",
+    "roomType": "Room Type",
+    "roomTypes": {
+      "private": "Private Room",
+      "shared": "Shared Room",
+      "studio": "Studio",
+      "apartment": "Entire Apartment"
+    },
+    "buildingType": "Building Type",
+    "buildingTypes": {
+      "apartment": "Apartment Building",
+      "house": "House",
+      "studentHousing": "Student Housing",
+      "dormitory": "Dormitory"
+    },
+    "rentFor": "Suitable For",
+    "rentForOptions": {
+      "students": "Students",
+      "professionals": "Professionals",
+      "couples": "Couples",
+      "anyone": "Anyone"
+    },
+    "maxTenants": "Maximum Flatmates",
+    "anyTenants": "Any number",
+    "amenities": "Amenities",
+    "amenitiesList": {
+      "wifi": "WiFi",
+      "washingMachine": "Washing Machine",
+      "dishwasher": "Dishwasher",
+      "balcony": "Balcony",
+      "parking": "Parking",
+      "elevator": "Elevator",
+      "airConditioning": "Air Conditioning",
+      "furnished": "Furnished"
+    },
+    "available": "Available Now",
+    "apply": "Apply Filters",
+    "reset": "Reset",
+    "clear": "Clear All"
+  },
+  "card": {
+    "perMonth": "/month",
+    "available": "Available",
+    "availableFrom": "Available from {{date}}",
+    "viewDetails": "View Details",
+    "beds": "bed",
+    "beds_one": "1 bed",
+    "beds_other": "{{count}} beds",
+    "baths": "bath",
+    "baths_one": "1 bath",
+    "baths_other": "{{count}} baths",
+    "rooms": "room",
+    "rooms_one": "1 room",
+    "rooms_other": "{{count}} rooms"
+  },
+  "details": {
+    "title": "Listing Details",
+    "description": "Description",
+    "amenities": "Amenities",
+    "location": "Location",
+    "landlord": "Landlord",
+    "contactLandlord": "Contact Landlord",
+    "available": "Available from",
+    "deposit": "Deposit",
+    "utilities": "Utilities",
+    "utilitiesIncluded": "Included in rent",
+    "utilitiesExtra": "Extra (approx. {{amount}} PLN/month)",
+    "minLease": "Minimum Lease",
+    "months": "months",
+    "size": "Size",
+    "floor": "Floor",
+    "rules": {
+      "title": "House Rules",
+      "smoking": "Smoking",
+      "pets": "Pets",
+      "guests": "Overnight Guests"
+    },
+    "currentFlatmates": "Current Flatmates",
+    "noFlatmates": "No current flatmates"
+  },
+  "empty": {
+    "title": "No listings found",
+    "subtitle": "Try adjusting your filters or search criteria"
+  },
+  "error": {
+    "title": "Oops! Something went wrong",
+    "loadingFailed": "Failed to load listings. Please try again.",
+    "retry": "Try Again"
+  },
+  "interestedUsers": {
+    "title": "Also interested",
+    "singleMatch": "{{name}} ({{score}}% match) is also interested",
+    "multipleMatches": "{{count}} compatible roommates are also interested",
+    "viewAll": "View all",
+    "noMatches": "Be the first to show interest!"
+  },
+  "actions": {
+    "like": "Save listing",
+    "unlike": "Remove from saved",
+    "liked": "Saved",
+    "share": "Share",
+    "report": "Report listing"
+  }
+}

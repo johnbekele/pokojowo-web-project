@@ -1,0 +1,198 @@
+{
+  "title": "Profil",
+  "menu": {
+    "editProfile": "Edytuj profil",
+    "landlordDashboard": "Panel właściciela",
+    "favorites": "Zapisane profile",
+    "language": "Język",
+    "settings": "Ustawienia",
+    "logout": "Wyloguj się"
+  },
+  "completion": {
+    "title": "Uzupełnij profil",
+    "subtitle": "Pomożemy Ci znaleźć idealne dopasowanie",
+    "badge": "Prawie gotowe!",
+    "step": "Krok",
+    "of": "z",
+    "progress": "{{percentage}}% ukończone",
+    "success": {
+      "title": "Profil zapisany",
+      "description": "Twoje zmiany zostały zapisane."
+    },
+    "error": {
+      "title": "Błąd",
+      "description": "Nie udało się zapisać profilu. Spróbuj ponownie."
+    }
+  },
+  "basicInfo": {
+    "title": "Podstawowe dane",
+    "subtitle": "Opowiedz nam o sobie",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "age": "Wiek",
+    "gender": "Płeć",
+    "selectGender": "Wybierz płeć",
+    "genderOptions": {
+      "male": "Mężczyzna",
+      "female": "Kobieta",
+      "other": "Inna",
+      "preferNotToSay": "Wolę nie podawać"
+    },
+    "bio": "O mnie",
+    "bioPlaceholder": "Napisz kilka zdań o sobie, swoich zainteresowaniach i tym, czego szukasz..."
+  },
+  "contact": {
+    "title": "Dane kontaktowe",
+    "subtitle": "Jak można się z Tobą skontaktować?",
+    "phone": "Numer telefonu",
+    "location": "Miasto / Lokalizacja",
+    "preferredContact": "Preferowany kontakt"
+  },
+  "preferences": {
+    "title": "Preferencje",
+    "subtitle": "Czego szukasz?",
+    "budget": "Budżet miesięczny",
+    "budgetMin": "Od",
+    "budgetMax": "Do",
+    "location": "Preferowana lokalizacja",
+    "leaseDuration": "Okres wynajmu",
+    "months": "miesięcy",
+    "moveInDate": "Data wprowadzenia"
+  },
+  "lifestyle": {
+    "title": "Styl życia",
+    "subtitle": "Pomóż nam znaleźć kompatybilnych współlokatorów",
+    "selectLevel": "Wybierz poziom",
+    "selectFrequency": "Wybierz częstotliwość",
+    "cleanliness": {
+      "label": "Czystość",
+      "veryClean": "Perfekcjonista",
+      "clean": "Czysty",
+      "moderate": "Umiarkowany",
+      "relaxed": "Wyluzowany"
+    },
+    "socialLevel": {
+      "label": "Towarzyskość",
+      "verySocial": "Imprezowicz",
+      "social": "Towarzyski",
+      "moderate": "Umiarkowany",
+      "quiet": "Domator"
+    },
+    "guests": {
+      "label": "Goście",
+      "often": "Często",
+      "sometimes": "Czasami",
+      "rarely": "Rzadko",
+      "never": "Nigdy"
+    },
+    "smoking": {
+      "label": "Palenie",
+      "yes": "Tak",
+      "no": "Nie",
+      "outside": "Tylko na balkonie"
+    },
+    "pets": {
+      "label": "Zwierzęta",
+      "have": "Mam zwierzaka",
+      "ok": "Nie przeszkadzają mi",
+      "no": "Bez zwierząt"
+    },
+    "workSchedule": {
+      "label": "Tryb pracy",
+      "morning": "Ranny ptaszek",
+      "regular": "Standardowe godziny",
+      "evening": "Nocny marek",
+      "flexible": "Elastyczny"
+    },
+    "noise": {
+      "label": "Hałas",
+      "quiet": "Potrzebuję ciszy",
+      "moderate": "Trochę hałasu OK",
+      "loud": "Nie przeszkadza mi"
+    }
+  },
+  "dealBreakers": {
+    "title": "Wykluczone",
+    "subtitle": "Czego absolutnie nie akceptujesz?",
+    "noSmokers": "Bez palaczy",
+    "noPets": "Bez zwierząt",
+    "noParties": "Bez imprez",
+    "sameGenderOnly": "Tylko ta sama płeć",
+    "quietHoursRequired": "Cisza nocna obowiązkowa"
+  },
+  "languages": {
+    "title": "Języki",
+    "subtitle": "Jakimi językami mówisz?",
+    "select": "Wybierz języki",
+    "preferredLanguage": "Preferowany język",
+    "selectPreferred": "Wybierz język",
+    "options": {
+      "polish": "Polski",
+      "english": "Angielski",
+      "ukrainian": "Ukraiński",
+      "german": "Niemiecki",
+      "russian": "Rosyjski",
+      "spanish": "Hiszpański",
+      "french": "Francuski"
+    }
+  },
+  "photo": {
+    "title": "Zdjęcie profilowe",
+    "upload": "Dodaj zdjęcie",
+    "change": "Zmień zdjęcie",
+    "remove": "Usuń zdjęcie",
+    "takePhoto": "Zrób zdjęcie",
+    "chooseFromLibrary": "Wybierz z galerii"
+  },
+  "actions": {
+    "save": "Zapisz profil",
+    "complete": "Zakończ",
+    "next": "Dalej",
+    "back": "Wstecz",
+    "skip": "Pomiń",
+    "saving": "Zapisywanie..."
+  },
+  "edit": {
+    "title": "Edytuj profil",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "phone": "Telefon",
+    "location": "Lokalizacja",
+    "age": "Wiek",
+    "bio": "O mnie",
+    "changePhoto": "Dotknij, aby zmienić zdjęcie",
+    "save": "Zapisz zmiany",
+    "permissionTitle": "Wymagane uprawnienia",
+    "permissionMessage": "Proszę przyznać dostęp do zdjęć",
+    "successTitle": "Sukces",
+    "successMessage": "Profil został zaktualizowany",
+    "errorTitle": "Błąd",
+    "errorMessage": "Nie udało się zaktualizować profilu"
+  },
+  "favorites": {
+    "title": "Zapisane profile",
+    "loading": "Ładowanie zapisanych profili...",
+    "empty": {
+      "title": "Brak zapisanych profili",
+      "description": "Zapisane profile pojawią się tutaj",
+      "action": "Szukaj współlokatorów"
+    }
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "general": "Ogólne",
+    "language": "Język",
+    "selectLanguage": "Wybierz preferowany język",
+    "notifications": "Powiadomienia",
+    "privacy": "Prywatność",
+    "privacyPolicy": "Polityka prywatności",
+    "terms": "Regulamin",
+    "support": "Pomoc",
+    "help": "Centrum pomocy",
+    "dangerZone": "Strefa zagrożenia",
+    "deleteAccount": "Usuń konto",
+    "deleteConfirm": "Czy na pewno chcesz usunąć swoje konto? Tej operacji nie można cofnąć.",
+    "error": "Błąd",
+    "deleteError": "Nie udało się usunąć konta"
+  }
+}

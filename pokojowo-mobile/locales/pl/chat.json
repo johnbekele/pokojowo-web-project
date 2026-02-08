@@ -1,0 +1,69 @@
+{
+  "title": "Wiadomości",
+  "subtitle": "Rozmawiaj ze swoimi dopasowaniami",
+  "search": {
+    "placeholder": "Szukaj rozmów..."
+  },
+  "empty": {
+    "title": "Brak wiadomości",
+    "subtitle": "Zacznij rozmowę z kimś, kto Ci się spodobał",
+    "findMatches": "Znajdź dopasowania"
+  },
+  "noMessages": "Brak wiadomości",
+  "startConversation": "Napisz pierwszą wiadomość",
+  "loading": "Ładowanie czatu...",
+  "loadingMessages": "Ładowanie wiadomości...",
+  "replyPlaceholder": "Napisz odpowiedź...",
+  "conversation": {
+    "online": "Online",
+    "offline": "Offline",
+    "typing": "pisze...",
+    "lastSeen": "Ostatnio: {{time}}",
+    "active": "Aktywny teraz"
+  },
+  "input": {
+    "placeholder": "Napisz wiadomość...",
+    "send": "Wyślij"
+  },
+  "inputPlaceholder": "Napisz wiadomość...",
+  "message": {
+    "sent": "Wysłano",
+    "delivered": "Dostarczono",
+    "read": "Przeczytano",
+    "sending": "Wysyłanie...",
+    "failed": "Nie udało się wysłać"
+  },
+  "error": {
+    "title": "Błąd",
+    "loadFailed": "Nie udało się załadować rozmów. Spróbuj ponownie.",
+    "chatNotFound": "Nie znaleziono rozmowy",
+    "sendFailed": "Nie udało się wysłać wiadomości",
+    "connectionLost": "Utracono połączenie. Ponowne łączenie..."
+  },
+  "connection": {
+    "connected": "Połączono",
+    "reconnecting": "Ponowne łączenie...",
+    "offline": "Jesteś offline"
+  },
+  "backToChats": "Wróć do wiadomości",
+  "viewProfile": "Zobacz profil",
+  "online": "Online",
+  "offline": "Offline",
+  "typing": "pisze...",
+  "actions": {
+    "delete": "Usuń wiadomość",
+    "copy": "Kopiuj tekst",
+    "reply": "Odpowiedz"
+  },
+  "deleteConfirm": {
+    "title": "Usunąć wiadomość?",
+    "message": "Ta wiadomość zostanie usunięta.",
+    "confirm": "Usuń",
+    "cancel": "Anuluj"
+  },
+  "newMatch": {
+    "title": "Masz dopasowanie z {{name}}!",
+    "subtitle": "Przywitaj się i zacznij rozmowę",
+    "sendMessage": "Napisz wiadomość"
+  }
+}

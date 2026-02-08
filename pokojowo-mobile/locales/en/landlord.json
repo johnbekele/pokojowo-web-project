@@ -1,0 +1,150 @@
+{
+  "title": "Landlord Dashboard",
+  "subtitle": "Manage your properties",
+  "loading": "Loading dashboard...",
+  "stats": {
+    "total": "Total Listings",
+    "active": "Active",
+    "inactive": "Inactive",
+    "inquiries": "Inquiries",
+    "views": "Views",
+    "thisMonth": "This month"
+  },
+  "quickActions": "Quick Actions",
+  "actions": {
+    "createListing": "Create Listing",
+    "viewListings": "My Listings",
+    "viewInquiries": "View Inquiries",
+    "editProfile": "Edit Profile"
+  },
+  "recentListings": "Recent Listings",
+  "viewAll": "View All",
+  "myListings": {
+    "title": "My Listings",
+    "subtitle": "Manage your property listings",
+    "empty": {
+      "title": "No listings yet",
+      "description": "Create your first listing to start finding tenants",
+      "action": "Create Listing"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending Review",
+      "rejected": "Rejected"
+    },
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "create": {
+    "title": "Create Listing",
+    "subtitle": "Add a new property listing",
+    "steps": {
+      "photos": "Photos",
+      "details": "Details",
+      "amenities": "Amenities",
+      "rules": "Rules",
+      "review": "Review"
+    },
+    "photos": "Photos",
+    "photosHint": "Add at least 3 photos of your property",
+    "addPhotos": "Add Photos",
+    "maxPhotos": "Maximum {{max}} photos",
+    "titleLabel": "Listing Title",
+    "titlePlaceholder": "e.g., Cozy room in city center",
+    "address": "Address",
+    "addressPlaceholder": "Street, building number, apartment",
+    "city": "City",
+    "cityPlaceholder": "e.g., Warsaw",
+    "district": "District / Neighborhood",
+    "districtPlaceholder": "e.g., Mokotów",
+    "price": "Monthly Rent (PLN)",
+    "pricePlaceholder": "e.g., 1500",
+    "deposit": "Deposit (PLN)",
+    "depositPlaceholder": "e.g., 3000",
+    "utilities": "Utilities",
+    "utilitiesIncluded": "Included in rent",
+    "utilitiesExtra": "Paid separately",
+    "utilitiesAmount": "Approx. utilities (PLN/month)",
+    "size": "Size (m²)",
+    "sizePlaceholder": "e.g., 15",
+    "roomType": "Room Type",
+    "roomTypeOptions": {
+      "private": "Private Room",
+      "shared": "Shared Room",
+      "studio": "Studio",
+      "apartment": "Entire Apartment"
+    },
+    "buildingType": "Building Type",
+    "buildingTypeOptions": {
+      "apartment": "Apartment Building",
+      "house": "House",
+      "studentHousing": "Student Housing"
+    },
+    "maxTenants": "Max Flatmates",
+    "floor": "Floor",
+    "totalFloors": "Total Floors",
+    "availableFrom": "Available From",
+    "minLease": "Minimum Lease (months)",
+    "descriptionEn": "Description (English)",
+    "descriptionEnPlaceholder": "Describe your property in English...",
+    "descriptionPl": "Description (Polish)",
+    "descriptionPlPlaceholder": "Opisz swoją nieruchomość po polsku...",
+    "amenities": "Amenities",
+    "selectAmenities": "Select available amenities",
+    "rules": "House Rules",
+    "rulesOptions": {
+      "smokingAllowed": "Smoking allowed",
+      "petsAllowed": "Pets allowed",
+      "guestsAllowed": "Overnight guests allowed",
+      "couplesAllowed": "Couples allowed"
+    },
+    "suitableFor": "Suitable For",
+    "suitableForOptions": {
+      "students": "Students",
+      "professionals": "Working professionals",
+      "couples": "Couples",
+      "anyone": "Anyone"
+    },
+    "submit": "Create Listing",
+    "submitting": "Creating...",
+    "saveDraft": "Save as Draft",
+    "preview": "Preview",
+    "successTitle": "Listing Created!",
+    "successMessage": "Your listing has been created and is now visible to potential tenants.",
+    "errorTitle": "Error",
+    "errorMessage": "Failed to create listing. Please try again."
+  },
+  "edit": {
+    "title": "Edit Listing",
+    "submit": "Save Changes",
+    "submitting": "Saving...",
+    "successTitle": "Changes Saved",
+    "successMessage": "Your listing has been updated.",
+    "errorTitle": "Error",
+    "errorMessage": "Failed to update listing. Please try again."
+  },
+  "delete": {
+    "title": "Delete Listing",
+    "message": "Are you sure you want to delete this listing? This action cannot be undone.",
+    "confirm": "Delete",
+    "cancel": "Cancel",
+    "successTitle": "Listing Deleted",
+    "successMessage": "The listing has been permanently deleted.",
+    "errorTitle": "Error",
+    "errorMessage": "Failed to delete listing. Please try again."
+  },
+  "inquiries": {
+    "title": "Inquiries",
+    "subtitle": "Messages from potential tenants",
+    "empty": {
+      "title": "No inquiries yet",
+      "description": "When potential tenants contact you, their messages will appear here."
+    },
+    "new": "New",
+    "replied": "Replied",
+    "archived": "Archived"
+  }
+}

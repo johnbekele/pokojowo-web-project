@@ -1,0 +1,69 @@
+{
+  "title": "Messages",
+  "subtitle": "Chat with your matches",
+  "search": {
+    "placeholder": "Search conversations..."
+  },
+  "empty": {
+    "title": "No messages yet",
+    "subtitle": "Start a conversation with your matches to find your perfect flatmate",
+    "findMatches": "Find Matches"
+  },
+  "noMessages": "No messages yet",
+  "startConversation": "Send a message to start the conversation",
+  "loading": "Loading chat...",
+  "loadingMessages": "Loading messages...",
+  "replyPlaceholder": "Type your reply...",
+  "conversation": {
+    "online": "Online",
+    "offline": "Offline",
+    "typing": "typing...",
+    "lastSeen": "Last seen {{time}}",
+    "active": "Active now"
+  },
+  "input": {
+    "placeholder": "Type a message...",
+    "send": "Send"
+  },
+  "inputPlaceholder": "Type a message...",
+  "message": {
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "read": "Read",
+    "sending": "Sending...",
+    "failed": "Failed to send"
+  },
+  "error": {
+    "title": "Error",
+    "loadFailed": "Failed to load conversations. Please try again.",
+    "chatNotFound": "Chat not found",
+    "sendFailed": "Failed to send message",
+    "connectionLost": "Connection lost. Reconnecting..."
+  },
+  "connection": {
+    "connected": "Connected",
+    "reconnecting": "Reconnecting...",
+    "offline": "You're offline"
+  },
+  "backToChats": "Back to Chats",
+  "viewProfile": "View Profile",
+  "online": "Online",
+  "offline": "Offline",
+  "typing": "typing...",
+  "actions": {
+    "delete": "Delete message",
+    "copy": "Copy text",
+    "reply": "Reply"
+  },
+  "deleteConfirm": {
+    "title": "Delete message?",
+    "message": "This message will be deleted for you.",
+    "confirm": "Delete",
+    "cancel": "Cancel"
+  },
+  "newMatch": {
+    "title": "You matched with {{name}}!",
+    "subtitle": "Say hi and start a conversation",
+    "sendMessage": "Send a Message"
+  }
+}

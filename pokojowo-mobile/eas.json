@@ -1,0 +1,42 @@
+{
+  "cli": {
+    "version": ">= 10.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:3000/api",
+        "EXPO_PUBLIC_SOCKET_URL": "http://localhost:3000"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.pokojowo.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://api.pokojowo.com"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.pokojowo.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://api.pokojowo.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@email.com",
+        "ascAppId": "your-app-store-connect-app-id"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-services.json"
+      }
+    }
+  }
+}

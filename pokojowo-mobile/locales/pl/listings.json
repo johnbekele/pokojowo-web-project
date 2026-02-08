@@ -1,0 +1,152 @@
+{
+  "title": "Znajdź pokój",
+  "hero": {
+    "badge": "Inteligentne dopasowywanie",
+    "subtitle": "Nasz algorytm AI znajduje kompatybilnych współlokatorów na podstawie stylu życia, zainteresowań i preferencji. Dołącz do tysięcy osób szukających idealnego miejsca.",
+    "searchButton": "Szukaj"
+  },
+  "cta": {
+    "tenant": {
+      "title": "Znajdź idealnego współlokatora",
+      "description": "Nasz algorytm dopasowuje współlokatorów na podstawie stylu życia, zainteresowań i preferencji.",
+      "badge1": "Dopasowanie AI",
+      "badge2": "Wynik zgodności",
+      "button": "Znajdź współlokatorów"
+    },
+    "landlord": {
+      "title": "Znajdź idealnego najemcę",
+      "description": "Wystaw swoją nieruchomość i pozwól naszemu AI dopasować zweryfikowanych najemców.",
+      "badge1": "Inteligentne dopasowanie",
+      "badge2": "Zweryfikowani najemcy",
+      "button": "Wystaw ogłoszenie"
+    }
+  },
+  "search": {
+    "placeholder": "Szukaj po lokalizacji, mieście lub dzielnicy...",
+    "filter": "Filtry",
+    "sort": "Sortuj",
+    "sortOptions": {
+      "newest": "Najnowsze",
+      "priceAsc": "Cena: od najniższej",
+      "priceDesc": "Cena: od najwyższej",
+      "closest": "Najbliżej"
+    }
+  },
+  "results": {
+    "count": "{{count}} ogłoszeń",
+    "count_one": "1 ogłoszenie",
+    "count_few": "{{count}} ogłoszenia",
+    "count_many": "{{count}} ogłoszeń"
+  },
+  "filters": {
+    "title": "Filtry",
+    "description": "Doprecyzuj wyszukiwanie",
+    "priceRange": "Cena",
+    "price": "Cena (zł/miesiąc)",
+    "size": "Powierzchnia (m²)",
+    "roomType": "Typ pokoju",
+    "roomTypes": {
+      "private": "Pokój prywatny",
+      "shared": "Pokój dzielony",
+      "studio": "Kawalerka",
+      "apartment": "Całe mieszkanie"
+    },
+    "buildingType": "Typ budynku",
+    "buildingTypes": {
+      "apartment": "Blok mieszkalny",
+      "house": "Dom",
+      "studentHousing": "Akademik prywatny",
+      "dormitory": "Akademik"
+    },
+    "rentFor": "Odpowiedni dla",
+    "rentForOptions": {
+      "students": "Studentów",
+      "professionals": "Pracujących",
+      "couples": "Par",
+      "anyone": "Wszystkich"
+    },
+    "maxTenants": "Maks. współlokatorów",
+    "anyTenants": "Dowolna liczba",
+    "amenities": "Udogodnienia",
+    "amenitiesList": {
+      "wifi": "WiFi",
+      "washingMachine": "Pralka",
+      "dishwasher": "Zmywarka",
+      "balcony": "Balkon",
+      "parking": "Parking",
+      "elevator": "Winda",
+      "airConditioning": "Klimatyzacja",
+      "furnished": "Umeblowane"
+    },
+    "available": "Dostępne teraz",
+    "apply": "Zastosuj",
+    "reset": "Resetuj",
+    "clear": "Wyczyść"
+  },
+  "card": {
+    "perMonth": "/mies.",
+    "available": "Dostępny",
+    "availableFrom": "Dostępny od {{date}}",
+    "viewDetails": "Zobacz szczegóły",
+    "beds": "łóżko",
+    "beds_one": "1 łóżko",
+    "beds_few": "{{count}} łóżka",
+    "beds_many": "{{count}} łóżek",
+    "baths": "łazienka",
+    "baths_one": "1 łazienka",
+    "baths_few": "{{count}} łazienki",
+    "baths_many": "{{count}} łazienek",
+    "rooms": "pokój",
+    "rooms_one": "1 pokój",
+    "rooms_few": "{{count}} pokoje",
+    "rooms_many": "{{count}} pokoi"
+  },
+  "details": {
+    "title": "Szczegóły ogłoszenia",
+    "description": "Opis",
+    "amenities": "Udogodnienia",
+    "location": "Lokalizacja",
+    "landlord": "Właściciel",
+    "contactLandlord": "Skontaktuj się",
+    "available": "Dostępny od",
+    "deposit": "Kaucja",
+    "utilities": "Media",
+    "utilitiesIncluded": "W cenie czynszu",
+    "utilitiesExtra": "Dodatkowo (ok. {{amount}} zł/mies.)",
+    "minLease": "Min. okres najmu",
+    "months": "miesięcy",
+    "size": "Powierzchnia",
+    "floor": "Piętro",
+    "rules": {
+      "title": "Zasady domu",
+      "smoking": "Palenie",
+      "pets": "Zwierzęta",
+      "guests": "Goście nocujący"
+    },
+    "currentFlatmates": "Obecni współlokatorzy",
+    "noFlatmates": "Brak obecnych współlokatorów"
+  },
+  "empty": {
+    "title": "Brak ogłoszeń",
+    "subtitle": "Spróbuj zmienić filtry lub kryteria wyszukiwania"
+  },
+  "error": {
+    "title": "Ups! Coś poszło nie tak",
+    "loadingFailed": "Nie udało się załadować ogłoszeń. Spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
+  },
+  "interestedUsers": {
+    "title": "Też zainteresowani",
+    "singleMatch": "{{name}} ({{score}}% zgodności) jest też zainteresowany/a",
+    "multipleMatches": "{{count}} dopasowanych osób jest zainteresowanych",
+    "viewAll": "Zobacz wszystkich",
+    "noMatches": "Bądź pierwszą zainteresowaną osobą!"
+  },
+  "actions": {
+    "like": "Zapisz ogłoszenie",
+    "unlike": "Usuń z zapisanych",
+    "liked": "Zapisano",
+    "share": "Udostępnij",
+    "report": "Zgłoś ogłoszenie"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "title": "Panel właściciela",
+  "subtitle": "Zarządzaj swoimi nieruchomościami",
+  "loading": "Ładowanie panelu...",
+  "stats": {
+    "total": "Wszystkie ogłoszenia",
+    "active": "Aktywne",
+    "inactive": "Nieaktywne",
+    "inquiries": "Zapytania",
+    "views": "Wyświetlenia",
+    "thisMonth": "W tym miesiącu"
+  },
+  "quickActions": "Szybkie akcje",
+  "actions": {
+    "createListing": "Dodaj ogłoszenie",
+    "viewListings": "Moje ogłoszenia",
+    "viewInquiries": "Zobacz zapytania",
+    "editProfile": "Edytuj profil"
+  },
+  "recentListings": "Ostatnie ogłoszenia",
+  "viewAll": "Zobacz wszystkie",
+  "myListings": {
+    "title": "Moje ogłoszenia",
+    "subtitle": "Zarządzaj swoimi ogłoszeniami",
+    "empty": {
+      "title": "Brak ogłoszeń",
+      "description": "Dodaj pierwsze ogłoszenie, aby znaleźć najemców",
+      "action": "Dodaj ogłoszenie"
+    },
+    "status": {
+      "active": "Aktywne",
+      "inactive": "Nieaktywne",
+      "pending": "Oczekuje na weryfikację",
+      "rejected": "Odrzucone"
+    },
+    "activate": "Aktywuj",
+    "deactivate": "Dezaktywuj",
+    "edit": "Edytuj",
+    "delete": "Usuń"
+  },
+  "create": {
+    "title": "Nowe ogłoszenie",
+    "subtitle": "Dodaj nową nieruchomość",
+    "steps": {
+      "photos": "Zdjęcia",
+      "details": "Szczegóły",
+      "amenities": "Udogodnienia",
+      "rules": "Zasady",
+      "review": "Podsumowanie"
+    },
+    "photos": "Zdjęcia",
+    "photosHint": "Dodaj minimum 3 zdjęcia nieruchomości",
+    "addPhotos": "Dodaj zdjęcia",
+    "maxPhotos": "Maksymalnie {{max}} zdjęć",
+    "titleLabel": "Tytuł ogłoszenia",
+    "titlePlaceholder": "np. Przytulny pokój w centrum",
+    "address": "Adres",
+    "addressPlaceholder": "Ulica, numer budynku, mieszkanie",
+    "city": "Miasto",
+    "cityPlaceholder": "np. Warszawa",
+    "district": "Dzielnica",
+    "districtPlaceholder": "np. Mokotów",
+    "price": "Czynsz miesięczny (zł)",
+    "pricePlaceholder": "np. 1500",
+    "deposit": "Kaucja (zł)",
+    "depositPlaceholder": "np. 3000",
+    "utilities": "Media",
+    "utilitiesIncluded": "Wliczone w czynsz",
+    "utilitiesExtra": "Płatne oddzielnie",
+    "utilitiesAmount": "Szacowane media (zł/mies.)",
+    "size": "Powierzchnia (m²)",
+    "sizePlaceholder": "np. 15",
+    "roomType": "Typ pokoju",
+    "roomTypeOptions": {
+      "private": "Pokój prywatny",
+      "shared": "Pokój dzielony",
+      "studio": "Kawalerka",
+      "apartment": "Całe mieszkanie"
+    },
+    "buildingType": "Typ budynku",
+    "buildingTypeOptions": {
+      "apartment": "Blok mieszkalny",
+      "house": "Dom",
+      "studentHousing": "Akademik prywatny"
+    },
+    "maxTenants": "Maks. współlokatorów",
+    "floor": "Piętro",
+    "totalFloors": "Liczba pięter",
+    "availableFrom": "Dostępny od",
+    "minLease": "Min. okres najmu (miesiące)",
+    "descriptionEn": "Opis (angielski)",
+    "descriptionEnPlaceholder": "Opisz nieruchomość po angielsku...",
+    "descriptionPl": "Opis (polski)",
+    "descriptionPlPlaceholder": "Opisz nieruchomość po polsku...",
+    "amenities": "Udogodnienia",
+    "selectAmenities": "Wybierz dostępne udogodnienia",
+    "rules": "Zasady domu",
+    "rulesOptions": {
+      "smokingAllowed": "Palenie dozwolone",
+      "petsAllowed": "Zwierzęta dozwolone",
+      "guestsAllowed": "Goście nocujący dozwoleni",
+      "couplesAllowed": "Pary dozwolone"
+    },
+    "suitableFor": "Odpowiednie dla",
+    "suitableForOptions": {
+      "students": "Studentów",
+      "professionals": "Osób pracujących",
+      "couples": "Par",
+      "anyone": "Wszystkich"
+    },
+    "submit": "Dodaj ogłoszenie",
+    "submitting": "Dodawanie...",
+    "saveDraft": "Zapisz jako szkic",
+    "preview": "Podgląd",
+    "successTitle": "Ogłoszenie dodane!",
+    "successMessage": "Twoje ogłoszenie zostało dodane i jest teraz widoczne dla potencjalnych najemców.",
+    "errorTitle": "Błąd",
+    "errorMessage": "Nie udało się dodać ogłoszenia. Spróbuj ponownie."
+  },
+  "edit": {
+    "title": "Edytuj ogłoszenie",
+    "submit": "Zapisz zmiany",
+    "submitting": "Zapisywanie...",
+    "successTitle": "Zmiany zapisane",
+    "successMessage": "Twoje ogłoszenie zostało zaktualizowane.",
+    "errorTitle": "Błąd",
+    "errorMessage": "Nie udało się zaktualizować ogłoszenia. Spróbuj ponownie."
+  },
+  "delete": {
+    "title": "Usuń ogłoszenie",
+    "message": "Czy na pewno chcesz usunąć to ogłoszenie? Tej akcji nie można cofnąć.",
+    "confirm": "Usuń",
+    "cancel": "Anuluj",
+    "successTitle": "Ogłoszenie usunięte",
+    "successMessage": "Ogłoszenie zostało trwale usunięte.",
+    "errorTitle": "Błąd",
+    "errorMessage": "Nie udało się usunąć ogłoszenia. Spróbuj ponownie."
+  },
+  "inquiries": {
+    "title": "Zapytania",
+    "subtitle": "Wiadomości od potencjalnych najemców",
+    "empty": {
+      "title": "Brak zapytań",
+      "description": "Gdy potencjalni najemcy się z Tobą skontaktują, ich wiadomości pojawią się tutaj."
+    },
+    "new": "Nowe",
+    "replied": "Odpowiedziane",
+    "archived": "Zarchiwizowane"
+  }
+}
