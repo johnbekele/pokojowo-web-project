@@ -1,16 +1,20 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Users, MessageSquare, MapPin, Heart, Languages } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, MessageSquare, MapPin, Heart, Languages, LayoutGrid, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserAvatar from '@/components/shared/UserAvatar';
 import LikeButton from '@/features/likes/components/LikeButton';
 import SaveButton from '@/features/favorites/components/SaveButton';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
+import SwipeStack from '../components/SwipeStack';
+import MatchDetailModal from '../components/MatchDetailModal';
 import useLikesStore from '@/stores/likesStore';
 import useFavoritesStore from '@/stores/favoritesStore';
 import api from '@/lib/api';
@@ -18,8 +22,11 @@ import { cn } from '@/lib/utils';
 
 export default function Matches() {
   const { t } = useTranslation('matching');
-  const { fetchLikesSent } = useLikesStore();
+  const { fetchLikesSent, likeUser } = useLikesStore();
   const { fetchSavedMatches } = useFavoritesStore();
+  const [viewMode, setViewMode] = useState('swipe'); // 'swipe' or 'grid'
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Load likes and favorites on mount
   useEffect(() => {
@@ -35,30 +42,36 @@ export default function Matches() {
     },
   });
 
+  const handleCardClick = (match) => {
+    setSelectedMatch(match);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMatch(null);
+  };
+
+  const handleLike = async (userId) => {
+    await likeUser(userId);
+  };
+
+  const handleSkip = (userId) => {
+    // Just close modal, skip is handled by swipe
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64 mt-2" />
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </div>
+          <Skeleton className="h-10 w-40" />
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex justify-center py-12">
+          <Skeleton className="w-[380px] h-[500px] rounded-3xl" />
         </div>
       </div>
     );
@@ -82,20 +95,36 @@ export default function Matches() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="mt-2 text-muted-foreground">{t('subtitle')}</p>
-        {data?.total_candidates != null && (
-          <p className="text-sm text-muted-foreground mt-1">
-            {matches.length} matches found from {data.total_candidates} candidates
-            {data.filtered_by_deal_breakers > 0 && (
-              <span> ({data.filtered_by_deal_breakers} filtered by deal breakers)</span>
-            )}
-          </p>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
+          {data?.total_candidates != null && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {matches.length} matches found from {data.total_candidates} candidates
+              {data.filtered_by_deal_breakers > 0 && (
+                <span className="text-yellow-600"> ({data.filtered_by_deal_breakers} filtered)</span>
+              )}
+            </p>
+          )}
+        </div>
+
+        {/* View mode toggle */}
+        <Tabs value={viewMode} onValueChange={setViewMode} className="w-auto">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="swipe" className="gap-2">
+              <Layers className="h-4 w-4" />
+              <span className="hidden sm:inline">Swipe</span>
+            </TabsTrigger>
+            <TabsTrigger value="grid" className="gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">Grid</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Matches Grid */}
+      {/* Content */}
       {matches.length === 0 ? (
         <Card>
           <CardHeader className="text-center">
@@ -112,12 +141,50 @@ export default function Matches() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {matches.map((match) => (
-            <MatchCard key={match.user_id} match={match} />
-          ))}
-        </div>
+        <AnimatePresence mode="wait">
+          {viewMode === 'swipe' ? (
+            <motion.div
+              key="swipe"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SwipeStack
+                matches={matches}
+                onCardClick={handleCardClick}
+                onEmpty={() => setViewMode('grid')}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {matches.map((match) => (
+                <MatchCard
+                  key={match.user_id}
+                  match={match}
+                  onClick={() => handleCardClick(match)}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
+
+      {/* Match Detail Modal */}
+      <MatchDetailModal
+        match={selectedMatch}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onLike={handleLike}
+        onSkip={handleSkip}
+      />
 
       {/* Mutual Match Modal */}
       <MutualMatchModal />
@@ -125,7 +192,7 @@ export default function Matches() {
   );
 }
 
-function MatchCard({ match }) {
+function MatchCard({ match, onClick }) {
   const { t } = useTranslation('matching');
 
   // API returns flat structure
@@ -170,7 +237,10 @@ function MatchCard({ match }) {
   const user = { firstname, lastname, photo };
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+    <Card
+      className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group cursor-pointer"
+      onClick={onClick}
+    >
       {/* Header with score */}
       <div className={cn('p-4 text-white', getMatchColor(score))}>
         <div className="flex items-center gap-2">
@@ -237,15 +307,15 @@ function MatchCard({ match }) {
         )}
       </CardContent>
 
-      <CardFooter className="bg-muted/50 gap-2 pt-4">
+      <CardFooter className="bg-muted/50 gap-2 pt-4" onClick={(e) => e.stopPropagation()}>
         <LikeButton userId={user_id} />
         <SaveButton userId={user_id} />
-        <Link to={`/matches/${user_id}`} className="flex-1">
+        <Link to={`/matches/${user_id}`} className="flex-1" onClick={(e) => e.stopPropagation()}>
           <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             {t('card.viewProfile')}
           </Button>
         </Link>
-        <Link to={`/chat/with/${user_id}`}>
+        <Link to={`/chat/with/${user_id}`} onClick={(e) => e.stopPropagation()}>
           <Button className="bg-primary">
             <MessageSquare className="h-4 w-4" />
           </Button>
