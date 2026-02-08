@@ -21,6 +21,10 @@ export default defineConfig({
       usePolling: true,
     },
     proxy: {
+      '/api/scraper': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,

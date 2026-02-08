@@ -37,6 +37,9 @@ const LandlordDashboard = lazy(() => import('@/features/landlord/pages/LandlordD
 const CreateListing = lazy(() => import('@/features/landlord/pages/CreateListing'));
 const MyListings = lazy(() => import('@/features/landlord/pages/MyListings'));
 
+// Admin pages
+const ScraperDashboard = lazy(() => import('@/features/scraper-dashboard'));
+
 /**
  * Application routes
  */
@@ -89,6 +92,11 @@ export default function AppRouter() {
           {/* Landlord routes without layout */}
           <Route path="/landlord/listings/new" element={<CreateListing />} />
           <Route path="/landlord/listings/:id/edit" element={<CreateListing />} />
+
+          {/* Admin routes */}
+          <Route element={<PageLayout />}>
+            <Route path="/admin/scraper" element={<ScraperDashboard />} />
+          </Route>
         </Route>
       </Routes>
     </Suspense>
