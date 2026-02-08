@@ -17,11 +17,34 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-// Hero background images
-const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
-  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
+// Hero slides with images and promo content
+const HERO_SLIDES = [
+  {
+    image: '/images/promo/roomate1.webp',
+    fallback: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80',
+    title: 'Find Your Perfect Roommate',
+    subtitle: 'Connect with people who match your vibe and lifestyle',
+    type: 'roommate',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
+    title: 'Discover Your Dream Room',
+    subtitle: 'Browse hundreds of verified rooms in your area',
+    type: 'room',
+  },
+  {
+    image: '/images/promo/Roommate-Finder.webp',
+    fallback: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1920&q=80',
+    title: 'Live With Like-Minded People',
+    subtitle: 'Find roommates who share your interests and values',
+    type: 'roommate',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
+    title: 'Your Next Home Awaits',
+    subtitle: 'Quality rooms at prices that work for you',
+    type: 'room',
+  },
 ];
 
 import { Button } from '@/components/ui/button';
@@ -59,13 +82,16 @@ export default function HomeListings() {
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
 
-  // Rotate hero images every 5 seconds
+  // Rotate hero slides every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+      setCurrentImageIndex((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Get current slide content
+  const currentSlide = HERO_SLIDES[currentImageIndex];
 
   const { data: rawListings, isLoading, error } = useQuery({
     queryKey: ['listings', searchQuery, sortBy],
@@ -152,18 +178,21 @@ export default function HomeListings() {
       {/* Hero Section with Rotating Images and Interactive Promo Cards */}
       <div className="relative rounded-2xl overflow-hidden min-h-[320px] md:min-h-[380px]">
         {/* Background Images */}
-        {HERO_IMAGES.map((image, index) => (
+        {HERO_SLIDES.map((slide, index) => (
           <div
-            key={image}
+            key={slide.image}
             className={cn(
               "absolute inset-0 transition-opacity duration-1000 ease-in-out",
               index === currentImageIndex ? "opacity-100" : "opacity-0"
             )}
           >
             <img
-              src={image}
-              alt={`Room ${index + 1}`}
+              src={slide.image}
+              alt={slide.title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                if (slide.fallback) e.target.src = slide.fallback;
+              }}
             />
           </div>
         ))}
@@ -175,11 +204,11 @@ export default function HomeListings() {
         <div className="relative z-10 p-4 sm:p-6 md:p-8 h-full flex flex-col justify-between min-h-[320px] md:min-h-[380px]">
           {/* Top - Title & Search */}
           <div className="max-w-xl">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-white">
-              {t('title')}
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-white transition-all duration-500">
+              {currentSlide.title}
             </h1>
-            <p className="text-sm md:text-base text-white/80 mb-4">
-              {t('hero.subtitle')}
+            <p className="text-sm md:text-base text-white/80 mb-4 transition-all duration-500">
+              {currentSlide.subtitle}
             </p>
 
             {/* Search Bar */}
@@ -229,17 +258,17 @@ export default function HomeListings() {
 
         {/* Image Indicators */}
         <div className="absolute bottom-3 right-3 z-10 flex gap-1.5">
-          {HERO_IMAGES.map((_, index) => (
+          {HERO_SLIDES.map((slide, index) => (
             <button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
               className={cn(
                 "w-1.5 h-1.5 rounded-full transition-all duration-300",
                 index === currentImageIndex
-                  ? "bg-white w-4"
+                  ? slide.type === 'roommate' ? "bg-teal-400 w-4" : "bg-white w-4"
                   : "bg-white/50 hover:bg-white/70"
               )}
-              aria-label={`Go to image ${index + 1}`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
