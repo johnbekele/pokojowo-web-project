@@ -103,7 +103,16 @@ class LikesService:
 
             await mutual_match.insert()
 
-            result["mutual_match"] = mutual_match
+            # Get the liked user details for the modal
+            liked_user = await User.get(liked_user_id)
+            if liked_user:
+                result["mutual_match"] = {
+                    "matched_user_id": liked_user_id,
+                    "user": self._format_user(liked_user),
+                    "compatibility_score": compatibility_score or reciprocal_like.compatibility_score
+                }
+            else:
+                result["mutual_match"] = mutual_match
 
             # Send notifications
             await self._notify_mutual_match(liker_id, liked_user_id)
