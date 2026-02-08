@@ -14,7 +14,7 @@ import {
   Globe,
   Search,
   Building2,
-  LayoutDashboard,
+  Heart,
   Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -67,7 +67,7 @@ export default function FloatingHeader() {
           ...(isLandlord
             ? [{ to: '/landlord/dashboard', label: 'Dashboard', icon: Building2 }]
             : [
-                ...(isAdmin ? [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
+                { to: '/likes', label: 'Likes', icon: Heart },
                 { to: '/discover', label: 'Discover', icon: Search },
                 { to: '/matches', label: 'Find Flatmate', icon: Users },
               ]),

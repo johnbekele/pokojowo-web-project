@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
 import LoadingPage from '@/components/shared/LoadingPage';
@@ -75,6 +75,8 @@ export default function AppRouter() {
             <Route path="/matches/:userId" element={<MatchDetail />} />
             <Route path="/favorites" element={<SavedMatches />} />
             <Route path="/likes" element={<LikesPage />} />
+            {/* Redirect old dashboard route to likes */}
+            <Route path="/dashboard" element={<Navigate to="/likes" replace />} />
             {/* Chat routes */}
             <Route path="/chat" element={<ChatList />} />
             <Route path="/chat/:chatId" element={<ChatRoom />} />
