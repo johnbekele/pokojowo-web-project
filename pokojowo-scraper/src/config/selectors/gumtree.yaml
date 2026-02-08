@@ -1,0 +1,79 @@
+# Gumtree.pl CSS Selectors for Rental Listings
+site_name: gumtree
+base_url: https://www.gumtree.pl
+
+# Search URL patterns
+search:
+  url_template: "{base_url}/s-mieszkania-i-domy-do-wynajecia/{city}/v1c9008l3200208"
+  params:
+    page: "page={page}"
+    sort: "o=sort_by_date"
+
+# Listing page selectors
+listing_page:
+  # Container for all listings
+  container: ".results"
+
+  # Individual listing card
+  card: ".tileV1"
+
+  # Link to listing detail
+  link: ".tile-link"
+
+  # Basic info on card
+  title: ".tile-title-text"
+  price: ".ad-price"
+  location: ".tile-location"
+  date: ".tile-date"
+
+  # Image on card
+  thumbnail: ".tile-image img"
+
+# Detail page selectors
+detail_page:
+  # Main content
+  title: ".vip-title h1"
+  price: ".vip-price .price"
+  description: ".vip-content-description"
+
+  # Images
+  images_container: ".vip-gallery"
+  image: ".gallery-item img"
+
+  # Properties/attributes
+  attributes_container: ".vip-details"
+  attribute_row: ".attribute"
+  attribute_label: ".attribute-label"
+  attribute_value: ".attribute-value"
+
+  # Location
+  location: ".vip-location"
+  map_container: ".vip-map"
+
+  # Contact
+  phone_reveal: ".btn-show-phone"
+  seller_info: ".vip-seller"
+
+# Pagination
+pagination:
+  container: ".pagination"
+  next_button: ".next a"
+  page_number: ".pagination a"
+  active_page: ".pagination .active"
+
+# Anti-bot detection
+captcha:
+  indicator: ".g-recaptcha, #captcha"
+
+# Attribute mappings (Polish -> English)
+attribute_mapping:
+  "Powierzchnia (m2)": "size"
+  "Liczba pokoi": "rooms"
+  "Liczba łazienek": "bathrooms"
+  "Do zamieszkania od": "available_from"
+  "Rodzaj nieruchomości": "property_type"
+  "Na parterze": "ground_floor"
+  "Parking": "parking"
+  "Umeblowanie": "furnished"
+  "Dla palących": "smoking_allowed"
+  "Przyjazne zwierzętom": "pets_allowed"

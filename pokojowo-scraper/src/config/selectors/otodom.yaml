@@ -1,0 +1,88 @@
+# Otodom.pl CSS Selectors for Rental Listings
+site_name: otodom
+base_url: https://www.otodom.pl
+
+# Search URL patterns
+search:
+  url_template: "{base_url}/pl/wyniki/wynajem/mieszkanie/{voivodeship}/{city}"
+  params:
+    page: "page={page}"
+    sort: "by=LATEST"
+
+# Listing page selectors
+listing_page:
+  # Container for all listings
+  container: "[data-cy='search.listing']"
+
+  # Individual listing card
+  card: "[data-cy='listing-item']"
+
+  # Link to listing detail
+  link: "[data-cy='listing-item-link']"
+
+  # Basic info on card
+  title: "[data-cy='listing-item-title']"
+  price: "[data-cy='listing-item-price']"
+  location: "[data-cy='listing-item-location']"
+
+  # Extra info on card
+  area: "[data-testid='listing-item-area']"
+  rooms: "[data-testid='listing-item-rooms']"
+
+# Detail page selectors
+detail_page:
+  # Main content
+  title: "[data-cy='adPageAdTitle']"
+  price: "[data-cy='adPageHeaderPrice']"
+  description: "[data-cy='adPageAdDescription']"
+
+  # Images
+  images_container: "[data-cy='gallery-pictures-container']"
+  image: "img[data-cy='gallery-picture']"
+
+  # Properties table
+  properties_table: "[data-testid='ad.top-information.table']"
+  property_row: "[data-testid^='table-value']"
+  property_label: "[data-testid='table-label']"
+  property_value: "[data-testid='table-value']"
+
+  # Additional features
+  features_container: "[data-testid='ad.additional-information']"
+  feature_item: "[data-testid^='ad.additional-information']"
+
+  # Location
+  address: "[aria-label='Adres']"
+  map_container: "[data-cy='map']"
+
+  # Agency/Owner info
+  seller_container: "[data-cy='ad.seller-info']"
+  seller_type: "[data-cy='ad.seller-badge']"
+
+# Pagination
+pagination:
+  container: "[data-cy='pagination']"
+  next_button: "[data-cy='pagination.next-page']"
+  page_number: "[data-cy='pagination.page-number']"
+  items_total: "[data-cy='search.listing-panel.label']"
+
+# Anti-bot detection
+captcha:
+  indicator: ".g-recaptcha, [data-cy='captcha']"
+
+# Attribute mappings (Polish -> English)
+attribute_mapping:
+  "Powierzchnia": "size"
+  "Liczba pokoi": "rooms"
+  "Piętro": "floor"
+  "Umeblowanie": "furnished"
+  "Forma własności": "ownership"
+  "Czynsz": "rent"
+  "Kaucja": "deposit"
+  "Typ ogłoszeniodawcy": "advertiser_type"
+  "Dostępny od": "available_from"
+  "Rodzaj zabudowy": "building_type"
+  "Rok budowy": "year_built"
+  "Stan wykończenia": "finish_state"
+  "Materiał budynku": "building_material"
+  "Okna": "windows"
+  "Ogrzewanie": "heating"

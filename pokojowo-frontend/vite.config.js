@@ -21,13 +21,16 @@ export default defineConfig({
       usePolling: true,
     },
     proxy: {
+      // Scraper backend - runs locally for development
       '/api/scraper': {
         target: 'http://localhost:8001',
         changeOrigin: true,
       },
+      // App backend - uses remote server (no local backend)
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://pokojowo-web-project.onrender.com',
         changeOrigin: true,
+        secure: true,
       },
     },
   },

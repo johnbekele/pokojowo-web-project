@@ -1,0 +1,74 @@
+# OLX.pl CSS Selectors for Rental Listings
+site_name: olx
+base_url: https://www.olx.pl
+
+# Search URL patterns
+search:
+  url_template: "{base_url}/nieruchomosci/mieszkania/wynajem/{city}/"
+  params:
+    page: "page={page}"
+    sort: "search[order]=created_at:desc"
+
+# Listing page selectors
+listing_page:
+  # Container for all listings
+  container: "[data-testid='listing-grid']"
+
+  # Individual listing card
+  card: "[data-cy='l-card']"
+
+  # Link to listing detail
+  link: "a[data-cy='ad-card-title']"
+
+  # Basic info on card
+  title: "[data-cy='ad-card-title'] h6"
+  price: "[data-testid='ad-price']"
+  location: "[data-testid='location-date'] p:first-child"
+  date: "[data-testid='location-date'] p:last-child"
+
+# Detail page selectors
+detail_page:
+  # Main content
+  title: "[data-cy='ad_title']"
+  price: "[data-testid='ad-price-container'] h3"
+  description: "[data-cy='ad_description'] div"
+
+  # Images
+  images_container: "[data-cy='ad-photo-swiper']"
+  image: "img"
+
+  # Properties/attributes
+  attributes_container: "[data-testid='ad-params-container']"
+  attribute_row: "li"
+  attribute_label: "p:first-child"
+  attribute_value: "p:last-child"
+
+  # Location
+  location: "[data-testid='map-link'] p"
+
+  # Contact
+  phone_button: "[data-testid='show-phone-button']"
+
+  # Promoted badge
+  promoted: "[data-testid='ad-badge']"
+
+# Pagination
+pagination:
+  container: "[data-testid='pagination-wrapper']"
+  next_button: "[data-cy='pagination-forward']"
+  page_number: "[data-testid='pagination-wrapper'] a"
+  total_pages: "[data-testid='total-count']"
+
+# Anti-bot detection
+captcha:
+  indicator: ".g-recaptcha, #captcha, [data-cy='captcha']"
+
+# Attribute mappings (Polish -> English)
+attribute_mapping:
+  "Powierzchnia": "size"
+  "Liczba pokoi": "rooms"
+  "Poziom": "floor"
+  "Umeblowane": "furnished"
+  "Rodzaj zabudowy": "building_type"
+  "Czynsz (dodatkowo)": "additional_rent"
+  "Kaucja": "deposit"
