@@ -17,11 +17,38 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-// Promo images for hero carousel
-const PROMO_IMAGES = [
-  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
-  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
+// Promo slides for hero carousel
+const PROMO_SLIDES = [
+  {
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
+    badge: 'For Tenants',
+    title: 'Find Your Perfect Roommate',
+    subtitle: 'Our smart matching algorithm finds compatible roommates based on lifestyle, interests, and preferences.',
+    features: ['AI Matching', 'Compatibility Score', 'Verified Profiles'],
+    ctaText: 'Find Roommates',
+    ctaLink: '/matches',
+    gradient: 'from-teal-600/90 via-teal-700/70 to-emerald-800/60',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
+    badge: 'For Landlords',
+    title: 'Find the Perfect Tenant',
+    subtitle: 'List your property and let our AI match you with verified, compatible tenants who fit your requirements.',
+    features: ['Smart Tenant Matching', 'Verified Tenants', 'Easy Listing'],
+    ctaText: 'List Your Property',
+    ctaLink: '/landlord/listings/new',
+    gradient: 'from-blue-600/90 via-blue-700/70 to-indigo-800/60',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
+    badge: 'Browse Listings',
+    title: 'Discover Amazing Places',
+    subtitle: 'Browse through verified room listings in Poland. Find your next home with ease and connect with great roommates.',
+    features: ['Verified Listings', 'Detailed Photos', 'Instant Chat'],
+    ctaText: 'Browse Rooms',
+    ctaLink: '#listings',
+    gradient: 'from-purple-600/90 via-purple-700/70 to-pink-800/60',
+  },
 ];
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,11 +85,11 @@ export default function HomeListings() {
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
 
-  // Rotate promo images every 5 seconds
+  // Rotate promo slides every 6 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % PROMO_IMAGES.length);
-    }, 5000);
+      setCurrentImageIndex((prev) => (prev + 1) % PROMO_SLIDES.length);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -148,40 +175,109 @@ export default function HomeListings() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section with Rotating Images */}
-      <div className="relative rounded-2xl overflow-hidden min-h-[400px] md:min-h-[450px]">
+      {/* Hero Section with Rotating Promo Slides */}
+      <div className="relative rounded-2xl overflow-hidden min-h-[450px] md:min-h-[500px]">
         {/* Background Images */}
-        {PROMO_IMAGES.map((image, index) => (
+        {PROMO_SLIDES.map((slide, index) => (
           <div
-            key={image}
+            key={slide.image}
             className={cn(
               "absolute inset-0 transition-opacity duration-1000 ease-in-out",
               index === currentImageIndex ? "opacity-100" : "opacity-0"
             )}
           >
             <img
-              src={image}
-              alt={`Room ${index + 1}`}
+              src={slide.image}
+              alt={slide.title}
               className="w-full h-full object-cover"
             />
+            {/* Gradient Overlay - unique per slide */}
+            <div className={cn("absolute inset-0 bg-gradient-to-r", slide.gradient)} />
           </div>
         ))}
 
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+        {/* Content - Rotates with slides */}
+        <div className="relative z-10 p-4 sm:p-6 md:p-8 lg:p-12 h-full flex flex-col justify-center min-h-[450px] md:min-h-[500px]">
+          {PROMO_SLIDES.map((slide, index) => (
+            <div
+              key={index}
+              className={cn(
+                "absolute inset-0 p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-center transition-all duration-700",
+                index === currentImageIndex
+                  ? "opacity-100 translate-x-0"
+                  : "opacity-0 -translate-x-8 pointer-events-none"
+              )}
+            >
+              <div className="max-w-2xl">
+                {/* Badge */}
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white mb-4">
+                  <Sparkles className="h-4 w-4" />
+                  {slide.badge}
+                </span>
 
-        {/* Content */}
-        <div className="relative z-10 p-4 sm:p-6 md:p-8 lg:p-12 h-full flex flex-col justify-center">
+                {/* Title */}
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-white leading-tight">
+                  {slide.title}
+                </h1>
+
+                {/* Subtitle */}
+                <p className="text-base md:text-lg text-white/90 mb-6 max-w-xl leading-relaxed">
+                  {slide.subtitle}
+                </p>
+
+                {/* Feature Badges */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {slide.features.map((feature) => (
+                    <Badge
+                      key={feature}
+                      className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30"
+                    >
+                      {feature}
+                    </Badge>
+                  ))}
+                </div>
+
+                {/* CTA Button */}
+                <Link to={slide.ctaLink}>
+                  <Button
+                    size="lg"
+                    className="bg-white text-gray-900 hover:bg-white/90 font-semibold shadow-lg"
+                  >
+                    {slide.ctaText}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
+          {PROMO_SLIDES.map((slide, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300",
+                index === currentImageIndex
+                  ? "bg-white text-gray-900 shadow-lg"
+                  : "bg-white/20 text-white hover:bg-white/30"
+              )}
+              aria-label={`Go to ${slide.badge}`}
+            >
+              <span className={cn(
+                "w-2 h-2 rounded-full transition-all",
+                index === currentImageIndex ? "bg-gray-900" : "bg-white"
+              )} />
+              <span className="text-xs font-medium hidden sm:inline">{slide.badge}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Search Bar Overlay */}
+        <div className="absolute bottom-20 sm:bottom-24 left-4 right-4 sm:left-6 sm:right-6 md:left-8 md:right-8 lg:left-12 lg:right-12 z-10">
           <div className="max-w-2xl">
-            <span className="text-sm font-medium text-white/80 mb-3 md:mb-4 block">{t('hero.badge')}</span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-white">
-              {t('title')}
-            </h1>
-            <p className="text-base md:text-lg text-white/80 mb-6 md:mb-8 max-w-xl">
-              {t('hero.subtitle')}
-            </p>
-
-            {/* Search Bar in Hero */}
             <div className="flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-md rounded-xl p-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
@@ -189,7 +285,7 @@ export default function HomeListings() {
                   placeholder={t('search.placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
                 />
               </div>
               <Button size="lg" variant="secondary" className="h-12 font-semibold">
@@ -198,23 +294,6 @@ export default function HomeListings() {
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Image Indicators */}
-        <div className="absolute bottom-4 right-4 z-10 flex gap-2">
-          {PROMO_IMAGES.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300",
-                index === currentImageIndex
-                  ? "bg-white w-6"
-                  : "bg-white/50 hover:bg-white/70"
-              )}
-              aria-label={`Go to image ${index + 1}`}
-            />
-          ))}
         </div>
       </div>
 
