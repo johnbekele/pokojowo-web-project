@@ -18,7 +18,7 @@ export default function Profile() {
     return null;
   }
 
-  const isTenant = user.role?.includes('tenant');
+  const isTenant = user.role?.some(r => r.toLowerCase() === 'tenant');
   const completionPercentage = user.profileCompletionStep || user.profile_completion_step || 0;
   const isComplete = user.isProfileComplete || user.is_profile_complete;
 

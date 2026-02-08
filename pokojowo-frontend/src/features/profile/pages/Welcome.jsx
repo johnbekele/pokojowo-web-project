@@ -9,7 +9,7 @@ export default function Welcome() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
 
-  const isTenant = user?.role?.includes('tenant');
+  const isTenant = user?.role?.some(r => r.toLowerCase() === 'tenant');
   const profilePath = isTenant ? '/profile-completion/tenant' : '/profile-completion/landlord';
 
   return (

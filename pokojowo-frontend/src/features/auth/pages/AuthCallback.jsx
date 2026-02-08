@@ -33,7 +33,7 @@ export default function AuthCallback() {
           navigate('/select-role', { replace: true });
         } else if (requiresProfileCompletion || !user?.is_profile_complete) {
           // User needs to complete profile
-          const role = user.role.includes('landlord') ? 'landlord' : 'tenant';
+          const role = user.role.some(r => r.toLowerCase() === 'landlord') ? 'landlord' : 'tenant';
           navigate(`/profile-completion/${role}`, { replace: true });
         } else {
           // Existing user with complete profile

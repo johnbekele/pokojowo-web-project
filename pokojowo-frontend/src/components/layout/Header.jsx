@@ -55,8 +55,8 @@ export default function Header() {
     return location.pathname.startsWith(path);
   };
 
-  const isLandlord = user?.role?.includes('landlord');
-  const isTenant = user?.role?.includes('tenant') || user?.role?.includes('User');
+  const isLandlord = user?.role?.some(r => r.toLowerCase() === 'landlord');
+  const isTenant = user?.role?.some(r => ['tenant', 'user'].includes(r.toLowerCase()));
 
   const navLinks = [
     { to: '/', label: t('nav.home'), icon: Home },
