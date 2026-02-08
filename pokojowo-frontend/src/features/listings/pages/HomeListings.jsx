@@ -17,37 +17,34 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-// Promo slides for hero carousel
-const PROMO_SLIDES = [
+// Hero background images
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
+  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
+];
+
+// Small interactive promo cards
+const PROMO_CARDS = [
   {
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
-    badge: 'For Tenants',
+    id: 'tenant',
+    icon: Users,
     title: 'Find Your Perfect Roommate',
-    subtitle: 'Our smart matching algorithm finds compatible roommates based on lifestyle, interests, and preferences.',
-    features: ['AI Matching', 'Compatibility Score', 'Verified Profiles'],
+    subtitle: 'AI-powered matching based on lifestyle & preferences',
+    features: ['AI Matching', 'Compatibility Score'],
     ctaText: 'Find Roommates',
     ctaLink: '/matches',
-    gradient: 'from-teal-600/90 via-teal-700/70 to-emerald-800/60',
+    color: 'teal',
   },
   {
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
-    badge: 'For Landlords',
+    id: 'landlord',
+    icon: Home,
     title: 'Find the Perfect Tenant',
-    subtitle: 'List your property and let our AI match you with verified, compatible tenants who fit your requirements.',
-    features: ['Smart Tenant Matching', 'Verified Tenants', 'Easy Listing'],
-    ctaText: 'List Your Property',
+    subtitle: 'List your property & get matched with verified tenants',
+    features: ['Smart Matching', 'Verified Tenants'],
+    ctaText: 'List Property',
     ctaLink: '/landlord/listings/new',
-    gradient: 'from-blue-600/90 via-blue-700/70 to-indigo-800/60',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
-    badge: 'Browse Listings',
-    title: 'Discover Amazing Places',
-    subtitle: 'Browse through verified room listings in Poland. Find your next home with ease and connect with great roommates.',
-    features: ['Verified Listings', 'Detailed Photos', 'Instant Chat'],
-    ctaText: 'Browse Rooms',
-    ctaLink: '#listings',
-    gradient: 'from-purple-600/90 via-purple-700/70 to-pink-800/60',
+    color: 'amber',
   },
 ];
 import { Button } from '@/components/ui/button';
@@ -85,11 +82,13 @@ export default function HomeListings() {
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
 
-  // Rotate promo slides every 6 seconds
+  const [expandedCard, setExpandedCard] = useState(null);
+
+  // Rotate hero images every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % PROMO_SLIDES.length);
-    }, 6000);
+      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -175,202 +174,138 @@ export default function HomeListings() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section with Rotating Promo Slides */}
-      <div className="relative rounded-2xl overflow-hidden min-h-[450px] md:min-h-[500px]">
+      {/* Hero Section with Rotating Images and Interactive Promo Cards */}
+      <div className="relative rounded-2xl overflow-hidden min-h-[320px] md:min-h-[380px]">
         {/* Background Images */}
-        {PROMO_SLIDES.map((slide, index) => (
+        {HERO_IMAGES.map((image, index) => (
           <div
-            key={slide.image}
+            key={image}
             className={cn(
               "absolute inset-0 transition-opacity duration-1000 ease-in-out",
               index === currentImageIndex ? "opacity-100" : "opacity-0"
             )}
           >
             <img
-              src={slide.image}
-              alt={slide.title}
+              src={image}
+              alt={`Room ${index + 1}`}
               className="w-full h-full object-cover"
             />
-            {/* Gradient Overlay - unique per slide */}
-            <div className={cn("absolute inset-0 bg-gradient-to-r", slide.gradient)} />
           </div>
         ))}
 
-        {/* Content - Rotates with slides */}
-        <div className="relative z-10 p-4 sm:p-6 md:p-8 lg:p-12 h-full flex flex-col justify-center min-h-[450px] md:min-h-[500px]">
-          {PROMO_SLIDES.map((slide, index) => (
-            <div
-              key={index}
-              className={cn(
-                "absolute inset-0 p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-center transition-all duration-700",
-                index === currentImageIndex
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 -translate-x-8 pointer-events-none"
-              )}
-            >
-              <div className="max-w-2xl">
-                {/* Badge */}
-                <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white mb-4">
-                  <Sparkles className="h-4 w-4" />
-                  {slide.badge}
-                </span>
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
 
-                {/* Title */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-white leading-tight">
-                  {slide.title}
-                </h1>
+        {/* Content */}
+        <div className="relative z-10 p-4 sm:p-6 md:p-8 h-full flex flex-col justify-between min-h-[320px] md:min-h-[380px]">
+          {/* Top - Title & Search */}
+          <div className="max-w-xl">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-white">
+              {t('title')}
+            </h1>
+            <p className="text-sm md:text-base text-white/80 mb-4">
+              {t('hero.subtitle')}
+            </p>
 
-                {/* Subtitle */}
-                <p className="text-base md:text-lg text-white/90 mb-6 max-w-xl leading-relaxed">
-                  {slide.subtitle}
-                </p>
-
-                {/* Feature Badges */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {slide.features.map((feature) => (
-                    <Badge
-                      key={feature}
-                      className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30"
-                    >
-                      {feature}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* CTA Button */}
-                <Link to={slide.ctaLink}>
-                  <Button
-                    size="lg"
-                    className="bg-white text-gray-900 hover:bg-white/90 font-semibold shadow-lg"
-                  >
-                    {slide.ctaText}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Slide Indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
-          {PROMO_SLIDES.map((slide, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300",
-                index === currentImageIndex
-                  ? "bg-white text-gray-900 shadow-lg"
-                  : "bg-white/20 text-white hover:bg-white/30"
-              )}
-              aria-label={`Go to ${slide.badge}`}
-            >
-              <span className={cn(
-                "w-2 h-2 rounded-full transition-all",
-                index === currentImageIndex ? "bg-gray-900" : "bg-white"
-              )} />
-              <span className="text-xs font-medium hidden sm:inline">{slide.badge}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Search Bar Overlay */}
-        <div className="absolute bottom-20 sm:bottom-24 left-4 right-4 sm:left-6 sm:right-6 md:left-8 md:right-8 lg:left-12 lg:right-12 z-10">
-          <div className="max-w-2xl">
-            <div className="flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-md rounded-xl p-3">
+            {/* Search Bar */}
+            <div className="flex gap-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
                 <Input
                   placeholder={t('search.placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20"
+                  className="pl-9 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm"
                 />
               </div>
-              <Button size="lg" variant="secondary" className="h-12 font-semibold">
-                <Search className="h-5 w-5 mr-2" />
-                {t('hero.searchButton')}
+              <Button size="sm" variant="secondary" className="h-10 px-4">
+                <Search className="h-4 w-4" />
               </Button>
             </div>
           </div>
+
+          {/* Bottom - Small Interactive Promo Cards */}
+          {!user && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {PROMO_CARDS.map((card) => {
+                const Icon = card.icon;
+                const isExpanded = expandedCard === card.id;
+                const colorClasses = card.color === 'teal'
+                  ? 'bg-teal-500/90 hover:bg-teal-500 border-teal-400/50'
+                  : 'bg-amber-500/90 hover:bg-amber-500 border-amber-400/50';
+
+                return (
+                  <div
+                    key={card.id}
+                    className={cn(
+                      "backdrop-blur-md rounded-lg border transition-all duration-300 cursor-pointer",
+                      colorClasses,
+                      isExpanded ? "p-3 min-w-[280px]" : "p-2"
+                    )}
+                    onMouseEnter={() => setExpandedCard(card.id)}
+                    onMouseLeave={() => setExpandedCard(null)}
+                    onClick={() => setExpandedCard(isExpanded ? null : card.id)}
+                  >
+                    {!isExpanded ? (
+                      /* Collapsed State - Very Small */
+                      <div className="flex items-center gap-2 text-white">
+                        <Icon className="h-4 w-4" />
+                        <span className="text-xs font-medium whitespace-nowrap">{card.title}</span>
+                        <ChevronRight className="h-3 w-3 opacity-60" />
+                      </div>
+                    ) : (
+                      /* Expanded State - Shows Details */
+                      <div className="text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon className="h-4 w-4" />
+                          <span className="text-sm font-semibold">{card.title}</span>
+                        </div>
+                        <p className="text-xs text-white/80 mb-2">{card.subtitle}</p>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {card.features.map((feature) => (
+                            <span
+                              key={feature}
+                              className="text-[10px] px-1.5 py-0.5 bg-white/20 rounded-full"
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                        <Link to={card.ctaLink}>
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs bg-white text-gray-900 hover:bg-white/90 w-full"
+                          >
+                            {card.ctaText}
+                            <ArrowRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-3 right-3 z-10 flex gap-1.5">
+          {HERO_IMAGES.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={cn(
+                "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                index === currentImageIndex
+                  ? "bg-white w-4"
+                  : "bg-white/50 hover:bg-white/70"
+              )}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
-
-      {/* CTA for Unauthenticated Users */}
-      {!user && (
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* For Tenants */}
-          <Card className="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {t('cta.tenant.title', 'Find Your Perfect Roommate')}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {t('cta.tenant.description', 'Our smart matching algorithm finds compatible roommates based on lifestyle, interests, and preferences.')}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="secondary" className="gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      {t('cta.tenant.badge1', 'AI Matching')}
-                    </Badge>
-                    <Badge variant="secondary" className="gap-1">
-                      <Heart className="h-3 w-3" />
-                      {t('cta.tenant.badge2', 'Compatibility Score')}
-                    </Badge>
-                  </div>
-                  <Link to="/signup?role=tenant">
-                    <Button className="gap-2">
-                      {t('cta.tenant.button', 'Find Roommates')}
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* For Landlords */}
-          <Card className="relative overflow-hidden border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-amber-500/10">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                  <Home className="h-6 w-6 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {t('cta.landlord.title', 'Find the Perfect Tenant')}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {t('cta.landlord.description', 'List your property and let our AI match you with verified, compatible tenants.')}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                      <Sparkles className="h-3 w-3" />
-                      {t('cta.landlord.badge1', 'Smart Matching')}
-                    </Badge>
-                    <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                      <Users className="h-3 w-3" />
-                      {t('cta.landlord.badge2', 'Verified Tenants')}
-                    </Badge>
-                  </div>
-                  <Link to="/signup?role=landlord">
-                    <Button variant="outline" className="gap-2 border-amber-500 text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20">
-                      {t('cta.landlord.button', 'List Your Property')}
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card rounded-xl border border-border shadow-sm">
