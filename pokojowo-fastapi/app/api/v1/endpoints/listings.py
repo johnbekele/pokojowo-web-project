@@ -41,14 +41,28 @@ async def create_listing(
 async def get_listings(
     skip: int = 0,
     limit: int = 20,
+    search: Optional[str] = None,
+    sort: Optional[str] = "newest",
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
+    min_size: Optional[float] = None,
+    max_size: Optional[float] = None,
     room_type: Optional[str] = None,
-    building_type: Optional[str] = None
+    building_type: Optional[str] = None,
+    max_tenants: Optional[int] = None
 ):
-    """Get all listings with optional filtering"""
+    """Get all listings with optional filtering, search, and sorting"""
     query = {}
 
+    # Text search on address and description
+    if search:
+        query["$or"] = [
+            {"address": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}},
+            {"close_to": {"$elemMatch": {"$regex": search, "$options": "i"}}}
+        ]
+
+    # Price filter
     if min_price is not None:
         query["price"] = {"$gte": min_price}
 
@@ -58,13 +72,35 @@ async def get_listings(
         else:
             query["price"] = {"$lte": max_price}
 
+    # Size filter
+    if min_size is not None:
+        query["size"] = {"$gte": min_size}
+
+    if max_size is not None:
+        if "size" in query:
+            query["size"]["$lte"] = max_size
+        else:
+            query["size"] = {"$lte": max_size}
+
     if room_type:
         query["room_type"] = room_type
 
     if building_type:
         query["building_type"] = building_type
 
-    listings = await Listing.find(query).skip(skip).limit(limit).to_list()
+    if max_tenants is not None:
+        query["max_tenants"] = {"$lte": max_tenants}
+
+    # Determine sort order
+    sort_field = "-created_at"  # Default: newest first
+    if sort == "price_asc":
+        sort_field = "+price"
+    elif sort == "price_desc":
+        sort_field = "-price"
+    elif sort == "oldest":
+        sort_field = "+created_at"
+
+    listings = await Listing.find(query).sort(sort_field).skip(skip).limit(limit).to_list()
 
     return [
         {

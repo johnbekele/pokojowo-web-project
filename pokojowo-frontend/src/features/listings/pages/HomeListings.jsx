@@ -112,74 +112,65 @@ export default function HomeListings() {
   // Get current slide content
   const currentSlide = HERO_SLIDES[currentImageIndex];
 
+  // Debounced search query
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const {
     data: rawListings,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["listings", searchQuery, sortBy],
+    queryKey: ["listings", debouncedSearch, sortBy, filters],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (searchQuery) params.append("search", searchQuery);
+
+      // Search
+      if (debouncedSearch) params.append("search", debouncedSearch);
+
+      // Sort
       params.append("sort", sortBy);
+
+      // Price filters
+      if (filters.minPrice > 0) params.append("min_price", filters.minPrice);
+      if (filters.maxPrice < 10000) params.append("max_price", filters.maxPrice);
+
+      // Size filters
+      if (filters.minSize > 0) params.append("min_size", filters.minSize);
+      if (filters.maxSize < 200) params.append("max_size", filters.maxSize);
+
+      // Room type (send first selected if any)
+      if (filters.roomTypes?.length > 0) {
+        params.append("room_type", filters.roomTypes[0]);
+      }
+
+      // Building type (send first selected if any)
+      if (filters.buildingTypes?.length > 0) {
+        params.append("building_type", filters.buildingTypes[0]);
+      }
+
+      // Max tenants
+      if (filters.maxTenants) params.append("max_tenants", filters.maxTenants);
+
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
     },
   });
 
-  // Apply client-side filters
+  // Process listings (handle response format)
   const listings = useMemo(() => {
-    // Handle both array response and object response {listings: [...]}
     const listingsArray = Array.isArray(rawListings)
       ? rawListings
       : rawListings?.listings || [];
-
-    if (!listingsArray.length) return [];
-
-    return listingsArray.filter((listing) => {
-      // Price filter
-      if (filters.minPrice > 0 && listing.price < filters.minPrice)
-        return false;
-      if (filters.maxPrice < 10000 && listing.price > filters.maxPrice)
-        return false;
-
-      // Size filter
-      if (filters.minSize > 0 && listing.size < filters.minSize) return false;
-      if (filters.maxSize < 200 && listing.size > filters.maxSize) return false;
-
-      // Room type filter
-      if (
-        filters.roomTypes?.length > 0 &&
-        !filters.roomTypes.includes(listing.roomType)
-      ) {
-        return false;
-      }
-
-      // Building type filter
-      if (
-        filters.buildingTypes?.length > 0 &&
-        !filters.buildingTypes.includes(listing.buildingType)
-      ) {
-        return false;
-      }
-
-      // Rent for filter
-      if (filters.rentFor?.length > 0) {
-        const listingRentFor = listing.rentForOnly || [];
-        const hasMatch = filters.rentFor.some((r) =>
-          listingRentFor.includes(r),
-        );
-        if (!hasMatch && !listingRentFor.includes("Open to All")) return false;
-      }
-
-      // Max tenants filter
-      if (filters.maxTenants && listing.maxTenants > filters.maxTenants) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [rawListings, filters]);
+    return listingsArray;
+  }, [rawListings]);
 
   // Batch fetch interested users and liked listings when user is logged in and listings are loaded
   useEffect(() => {
