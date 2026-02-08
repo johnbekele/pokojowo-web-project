@@ -25,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ThemeToggle, ThemeToggleMobile } from '@/components/ui/theme-toggle';
 import UserAvatar from '@/components/shared/UserAvatar';
 import NotificationDropdown from '@/components/shared/NotificationDropdown';
 import useAuthStore from '@/stores/authStore';
@@ -375,17 +375,20 @@ export default function FloatingHeader() {
 
                 {/* Footer */}
                 <div className="p-4 border-t border-border space-y-4">
-                  {/* Theme & Language */}
+                  {/* Theme */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ThemeToggle />
-                      <span className="text-sm text-muted-foreground">Theme</span>
-                    </div>
+                    <span className="text-sm text-muted-foreground">Theme</span>
+                    <ThemeToggleMobile />
+                  </div>
+
+                  {/* Language */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Language</span>
                     <div className="flex rounded-lg border border-border overflow-hidden">
                       <button
                         onClick={() => i18n.changeLanguage('en')}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
+                          "px-4 py-2 text-xs font-semibold transition-colors touch-manipulation",
                           i18n.language === 'en'
                             ? "bg-foreground text-background"
                             : "text-muted-foreground hover:text-foreground"
@@ -396,7 +399,7 @@ export default function FloatingHeader() {
                       <button
                         onClick={() => i18n.changeLanguage('pl')}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-semibold transition-colors touch-manipulation",
+                          "px-4 py-2 text-xs font-semibold transition-colors touch-manipulation",
                           i18n.language === 'pl'
                             ? "bg-foreground text-background"
                             : "text-muted-foreground hover:text-foreground"
