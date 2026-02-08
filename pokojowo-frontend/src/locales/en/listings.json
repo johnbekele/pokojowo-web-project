@@ -1,9 +1,25 @@
 {
-  "title": "Find Your Perfect Room",
+  "title": "Find Your Perfect Roommate",
   "hero": {
-    "badge": "Discover amazing places",
-    "subtitle": "Browse through verified room listings in Poland. Find your next home with ease.",
+    "badge": "Smart Roommate Matching",
+    "subtitle": "Our AI-powered matching finds compatible roommates based on lifestyle, interests, and preferences. Join thousands finding their ideal living situation.",
     "searchButton": "Search"
+  },
+  "cta": {
+    "tenant": {
+      "title": "Find Your Perfect Roommate",
+      "description": "Our smart matching algorithm finds compatible roommates based on lifestyle, interests, and preferences.",
+      "badge1": "AI Matching",
+      "badge2": "Compatibility Score",
+      "button": "Find Roommates"
+    },
+    "landlord": {
+      "title": "Find the Perfect Tenant",
+      "description": "List your property and let our AI match you with verified, compatible tenants.",
+      "badge1": "Smart Matching",
+      "badge2": "Verified Tenants",
+      "button": "List Your Property"
+    }
   },
   "search": {
     "placeholder": "Search by location, city, or neighborhood...",

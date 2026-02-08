@@ -1,9 +1,25 @@
 {
-  "title": "Znajdź Idealny Pokój",
+  "title": "Znajdź Idealnego Współlokatora",
   "hero": {
-    "badge": "Odkryj niesamowite miejsca",
-    "subtitle": "Przeglądaj zweryfikowane ogłoszenia pokoi w Polsce. Znajdź swój nowy dom z łatwością.",
+    "badge": "Inteligentne Dopasowywanie",
+    "subtitle": "Nasz algorytm AI znajduje kompatybilnych współlokatorów na podstawie stylu życia, zainteresowań i preferencji. Dołącz do tysięcy osób szukających idealnej sytuacji mieszkaniowej.",
     "searchButton": "Szukaj"
+  },
+  "cta": {
+    "tenant": {
+      "title": "Znajdź Idealnego Współlokatora",
+      "description": "Nasz inteligentny algorytm dopasowuje współlokatorów na podstawie stylu życia, zainteresowań i preferencji.",
+      "badge1": "Dopasowanie AI",
+      "badge2": "Wynik Kompatybilności",
+      "button": "Znajdź Współlokatorów"
+    },
+    "landlord": {
+      "title": "Znajdź Idealnego Najemcę",
+      "description": "Wystaw swoją nieruchomość i pozwól naszemu AI dopasować Cię do zweryfikowanych, kompatybilnych najemców.",
+      "badge1": "Inteligentne Dopasowanie",
+      "badge2": "Zweryfikowani Najemcy",
+      "button": "Wystaw Nieruchomość"
+    }
   },
   "search": {
     "placeholder": "Szukaj po lokalizacji, mieście lub dzielnicy...",
