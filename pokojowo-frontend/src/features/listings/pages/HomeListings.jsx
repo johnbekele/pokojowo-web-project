@@ -20,7 +20,7 @@ import {
 // Hero slides with images and promo content
 const HERO_SLIDES = [
   {
-    image: '/images/promo/roomate1.webp',
+    image: '/images/promo/Screenshot 2026-02-08 at 16.44.49.png',
     fallback: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80',
     title: 'Find Your Perfect Roommate',
     subtitle: 'Connect with people who match your vibe and lifestyle',
