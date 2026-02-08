@@ -8,9 +8,9 @@ import {
   MapPin,
   Check,
   Minus,
-  Heart,
+  ThumbsUp,
   Languages,
-  Sparkles,
+  Home,
   ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -211,8 +211,8 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
                     {breakdownItems.length > 0 && (
                       <div className="mb-6">
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          Compatibility Breakdown
+                          <Home className="h-4 w-4" />
+                          Flatmate Compatibility
                         </h3>
                         <div className="grid gap-3">
                           {breakdownItems.map(({ key, label, value }) => (
@@ -313,7 +313,7 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
                 <Button
                   variant="outline"
                   size="default"
-                  className="flex-1 h-12 border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white"
+                  className="flex-1 h-12 border-muted-foreground/30 text-muted-foreground hover:bg-muted hover:text-foreground"
                   onClick={() => {
                     onSkip?.(user_id);
                     onClose();
@@ -324,14 +324,14 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
                 </Button>
                 <Button
                   size="default"
-                  className="flex-1 h-12 bg-green-500 hover:bg-green-600"
+                  className="flex-1 h-12 bg-teal-500 hover:bg-teal-600"
                   onClick={() => {
                     onLike?.(user_id);
                     onClose();
                   }}
                 >
-                  <Heart className="h-4 w-4 mr-1" />
-                  Like
+                  <ThumbsUp className="h-4 w-4 mr-1" />
+                  Interested
                 </Button>
                 <Link to={`/chat/with/${user_id}`} className="flex-1">
                   <Button variant="outline" size="default" className="w-full h-12">

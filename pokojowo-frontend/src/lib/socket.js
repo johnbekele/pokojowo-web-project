@@ -13,6 +13,13 @@ export let socket = null;
 // Store rooms to rejoin on reconnect
 let activeRooms = new Set();
 
+// Track connection state for debugging
+let connectionState = {
+  isConnecting: false,
+  lastConnectAttempt: null,
+  connectionCount: 0,
+};
+
 /**
  * Connect/initialize socket - ensures only one socket connection exists
  */
@@ -34,15 +41,28 @@ export function connectSocket(token) {
 
   // If socket already exists and is connected, return it
   if (socket?.connected) {
+    console.log('Socket already connected, reusing existing connection:', socket.id);
     return socket;
   }
 
   // If socket exists but disconnected, reconnect with token
   if (socket && !socket.connected) {
+    console.log('Socket exists but disconnected, reconnecting...');
     socket.auth = { token: authToken };
     socket.connect();
     return socket;
   }
+
+  // Prevent multiple simultaneous connection attempts
+  if (connectionState.isConnecting) {
+    console.log('Socket connection already in progress...');
+    return socket;
+  }
+
+  connectionState.isConnecting = true;
+  connectionState.lastConnectAttempt = Date.now();
+
+  console.log('Creating new socket connection to:', SOCKET_URL);
 
   // Create new socket
   socket = io(SOCKET_URL, {
@@ -52,34 +72,50 @@ export function connectSocket(token) {
     transports: ['websocket', 'polling'],
     autoConnect: true,
     reconnection: true,
-    reconnectionAttempts: 10,
+    reconnectionAttempts: Infinity, // Keep trying to reconnect
     reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
+    reconnectionDelayMax: 10000,
+    timeout: 20000,
+    forceNew: false,
   });
 
   socket.on('connect', () => {
-    console.log('Socket connected:', socket.id);
+    connectionState.isConnecting = false;
+    connectionState.connectionCount++;
+    console.log(`Socket connected (attempt #${connectionState.connectionCount}):`, socket.id);
+
     // Re-join any active rooms on reconnect
-    activeRooms.forEach((roomId) => {
-      console.log('Re-joining room after reconnect:', roomId);
-      socket.emit('join_chat', { chatId: roomId });
-    });
+    if (activeRooms.size > 0) {
+      console.log('Re-joining', activeRooms.size, 'rooms after connect');
+      activeRooms.forEach((roomId) => {
+        console.log('Re-joining room:', roomId);
+        socket.emit('join_chat', { chatId: roomId });
+      });
+    }
   });
 
   socket.on('disconnect', (reason) => {
     console.log('Socket disconnected:', reason);
-    // Don't clear socket - allow reconnection
+    connectionState.isConnecting = false;
+
+    // These reasons indicate the server closed the connection intentionally
+    if (reason === 'io server disconnect') {
+      // Server disconnected us, try to reconnect
+      console.log('Server disconnected socket, will attempt to reconnect...');
+    }
   });
 
   socket.on('connect_error', (error) => {
     console.error('Socket connection error:', error.message);
+    connectionState.isConnecting = false;
+
     // If auth error, try to reconnect with fresh token
-    if (error.message?.includes('auth') || error.message?.includes('token')) {
+    if (error.message?.includes('auth') || error.message?.includes('token') || error.message?.includes('unauthorized')) {
       const freshToken = localStorage.getItem('token');
       if (freshToken && freshToken !== socket.auth?.token) {
         console.log('Retrying socket connection with fresh token');
         socket.auth = { token: freshToken };
-        socket.connect();
+        setTimeout(() => socket.connect(), 1000);
       }
     }
   });
@@ -90,6 +126,23 @@ export function connectSocket(token) {
 
   socket.on('reconnect_attempt', (attemptNumber) => {
     console.log('Socket reconnection attempt:', attemptNumber);
+  });
+
+  socket.on('reconnect_error', (error) => {
+    console.error('Socket reconnection error:', error.message);
+  });
+
+  socket.on('reconnect_failed', () => {
+    console.error('Socket reconnection failed after all attempts');
+    // Try to create a new connection after a delay
+    setTimeout(() => {
+      if (!socket?.connected) {
+        console.log('Attempting fresh socket connection...');
+        socket = null;
+        connectionState.isConnecting = false;
+        connectSocket(authToken);
+      }
+    }, 5000);
   });
 
   return socket;

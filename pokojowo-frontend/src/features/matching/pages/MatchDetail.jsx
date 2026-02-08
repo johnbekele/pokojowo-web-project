@@ -1,7 +1,8 @@
-import { useParams, Link } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, MessageSquare, MapPin, Check, X, Minus } from 'lucide-react';
+import { ArrowLeft, MessageSquare, MapPin, Check, X, Minus, UserPlus, UserCheck, Loader2, Handshake, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,10 +12,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '@/components/shared/UserAvatar';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
+import useLikesStore from '@/stores/likesStore';
 
 export default function MatchDetail() {
   const { userId } = useParams();
   const { t } = useTranslation('matching');
+  const navigate = useNavigate();
+  const { hasLiked, isMutualMatch, likeUser, unlikeUser } = useLikesStore();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['match', userId],
@@ -23,6 +27,35 @@ export default function MatchDetail() {
       return response.data;
     },
   });
+
+  // Check like status
+  const { data: likeStatus } = useQuery({
+    queryKey: ['like-status', userId],
+    queryFn: async () => {
+      const response = await api.get(`/likes/check/${userId}`);
+      return response.data;
+    },
+    enabled: !!userId,
+  });
+
+  const isLiked = likeStatus?.i_liked || hasLiked(userId);
+  const isMutual = likeStatus?.is_mutual || isMutualMatch(userId);
+  const theyLikedMe = likeStatus?.they_liked;
+
+  const [isLiking, setIsLiking] = React.useState(false);
+
+  const handleLike = async () => {
+    setIsLiking(true);
+    try {
+      if (isLiked) {
+        await unlikeUser(userId);
+      } else {
+        await likeUser(userId);
+      }
+    } finally {
+      setIsLiking(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -167,12 +200,48 @@ export default function MatchDetail() {
                   )}
                 </div>
 
-                <Link to={`/chat/with/${user_id}`}>
-                  <Button>
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Message
-                  </Button>
-                </Link>
+                <div className="flex flex-col gap-2">
+                  {/* Match Status Badge */}
+                  {isMutual && (
+                    <Badge className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-0 justify-center">
+                      <Handshake className="mr-1 h-3 w-3" />
+                      Connected!
+                    </Badge>
+                  )}
+                  {theyLikedMe && !isMutual && (
+                    <Badge variant="secondary" className="justify-center bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800">
+                      <ThumbsUp className="mr-1 h-3 w-3" />
+                      Interested in you!
+                    </Badge>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant={isLiked ? "default" : "outline"}
+                      onClick={handleLike}
+                      disabled={isLiking}
+                      className={cn(
+                        isLiked && "bg-teal-500 hover:bg-teal-600 text-white"
+                      )}
+                    >
+                      {isLiking ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : isLiked ? (
+                        <UserCheck className="mr-2 h-4 w-4" />
+                      ) : (
+                        <UserPlus className="mr-2 h-4 w-4" />
+                      )}
+                      {isLiked ? 'Interested' : 'Show Interest'}
+                    </Button>
+                    <Link to={`/chat/with/${user_id}`}>
+                      <Button>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Message
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

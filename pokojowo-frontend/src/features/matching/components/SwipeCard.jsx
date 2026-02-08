@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, useAnimation } from 'framer-motion';
-import { Heart, X, MapPin, Languages, Info, Sparkles } from 'lucide-react';
+import { ThumbsUp, X, MapPin, Languages, Info, Home } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -125,13 +125,13 @@ export default function SwipeCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </div>
 
-        {/* Like/Nope overlays */}
+        {/* Yes/Pass overlays */}
         <motion.div
           className="absolute top-8 right-8 z-20 rotate-12"
           style={{ opacity: likeOpacity }}
         >
-          <div className="px-4 py-2 border-4 border-green-500 rounded-lg">
-            <span className="text-3xl font-black text-green-500">LIKE</span>
+          <div className="px-4 py-2 border-4 border-teal-500 rounded-lg bg-teal-500/20">
+            <span className="text-3xl font-black text-teal-500">YES!</span>
           </div>
         </motion.div>
 
@@ -139,8 +139,8 @@ export default function SwipeCard({
           className="absolute top-8 left-8 z-20 -rotate-12"
           style={{ opacity: nopeOpacity }}
         >
-          <div className="px-4 py-2 border-4 border-red-500 rounded-lg">
-            <span className="text-3xl font-black text-red-500">NOPE</span>
+          <div className="px-4 py-2 border-4 border-gray-400 rounded-lg bg-gray-400/20">
+            <span className="text-3xl font-black text-gray-400">PASS</span>
           </div>
         </motion.div>
 
@@ -149,8 +149,8 @@ export default function SwipeCard({
           <div className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 backdrop-blur-sm shadow-lg"
           )}>
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-bold text-foreground">{score}% Match</span>
+            <Home className="h-4 w-4 text-teal-600" />
+            <span className="text-sm font-bold text-foreground">{score}% Compatible</span>
           </div>
         </div>
 
@@ -217,7 +217,7 @@ export default function SwipeCard({
       {isTop && (
         <div className="absolute -bottom-20 left-0 right-0 flex justify-center gap-6">
           <motion.button
-            className="w-16 h-16 rounded-full bg-white dark:bg-card shadow-xl flex items-center justify-center border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+            className="w-16 h-16 rounded-full bg-white dark:bg-card shadow-xl flex items-center justify-center border-2 border-gray-300 dark:border-gray-600 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
@@ -229,7 +229,7 @@ export default function SwipeCard({
           </motion.button>
 
           <motion.button
-            className="w-16 h-16 rounded-full bg-white dark:bg-card shadow-xl flex items-center justify-center border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white transition-colors"
+            className="w-16 h-16 rounded-full bg-white dark:bg-card shadow-xl flex items-center justify-center border-2 border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
@@ -237,7 +237,7 @@ export default function SwipeCard({
               handleButtonSwipe('right');
             }}
           >
-            <Heart className="h-8 w-8" />
+            <ThumbsUp className="h-8 w-8" />
           </motion.button>
         </div>
       )}
