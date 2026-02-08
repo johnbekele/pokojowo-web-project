@@ -78,6 +78,32 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
 
   const getScoreBg = (score) => {
     if (score >= 85) return 'bg-green-500';
+
+  // Labels for score breakdown categories
+  const breakdownLabels = {
+    budgetScore: 'Budget',
+    lifestyleScore: 'Lifestyle',
+    personalityScore: 'Personality',
+    scheduleScore: 'Schedule',
+    locationScore: 'Location',
+    preferencesScore: 'Preferences',
+    interestsScore: 'Interests',
+  };
+
+  // Filter and format score breakdown for display
+  const getBreakdownItems = () => {
+    if (!score_breakdown) return [];
+    return Object.entries(score_breakdown)
+      .filter(([key]) => key !== 'totalScore' && breakdownLabels[key])
+      .map(([key, value]) => ({
+        key,
+        label: breakdownLabels[key],
+        value: Math.round(value),
+      }))
+      .sort((a, b) => b.value - a.value);
+  };
+
+  const breakdownItems = getBreakdownItems();
     if (score >= 70) return 'bg-blue-500';
     if (score >= 55) return 'bg-yellow-500';
     return 'bg-muted-foreground';
@@ -188,21 +214,21 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
                 ) : (
                   <>
                     {/* Score breakdown */}
-                    {score_breakdown && (
+                    {breakdownItems.length > 0 && (
                       <div className="mb-6">
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
                           <Sparkles className="h-4 w-4" />
                           Compatibility Breakdown
                         </h3>
                         <div className="grid gap-3">
-                          {Object.entries(score_breakdown).map(([key, value]) => (
+                          {breakdownItems.map(({ key, label, value }) => (
                             <div key={key} className="space-y-1">
                               <div className="flex justify-between text-sm">
-                                <span className="capitalize text-muted-foreground">
-                                  {key.replace(/_/g, ' ')}
+                                <span className="text-muted-foreground">
+                                  {label}
                                 </span>
                                 <span className={cn("font-semibold", getScoreColor(value))}>
-                                  {Math.round(value)}%
+                                  {value}%
                                 </span>
                               </div>
                               <Progress value={value} className="h-2" />
