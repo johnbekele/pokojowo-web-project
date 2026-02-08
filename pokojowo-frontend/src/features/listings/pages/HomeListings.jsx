@@ -17,28 +17,11 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-// Promo sections with images
-const PROMO_SECTIONS = [
-  {
-    id: 'roommates',
-    image: '/images/promo/roomate1.webp',
-    fallbackImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80',
-    title: 'Find Your Vibe',
-    subtitle: 'Match with roommates who get you. Same energy, same lifestyle.',
-    ctaText: 'Find Roommates',
-    ctaLink: '/matches',
-    color: 'teal',
-  },
-  {
-    id: 'rooms',
-    image: '/images/promo/apartment-hotels.jpg',
-    fallbackImage: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
-    title: 'Score Your Space',
-    subtitle: 'Discover rooms that fit your budget and your vibe. No cap.',
-    ctaText: 'Browse Rooms',
-    ctaLink: '#listings',
-    color: 'blue',
-  },
+// Hero background images
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
+  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
 ];
 
 import { Button } from '@/components/ui/button';
@@ -72,14 +55,14 @@ export default function HomeListings() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [activePromo, setActivePromo] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
 
-  // Auto-switch promo sections every 5 seconds
+  // Rotate hero images every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setActivePromo((prev) => (prev + 1) % PROMO_SECTIONS.length);
+      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -166,113 +149,100 @@ export default function HomeListings() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section with Promo Cards */}
-      <div className="space-y-4">
-        {/* Main Search Bar */}
-        <div className="flex gap-2 bg-card border border-border rounded-xl p-3 shadow-sm">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t('search.placeholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10 text-sm"
+      {/* Hero Section with Rotating Images and Interactive Promo Cards */}
+      <div className="relative rounded-2xl overflow-hidden min-h-[320px] md:min-h-[380px]">
+        {/* Background Images */}
+        {HERO_IMAGES.map((image, index) => (
+          <div
+            key={image}
+            className={cn(
+              "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+              index === currentImageIndex ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <img
+              src={image}
+              alt={`Room ${index + 1}`}
+              className="w-full h-full object-cover"
             />
           </div>
-          <Button size="sm" className="h-10 px-4">
-            <Search className="h-4 w-4 mr-2" />
-            Search
-          </Button>
-        </div>
+        ))}
 
-        {/* Promo Cards Grid */}
-        {!user && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {PROMO_SECTIONS.map((promo, index) => {
-              const isActive = activePromo === index;
-              const colorClasses = promo.color === 'teal'
-                ? 'from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700'
-                : 'from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700';
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
 
-              return (
-                <Link
-                  key={promo.id}
-                  to={promo.ctaLink}
-                  className="group relative overflow-hidden rounded-xl h-[180px] md:h-[200px] cursor-pointer"
-                  onMouseEnter={() => setActivePromo(index)}
-                >
-                  {/* Background Image */}
-                  <img
-                    src={promo.image}
-                    alt={promo.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => { e.target.src = promo.fallbackImage; }}
-                  />
+        {/* Content */}
+        <div className="relative z-10 p-4 sm:p-6 md:p-8 h-full flex flex-col justify-between min-h-[320px] md:min-h-[380px]">
+          {/* Top - Title & Search */}
+          <div className="max-w-xl">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-white">
+              {t('title')}
+            </h1>
+            <p className="text-sm md:text-base text-white/80 mb-4">
+              {t('hero.subtitle')}
+            </p>
 
-                  {/* Gradient Overlay */}
-                  <div className={cn(
-                    "absolute inset-0 bg-gradient-to-t opacity-80 group-hover:opacity-90 transition-opacity",
-                    colorClasses
-                  )} />
-
-                  {/* Content */}
-                  <div className="relative z-10 h-full p-4 flex flex-col justify-end text-white">
-                    <div className={cn(
-                      "transform transition-all duration-300",
-                      isActive ? "translate-y-0" : "translate-y-2"
-                    )}>
-                      <h3 className="text-lg md:text-xl font-bold mb-1">
-                        {promo.title}
-                      </h3>
-                      <p className="text-xs md:text-sm text-white/90 mb-3 line-clamp-2">
-                        {promo.subtitle}
-                      </p>
-                      <Button
-                        size="sm"
-                        className="h-8 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white text-xs font-medium"
-                      >
-                        {promo.color === 'teal' ? (
-                          <Users className="h-3.5 w-3.5 mr-1.5" />
-                        ) : (
-                          <Home className="h-3.5 w-3.5 mr-1.5" />
-                        )}
-                        {promo.ctaText}
-                        <ArrowRight className="h-3 w-3 ml-1.5 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Active Indicator */}
-                  <div className={cn(
-                    "absolute top-3 right-3 w-2 h-2 rounded-full transition-all",
-                    isActive ? "bg-white scale-100" : "bg-white/50 scale-75"
-                  )} />
-                </Link>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Landlord CTA - Small Banner */}
-        {!user && (
-          <Link to="/landlord/listings/new" className="block">
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl hover:border-amber-500/40 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Home className="h-4 w-4 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Got a room to rent?</p>
-                  <p className="text-xs text-muted-foreground">List it free & find your perfect tenant</p>
-                </div>
+            {/* Search Bar */}
+            <div className="flex gap-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+                <Input
+                  placeholder={t('search.placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm"
+                />
               </div>
-              <Button size="sm" variant="outline" className="h-8 text-xs border-amber-500/50 text-amber-600 hover:bg-amber-500/10">
-                List Property
-                <ArrowRight className="h-3 w-3 ml-1" />
+              <Button size="sm" variant="secondary" className="h-10 px-4">
+                <Search className="h-4 w-4" />
               </Button>
             </div>
-          </Link>
-        )}
+          </div>
+
+          {/* Bottom - Small Action Buttons */}
+          {!user && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {/* Find Roommates Button */}
+              <Link to="/matches">
+                <Button
+                  size="sm"
+                  className="h-8 px-3 bg-teal-500 hover:bg-teal-600 text-white text-xs font-medium gap-1.5"
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Find Roommates
+                </Button>
+              </Link>
+
+              {/* List Property Button */}
+              <Link to="/landlord/listings/new">
+                <Button
+                  size="sm"
+                  className="h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium gap-1.5"
+                >
+                  <Home className="h-3.5 w-3.5" />
+                  List Property
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-3 right-3 z-10 flex gap-1.5">
+          {HERO_IMAGES.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={cn(
+                "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                index === currentImageIndex
+                  ? "bg-white w-4"
+                  : "bg-white/50 hover:bg-white/70"
+              )}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Filters Bar */}
