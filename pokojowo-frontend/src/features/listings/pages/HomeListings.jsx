@@ -140,7 +140,8 @@ export default function HomeListings() {
 
       // Price filters
       if (filters.minPrice > 0) params.append("min_price", filters.minPrice);
-      if (filters.maxPrice < 10000) params.append("max_price", filters.maxPrice);
+      if (filters.maxPrice < 10000)
+        params.append("max_price", filters.maxPrice);
 
       // Size filters
       if (filters.minSize > 0) params.append("min_size", filters.minSize);
@@ -258,9 +259,10 @@ export default function HomeListings() {
               <Link to="/login">
                 <Button
                   size="sm"
-                  className="h-9 px-5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium gap-2"
+                  variant="ghost"
+                  className="h-9 px-5 bg-transparent hover:bg-white/10 text-white text-sm font-medium gap-2 border border-white/30"
                 >
-                  Get Started
+                  Signup now
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
