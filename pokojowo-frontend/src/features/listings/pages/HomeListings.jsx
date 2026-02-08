@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,13 @@ import {
   Sparkles,
   ArrowRight
 } from 'lucide-react';
+
+// Promo images for hero carousel
+const PROMO_IMAGES = [
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
+  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
+];
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -47,8 +54,17 @@ export default function HomeListings() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
+
+  // Rotate promo images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % PROMO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data: rawListings, isLoading, error } = useQuery({
     queryKey: ['listings', searchQuery, sortBy],
@@ -132,33 +148,73 @@ export default function HomeListings() {
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="rounded-2xl bg-primary p-4 sm:p-6 md:p-8 lg:p-12 text-primary-foreground">
-        <div className="max-w-2xl">
-          <span className="text-sm font-medium text-primary-foreground/70 mb-3 md:mb-4 block">{t('hero.badge')}</span>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
-            {t('title')}
-          </h1>
-          <p className="text-base md:text-lg text-primary-foreground/80 mb-6 md:mb-8 max-w-xl">
-            {t('hero.subtitle')}
-          </p>
-
-          {/* Search Bar in Hero */}
-          <div className="flex flex-col sm:flex-row gap-3 bg-primary-foreground/10 rounded-xl p-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-primary-foreground/50" />
-              <Input
-                placeholder={t('search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-              />
-            </div>
-            <Button size="lg" variant="secondary" className="h-12 font-semibold">
-              <Search className="h-5 w-5 mr-2" />
-              {t('hero.searchButton')}
-            </Button>
+      {/* Hero Section with Rotating Images */}
+      <div className="relative rounded-2xl overflow-hidden min-h-[400px] md:min-h-[450px]">
+        {/* Background Images */}
+        {PROMO_IMAGES.map((image, index) => (
+          <div
+            key={image}
+            className={cn(
+              "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+              index === currentImageIndex ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <img
+              src={image}
+              alt={`Room ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
           </div>
+        ))}
+
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+
+        {/* Content */}
+        <div className="relative z-10 p-4 sm:p-6 md:p-8 lg:p-12 h-full flex flex-col justify-center">
+          <div className="max-w-2xl">
+            <span className="text-sm font-medium text-white/80 mb-3 md:mb-4 block">{t('hero.badge')}</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-white">
+              {t('title')}
+            </h1>
+            <p className="text-base md:text-lg text-white/80 mb-6 md:mb-8 max-w-xl">
+              {t('hero.subtitle')}
+            </p>
+
+            {/* Search Bar in Hero */}
+            <div className="flex flex-col sm:flex-row gap-3 bg-white/10 backdrop-blur-md rounded-xl p-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
+                <Input
+                  placeholder={t('search.placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                />
+              </div>
+              <Button size="lg" variant="secondary" className="h-12 font-semibold">
+                <Search className="h-5 w-5 mr-2" />
+                {t('hero.searchButton')}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-4 right-4 z-10 flex gap-2">
+          {PROMO_IMAGES.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                index === currentImageIndex
+                  ? "bg-white w-6"
+                  : "bg-white/50 hover:bg-white/70"
+              )}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
 

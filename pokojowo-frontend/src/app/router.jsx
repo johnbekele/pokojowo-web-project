@@ -29,9 +29,8 @@ const ChatList = lazy(() => import('@/features/chat/pages/ChatList'));
 const ChatRoom = lazy(() => import('@/features/chat/pages/ChatRoom'));
 
 // Tenant pages
-const Dashboard = lazy(() => import('@/features/tenant/pages/Dashboard'));
+const LikesPage = lazy(() => import('@/features/tenant/pages/Dashboard'));
 const SavedMatches = lazy(() => import('@/features/favorites/pages/SavedMatches'));
-const LikesPage = lazy(() => import('@/features/likes/pages/LikesPage'));
 
 // Landlord pages
 const LandlordDashboard = lazy(() => import('@/features/landlord/pages/LandlordDashboard'));
@@ -71,8 +70,6 @@ export default function AppRouter() {
           {/* Protected routes with layout */}
           <Route element={<PageLayout />}>
             <Route path="/profile" element={<Profile />} />
-            {/* Admin-only dashboard */}
-            <Route path="/dashboard" element={<ProtectedRoute requiredRole="admin"><Dashboard /></ProtectedRoute>} />
             {/* Tenant routes */}
             <Route path="/matches" element={<Matches />} />
             <Route path="/matches/:userId" element={<MatchDetail />} />

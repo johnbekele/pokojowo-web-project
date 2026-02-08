@@ -48,7 +48,7 @@ export default function MutualMatchModal() {
 
   return (
     <Dialog open={showMutualMatchModal} onOpenChange={closeMutualMatchModal}>
-      <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0">
+      <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0 [&>button]:hidden">
         {/* Close button */}
         <button
           onClick={closeMutualMatchModal}

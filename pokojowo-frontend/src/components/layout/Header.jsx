@@ -16,7 +16,6 @@ import {
   Building2,
   Heart,
   Bookmark,
-  LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,9 +64,8 @@ export default function Header() {
           ...(isLandlord
             ? [{ to: '/landlord/dashboard', label: t('nav.dashboard', 'Dashboard'), icon: Building2 }]
             : [
-                { to: '/dashboard', label: t('nav.dashboard', 'Dashboard'), icon: LayoutDashboard },
-                { to: '/matches', label: t('nav.matches'), icon: Users },
                 { to: '/likes', label: t('nav.likes', 'Likes'), icon: Heart },
+                { to: '/matches', label: t('nav.matches'), icon: Users },
                 { to: '/favorites', label: t('nav.favorites', 'Saved'), icon: Bookmark },
               ]),
           { to: '/chat', label: t('nav.chat'), icon: MessageSquare },
