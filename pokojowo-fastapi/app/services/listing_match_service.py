@@ -6,6 +6,7 @@ to find compatible roommates interested in the same listings.
 """
 
 from typing import List, Dict, Optional
+from bson import ObjectId
 from app.models.user import User
 from app.services.listing_interaction_service import listing_interaction_service
 from app.services.matching_service import matching_service
@@ -61,8 +62,7 @@ class ListingMatchService:
 
         # Fetch user documents
         interested_users = await User.find(
-            {"_id": {"$in": [User.parse_id(uid) for uid in interested_user_ids]}},
-            User.is_active == True
+            {"_id": {"$in": [ObjectId(uid) for uid in interested_user_ids]}, "isActive": True}
         ).to_list()
 
         if not interested_users:
@@ -132,8 +132,7 @@ class ListingMatchService:
 
         # Fetch all users in one query
         users_list = await User.find(
-            {"_id": {"$in": [User.parse_id(uid) for uid in all_user_ids]}},
-            User.is_active == True
+            {"_id": {"$in": [ObjectId(uid) for uid in all_user_ids]}, "isActive": True}
         ).to_list()
 
         # Build user lookup dict
