@@ -346,15 +346,22 @@ async def google_callback(request: Request):
         access_token = result["access_token"]
         refresh_token = result["refresh_token"]
         is_new_user = result.get("is_new_user", False)
+        requires_profile_completion = result.get("requires_profile_completion", False)
 
         # Determine redirect URL
         frontend_url = settings.FRONTEND_URL or "http://localhost:5173"
+
+        # Check if user has a real role (not just 'User')
+        user_roles = [r.value for r in user.role] if user.role else []
+        has_real_role = any(r in ['Tenant', 'Landlord', 'tenant', 'landlord'] for r in user_roles)
 
         # Always redirect to auth callback, let frontend handle routing
         params = {
             "token": access_token,
             "refresh_token": refresh_token,
             "is_new_user": "true" if is_new_user else "false",
+            "requiresProfileCompletion": "true" if (requires_profile_completion or not user.is_profile_complete) else "false",
+            "hasRole": "true" if has_real_role else "false",
             "firstname": user.firstname or "",
         }
         redirect_url = f"{frontend_url}/auth/callback?{urlencode(params)}"

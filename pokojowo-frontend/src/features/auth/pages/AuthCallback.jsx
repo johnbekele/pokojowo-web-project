@@ -17,6 +17,7 @@ export default function AuthCallback() {
         const refreshToken = searchParams.get('refresh_token') || searchParams.get('refreshToken');
         const isNewUser = searchParams.get('is_new_user') === 'true' || searchParams.get('isNewUser') === 'true';
         const requiresProfileCompletion = searchParams.get('requiresProfileCompletion') === 'true';
+        const hasRole = searchParams.get('hasRole') === 'true';
 
         if (!token) {
           const errorMessage = searchParams.get('error');
@@ -27,9 +28,14 @@ export default function AuthCallback() {
         await handleOAuthCallback(token, refreshToken);
         const user = await fetchUser();
 
+        // Check if user has a real role (not just 'User')
+        const userHasRealRole = hasRole || (user?.role && user.role.some(r =>
+          ['tenant', 'landlord'].includes(r.toLowerCase())
+        ));
+
         // Determine where to redirect
-        if (isNewUser || !user?.role || user.role.length === 0 || (user.role.length === 1 && user.role[0] === 'User')) {
-          // New user needs to select role
+        if (isNewUser || !userHasRealRole) {
+          // New user or user without role needs to select role
           navigate('/select-role', { replace: true });
         } else if (requiresProfileCompletion || !user?.isProfileComplete) {
           // User needs to complete profile
