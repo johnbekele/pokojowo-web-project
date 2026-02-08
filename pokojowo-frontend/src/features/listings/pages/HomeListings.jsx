@@ -24,29 +24,6 @@ const HERO_IMAGES = [
   'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1920&q=80',
 ];
 
-// Small interactive promo cards
-const PROMO_CARDS = [
-  {
-    id: 'tenant',
-    icon: Users,
-    title: 'Find Your Perfect Roommate',
-    subtitle: 'AI-powered matching based on lifestyle & preferences',
-    features: ['AI Matching', 'Compatibility Score'],
-    ctaText: 'Find Roommates',
-    ctaLink: '/matches',
-    color: 'teal',
-  },
-  {
-    id: 'landlord',
-    icon: Home,
-    title: 'Find the Perfect Tenant',
-    subtitle: 'List your property & get matched with verified tenants',
-    features: ['Smart Matching', 'Verified Tenants'],
-    ctaText: 'List Property',
-    ctaLink: '/landlord/listings/new',
-    color: 'amber',
-  },
-];
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -81,8 +58,6 @@ export default function HomeListings() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
-
-  const [expandedCard, setExpandedCard] = useState(null);
 
   // Rotate hero images every 5 seconds
   useEffect(() => {
@@ -224,67 +199,30 @@ export default function HomeListings() {
             </div>
           </div>
 
-          {/* Bottom - Small Interactive Promo Cards */}
+          {/* Bottom - Small Action Buttons */}
           {!user && (
             <div className="flex flex-wrap gap-2 mt-4">
-              {PROMO_CARDS.map((card) => {
-                const Icon = card.icon;
-                const isExpanded = expandedCard === card.id;
-                const colorClasses = card.color === 'teal'
-                  ? 'bg-teal-500/90 hover:bg-teal-500 border-teal-400/50'
-                  : 'bg-amber-500/90 hover:bg-amber-500 border-amber-400/50';
+              {/* Find Roommates Button */}
+              <Link to="/matches">
+                <Button
+                  size="sm"
+                  className="h-8 px-3 bg-teal-500 hover:bg-teal-600 text-white text-xs font-medium gap-1.5"
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Find Roommates
+                </Button>
+              </Link>
 
-                return (
-                  <div
-                    key={card.id}
-                    className={cn(
-                      "backdrop-blur-md rounded-lg border transition-all duration-300 cursor-pointer",
-                      colorClasses,
-                      isExpanded ? "p-3 min-w-[280px]" : "p-2"
-                    )}
-                    onMouseEnter={() => setExpandedCard(card.id)}
-                    onMouseLeave={() => setExpandedCard(null)}
-                    onClick={() => setExpandedCard(isExpanded ? null : card.id)}
-                  >
-                    {!isExpanded ? (
-                      /* Collapsed State - Very Small */
-                      <div className="flex items-center gap-2 text-white">
-                        <Icon className="h-4 w-4" />
-                        <span className="text-xs font-medium whitespace-nowrap">{card.title}</span>
-                        <ChevronRight className="h-3 w-3 opacity-60" />
-                      </div>
-                    ) : (
-                      /* Expanded State - Shows Details */
-                      <div className="text-white">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Icon className="h-4 w-4" />
-                          <span className="text-sm font-semibold">{card.title}</span>
-                        </div>
-                        <p className="text-xs text-white/80 mb-2">{card.subtitle}</p>
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {card.features.map((feature) => (
-                            <span
-                              key={feature}
-                              className="text-[10px] px-1.5 py-0.5 bg-white/20 rounded-full"
-                            >
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                        <Link to={card.ctaLink}>
-                          <Button
-                            size="sm"
-                            className="h-7 text-xs bg-white text-gray-900 hover:bg-white/90 w-full"
-                          >
-                            {card.ctaText}
-                            <ArrowRight className="ml-1 h-3 w-3" />
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {/* List Property Button */}
+              <Link to="/landlord/listings/new">
+                <Button
+                  size="sm"
+                  className="h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium gap-1.5"
+                >
+                  <Home className="h-3.5 w-3.5" />
+                  List Property
+                </Button>
+              </Link>
             </div>
           )}
         </div>
