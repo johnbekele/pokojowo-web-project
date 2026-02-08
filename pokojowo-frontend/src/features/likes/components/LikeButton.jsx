@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart } from 'lucide-react';
+import { ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import useLikesStore from '@/stores/likesStore';
@@ -35,16 +35,16 @@ export default function LikeButton({
 
     if (result.success) {
       if (result.data?.is_mutual) {
-        // Mutual match!
+        // Mutual connection!
         onMutualMatch?.(result.data.mutual_match);
         toast({
-          title: "It's a Match!",
-          description: 'You both liked each other. Start chatting now!',
+          title: "You're Connected!",
+          description: 'You both showed interest. Start chatting now!',
         });
       } else if (!liked) {
         toast({
-          title: 'Liked!',
-          description: 'Your like has been sent.',
+          title: 'Interest Sent!',
+          description: 'They will be notified of your interest.',
         });
       }
     } else {
@@ -64,14 +64,14 @@ export default function LikeButton({
       disabled={isLoading}
       className={cn(
         'transition-all duration-200 group',
-        liked && 'bg-pink-500 hover:bg-pink-600 text-white',
-        mutual && 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600',
+        liked && 'bg-teal-500 hover:bg-teal-600 text-white',
+        mutual && 'bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600',
         isAnimating && 'scale-110',
         className
       )}
-      title={mutual ? 'Mutual match!' : liked ? 'Unlike' : 'Like'}
+      title={mutual ? 'Connected!' : liked ? 'Remove interest' : 'Show interest'}
     >
-      <Heart
+      <ThumbsUp
         className={cn(
           'h-4 w-4 transition-transform duration-200',
           showLabel && 'mr-2',
@@ -80,7 +80,7 @@ export default function LikeButton({
           !liked && 'group-hover:scale-110'
         )}
       />
-      {showLabel && (mutual ? 'Matched!' : liked ? 'Liked' : 'Like')}
+      {showLabel && (mutual ? 'Connected!' : liked ? 'Interested' : 'Interested?')}
     </Button>
   );
 }

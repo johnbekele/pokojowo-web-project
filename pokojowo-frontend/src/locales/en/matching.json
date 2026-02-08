@@ -126,24 +126,24 @@
     },
     "mutual": {
       "empty": {
-        "title": "No Mutual Matches Yet",
-        "subtitle": "When you and someone both like each other, it's a match!"
+        "title": "No Connections Yet",
+        "subtitle": "When you and someone both show interest, you'll be connected!"
       },
-      "findMatches": "Find Matches",
-      "matched": "Matched {{time}}",
-      "matchBadge": "Match!"
+      "findMatches": "Find Flatmates",
+      "matched": "Connected {{time}}",
+      "matchBadge": "Connected!"
     },
     "actions": {
-      "like": "Like",
-      "liked": "Liked",
-      "matched": "Matched!",
-      "unliked": "Your like has been removed.",
-      "likeSent": "Your like has been sent."
+      "like": "Interested",
+      "liked": "Interested",
+      "matched": "Connected!",
+      "unliked": "Your interest has been removed.",
+      "likeSent": "Your interest has been sent."
     },
     "match": {
-      "title": "It's a Match!",
-      "subtitle": "You and {{name}} both liked each other!",
-      "startChatting": "You both liked each other. Start chatting now!"
+      "title": "You're Connected!",
+      "subtitle": "You and {{name}} are both interested!",
+      "startChatting": "You both showed interest. Start chatting now!"
     }
   },
   "favorites": {

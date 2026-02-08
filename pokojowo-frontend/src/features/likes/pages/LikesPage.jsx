@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Heart,
+  ThumbsUp,
   MessageSquare,
   MapPin,
-  Sparkles,
+  Handshake,
   ArrowRight,
   ArrowLeft,
   Users,
@@ -56,9 +56,9 @@ export default function LikesPage() {
   return (
     <div className="space-y-6">
       {/* Header with stats */}
-      <div className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 p-6 text-white">
+      <div className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-6 text-white">
         <h1 className="text-3xl font-bold flex items-center gap-2 mb-4">
-          <Heart className="h-8 w-8 fill-white" />
+          <Users className="h-8 w-8" />
           {t('likes.title')}
         </h1>
 
@@ -79,7 +79,7 @@ export default function LikesPage() {
             <div className="text-3xl font-bold">{stats.pending_likes}</div>
             <div className="text-sm opacity-90">{t('likes.stats.pending')}</div>
             {stats.pending_likes > 0 && (
-              <span className="absolute top-2 right-2 h-3 w-3 bg-yellow-400 rounded-full animate-pulse" />
+              <span className="absolute top-2 right-2 h-3 w-3 bg-amber-400 rounded-full animate-pulse" />
             )}
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function LikesPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('likes.tabs.received')}
             {stats.pending_likes > 0 && (
-              <Badge className="ml-2 bg-pink-500">{stats.pending_likes}</Badge>
+              <Badge className="ml-2 bg-teal-500">{stats.pending_likes}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="sent">
@@ -100,10 +100,10 @@ export default function LikesPage() {
             {t('likes.tabs.sent')}
           </TabsTrigger>
           <TabsTrigger value="mutual">
-            <Sparkles className="h-4 w-4 mr-2" />
+            <Handshake className="h-4 w-4 mr-2" />
             {t('likes.tabs.mutual')}
             {stats.mutual_matches > 0 && (
-              <Badge className="ml-2 bg-gradient-to-r from-pink-500 to-rose-500">
+              <Badge className="ml-2 bg-gradient-to-r from-teal-500 to-emerald-500">
                 {stats.mutual_matches}
               </Badge>
             )}
@@ -125,7 +125,7 @@ export default function LikesPage() {
               {pendingLikesReceived.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <span className="h-2 w-2 bg-yellow-500 rounded-full animate-pulse" />
+                    <span className="h-2 w-2 bg-amber-500 rounded-full animate-pulse" />
                     {t('likes.received.waitingForResponse')}
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -182,12 +182,12 @@ export default function LikesPage() {
             <LoadingSkeleton />
           ) : mutualMatches.length === 0 ? (
             <EmptyState
-              icon={<Sparkles className="h-8 w-8 text-pink-500" />}
+              icon={<Handshake className="h-8 w-8 text-teal-500" />}
               title={t('likes.mutual.empty.title')}
               description={t('likes.mutual.empty.subtitle')}
               action={
                 <Link to="/matches">
-                  <Button className="bg-gradient-to-r from-pink-500 to-rose-500">
+                  <Button className="bg-gradient-to-r from-teal-500 to-emerald-500">
                     {t('likes.mutual.findMatches')}
                   </Button>
                 </Link>
@@ -212,7 +212,7 @@ function LikeReceivedCard({ like, isPending, t }) {
   if (!user) return null;
 
   return (
-    <Card className={`overflow-hidden transition-all ${isPending ? 'ring-2 ring-yellow-400 dark:ring-yellow-500 bg-yellow-50/30 dark:bg-yellow-950/30' : ''}`}>
+    <Card className={`overflow-hidden transition-all ${isPending ? 'ring-2 ring-amber-400 dark:ring-amber-500 bg-amber-50/30 dark:bg-amber-950/30' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
           <UserAvatar user={user} size="lg" className="h-14 w-14" />
@@ -228,7 +228,7 @@ function LikeReceivedCard({ like, isPending, t }) {
             )}
           </div>
           {compatibility_score && (
-            <Badge className="bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300">
+            <Badge className="bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300">
               {Math.round(compatibility_score)}%
             </Badge>
           )}
@@ -269,7 +269,7 @@ function LikeSentCard({ like, t }) {
   const isMutual = status === 'mutual';
 
   return (
-    <Card className={`overflow-hidden ${isMutual ? 'ring-2 ring-pink-400' : ''}`}>
+    <Card className={`overflow-hidden ${isMutual ? 'ring-2 ring-teal-400' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
           <UserAvatar user={user} size="lg" className="h-14 w-14" />
@@ -285,8 +285,8 @@ function LikeSentCard({ like, t }) {
             )}
           </div>
           {isMutual && (
-            <Badge className="bg-gradient-to-r from-pink-500 to-rose-500 text-white">
-              <Sparkles className="h-3 w-3 mr-1" />
+            <Badge className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
+              <Handshake className="h-3 w-3 mr-1" />
               {t('likes.mutual.matchBadge')}
             </Badge>
           )}
@@ -309,7 +309,7 @@ function LikeSentCard({ like, t }) {
         <SaveButton userId={like.liked_user_id} />
         {isMutual && (
           <Link to={`/chat/with/${like.liked_user_id}`}>
-            <Button className="bg-gradient-to-r from-pink-500 to-rose-500">
+            <Button className="bg-gradient-to-r from-teal-500 to-emerald-500">
               <MessageSquare className="h-4 w-4" />
             </Button>
           </Link>
@@ -325,13 +325,13 @@ function MutualMatchCard({ match, t }) {
   if (!user) return null;
 
   return (
-    <Card className="overflow-hidden ring-2 ring-pink-400 dark:ring-pink-600 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30">
+    <Card className="overflow-hidden ring-2 ring-teal-400 dark:ring-teal-600 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
           <div className="relative">
             <UserAvatar user={user} size="lg" className="h-14 w-14" />
-            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full p-1">
-              <Heart className="h-3 w-3 text-white fill-white" />
+            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full p-1">
+              <Handshake className="h-3 w-3 text-white" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
@@ -346,7 +346,7 @@ function MutualMatchCard({ match, t }) {
             )}
           </div>
           {compatibility_score && (
-            <Badge className="bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+            <Badge className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
               {Math.round(compatibility_score)}%
             </Badge>
           )}
@@ -368,7 +368,7 @@ function MutualMatchCard({ match, t }) {
         </Link>
         <SaveButton userId={match.matched_user_id} />
         <Link to={`/chat/with/${match.matched_user_id}`}>
-          <Button className="bg-gradient-to-r from-pink-500 to-rose-500">
+          <Button className="bg-gradient-to-r from-teal-500 to-emerald-500">
             <MessageSquare className="h-4 w-4 mr-2" />
             {t('card.chat')}
           </Button>
