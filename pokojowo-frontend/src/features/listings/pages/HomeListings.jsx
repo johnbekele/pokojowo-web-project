@@ -10,7 +10,11 @@ import {
   Bath,
   Wifi,
   Car,
-  ChevronRight
+  ChevronRight,
+  Users,
+  Heart,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -157,6 +161,81 @@ export default function HomeListings() {
           </div>
         </div>
       </div>
+
+      {/* CTA for Unauthenticated Users */}
+      {!user && (
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* For Tenants */}
+          <Card className="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    {t('cta.tenant.title', 'Find Your Perfect Roommate')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {t('cta.tenant.description', 'Our smart matching algorithm finds compatible roommates based on lifestyle, interests, and preferences.')}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="secondary" className="gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      {t('cta.tenant.badge1', 'AI Matching')}
+                    </Badge>
+                    <Badge variant="secondary" className="gap-1">
+                      <Heart className="h-3 w-3" />
+                      {t('cta.tenant.badge2', 'Compatibility Score')}
+                    </Badge>
+                  </div>
+                  <Link to="/signup?role=tenant">
+                    <Button className="gap-2">
+                      {t('cta.tenant.button', 'Find Roommates')}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* For Landlords */}
+          <Card className="relative overflow-hidden border-2 border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-amber-500/10">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <Home className="h-6 w-6 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    {t('cta.landlord.title', 'Find the Perfect Tenant')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {t('cta.landlord.description', 'List your property and let our AI match you with verified, compatible tenants.')}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      <Sparkles className="h-3 w-3" />
+                      {t('cta.landlord.badge1', 'Smart Matching')}
+                    </Badge>
+                    <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      <Users className="h-3 w-3" />
+                      {t('cta.landlord.badge2', 'Verified Tenants')}
+                    </Badge>
+                  </div>
+                  <Link to="/signup?role=landlord">
+                    <Button variant="outline" className="gap-2 border-amber-500 text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20">
+                      {t('cta.landlord.button', 'List Your Property')}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Filters Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card rounded-xl border border-border shadow-sm">
