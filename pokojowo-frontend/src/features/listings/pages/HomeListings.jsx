@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import {
   Search,
   MapPin,
@@ -14,53 +14,68 @@ import {
   Users,
   Heart,
   Sparkles,
-  ArrowRight
-} from 'lucide-react';
+  ArrowRight,
+} from "lucide-react";
 
 // Hero slides with images and promo content
 const HERO_SLIDES = [
   {
-    image: '/images/promo/Screenshot 2026-02-08 at 16.44.49.png',
-    fallback: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80',
-    title: 'Find Your Perfect Roommate',
-    subtitle: 'Connect with people who match your vibe and lifestyle',
-    type: 'roommate',
+    image: "/images/promo/romm1.png",
+    fallback:
+      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80",
+    title: "Find Your Perfect Roommate",
+    subtitle: "Connect with people who match your vibe and lifestyle",
+    type: "roommate",
   },
   {
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
-    title: 'Discover Your Dream Room',
-    subtitle: 'Browse hundreds of verified rooms in your area',
-    type: 'room',
+    image:
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80",
+    title: "Discover Your Dream Room",
+    subtitle: "Browse hundreds of verified rooms in your area",
+    type: "room",
   },
   {
-    image: '/images/promo/Roommate-Finder.webp',
-    fallback: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1920&q=80',
-    title: 'Live With Like-Minded People',
-    subtitle: 'Find roommates who share your interests and values',
-    type: 'roommate',
+    image: "/images/promo/Roommate-Finder.webp",
+    fallback:
+      "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1920&q=80",
+    title: "Live With Like-Minded People",
+    subtitle: "Find roommates who share your interests and values",
+    type: "roommate",
   },
   {
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
-    title: 'Your Next Home Awaits',
-    subtitle: 'Quality rooms at prices that work for you',
-    type: 'room',
+    image:
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80",
+    title: "Your Next Home Awaits",
+    subtitle: "Quality rooms at prices that work for you",
+    type: "room",
   },
 ];
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import SearchFilters from '../components/SearchFilters';
-import InterestedUsersPreview from '../components/InterestedUsersPreview';
-import ListingLikeButton from '../components/ListingLikeButton';
-import api from '@/lib/api';
-import { formatCurrency, cn } from '@/lib/utils';
-import useListingInteractionStore from '@/stores/listingInteractionStore';
-import useAuthStore from '@/stores/authStore';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import SearchFilters from "../components/SearchFilters";
+import InterestedUsersPreview from "../components/InterestedUsersPreview";
+import ListingLikeButton from "../components/ListingLikeButton";
+import api from "@/lib/api";
+import { formatCurrency, cn } from "@/lib/utils";
+import useListingInteractionStore from "@/stores/listingInteractionStore";
+import useAuthStore from "@/stores/authStore";
 
 const DEFAULT_FILTERS = {
   minPrice: 0,
@@ -74,13 +89,17 @@ const DEFAULT_FILTERS = {
 };
 
 export default function HomeListings() {
-  const { t } = useTranslation('listings');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+  const { t } = useTranslation("listings");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user } = useAuthStore();
-  const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } = useListingInteractionStore();
+  const {
+    fetchBatchInterestedUsers,
+    fetchMyLikedListings,
+    getInterestedUsers,
+  } = useListingInteractionStore();
 
   // Rotate hero slides every 5 seconds
   useEffect(() => {
@@ -93,12 +112,16 @@ export default function HomeListings() {
   // Get current slide content
   const currentSlide = HERO_SLIDES[currentImageIndex];
 
-  const { data: rawListings, isLoading, error } = useQuery({
-    queryKey: ['listings', searchQuery, sortBy],
+  const {
+    data: rawListings,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["listings", searchQuery, sortBy],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      params.append('sort', sortBy);
+      if (searchQuery) params.append("search", searchQuery);
+      params.append("sort", sortBy);
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
     },
@@ -115,28 +138,38 @@ export default function HomeListings() {
 
     return listingsArray.filter((listing) => {
       // Price filter
-      if (filters.minPrice > 0 && listing.price < filters.minPrice) return false;
-      if (filters.maxPrice < 10000 && listing.price > filters.maxPrice) return false;
+      if (filters.minPrice > 0 && listing.price < filters.minPrice)
+        return false;
+      if (filters.maxPrice < 10000 && listing.price > filters.maxPrice)
+        return false;
 
       // Size filter
       if (filters.minSize > 0 && listing.size < filters.minSize) return false;
       if (filters.maxSize < 200 && listing.size > filters.maxSize) return false;
 
       // Room type filter
-      if (filters.roomTypes?.length > 0 && !filters.roomTypes.includes(listing.roomType)) {
+      if (
+        filters.roomTypes?.length > 0 &&
+        !filters.roomTypes.includes(listing.roomType)
+      ) {
         return false;
       }
 
       // Building type filter
-      if (filters.buildingTypes?.length > 0 && !filters.buildingTypes.includes(listing.buildingType)) {
+      if (
+        filters.buildingTypes?.length > 0 &&
+        !filters.buildingTypes.includes(listing.buildingType)
+      ) {
         return false;
       }
 
       // Rent for filter
       if (filters.rentFor?.length > 0) {
         const listingRentFor = listing.rentForOnly || [];
-        const hasMatch = filters.rentFor.some((r) => listingRentFor.includes(r));
-        if (!hasMatch && !listingRentFor.includes('Open to All')) return false;
+        const hasMatch = filters.rentFor.some((r) =>
+          listingRentFor.includes(r),
+        );
+        if (!hasMatch && !listingRentFor.includes("Open to All")) return false;
       }
 
       // Max tenants filter
@@ -151,7 +184,7 @@ export default function HomeListings() {
   // Batch fetch interested users and liked listings when user is logged in and listings are loaded
   useEffect(() => {
     if (user && listings && listings.length > 0) {
-      const listingIds = listings.map(l => l._id || l.id).filter(Boolean);
+      const listingIds = listings.map((l) => l._id || l.id).filter(Boolean);
       if (listingIds.length > 0) {
         fetchBatchInterestedUsers(listingIds, 70, 3);
       }
@@ -183,7 +216,7 @@ export default function HomeListings() {
             key={slide.image}
             className={cn(
               "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-              index === currentImageIndex ? "opacity-100" : "opacity-0"
+              index === currentImageIndex ? "opacity-100" : "opacity-0",
             )}
           >
             <img
@@ -216,7 +249,7 @@ export default function HomeListings() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
                 <Input
-                  placeholder={t('search.placeholder')}
+                  placeholder={t("search.placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm"
@@ -228,28 +261,16 @@ export default function HomeListings() {
             </div>
           </div>
 
-          {/* Bottom - Small Action Buttons */}
+          {/* Bottom - Get Started Button */}
           {!user && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {/* Find Roommates Button */}
-              <Link to="/matches">
+            <div className="flex justify-end mt-4">
+              <Link to="/login">
                 <Button
                   size="sm"
-                  className="h-8 px-3 bg-teal-500 hover:bg-teal-600 text-white text-xs font-medium gap-1.5"
+                  className="h-9 px-5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium gap-2"
                 >
-                  <Users className="h-3.5 w-3.5" />
-                  Find Roommates
-                </Button>
-              </Link>
-
-              {/* List Property Button */}
-              <Link to="/landlord/listings/new">
-                <Button
-                  size="sm"
-                  className="h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium gap-1.5"
-                >
-                  <Home className="h-3.5 w-3.5" />
-                  List Property
+                  Get Started
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -265,8 +286,10 @@ export default function HomeListings() {
               className={cn(
                 "w-1.5 h-1.5 rounded-full transition-all duration-300",
                 index === currentImageIndex
-                  ? slide.type === 'roommate' ? "bg-teal-400 w-4" : "bg-white w-4"
-                  : "bg-white/50 hover:bg-white/70"
+                  ? slide.type === "roommate"
+                    ? "bg-teal-400 w-4"
+                    : "bg-white w-4"
+                  : "bg-white/50 hover:bg-white/70",
               )}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -279,19 +302,25 @@ export default function HomeListings() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Home className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm font-medium text-foreground">
-            {listings?.length || 0} {t('results.count')}
+            {listings?.length || 0} {t("results.count")}
           </span>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-full sm:w-auto sm:min-w-[160px]">
-              <SelectValue placeholder={t('search.sort')} />
+              <SelectValue placeholder={t("search.sort")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="newest">{t('search.sortOptions.newest')}</SelectItem>
-              <SelectItem value="price_asc">{t('search.sortOptions.priceAsc')}</SelectItem>
-              <SelectItem value="price_desc">{t('search.sortOptions.priceDesc')}</SelectItem>
+              <SelectItem value="newest">
+                {t("search.sortOptions.newest")}
+              </SelectItem>
+              <SelectItem value="price_asc">
+                {t("search.sortOptions.priceAsc")}
+              </SelectItem>
+              <SelectItem value="price_desc">
+                {t("search.sortOptions.priceDesc")}
+              </SelectItem>
             </SelectContent>
           </Select>
           <SearchFilters
@@ -328,12 +357,17 @@ export default function HomeListings() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
               <Home className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
-            <h3 className="text-lg font-semibold text-red-900 dark:text-red-100">{t('error.title')}</h3>
+            <h3 className="text-lg font-semibold text-red-900 dark:text-red-100">
+              {t("error.title")}
+            </h3>
             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-              {error.message || t('error.loadingFailed')}
+              {error.message || t("error.loadingFailed")}
             </p>
-            <Button variant="outline" className="mt-4 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50">
-              {t('error.retry')}
+            <Button
+              variant="outline"
+              className="mt-4 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
+            >
+              {t("error.retry")}
             </Button>
           </CardHeader>
         </Card>
@@ -343,8 +377,12 @@ export default function HomeListings() {
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
               <Home className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">{t('empty.title')}</h3>
-            <p className="text-muted-foreground mt-2 max-w-sm mx-auto">{t('empty.subtitle')}</p>
+            <h3 className="text-xl font-semibold text-foreground">
+              {t("empty.title")}
+            </h3>
+            <p className="text-muted-foreground mt-2 max-w-sm mx-auto">
+              {t("empty.subtitle")}
+            </p>
           </CardHeader>
         </Card>
       ) : (
@@ -367,12 +405,12 @@ export default function HomeListings() {
 }
 
 function ListingCard({ listing, interestedUsers = [] }) {
-  const { t, i18n } = useTranslation('listings');
+  const { t, i18n } = useTranslation("listings");
 
   const getLocalizedText = (field) => {
-    if (!field) return '';
-    if (typeof field === 'string') return field;
-    return field[i18n.language] || field.en || field.pl || '';
+    if (!field) return "";
+    if (typeof field === "string") return field;
+    return field[i18n.language] || field.en || field.pl || "";
   };
 
   const listingId = listing._id || listing.id;
@@ -382,7 +420,11 @@ function ListingCard({ listing, interestedUsers = [] }) {
       {/* Image Container */}
       <div className="relative h-52 overflow-hidden bg-muted">
         <img
-          src={listing.images?.[0] || listing.photos?.[0]?.url || '/placeholder-room.jpg'}
+          src={
+            listing.images?.[0] ||
+            listing.photos?.[0]?.url ||
+            "/placeholder-room.jpg"
+          }
           alt={getLocalizedText(listing.title) || listing.address}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
@@ -397,7 +439,7 @@ function ListingCard({ listing, interestedUsers = [] }) {
         <div className="absolute top-3 left-3 flex gap-2">
           {listing.available && (
             <Badge className="bg-green-500 hover:bg-green-600 text-white font-medium shadow-lg">
-              {t('card.available')}
+              {t("card.available")}
             </Badge>
           )}
         </div>
@@ -408,7 +450,9 @@ function ListingCard({ listing, interestedUsers = [] }) {
             <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {formatCurrency(listing.price || listing.rent)}
             </p>
-            <p className="text-xs text-muted-foreground text-right">{t('card.perMonth')}</p>
+            <p className="text-xs text-muted-foreground text-right">
+              {t("card.perMonth")}
+            </p>
           </div>
         </div>
       </div>
@@ -420,7 +464,9 @@ function ListingCard({ listing, interestedUsers = [] }) {
         </h3>
         <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground">
           <MapPin className="h-4 w-4 flex-shrink-0" />
-          <span className="text-sm truncate">{listing.location || listing.address}</span>
+          <span className="text-sm truncate">
+            {listing.location || listing.address}
+          </span>
         </div>
 
         <Separator className="my-4" />
@@ -432,11 +478,11 @@ function ListingCard({ listing, interestedUsers = [] }) {
               {listing.roomType}
             </Badge>
           )}
-          {listing.size && (
-            <span>{listing.size}m²</span>
-          )}
+          {listing.size && <span>{listing.size}m²</span>}
           {listing.maxTenants && (
-            <span>{listing.maxTenants} tenant{listing.maxTenants > 1 ? 's' : ''}</span>
+            <span>
+              {listing.maxTenants} tenant{listing.maxTenants > 1 ? "s" : ""}
+            </span>
           )}
         </div>
 
@@ -460,7 +506,10 @@ function ListingCard({ listing, interestedUsers = [] }) {
               </Badge>
             ))}
             {listing.amenities.length > 3 && (
-              <Badge variant="secondary" className="bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
+              <Badge
+                variant="secondary"
+                className="bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+              >
                 +{listing.amenities.length - 3}
               </Badge>
             )}
@@ -475,10 +524,8 @@ function ListingCard({ listing, interestedUsers = [] }) {
 
       <CardFooter className="p-5 pt-0">
         <Link to={`/listing/${listing._id || listing.id}`} className="w-full">
-          <Button
-            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white group/btn"
-          >
-            {t('card.viewDetails')}
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white group/btn">
+            {t("card.viewDetails")}
             <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover/btn:translate-x-1" />
           </Button>
         </Link>
