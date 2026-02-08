@@ -19,7 +19,7 @@ export default function MatchDetail() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['match', userId],
     queryFn: async () => {
-      const response = await api.get(`/matching/${userId}`);
+      const response = await api.get(`/matching/user/${userId}`);
       return response.data;
     },
   });
