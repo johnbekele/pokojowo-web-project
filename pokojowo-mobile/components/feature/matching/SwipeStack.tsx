@@ -72,7 +72,15 @@ export default function SwipeStack({
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      // Only capture gesture if horizontal movement is significant
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        // Only capture if horizontal movement > 10px (allows taps through)
+        return Math.abs(gesture.dx) > 10;
+      },
+      onPanResponderGrant: () => {
+        // Reset position when gesture starts
+      },
       onPanResponderMove: (_, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
       },

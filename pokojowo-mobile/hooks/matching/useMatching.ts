@@ -18,11 +18,13 @@ export function useMatches(filters?: MatchingFilters) {
       const data = response.data;
 
       // Transform flat match results to include nested user object
-      // Backend returns: { user_id, username, photo, ... }
-      // Mobile expects: { user_id, user: { id, username, photo, ... }, ... }
+      // Backend returns: { user_id, username, photo, match_tier, explanations, ... }
+      // Mobile expects: { user_id, user: { id, username, photo, ... }, match_tier, ... }
       if (data?.matches) {
         data.matches = data.matches.map((match: Record<string, unknown>) => ({
+          // Keep all original fields (match_tier, explanations, shared_interests, etc.)
           ...match,
+          // Create nested user object for component compatibility
           user: {
             id: match.user_id,
             _id: match.user_id,
