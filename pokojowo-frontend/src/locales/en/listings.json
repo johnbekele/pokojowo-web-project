@@ -105,6 +105,12 @@
     "viewOnSource": "View on source",
     "viewOriginal": "View Original Listing",
     "call": "Call",
-    "scrapedNotice": "This listing was imported from an external source. Contact the landlord directly through the original website or phone number."
+    "scrapedNotice": "This listing was imported from an external source. Contact the landlord directly through the original website or phone number.",
+    "notFound": "Listing Not Found",
+    "notFoundDescription": "This listing may have been removed or doesn't exist.",
+    "backToListings": "Back to Listings",
+    "availableNow": "Available Now",
+    "maxTenants": "Max {{count}} tenants",
+    "availableFrom": "Available from {{date}}"
   }
 }

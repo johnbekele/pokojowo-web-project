@@ -105,6 +105,12 @@
     "viewOnSource": "Zobacz źródło",
     "viewOriginal": "Zobacz oryginalne ogłoszenie",
     "call": "Zadzwoń",
-    "scrapedNotice": "To ogłoszenie zostało zaimportowane z zewnętrznego źródła. Skontaktuj się z właścicielem bezpośrednio przez oryginalną stronę lub numer telefonu."
+    "scrapedNotice": "To ogłoszenie zostało zaimportowane z zewnętrznego źródła. Skontaktuj się z właścicielem bezpośrednio przez oryginalną stronę lub numer telefonu.",
+    "notFound": "Nie znaleziono ogłoszenia",
+    "notFoundDescription": "To ogłoszenie mogło zostać usunięte lub nie istnieje.",
+    "backToListings": "Wróć do ogłoszeń",
+    "availableNow": "Dostępne teraz",
+    "maxTenants": "Maks. {{count}} lokatorów",
+    "availableFrom": "Dostępne od {{date}}"
   }
 }

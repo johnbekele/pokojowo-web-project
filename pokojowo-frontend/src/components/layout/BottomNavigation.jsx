@@ -22,13 +22,13 @@ export default function BottomNavigation() {
   const navItems = isLandlord
     ? [
         { to: '/', label: t('nav.home'), icon: Home },
-        { to: '/landlord/dashboard', label: 'Dashboard', icon: Building2 },
+        { to: '/landlord/dashboard', label: t('nav.dashboard'), icon: Building2 },
         { to: '/chat', label: t('nav.chat'), icon: MessageSquare },
         { to: '/profile', label: t('nav.profile'), icon: User },
       ]
     : [
         { to: '/', label: t('nav.home'), icon: Home },
-        { to: '/matches', label: 'Flatmates', icon: Users },
+        { to: '/matches', label: t('nav.matches'), icon: Users },
         { to: '/chat', label: t('nav.chat'), icon: MessageSquare },
         { to: '/profile', label: t('nav.profile'), icon: User },
       ];

@@ -68,16 +68,16 @@ export default function ListingDetails() {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-destructive">Listing Not Found</CardTitle>
+          <CardTitle className="text-destructive">{t('detail.notFound', 'Listing Not Found')}</CardTitle>
           <CardDescription>
-            This listing may have been removed or doesn't exist.
+            {t('detail.notFoundDescription', "This listing may have been removed or doesn't exist.")}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <Link to="/">
             <Button>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Listings
+              {t('detail.backToListings', 'Back to Listings')}
             </Button>
           </Link>
         </CardContent>
@@ -103,7 +103,7 @@ export default function ListingDetails() {
       {/* Back button */}
       <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground">
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to listings
+        {t('detail.backToListings', 'Back to listings')}
       </Link>
 
       {/* Image Gallery */}
@@ -161,7 +161,7 @@ export default function ListingDetails() {
             </div>
 
             {listing.available && (
-              <Badge className="mt-2 bg-green-500">Available Now</Badge>
+              <Badge className="mt-2 bg-green-500">{t('detail.availableNow', 'Available Now')}</Badge>
             )}
           </div>
 
@@ -182,13 +182,13 @@ export default function ListingDetails() {
             {listing.maxTenants && (
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-muted-foreground" />
-                <span>Max {listing.maxTenants} {listing.maxTenants === 1 ? 'tenant' : 'tenants'}</span>
+                <span>{t('detail.maxTenants', 'Max {{count}} tenants', { count: listing.maxTenants })}</span>
               </div>
             )}
             {listing.availableFrom && (
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span>Available from {formatDate(listing.availableFrom)}</span>
+                <span>{t('detail.availableFrom', 'Available from {{date}}', { date: formatDate(listing.availableFrom) })}</span>
               </div>
             )}
           </div>
