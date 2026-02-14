@@ -108,28 +108,47 @@ export default function MatchesScreen() {
 
   if (error) {
     // Check for specific error types
-    const errorMessage = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-    const isProfileIncomplete = errorMessage?.toLowerCase().includes('profile');
+    const errorMessage = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || '';
+    const errorStatus = (error as { response?: { status?: number } })?.response?.status;
+    const isProfileIncomplete = errorMessage.toLowerCase().includes('profile');
+    const isRoleError = errorMessage.toLowerCase().includes('tenant') || errorStatus === 403;
+
+    const getErrorContent = () => {
+      if (isProfileIncomplete) {
+        return {
+          title: t('empty.title', 'Complete Your Profile'),
+          description: t('empty.description', 'Complete your profile to see compatible flatmates'),
+          actionLabel: t('empty.action', 'Complete Profile'),
+          onPress: () => router.push('/onboarding/profile-completion/tenant'),
+        };
+      }
+      if (isRoleError) {
+        return {
+          title: t('error.roleRequired', 'Tenant Role Required'),
+          description: t('error.roleDescription', 'You need to be a tenant to find flatmates'),
+          actionLabel: t('error.selectRole', 'Select Role'),
+          onPress: () => router.push('/onboarding/role'),
+        };
+      }
+      return {
+        title: t('error.title', 'Something went wrong'),
+        description: t('error.description', 'Unable to load matches. Please try again.'),
+        actionLabel: t('error.retry', 'Try Again'),
+        onPress: () => refreshMatches(),
+      };
+    };
+
+    const errorContent = getErrorContent();
 
     return (
       <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <EmptyState
           icon={<Users size={48} color={COLORS.gray[400]} />}
-          title={isProfileIncomplete
-            ? t('empty.title', 'Complete Your Profile')
-            : t('error.title', 'Something went wrong')
-          }
-          description={isProfileIncomplete
-            ? t('empty.description', 'Complete your profile to see compatible flatmates')
-            : t('error.description', 'Unable to load matches. Please try again.')
-          }
+          title={errorContent.title}
+          description={errorContent.description}
           action={{
-            label: isProfileIncomplete
-              ? t('empty.action', 'Complete Profile')
-              : t('error.retry', 'Try Again'),
-            onPress: isProfileIncomplete
-              ? () => router.push('/(app)/(profile)/edit')
-              : () => refreshMatches(),
+            label: errorContent.actionLabel,
+            onPress: errorContent.onPress,
           }}
         />
       </SafeAreaView>
