@@ -47,12 +47,14 @@ export default function MyListingsScreen() {
     );
   };
 
-  const renderItem = ({ item }: { item: Listing }) => (
+  const renderItem = ({ item }: { item: Listing }) => {
+    const itemId = item.id || item._id;
+    return (
     <Card
       variant="elevated"
       padding="md"
       className="mx-4 mb-3"
-      onPress={() => router.push(`/(app)/(home)/listing/${item.id}`)}
+      onPress={() => router.push(`/(app)/(home)/listing/${itemId}`)}
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 mr-3">
@@ -88,13 +90,13 @@ export default function MyListingsScreen() {
         {/* Actions */}
         <View className="flex-col gap-2">
           <TouchableOpacity
-            onPress={() => router.push(`/(app)/(landlord)/edit-listing/${item.id}`)}
+            onPress={() => router.push(`/(app)/(landlord)/edit-listing/${itemId}`)}
             className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
           >
             <Edit size={18} color={COLORS.gray[600]} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => handleDeleteListing(item.id, item.address)}
+            onPress={() => handleDeleteListing(itemId!, item.address)}
             className="w-10 h-10 rounded-full bg-red-50 items-center justify-center"
           >
             <Trash2 size={18} color={COLORS.error} />
@@ -102,7 +104,7 @@ export default function MyListingsScreen() {
         </View>
       </View>
     </Card>
-  );
+  );};
 
   if (isLoading) {
     return (
@@ -135,7 +137,7 @@ export default function MyListingsScreen() {
         <FlatList
           data={listings}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => item.id || item._id || `listing-${index}`}
           contentContainerStyle={{ paddingTop: 12 }}
           refreshControl={
             <RefreshControl

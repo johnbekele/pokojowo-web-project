@@ -18,3 +18,6 @@ export * from './chat/useChat';
 
 // Favorites hooks
 export * from './favorites/useFavorites';
+
+// Listing Interaction hooks
+export * from './listingInteractions/useListingInteractions';

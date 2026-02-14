@@ -1,16 +1,20 @@
 import { useState, useCallback } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Users } from 'lucide-react-native';
+import { Users, SlidersHorizontal } from 'lucide-react-native';
 
-import { SwipeStack, MatchDetailModal, MutualMatchModal } from '@/components/feature/matching';
+import {
+  SwipeStack,
+  MatchDetailModal,
+  MutualMatchModal,
+  MatchFiltersModal,
+} from '@/components/feature/matching';
 import { LoadingSpinner, EmptyState } from '@/components/ui';
 import { useMatches, useRefreshMatches } from '@/hooks/matching/useMatching';
 import { useLikeUser } from '@/hooks/likes/useLikes';
-import { useChatWithUser } from '@/hooks/chat/useChat';
-import type { MatchResult } from '@/types/matching.types';
+import type { MatchResult, MatchingFilters } from '@/types/matching.types';
 import { COLORS } from '@/lib/constants';
 
 export default function MatchesScreen() {
@@ -21,10 +25,25 @@ export default function MatchesScreen() {
   const [mutualMatchUser, setMutualMatchUser] = useState<MatchResult['user'] | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showMutualModal, setShowMutualModal] = useState(false);
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
+  const [filters, setFilters] = useState<MatchingFilters>({ limit: 50 });
 
-  const { data: matchingData, isLoading, error } = useMatches({ limit: 50 });
+  const { data: matchingData, isLoading, error } = useMatches(filters);
   const { mutate: refreshMatches, isPending: isRefreshing } = useRefreshMatches();
   const { mutate: likeUser } = useLikeUser();
+
+  const activeFilterCount = [
+    filters.location,
+    filters.minScore && filters.minScore > 0,
+  ].filter(Boolean).length;
+
+  const handleApplyFilters = (newFilters: MatchingFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({ limit: 50 });
+  };
 
   const handleSwipeRight = useCallback((match: MatchResult) => {
     likeUser(match.user_id, {
@@ -34,8 +53,15 @@ export default function MatchesScreen() {
           setShowMutualModal(true);
         }
       },
+      onError: (error) => {
+        Alert.alert(
+          t('error.title', 'Error'),
+          t('error.likeFailed', 'Failed to send like. Please try again.')
+        );
+        console.error('Like failed:', error);
+      },
     });
-  }, [likeUser]);
+  }, [likeUser, t]);
 
   const handleSwipeLeft = useCallback((match: MatchResult) => {
     // Just pass, no action needed
@@ -81,15 +107,29 @@ export default function MatchesScreen() {
   }
 
   if (error) {
+    // Check for specific error types
+    const errorMessage = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+    const isProfileIncomplete = errorMessage?.toLowerCase().includes('profile');
+
     return (
       <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <EmptyState
           icon={<Users size={48} color={COLORS.gray[400]} />}
-          title={t('error.title', 'Something went wrong')}
-          description={t('error.description', 'Unable to load matches. Please try again.')}
+          title={isProfileIncomplete
+            ? t('empty.title', 'Complete Your Profile')
+            : t('error.title', 'Something went wrong')
+          }
+          description={isProfileIncomplete
+            ? t('empty.description', 'Complete your profile to see compatible flatmates')
+            : t('error.description', 'Unable to load matches. Please try again.')
+          }
           action={{
-            label: t('error.retry', 'Try Again'),
-            onPress: () => refreshMatches(),
+            label: isProfileIncomplete
+              ? t('empty.action', 'Complete Profile')
+              : t('error.retry', 'Try Again'),
+            onPress: isProfileIncomplete
+              ? () => router.push('/(app)/(profile)/edit')
+              : () => refreshMatches(),
           }}
         />
       </SafeAreaView>
@@ -102,12 +142,27 @@ export default function MatchesScreen() {
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* Header */}
       <View className="px-4 py-3 border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">
-          {t('title', 'Find Flatmates')}
-        </Text>
-        <Text className="text-gray-500">
-          {t('subtitle', 'Swipe to find compatible roommates')}
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-gray-900">
+              {t('title', 'Find Flatmates')}
+            </Text>
+            <Text className="text-gray-500">
+              {t('subtitle', 'Swipe to find compatible roommates')}
+            </Text>
+          </View>
+          <TouchableOpacity
+            className="bg-gray-100 p-3 rounded-lg relative"
+            onPress={() => setShowFiltersModal(true)}
+          >
+            <SlidersHorizontal size={20} color={COLORS.gray[600]} />
+            {activeFilterCount > 0 && (
+              <View className="absolute -top-1 -right-1 bg-primary-600 rounded-full w-5 h-5 items-center justify-center">
+                <Text className="text-white text-xs font-bold">{activeFilterCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Swipe Stack */}
@@ -148,6 +203,15 @@ export default function MatchesScreen() {
         user={mutualMatchUser}
         onSendMessage={handleSendMessage}
         onKeepSwiping={() => setShowMutualModal(false)}
+      />
+
+      {/* Filters Modal */}
+      <MatchFiltersModal
+        visible={showFiltersModal}
+        onClose={() => setShowFiltersModal(false)}
+        filters={filters}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
       />
     </SafeAreaView>
   );

@@ -12,6 +12,49 @@ export interface UserUpdateData {
   bio?: string;
 }
 
+export interface TenantProfileData {
+  firstname: string;
+  lastname: string;
+  age?: number | null;
+  gender?: string | null;
+  bio?: string;
+  phone?: string;
+  location?: string;
+  languages?: string[];
+  preferredLanguage?: string | null;
+  tenantProfile: {
+    preferences: {
+      budget: {
+        min: number | null;
+        max: number | null;
+      };
+      location: string | null;
+      leaseDuration: number;
+    };
+    flatmateTraits: {
+      cleanliness: string | null;
+      socialLevel: string | null;
+      guestsFrequency: string | null;
+    };
+    dealBreakers: {
+      noSmokers: boolean;
+      noPets: boolean;
+      noParties: boolean;
+      sameGenderOnly: boolean;
+      quietHoursRequired: boolean;
+    };
+  };
+}
+
+export interface LandlordProfileData {
+  firstname: string;
+  lastname: string;
+  phone?: string;
+  location?: string;
+  companyName?: string;
+  bio?: string;
+}
+
 export interface RoleUpdateResponse {
   message: string;
   data: {
@@ -34,6 +77,12 @@ export const userService = {
 
   deleteAccount: () =>
     api.delete('/users/me'),
+
+  completeTenantProfile: (data: TenantProfileData) =>
+    api.put<{ message: string; user: User }>('/profile/complete-tenant', data),
+
+  completeLandlordProfile: (data: LandlordProfileData) =>
+    api.put<{ message: string; user: User }>('/profile/complete-landlord', data),
 
   getUserById: (userId: string) =>
     api.get<User>(`/users/${userId}`),

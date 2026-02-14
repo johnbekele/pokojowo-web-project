@@ -14,16 +14,36 @@ import { Search, SlidersHorizontal } from 'lucide-react-native';
 
 import { useListings } from '@/hooks/listings/useListings';
 import ListingCard from '@/components/feature/listings/ListingCard';
+import SearchFiltersModal from '@/components/feature/listings/SearchFiltersModal';
+import type { ListingFilters } from '@/types/listing.types';
 import { COLORS } from '@/lib/constants';
 
 export default function HomeScreen() {
   const { t } = useTranslation('listings');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<ListingFilters>({});
 
   const { data: listings, isLoading, isRefetching, refetch } = useListings({
+    ...filters,
     search: searchQuery,
   });
+
+  const handleApplyFilters = (newFilters: ListingFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({});
+  };
+
+  const activeFilterCount = Object.keys(filters).filter(
+    (key) => {
+      const value = filters[key as keyof ListingFilters];
+      if (Array.isArray(value)) return value.length > 0;
+      return value !== undefined && value !== null;
+    }
+  ).length;
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -56,10 +76,15 @@ export default function HomeScreen() {
             />
           </View>
           <TouchableOpacity
-            className="bg-gray-100 p-3 rounded-lg"
-            onPress={() => setShowFilters(!showFilters)}
+            className="bg-gray-100 p-3 rounded-lg relative"
+            onPress={() => setShowFilters(true)}
           >
             <SlidersHorizontal size={20} color={COLORS.gray[600]} />
+            {activeFilterCount > 0 && (
+              <View className="absolute -top-1 -right-1 bg-primary-600 rounded-full w-5 h-5 items-center justify-center">
+                <Text className="text-white text-xs font-bold">{activeFilterCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -88,8 +113,8 @@ export default function HomeScreen() {
             <ActivityIndicator size="large" color={COLORS.primary[600]} />
           </View>
         ) : hasListings ? (
-          listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
+          listings.map((listing, index) => (
+            <ListingCard key={listing.id || listing._id || `listing-${index}`} listing={listing} />
           ))
         ) : (
           <View className="flex-1 items-center justify-center py-20">
@@ -102,6 +127,15 @@ export default function HomeScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Filters Modal */}
+      <SearchFiltersModal
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
+        filters={filters}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+      />
     </SafeAreaView>
   );
 }

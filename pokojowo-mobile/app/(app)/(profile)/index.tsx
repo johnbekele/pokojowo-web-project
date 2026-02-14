@@ -10,6 +10,7 @@ import {
   User,
   Globe,
   Building2,
+  Users,
 } from 'lucide-react-native';
 
 import useAuthStore from '@/stores/authStore';
@@ -42,6 +43,11 @@ export default function ProfileScreen() {
           },
         ]
       : []),
+    {
+      icon: Users,
+      label: t('menu.likesMatches', 'Likes & Matches'),
+      href: '/(app)/(profile)/likes',
+    },
     {
       icon: Heart,
       label: t('menu.favorites', 'Saved Matches'),

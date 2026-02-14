@@ -4,7 +4,13 @@ import type {
   MatchingStats,
   DashboardResponse,
   MatchingFilters,
+  MatchResult,
 } from '@/types/matching.types';
+
+interface MatchWithUserResponse extends MatchResult {
+  compatible: boolean;
+  reason?: string;
+}
 
 export const matchingService = {
   // Get matches for current user
@@ -13,9 +19,7 @@ export const matchingService = {
 
   // Get detailed compatibility with specific user
   getMatchWithUser: (userId: string) =>
-    api.get<{ compatible: boolean; reason?: string } & Record<string, unknown>>(
-      `/matching/user/${userId}`
-    ),
+    api.get<MatchWithUserResponse>(`/matching/user/${userId}`),
 
   // Refresh matches after profile update
   refreshMatches: () =>

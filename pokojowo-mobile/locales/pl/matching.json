@@ -46,12 +46,15 @@
     }
   },
   "detail": {
+    "title": "Profil",
     "whyMatch": "Dlaczego to dopasowanie?",
     "sharedInterests": "Wspólne zainteresowania",
     "sharedLanguages": "Wspólne języki",
     "compatibility": "Szczegóły zgodności",
     "overallMatch": "Ogólna zgodność",
-    "about": "O mnie"
+    "about": "O mnie",
+    "thingsToConsider": "Kwestie do rozważenia",
+    "unknown": "Nieznany"
   },
   "empty": {
     "title": "Brak dopasowań",
@@ -59,14 +62,27 @@
     "completeProfile": "Uzupełnij profil"
   },
   "filters": {
+    "title": "Filtry dopasowań",
     "minScore": "Minimalna zgodność",
+    "minScoreDescription": "Pokazuj tylko dopasowania z co najmniej taką zgodnością",
+    "anyScore": "Dowolna",
     "location": "Lokalizacja",
-    "budget": "Budżet"
+    "locationDescription": "Filtruj dopasowania według preferowanej lokalizacji",
+    "locationPlaceholder": "np. Warszawa, Kraków...",
+    "budget": "Budżet",
+    "resultsLimit": "Wyników na stronę",
+    "apply": "Zastosuj",
+    "reset": "Resetuj"
   },
   "error": {
     "title": "Błąd",
     "loadingFailed": "Nie udało się załadować dopasowań. Spróbuj ponownie.",
-    "notFound": "Nie znaleziono dopasowania"
+    "notFound": "Nie znaleziono profilu",
+    "notFoundDescription": "Ten profil może nie być już dostępny",
+    "goBack": "Wróć",
+    "likeFailed": "Nie udało się wysłać polubienia. Spróbuj ponownie.",
+    "description": "Nie udało się załadować dopasowań. Spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
   },
   "dashboard": {
     "welcome": "Witaj, {{name}}!",
@@ -111,6 +127,8 @@
   },
   "likes": {
     "title": "Polubienia",
+    "pageTitle": "Polubienia i dopasowania",
+    "likeBack": "Polub też",
     "tabs": {
       "received": "Otrzymane",
       "sent": "Wysłane",

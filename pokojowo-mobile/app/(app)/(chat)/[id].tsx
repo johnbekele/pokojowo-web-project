@@ -187,7 +187,7 @@ export default function ChatRoomScreen() {
           ref={flatListRef}
           data={messages || []}
           renderItem={renderMessage}
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item, index) => item._id || `msg-${index}`}
           inverted
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}

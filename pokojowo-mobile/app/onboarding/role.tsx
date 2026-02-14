@@ -52,11 +52,22 @@ export default function OnboardingRoleScreen() {
     try {
       const roles = selectedRole === 'Both' ? ['Tenant', 'Landlord'] : [selectedRole];
       await updateRoleMutation.mutateAsync(roles);
-      router.replace('/(app)/(home)');
+
+      // Navigate to appropriate profile completion page
+      if (selectedRole === 'Landlord') {
+        router.replace('/onboarding/profile-completion/landlord');
+      } else {
+        // For Tenant or Both, start with tenant profile completion
+        router.replace('/onboarding/profile-completion/tenant');
+      }
     } catch (error) {
       console.error('Failed to update role:', error);
       // Still navigate even if role update fails
-      router.replace('/(app)/(home)');
+      if (selectedRole === 'Landlord') {
+        router.replace('/onboarding/profile-completion/landlord');
+      } else {
+        router.replace('/onboarding/profile-completion/tenant');
+      }
     }
   };
 

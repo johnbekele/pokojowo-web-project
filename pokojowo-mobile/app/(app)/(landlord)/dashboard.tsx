@@ -154,13 +154,13 @@ export default function LandlordDashboard() {
                 </Text>
               </TouchableOpacity>
             </View>
-            {listings.slice(0, 3).map((listing) => (
+            {listings.slice(0, 3).map((listing, index) => (
               <Card
-                key={listing.id}
+                key={listing.id || listing._id || `listing-${index}`}
                 variant="elevated"
                 padding="md"
                 className="mb-3"
-                onPress={() => router.push(`/(app)/(home)/listing/${listing.id}`)}
+                onPress={() => router.push(`/(app)/(home)/listing/${listing.id || listing._id}`)}
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1">

@@ -46,12 +46,15 @@
     }
   },
   "detail": {
+    "title": "Profile",
     "whyMatch": "Why this match?",
     "sharedInterests": "Shared Interests",
     "sharedLanguages": "Shared Languages",
     "compatibility": "Compatibility Breakdown",
     "overallMatch": "Overall Match",
-    "about": "About"
+    "about": "About",
+    "thingsToConsider": "Things to consider",
+    "unknown": "Unknown"
   },
   "empty": {
     "title": "No matches yet",
@@ -59,14 +62,27 @@
     "completeProfile": "Complete Your Profile"
   },
   "filters": {
-    "minScore": "Minimum Score",
+    "title": "Match Filters",
+    "minScore": "Minimum Compatibility Score",
+    "minScoreDescription": "Only show matches with at least this compatibility score",
+    "anyScore": "Any",
     "location": "Location",
-    "budget": "Budget Range"
+    "locationDescription": "Filter matches by preferred location",
+    "locationPlaceholder": "e.g., Warsaw, Krakow...",
+    "budget": "Budget Range",
+    "resultsLimit": "Results per page",
+    "apply": "Apply",
+    "reset": "Reset"
   },
   "error": {
     "title": "Error",
     "loadingFailed": "Failed to load matches. Please try again.",
-    "notFound": "Match not found"
+    "notFound": "Profile not found",
+    "notFoundDescription": "This profile may no longer be available",
+    "goBack": "Go Back",
+    "likeFailed": "Failed to send like. Please try again.",
+    "description": "Unable to load matches. Please try again.",
+    "retry": "Try Again"
   },
   "dashboard": {
     "welcome": "Welcome back, {{name}}!",
@@ -111,6 +127,8 @@
   },
   "likes": {
     "title": "Likes & Matches",
+    "pageTitle": "Likes & Matches",
+    "likeBack": "Like Back",
     "tabs": {
       "received": "Received",
       "sent": "Sent",

@@ -49,7 +49,7 @@ export default function ChatListScreen() {
         <FlatList
           data={chats}
           renderItem={renderItem}
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item, index) => item._id || `chat-${index}`}
           ItemSeparatorComponent={() => (
             <View className="h-px bg-gray-100 ml-20" />
           )}

@@ -26,8 +26,11 @@ export default function ListingCard({ listing }: ListingCardProps) {
     listing.images?.[0] ||
     'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400';
 
+  // Use id or _id (MongoDB returns _id)
+  const listingId = listing.id || listing._id;
+
   return (
-    <Link href={`/(app)/(home)/listing/${listing.id}`} asChild>
+    <Link href={`/(app)/(home)/listing/${listingId}`} asChild>
       <TouchableOpacity
         className="bg-white rounded-xl shadow-sm mx-4 mb-4 overflow-hidden"
         style={{ width: CARD_WIDTH }}
