@@ -15,7 +15,32 @@ export function useMatches(filters?: MatchingFilters) {
     queryKey: MATCHING_KEYS.matches(filters),
     queryFn: async () => {
       const response = await matchingService.getMatches(filters);
-      return response.data;
+      const data = response.data;
+
+      // Transform flat match results to include nested user object
+      // Backend returns: { user_id, username, photo, ... }
+      // Mobile expects: { user_id, user: { id, username, photo, ... }, ... }
+      if (data?.matches) {
+        data.matches = data.matches.map((match: Record<string, unknown>) => ({
+          ...match,
+          user: {
+            id: match.user_id,
+            _id: match.user_id,
+            username: match.username,
+            firstname: match.firstname,
+            lastname: match.lastname,
+            photo: match.photo,
+            age: match.age,
+            gender: match.gender,
+            bio: match.bio,
+            location: match.location,
+            languages: match.languages,
+            job: match.job,
+          },
+        }));
+      }
+
+      return data;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   });

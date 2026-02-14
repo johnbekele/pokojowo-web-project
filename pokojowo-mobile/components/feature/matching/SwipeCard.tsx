@@ -17,6 +17,11 @@ interface SwipeCardProps {
 export default function SwipeCard({ match, style }: SwipeCardProps) {
   const { user, compatibility_score, matched_preferences } = match;
 
+  // Safety check for undefined user
+  if (!user) {
+    return null;
+  }
+
   const photoUrl = typeof user.photo === 'string'
     ? user.photo
     : (user.photo as { url?: string } | undefined)?.url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
