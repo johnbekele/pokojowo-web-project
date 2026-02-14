@@ -172,8 +172,20 @@ const useAuthStore = create<AuthState>()(
       updateRole: async (roles) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await api.put('/users/me/role', { role: roles });
-          const { accessToken, refreshToken, user } = response.data;
+          // Backend expects a single role string: 'tenant', 'landlord', or 'both'
+          let role: string;
+          if (roles.length === 2 || roles.includes('Both')) {
+            role = 'both';
+          } else {
+            role = roles[0].toLowerCase();
+          }
+
+          const response = await api.put('/users/me/role', { role });
+          const data = response.data.data || response.data;
+          // Backend returns 'token' and 'refresh_token', not camelCase
+          const accessToken = data.token || data.accessToken;
+          const refreshToken = data.refresh_token || data.refreshToken;
+          const user = data.user;
 
           if (accessToken) {
             await get().setTokens(accessToken, refreshToken);

@@ -61,29 +61,30 @@ async def update_user_role(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Update current user's role (tenant or landlord).
+    Update current user's role (tenant, landlord, or both).
     This is called during onboarding when a new user selects their role.
     Returns a new token with the updated role.
     """
     role_value = role_data.role.lower()
 
-    if role_value not in ["tenant", "landlord"]:
+    if role_value not in ["tenant", "landlord", "both"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid role. Must be 'tenant' or 'landlord'"
+            detail="Invalid role. Must be 'tenant', 'landlord', or 'both'"
         )
 
-    # Map to RoleEnum
-    new_role = RoleEnum.TENANT if role_value == "tenant" else RoleEnum.LANDLORD
-
-    # Update user's role - keep USER role and add the new role
+    # Update user's role - keep USER role and add the new role(s)
     current_roles = list(current_user.role) if current_user.role else []
 
-    # Remove any existing tenant/landlord role (user can only be one)
+    # Remove any existing tenant/landlord role
     current_roles = [r for r in current_roles if r not in [RoleEnum.TENANT, RoleEnum.LANDLORD]]
 
-    # Add the new role
-    if new_role not in current_roles:
+    # Add the new role(s)
+    if role_value == "both":
+        current_roles.append(RoleEnum.TENANT)
+        current_roles.append(RoleEnum.LANDLORD)
+    else:
+        new_role = RoleEnum.TENANT if role_value == "tenant" else RoleEnum.LANDLORD
         current_roles.append(new_role)
 
     # Ensure USER role is present
@@ -111,8 +112,9 @@ async def update_user_role(
     current_user.refresh_token = refresh_token
     await current_user.save()
 
+    role_message = "Tenant and Landlord" if role_value == "both" else role_value.capitalize()
     return {
-        "message": f"Role updated to {new_role.value}",
+        "message": f"Role updated to {role_message}",
         "data": {
             "token": access_token,
             "refresh_token": refresh_token,
