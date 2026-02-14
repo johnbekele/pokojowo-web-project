@@ -120,6 +120,9 @@ async def get_listings(
             "canBeContacted": listing.can_be_contacted,
             "closeTo": listing.close_to,
             "AIHelp": listing.ai_help,
+            "isScraped": listing.is_scraped,
+            "sourceUrl": listing.source_url,
+            "sourceSite": listing.source_site,
             "createdAt": listing.created_at,
             "updatedAt": listing.updated_at
         }
@@ -147,6 +150,7 @@ async def get_listing_by_id(listing_id: str):
         "maxTenants": listing.max_tenants,
         "images": listing.images,
         "description": listing.description,
+        "phone": listing.phone,
         "availableFrom": listing.available_from,
         "roomType": listing.room_type.value,
         "buildingType": listing.building_type.value,
@@ -154,6 +158,9 @@ async def get_listing_by_id(listing_id: str):
         "canBeContacted": listing.can_be_contacted,
         "closeTo": listing.close_to,
         "AIHelp": listing.ai_help,
+        "isScraped": listing.is_scraped,
+        "sourceUrl": listing.source_url,
+        "sourceSite": listing.source_site,
         "createdAt": listing.created_at,
         "updatedAt": listing.updated_at
     }
@@ -244,6 +251,7 @@ async def get_my_listings(
             "maxTenants": listing.max_tenants,
             "images": listing.images,
             "description": listing.description,
+            "phone": listing.phone,
             "availableFrom": listing.available_from,
             "roomType": listing.room_type.value,
             "buildingType": listing.building_type.value,
@@ -251,6 +259,9 @@ async def get_my_listings(
             "canBeContacted": listing.can_be_contacted,
             "closeTo": listing.close_to,
             "AIHelp": listing.ai_help,
+            "isScraped": listing.is_scraped,
+            "sourceUrl": listing.source_url,
+            "sourceSite": listing.source_site,
             "createdAt": listing.created_at,
             "updatedAt": listing.updated_at
         }
@@ -273,6 +284,7 @@ async def get_listings_by_owner(owner_id: str, skip: int = 0, limit: int = 20):
             "maxTenants": listing.max_tenants,
             "images": listing.images,
             "description": listing.description,
+            "phone": listing.phone,
             "availableFrom": listing.available_from,
             "roomType": listing.room_type.value,
             "buildingType": listing.building_type.value,
@@ -280,6 +292,9 @@ async def get_listings_by_owner(owner_id: str, skip: int = 0, limit: int = 20):
             "canBeContacted": listing.can_be_contacted,
             "closeTo": listing.close_to,
             "AIHelp": listing.ai_help,
+            "isScraped": listing.is_scraped,
+            "sourceUrl": listing.source_url,
+            "sourceSite": listing.source_site,
             "createdAt": listing.created_at,
             "updatedAt": listing.updated_at
         }
