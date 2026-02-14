@@ -144,5 +144,27 @@
     "liked": "Saved",
     "share": "Share",
     "report": "Report listing"
+  },
+  "detail": {
+    "description": "Description",
+    "amenities": "Amenities",
+    "details": "Details",
+    "landlord": "Landlord",
+    "contactInfo": "Contact Information",
+    "phoneNumber": "Phone Number",
+    "tapToCall": "Tap to call",
+    "notProvided": "Not provided",
+    "originalListing": "Original Listing",
+    "viewOnSource": "View on source",
+    "scrapedNotice": "This listing was imported from an external source. Contact the landlord directly through the original website or phone number.",
+    "call": "Call",
+    "message": "Message",
+    "viewOriginal": "View Original",
+    "callError": "Cannot make call",
+    "callErrorMessage": "Unable to open phone app. Phone: {{phone}}",
+    "noPhone": "Phone not available",
+    "noPhoneMessage": "The owner has not provided a phone number. Try sending a message instead.",
+    "linkError": "Cannot open link",
+    "linkErrorMessage": "Unable to open the original listing."
   }
 }

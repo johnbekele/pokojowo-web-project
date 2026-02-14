@@ -148,5 +148,27 @@
     "liked": "Zapisano",
     "share": "Udostępnij",
     "report": "Zgłoś ogłoszenie"
+  },
+  "detail": {
+    "description": "Opis",
+    "amenities": "Udogodnienia",
+    "details": "Szczegóły",
+    "landlord": "Właściciel",
+    "contactInfo": "Dane kontaktowe",
+    "phoneNumber": "Numer telefonu",
+    "tapToCall": "Dotknij aby zadzwonić",
+    "notProvided": "Nie podano",
+    "originalListing": "Oryginalne ogłoszenie",
+    "viewOnSource": "Zobacz źródło",
+    "scrapedNotice": "To ogłoszenie zostało zaimportowane z zewnętrznego źródła. Skontaktuj się z właścicielem bezpośrednio przez oryginalną stronę lub numer telefonu.",
+    "call": "Zadzwoń",
+    "message": "Wiadomość",
+    "viewOriginal": "Zobacz oryginał",
+    "callError": "Nie można zadzwonić",
+    "callErrorMessage": "Nie można otworzyć aplikacji telefonu. Numer: {{phone}}",
+    "noPhone": "Brak numeru telefonu",
+    "noPhoneMessage": "Właściciel nie podał numeru telefonu. Spróbuj wysłać wiadomość.",
+    "linkError": "Nie można otworzyć linku",
+    "linkErrorMessage": "Nie można otworzyć oryginalnego ogłoszenia."
   }
 }

@@ -38,6 +38,22 @@ import { COLORS } from '@/lib/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// Base URL for images (without /api)
+const IMAGE_BASE_URL = 'https://pokojowo-web-project.onrender.com';
+
+/**
+ * Convert image URL to absolute URL if it's a relative path
+ */
+const getImageUrl = (url: string): string => {
+  if (!url) return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800';
+  // If already absolute URL, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Prepend base URL for relative paths
+  return `${IMAGE_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -113,11 +129,10 @@ export default function ListingDetailScreen() {
   };
 
   const handleViewOriginal = async () => {
-    const sourceUrl = (listing as any)?.sourceUrl;
-    if (sourceUrl) {
-      const canOpen = await Linking.canOpenURL(sourceUrl);
+    if (listing?.sourceUrl) {
+      const canOpen = await Linking.canOpenURL(listing.sourceUrl);
       if (canOpen) {
-        await Linking.openURL(sourceUrl);
+        await Linking.openURL(listing.sourceUrl);
       } else {
         Alert.alert(
           t('detail.linkError', 'Cannot open link'),
@@ -147,8 +162,16 @@ export default function ListingDetailScreen() {
   }
 
   const images = listing.images?.length
-    ? listing.images
+    ? listing.images.map(getImageUrl)
     : ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'];
+
+  // Get phone number from various possible sources
+  const phoneNumber = listing.phone || listing.landlord?.phone || listing.owner?.phone;
+
+  // Check if this is a scraped listing
+  const isScraped = listing.isScraped;
+  const sourceUrl = listing.sourceUrl;
+  const sourceSite = listing.sourceSite;
 
   const description =
     listing.description?.[i18n.language as 'en' | 'pl'] ||
@@ -321,7 +344,7 @@ export default function ListingDetailScreen() {
           </View>
 
           {/* Landlord */}
-          {listing.owner && (
+          {listing.owner && !isScraped && (
             <View className="mb-6">
               <Text className="text-lg font-semibold text-gray-900 mb-3">
                 {t('detail.landlord', 'Landlord')}
@@ -349,20 +372,85 @@ export default function ListingDetailScreen() {
               </Card>
             </View>
           )}
+
+          {/* Contact Information */}
+          <View className="mb-6">
+            <Text className="text-lg font-semibold text-gray-900 mb-3">
+              {t('detail.contactInfo', 'Contact Information')}
+            </Text>
+            <Card variant="outlined" padding="md">
+              {/* Phone Number */}
+              {phoneNumber ? (
+                <TouchableOpacity
+                  onPress={handleCall}
+                  className="flex-row items-center py-2 border-b border-gray-100"
+                >
+                  <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center mr-3">
+                    <Phone size={20} color={COLORS.success} />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-gray-500 text-sm">{t('detail.phoneNumber', 'Phone Number')}</Text>
+                    <Text className="text-gray-900 font-medium text-base">{phoneNumber}</Text>
+                  </View>
+                  <Text className="text-primary-600 font-medium">{t('detail.tapToCall', 'Tap to call')}</Text>
+                </TouchableOpacity>
+              ) : (
+                <View className="flex-row items-center py-2 border-b border-gray-100">
+                  <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center mr-3">
+                    <Phone size={20} color={COLORS.gray[400]} />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-gray-500 text-sm">{t('detail.phoneNumber', 'Phone Number')}</Text>
+                    <Text className="text-gray-400">{t('detail.notProvided', 'Not provided')}</Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Source Link for Scraped Listings */}
+              {isScraped && sourceUrl && (
+                <TouchableOpacity
+                  onPress={handleViewOriginal}
+                  className="flex-row items-center py-2 mt-2"
+                >
+                  <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
+                    <ExternalLink size={20} color={COLORS.primary[600]} />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-gray-500 text-sm">{t('detail.originalListing', 'Original Listing')}</Text>
+                    <Text className="text-primary-600 font-medium capitalize">
+                      {sourceSite || t('detail.viewOnSource', 'View on source')}
+                    </Text>
+                  </View>
+                  <ExternalLink size={18} color={COLORS.primary[600]} />
+                </TouchableOpacity>
+              )}
+
+              {/* Scraped listing notice */}
+              {isScraped && (
+                <View className="mt-3 p-3 bg-amber-50 rounded-lg">
+                  <Text className="text-amber-800 text-sm">
+                    {t('detail.scrapedNotice', 'This listing was imported from an external source. Contact the landlord directly through the original website or phone number.')}
+                  </Text>
+                </View>
+              )}
+            </Card>
+          </View>
         </View>
       </ScrollView>
 
       {/* Bottom CTA */}
       <View className="p-4 border-t border-gray-100 bg-white flex-row gap-3">
-        <Button
-          variant="outline"
-          className="flex-1"
-          icon={<Phone size={18} color={COLORS.gray[700]} />}
-          onPress={handleCall}
-        >
-          {t('detail.call', 'Call')}
-        </Button>
-        {(listing as any)?.isScraped && (listing as any)?.sourceUrl ? (
+        {phoneNumber && (
+          <Button
+            variant="outline"
+            className="flex-1"
+            icon={<Phone size={18} color={COLORS.success} />}
+            onPress={handleCall}
+          >
+            {t('detail.call', 'Call')}
+          </Button>
+        )}
+        {isScraped && sourceUrl ? (
           <Button
             variant="primary"
             className="flex-1"
