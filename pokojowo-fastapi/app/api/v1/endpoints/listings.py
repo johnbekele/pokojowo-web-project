@@ -112,6 +112,7 @@ async def get_listings(
             "maxTenants": listing.max_tenants,
             "images": listing.images,
             "description": listing.description,
+            "phone": listing.phone,
             "availableFrom": listing.available_from,
             "roomType": listing.room_type.value,
             "buildingType": listing.building_type.value,
