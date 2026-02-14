@@ -1,15 +1,19 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { MapPin, Calendar, MessageSquare, ArrowLeft, Check, Home, Bed, Bath } from 'lucide-react';
+import { MapPin, Calendar, MessageSquare, ArrowLeft, Check, Home, Bed, Users, Phone, ExternalLink, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserAvatar from '@/components/shared/UserAvatar';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
+
+// Base URL for images (without /api)
+const IMAGE_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'https://pokojowo-web-project.onrender.com';
 
 // Helper to get translated text from multilingual object
 const getTranslatedText = (text, lang) => {
@@ -19,6 +23,15 @@ const getTranslatedText = (text, lang) => {
     return text[lang] || text.en || text.pl || '';
   }
   return String(text);
+};
+
+// Helper to convert relative image URLs to absolute
+const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `${IMAGE_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 export default function ListingDetails() {
@@ -74,6 +87,17 @@ export default function ListingDetails() {
 
   const landlord = listing.landlord || listing.owner;
 
+  // Get images array and convert to absolute URLs
+  const images = (listing.images || []).map(getImageUrl).filter(Boolean);
+
+  // Get phone number from various sources
+  const phoneNumber = listing.phone || landlord?.phone;
+
+  // Check if scraped listing
+  const isScraped = listing.isScraped;
+  const sourceUrl = listing.sourceUrl;
+  const sourceSite = listing.sourceSite;
+
   return (
     <div className="space-y-6">
       {/* Back button */}
@@ -84,21 +108,21 @@ export default function ListingDetails() {
 
       {/* Image Gallery */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {listing.photos?.length > 0 ? (
+        {images.length > 0 ? (
           <>
             <div className="md:col-span-2 lg:row-span-2">
               <img
-                src={listing.photos[0].url}
-                alt={listing.title}
+                src={images[0]}
+                alt={listing.title || listing.address}
                 className="h-full w-full rounded-lg object-cover"
                 style={{ minHeight: '400px' }}
               />
             </div>
-            {listing.photos.slice(1, 5).map((photo, index) => (
+            {images.slice(1, 5).map((imageUrl, index) => (
               <div key={index}>
                 <img
-                  src={photo.url}
-                  alt={`${listing.title} ${index + 2}`}
+                  src={imageUrl}
+                  alt={`${listing.title || listing.address} ${index + 2}`}
                   className="h-48 w-full rounded-lg object-cover"
                 />
               </div>
@@ -118,10 +142,14 @@ export default function ListingDetails() {
           <div>
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold md:text-3xl">{listing.title}</h1>
+                <h1 className="text-2xl font-bold md:text-3xl">
+                  {listing.title || listing.address}
+                </h1>
                 <p className="flex items-center gap-1 text-muted-foreground">
                   <MapPin className="h-4 w-4" />
-                  {listing.address?.street}, {listing.address?.city}
+                  {typeof listing.address === 'string'
+                    ? listing.address
+                    : `${listing.address?.street || ''}, ${listing.address?.city || ''}`}
                 </p>
               </div>
               <div className="text-right">
@@ -145,10 +173,16 @@ export default function ListingDetails() {
                 <span className="capitalize">{listing.roomType.replace('_', ' ')}</span>
               </div>
             )}
-            {listing.bathrooms && (
+            {listing.size && (
               <div className="flex items-center gap-2">
-                <Bath className="h-5 w-5 text-muted-foreground" />
-                <span>{listing.bathrooms} {listing.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+                <Home className="h-5 w-5 text-muted-foreground" />
+                <span>{listing.size} m²</span>
+              </div>
+            )}
+            {listing.maxTenants && (
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <span>Max {listing.maxTenants} {listing.maxTenants === 1 ? 'tenant' : 'tenants'}</span>
               </div>
             )}
             {listing.availableFrom && (
@@ -209,40 +243,130 @@ export default function ListingDetails() {
           </div>
         </div>
 
-        {/* Sidebar - Landlord Info */}
-        <div>
+        {/* Sidebar - Contact Info */}
+        <div className="space-y-4">
+          {/* Scraped Listing Notice */}
+          {isScraped && (
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                {t('detail.scrapedNotice', 'This listing was imported from an external source. Contact the landlord directly through the original website or phone number.')}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Contact Card */}
           <Card className="sticky top-24">
             <CardHeader>
-              <CardTitle className="text-lg">{t('details.landlord')}</CardTitle>
+              <CardTitle className="text-lg">
+                {t('detail.contactInfo', 'Contact Information')}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {landlord ? (
-                <>
-                  <div className="flex items-center gap-3">
-                    <UserAvatar user={landlord} size="lg" />
-                    <div>
-                      <p className="font-medium">
-                        {landlord.firstname} {landlord.lastname}
+              {/* Phone Number */}
+              {phoneNumber && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {t('detail.phoneNumber', 'Phone Number')}
+                  </p>
+                  <a
+                    href={`tel:${phoneNumber.replace(/[^\d+]/g, '')}`}
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+                      <Phone className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{phoneNumber}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('detail.tapToCall', 'Click to call')}
                       </p>
-                      {landlord.isVerified && (
-                        <Badge variant="outline" className="text-green-600 border-green-600">
-                          Verified
-                        </Badge>
-                      )}
+                    </div>
+                  </a>
+                </div>
+              )}
+
+              {/* Source Link for Scraped Listings */}
+              {isScraped && sourceUrl && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {t('detail.originalListing', 'Original Listing')}
+                  </p>
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
+                  >
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
+                      <ExternalLink className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium capitalize">
+                        {sourceSite || t('detail.viewOnSource', 'View on source')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('detail.viewOriginal', 'View original listing')}
+                      </p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </a>
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Landlord Info (only for non-scraped) */}
+              {!isScraped && landlord ? (
+                <>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {t('details.landlord', 'Landlord')}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <UserAvatar user={landlord} size="lg" />
+                      <div>
+                        <p className="font-medium">
+                          {landlord.firstname} {landlord.lastname}
+                        </p>
+                        {landlord.isVerified && (
+                          <Badge variant="outline" className="text-green-600 border-green-600">
+                            Verified
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
-
-                  <Separator />
 
                   <Button className="w-full">
                     <MessageSquare className="mr-2 h-4 w-4" />
                     {t('details.contactLandlord')}
                   </Button>
                 </>
-              ) : (
-                <p className="text-muted-foreground">
-                  Landlord information not available
+              ) : !isScraped ? (
+                <p className="text-muted-foreground text-center py-2">
+                  {t('detail.notProvided', 'Contact information not available')}
                 </p>
+              ) : null}
+
+              {/* View Original Button for Scraped */}
+              {isScraped && sourceUrl && (
+                <Button className="w-full" asChild>
+                  <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    {t('detail.viewOriginal', 'View Original Listing')}
+                  </a>
+                </Button>
+              )}
+
+              {/* Call Button */}
+              {phoneNumber && (
+                <Button variant="outline" className="w-full" asChild>
+                  <a href={`tel:${phoneNumber.replace(/[^\d+]/g, '')}`}>
+                    <Phone className="mr-2 h-4 w-4" />
+                    {t('detail.call', 'Call')}
+                  </a>
+                </Button>
               )}
             </CardContent>
           </Card>

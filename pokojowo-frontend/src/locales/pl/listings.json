@@ -95,5 +95,16 @@
     "like": "Zapisz ogłoszenie",
     "unlike": "Usuń z zapisanych",
     "liked": "Zapisano"
+  },
+  "detail": {
+    "contactInfo": "Dane kontaktowe",
+    "phoneNumber": "Numer telefonu",
+    "tapToCall": "Kliknij aby zadzwonić",
+    "notProvided": "Dane kontaktowe niedostępne",
+    "originalListing": "Oryginalne ogłoszenie",
+    "viewOnSource": "Zobacz źródło",
+    "viewOriginal": "Zobacz oryginalne ogłoszenie",
+    "call": "Zadzwoń",
+    "scrapedNotice": "To ogłoszenie zostało zaimportowane z zewnętrznego źródła. Skontaktuj się z właścicielem bezpośrednio przez oryginalną stronę lub numer telefonu."
   }
 }

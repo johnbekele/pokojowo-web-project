@@ -95,5 +95,16 @@
     "like": "Save listing",
     "unlike": "Remove from saved",
     "liked": "Saved"
+  },
+  "detail": {
+    "contactInfo": "Contact Information",
+    "phoneNumber": "Phone Number",
+    "tapToCall": "Click to call",
+    "notProvided": "Contact information not available",
+    "originalListing": "Original Listing",
+    "viewOnSource": "View on source",
+    "viewOriginal": "View Original Listing",
+    "call": "Call",
+    "scrapedNotice": "This listing was imported from an external source. Contact the landlord directly through the original website or phone number."
   }
 }
