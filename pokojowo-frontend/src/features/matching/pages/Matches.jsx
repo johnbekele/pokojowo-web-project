@@ -81,9 +81,9 @@ export default function Matches() {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-destructive">Error loading matches</CardTitle>
+          <CardTitle className="text-destructive">{t('error.title')}</CardTitle>
           <CardDescription>
-            Please try again later.
+            {t('error.subtitle')}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -101,9 +101,9 @@ export default function Matches() {
           <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
           {data?.total_candidates != null && (
             <p className="text-sm text-muted-foreground mt-1">
-              {matches.length} matches found from {data.total_candidates} candidates
+              {t('stats.matchesFound', { count: matches.length, total: data.total_candidates })}
               {data.filtered_by_deal_breakers > 0 && (
-                <span className="text-yellow-600"> ({data.filtered_by_deal_breakers} filtered)</span>
+                <span className="text-yellow-600"> ({t('stats.filtered', { count: data.filtered_by_deal_breakers })})</span>
               )}
             </p>
           )}
@@ -114,11 +114,11 @@ export default function Matches() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="swipe" className="gap-2">
               <Layers className="h-4 w-4" />
-              <span className="hidden sm:inline">Swipe</span>
+              <span className="hidden sm:inline">{t('viewMode.swipe')}</span>
             </TabsTrigger>
             <TabsTrigger value="grid" className="gap-2">
               <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">Grid</span>
+              <span className="hidden sm:inline">{t('viewMode.grid')}</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -252,7 +252,7 @@ function MatchCard({ match, onClick }) {
           {is_new_user && (
             <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500 text-white text-xs font-bold">
               <Sparkles className="h-3 w-3" />
-              NEW
+              {t('card.newUser')}
             </div>
           )}
         </div>

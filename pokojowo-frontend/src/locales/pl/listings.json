@@ -3,7 +3,26 @@
   "hero": {
     "badge": "Inteligentne Dopasowywanie",
     "subtitle": "Nasz algorytm AI znajduje kompatybilnych współlokatorów na podstawie stylu życia, zainteresowań i preferencji. Dołącz do tysięcy osób szukających idealnej sytuacji mieszkaniowej.",
-    "searchButton": "Szukaj"
+    "searchButton": "Szukaj",
+    "signupNow": "Zarejestruj się",
+    "slides": {
+      "roommate1": {
+        "title": "Znajdź Idealnego Współlokatora",
+        "subtitle": "Połącz się z ludźmi, którzy pasują do Twojego stylu życia"
+      },
+      "room1": {
+        "title": "Odkryj Swój Wymarzony Pokój",
+        "subtitle": "Przeglądaj setki zweryfikowanych pokoi w Twojej okolicy"
+      },
+      "roommate2": {
+        "title": "Mieszkaj z Podobnymi Ludźmi",
+        "subtitle": "Znajdź współlokatorów, którzy podzielają Twoje zainteresowania"
+      },
+      "room2": {
+        "title": "Twój Nowy Dom Czeka",
+        "subtitle": "Pokoje wysokiej jakości w przystępnych cenach"
+      }
+    }
   },
   "cta": {
     "tenant": {
@@ -61,7 +80,9 @@
     "available": "Dostępny",
     "viewDetails": "Zobacz szczegóły",
     "beds": "łóżka",
-    "baths": "łazienki"
+    "baths": "łazienki",
+    "tenants": "{{count}} lokator",
+    "tenants_plural": "{{count}} lokatorów"
   },
   "details": {
     "description": "Opis",

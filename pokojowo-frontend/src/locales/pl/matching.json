@@ -23,6 +23,7 @@
     "compatible": "{{score}}% Zgodność",
     "yearsOld": "{{age}} lat",
     "whyYouMatch": "Dlaczego pasujesz",
+    "newUser": "NOWY",
     "matchMessages": {
       "perfect": "Możecie być świetnymi współlokatorami!",
       "great": "Macie wiele wspólnego!",
@@ -49,9 +50,18 @@
     "budget": "Zakres budżetu"
   },
   "error": {
-    "title": "Błąd",
+    "title": "Błąd ładowania dopasowań",
+    "subtitle": "Spróbuj ponownie później.",
     "loadingFailed": "Nie udało się załadować dopasowań. Spróbuj ponownie.",
     "notFound": "Nie znaleziono dopasowania"
+  },
+  "stats": {
+    "matchesFound": "{{count}} dopasowań z {{total}} kandydatów",
+    "filtered": "{{count}} odfiltrowanych"
+  },
+  "viewMode": {
+    "swipe": "Przesuwaj",
+    "grid": "Siatka"
   },
   "dashboard": {
     "welcome": "Witaj ponownie, {{name}}!",

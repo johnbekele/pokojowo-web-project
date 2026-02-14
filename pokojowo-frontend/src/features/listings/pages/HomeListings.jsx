@@ -17,36 +17,36 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-// Hero slides with images and promo content
+// Hero slides with images and promo content (titles/subtitles use translation keys)
 const HERO_SLIDES = [
   {
     image: "/images/promo/romm1.png",
     fallback:
       "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80",
-    title: "Find Your Perfect Roommate",
-    subtitle: "Connect with people who match your vibe and lifestyle",
+    titleKey: "hero.slides.roommate1.title",
+    subtitleKey: "hero.slides.roommate1.subtitle",
     type: "roommate",
   },
   {
     image:
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80",
-    title: "Discover Your Dream Room",
-    subtitle: "Browse hundreds of verified rooms in your area",
+    titleKey: "hero.slides.room1.title",
+    subtitleKey: "hero.slides.room1.subtitle",
     type: "room",
   },
   {
     image: "/images/promo/Roommate-Finder.webp",
     fallback:
       "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1920&q=80",
-    title: "Live With Like-Minded People",
-    subtitle: "Find roommates who share your interests and values",
+    titleKey: "hero.slides.roommate2.title",
+    subtitleKey: "hero.slides.roommate2.subtitle",
     type: "roommate",
   },
   {
     image:
       "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80",
-    title: "Your Next Home Awaits",
-    subtitle: "Quality rooms at prices that work for you",
+    titleKey: "hero.slides.room2.title",
+    subtitleKey: "hero.slides.room2.subtitle",
     type: "room",
   },
 ];
@@ -230,10 +230,10 @@ export default function HomeListings() {
           {/* Top - Title & Search */}
           <div className="max-w-xl">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-white transition-all duration-500">
-              {currentSlide.title}
+              {t(currentSlide.titleKey)}
             </h1>
             <p className="text-sm md:text-base text-white/80 mb-4 transition-all duration-500">
-              {currentSlide.subtitle}
+              {t(currentSlide.subtitleKey)}
             </p>
 
             {/* Search Bar */}
@@ -262,7 +262,7 @@ export default function HomeListings() {
                   variant="ghost"
                   className="h-9 px-5 bg-transparent hover:bg-white/10 text-white text-sm font-medium gap-2 border border-white/30"
                 >
-                  Signup now
+                  {t("hero.signupNow")}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -474,7 +474,7 @@ function ListingCard({ listing, interestedUsers = [] }) {
           {listing.size && <span>{listing.size}m²</span>}
           {listing.maxTenants && (
             <span>
-              {listing.maxTenants} tenant{listing.maxTenants > 1 ? "s" : ""}
+              {t("card.tenants", { count: listing.maxTenants })}
             </span>
           )}
         </div>

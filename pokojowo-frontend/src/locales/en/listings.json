@@ -3,7 +3,26 @@
   "hero": {
     "badge": "Smart Roommate Matching",
     "subtitle": "Our AI-powered matching finds compatible roommates based on lifestyle, interests, and preferences. Join thousands finding their ideal living situation.",
-    "searchButton": "Search"
+    "searchButton": "Search",
+    "signupNow": "Sign up now",
+    "slides": {
+      "roommate1": {
+        "title": "Find Your Perfect Roommate",
+        "subtitle": "Connect with people who match your vibe and lifestyle"
+      },
+      "room1": {
+        "title": "Discover Your Dream Room",
+        "subtitle": "Browse hundreds of verified rooms in your area"
+      },
+      "roommate2": {
+        "title": "Live With Like-Minded People",
+        "subtitle": "Find roommates who share your interests and values"
+      },
+      "room2": {
+        "title": "Your Next Home Awaits",
+        "subtitle": "Quality rooms at prices that work for you"
+      }
+    }
   },
   "cta": {
     "tenant": {
@@ -61,7 +80,9 @@
     "available": "Available",
     "viewDetails": "View Details",
     "beds": "beds",
-    "baths": "baths"
+    "baths": "baths",
+    "tenants": "{{count}} tenant",
+    "tenants_plural": "{{count}} tenants"
   },
   "details": {
     "description": "Description",

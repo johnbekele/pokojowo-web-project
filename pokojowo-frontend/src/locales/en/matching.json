@@ -23,6 +23,7 @@
     "compatible": "{{score}}% Compatible",
     "yearsOld": "{{age}} years old",
     "whyYouMatch": "Why you match",
+    "newUser": "NEW",
     "matchMessages": {
       "perfect": "You two could be great roommates!",
       "great": "You have a lot in common!",
@@ -49,9 +50,18 @@
     "budget": "Budget Range"
   },
   "error": {
-    "title": "Error",
+    "title": "Error loading matches",
+    "subtitle": "Please try again later.",
     "loadingFailed": "Failed to load matches. Please try again.",
     "notFound": "Match not found"
+  },
+  "stats": {
+    "matchesFound": "{{count}} matches found from {{total}} candidates",
+    "filtered": "{{count}} filtered"
+  },
+  "viewMode": {
+    "swipe": "Swipe",
+    "grid": "Grid"
   },
   "dashboard": {
     "welcome": "Welcome back, {{name}}!",
