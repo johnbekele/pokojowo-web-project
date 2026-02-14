@@ -50,6 +50,12 @@ class Listing(Document):
     close_to: Optional[List[str]] = Field(None, alias="closeTo")
     ai_help: bool = Field(False, alias="AIHelp")
 
+    # Scraped listing fields (for external sources like OLX, Otodom)
+    is_scraped: bool = Field(False, alias="isScraped")
+    source_url: Optional[str] = Field(None, alias="sourceUrl")
+    source_site: Optional[str] = Field(None, alias="sourceSite")  # olx, otodom, etc.
+    phone: Optional[str] = Field(None)  # Contact phone from scraped listing
+
     # Timestamps
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow, alias="createdAt")
     updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow, alias="updatedAt")

@@ -284,3 +284,149 @@ async def get_listings_by_owner(owner_id: str, skip: int = 0, limit: int = 20):
         }
         for listing in listings
     ]
+
+
+# ============================================================================
+# SCRAPED LISTING IMPORT (No Auth Required)
+# ============================================================================
+
+from pydantic import BaseModel
+
+class ScrapedListingImport(BaseModel):
+    """Schema for importing scraped listings from external sources."""
+    address: str
+    price: float
+    size: float
+    maxTenants: int = 1
+    images: List[str] = []
+    description: dict  # {en: "", pl: ""}
+    availableFrom: Optional[str] = None
+    roomType: str = "Single"
+    buildingType: str = "Apartment"
+    rentForOnly: List[str] = ["Open to All"]
+    canBeContacted: List[str] = ["Message"]
+    closeTo: List[str] = []
+    AIHelp: bool = False
+    # Scraped-specific fields
+    sourceUrl: str  # Required - link to original post
+    sourceSite: str  # Required - olx, otodom, etc.
+    phone: Optional[str] = None
+
+
+@router.post("/import", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def import_scraped_listing(listing_data: ScrapedListingImport):
+    """
+    Import a scraped listing from external sources (OLX, Otodom, etc.)
+    No authentication required - these are reference listings.
+    Users can click through to the original source.
+    """
+    from app.models.listing import RoomTypeEnum, BuildingTypeEnum, RentForEnum
+
+    # Check for duplicate by source_url
+    existing = await Listing.find_one({"source_url": listing_data.sourceUrl})
+    if existing:
+        return {
+            "message": "Listing already exists",
+            "listing_id": str(existing.id),
+            "duplicate": True
+        }
+
+    # Parse room type
+    try:
+        room_type = RoomTypeEnum(listing_data.roomType)
+    except ValueError:
+        room_type = RoomTypeEnum.SINGLE
+
+    # Parse building type
+    try:
+        building_type = BuildingTypeEnum(listing_data.buildingType)
+    except ValueError:
+        building_type = BuildingTypeEnum.APARTMENT
+
+    # Parse rent for only
+    rent_for_only = []
+    for r in listing_data.rentForOnly:
+        try:
+            rent_for_only.append(RentForEnum(r))
+        except ValueError:
+            rent_for_only.append(RentForEnum.OPEN_TO_ALL)
+    if not rent_for_only:
+        rent_for_only = [RentForEnum.OPEN_TO_ALL]
+
+    # Parse available from date
+    available_from = datetime.utcnow()
+    if listing_data.availableFrom:
+        try:
+            available_from = datetime.fromisoformat(listing_data.availableFrom.replace('Z', '+00:00'))
+        except:
+            pass
+
+    # Create listing with scraped flag
+    listing = Listing(
+        owner_id="scraped",  # Special owner ID for scraped listings
+        address=listing_data.address,
+        price=listing_data.price,
+        size=listing_data.size,
+        max_tenants=listing_data.maxTenants,
+        images=listing_data.images,
+        description=listing_data.description,
+        available_from=available_from,
+        room_type=room_type,
+        building_type=building_type,
+        rent_for_only=rent_for_only,
+        can_be_contacted=listing_data.canBeContacted,
+        close_to=listing_data.closeTo,
+        ai_help=listing_data.AIHelp,
+        # Scraped-specific fields
+        is_scraped=True,
+        source_url=listing_data.sourceUrl,
+        source_site=listing_data.sourceSite,
+        phone=listing_data.phone,
+    )
+
+    await listing.insert()
+
+    return {
+        "message": "Scraped listing imported successfully",
+        "listing_id": str(listing.id),
+        "duplicate": False
+    }
+
+
+@router.get("/scraped", response_model=List[dict])
+async def get_scraped_listings(
+    skip: int = 0,
+    limit: int = 20,
+    source_site: Optional[str] = None
+):
+    """Get all scraped listings, optionally filtered by source site."""
+    query = {"is_scraped": True}
+    if source_site:
+        query["source_site"] = source_site
+
+    listings = await Listing.find(query).sort("-created_at").skip(skip).limit(limit).to_list()
+
+    return [
+        {
+            "_id": str(listing.id),
+            "address": listing.address,
+            "price": listing.price,
+            "size": listing.size,
+            "maxTenants": listing.max_tenants,
+            "images": listing.images,
+            "description": listing.description,
+            "availableFrom": listing.available_from,
+            "roomType": listing.room_type.value,
+            "buildingType": listing.building_type.value,
+            "rentForOnly": [r.value for r in listing.rent_for_only],
+            "canBeContacted": listing.can_be_contacted,
+            "closeTo": listing.close_to,
+            "AIHelp": listing.ai_help,
+            "isScraped": listing.is_scraped,
+            "sourceUrl": listing.source_url,
+            "sourceSite": listing.source_site,
+            "phone": listing.phone,
+            "createdAt": listing.created_at,
+        }
+        for listing in listings
+    ]
