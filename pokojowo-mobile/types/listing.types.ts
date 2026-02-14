@@ -46,6 +46,9 @@ export interface Listing {
     isVerified?: boolean;
   };
   phone?: string; // Direct phone on listing
+  isScraped?: boolean;
+  sourceUrl?: string;
+  sourceSite?: string;
 }
 
 export interface ListingFilters {

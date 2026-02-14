@@ -26,6 +26,7 @@ import {
   Phone,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
 } from 'lucide-react-native';
 
 import { Button, Badge, Avatar, LoadingSpinner, Card } from '@/components/ui';
@@ -108,6 +109,21 @@ export default function ListingDetailScreen() {
         t('detail.noPhone', 'Phone not available'),
         t('detail.noPhoneMessage', 'The owner has not provided a phone number. Try sending a message instead.')
       );
+    }
+  };
+
+  const handleViewOriginal = async () => {
+    const sourceUrl = (listing as any)?.sourceUrl;
+    if (sourceUrl) {
+      const canOpen = await Linking.canOpenURL(sourceUrl);
+      if (canOpen) {
+        await Linking.openURL(sourceUrl);
+      } else {
+        Alert.alert(
+          t('detail.linkError', 'Cannot open link'),
+          t('detail.linkErrorMessage', 'Unable to open the original listing.')
+        );
+      }
     }
   };
 
@@ -346,14 +362,25 @@ export default function ListingDetailScreen() {
         >
           {t('detail.call', 'Call')}
         </Button>
-        <Button
-          variant="primary"
-          className="flex-1"
-          icon={<MessageSquare size={18} color="white" />}
-          onPress={handleContact}
-        >
-          {t('detail.message', 'Message')}
-        </Button>
+        {(listing as any)?.isScraped && (listing as any)?.sourceUrl ? (
+          <Button
+            variant="primary"
+            className="flex-1"
+            icon={<ExternalLink size={18} color="white" />}
+            onPress={handleViewOriginal}
+          >
+            {t('detail.viewOriginal', 'View Original')}
+          </Button>
+        ) : (
+          <Button
+            variant="primary"
+            className="flex-1"
+            icon={<MessageSquare size={18} color="white" />}
+            onPress={handleContact}
+          >
+            {t('detail.message', 'Message')}
+          </Button>
+        )}
       </View>
     </SafeAreaView>
   );
