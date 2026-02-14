@@ -23,8 +23,14 @@ export default function StatsOverview() {
         scraperApi.getStatsBySite(),
         scraperApi.getQualityMetrics(),
       ]);
-      setStats(overviewData);
-      setSiteStats(siteData.sites || []);
+      // Flatten the nested listings object for easier access
+      setStats(overviewData?.listings || {});
+      // Convert site stats object to array
+      const sitesArray = Object.entries(siteData || {}).map(([site, data]) => ({
+        site,
+        ...data,
+      }));
+      setSiteStats(sitesArray);
       setQuality(qualityData);
     } catch (err) {
       setError(err.message);
@@ -143,27 +149,27 @@ export default function StatsOverview() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <p className="text-2xl font-bold text-blue-600">
-                {quality.avg_completeness?.toFixed(1) || 0}%
+                {quality.averages?.completeness_score?.toFixed(1) || 0}%
               </p>
               <p className="text-sm text-gray-500">Avg Completeness</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <p className="text-2xl font-bold text-green-600">
-                {quality.avg_confidence?.toFixed(1) || 0}%
+                {quality.averages?.confidence_score?.toFixed(1) || 0}%
               </p>
               <p className="text-sm text-gray-500">Avg Confidence</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <p className="text-2xl font-bold text-purple-600">
-                {formatNumber(quality.with_images || 0)}
+                {quality.completeness?.with_images?.toFixed(1) || 0}%
               </p>
               <p className="text-sm text-gray-500">With Images</p>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <p className="text-2xl font-bold text-orange-600">
-                {formatNumber(quality.with_translation || 0)}
+                {quality.completeness?.with_price?.toFixed(1) || 0}%
               </p>
-              <p className="text-sm text-gray-500">Translated</p>
+              <p className="text-sm text-gray-500">With Price</p>
             </div>
           </div>
         </div>

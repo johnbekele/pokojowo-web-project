@@ -29,7 +29,8 @@ class Settings(BaseSettings):
 
     # Pokojowo API
     pokojowo_api_url: str = Field(
-        default="http://localhost:3000", description="Pokojowo FastAPI base URL"
+        default="https://pokojowo-web-project.onrender.com",
+        description="Pokojowo FastAPI base URL"
     )
     pokojowo_email: str = Field(
         default="", description="Scraper account email (required for publishing)"
