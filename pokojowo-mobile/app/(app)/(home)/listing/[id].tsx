@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   Dimensions,
   FlatList,
+  Share,
+  Linking,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -28,6 +31,7 @@ import {
 import { Button, Badge, Avatar, LoadingSpinner, Card } from '@/components/ui';
 import { useListing } from '@/hooks/listings/useListings';
 import { useSaveListing, useUnsaveListing, useIsListingSaved } from '@/hooks/favorites/useFavorites';
+import { useTrackView } from '@/hooks/listingInteractions/useListingInteractions';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { COLORS } from '@/lib/constants';
 
@@ -45,6 +49,14 @@ export default function ListingDetailScreen() {
   const { data: isSaved } = useIsListingSaved(id);
   const { mutate: saveListing } = useSaveListing();
   const { mutate: unsaveListing } = useUnsaveListing();
+  const { mutate: trackView } = useTrackView(id);
+
+  // Track view when listing is loaded
+  useEffect(() => {
+    if (id && listing) {
+      trackView(undefined); // Fire and forget
+    }
+  }, [id, listing]);
 
   const handleToggleSave = () => {
     if (isSaved) {
@@ -57,6 +69,45 @@ export default function ListingDetailScreen() {
   const handleContact = () => {
     if (listing?.owner_id) {
       router.push(`/(app)/(chat)/${listing.owner_id}`);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!listing) return;
+    try {
+      await Share.share({
+        title: listing.address,
+        message: `Check out this listing: ${listing.address} - ${formatCurrency(listing.price)}/mo\n\nhttps://pokojowo.com/listing/${id}`,
+      });
+    } catch (error) {
+      console.error('Share failed:', error);
+    }
+  };
+
+  const handleCall = async () => {
+    // Check multiple possible locations for phone number
+    const landlord = listing?.landlord || listing?.owner;
+    const phone = landlord?.phone || listing?.phone;
+
+    if (phone) {
+      // Remove any spaces or special characters except + and digits
+      const cleanPhone = phone.replace(/[^\d+]/g, '');
+      const phoneUrl = `tel:${cleanPhone}`;
+
+      const canOpen = await Linking.canOpenURL(phoneUrl);
+      if (canOpen) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert(
+          t('detail.callError', 'Cannot make call'),
+          t('detail.callErrorMessage', 'Unable to open phone app. Phone: {{phone}}', { phone: cleanPhone })
+        );
+      }
+    } else {
+      Alert.alert(
+        t('detail.noPhone', 'Phone not available'),
+        t('detail.noPhoneMessage', 'The owner has not provided a phone number. Try sending a message instead.')
+      );
     }
   };
 
@@ -135,7 +186,7 @@ export default function ListingDetailScreen() {
                 fill={isSaved ? COLORS.error : 'none'}
               />
             </TouchableOpacity>
-            <TouchableOpacity className="bg-white/90 rounded-full p-2">
+            <TouchableOpacity onPress={handleShare} className="bg-white/90 rounded-full p-2">
               <Share2 size={24} color={COLORS.gray[700]} />
             </TouchableOpacity>
           </View>
@@ -291,8 +342,9 @@ export default function ListingDetailScreen() {
           variant="outline"
           className="flex-1"
           icon={<Phone size={18} color={COLORS.gray[700]} />}
+          onPress={handleCall}
         >
-          Call
+          {t('detail.call', 'Call')}
         </Button>
         <Button
           variant="primary"
@@ -300,7 +352,7 @@ export default function ListingDetailScreen() {
           icon={<MessageSquare size={18} color="white" />}
           onPress={handleContact}
         >
-          Message
+          {t('detail.message', 'Message')}
         </Button>
       </View>
     </SafeAreaView>
