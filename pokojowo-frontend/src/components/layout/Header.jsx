@@ -74,7 +74,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b border-border shadow-sm transition-colors duration-200">
+    <header className="sticky top-0 z-50 w-full bg-green-200 border-b border-border shadow-sm transition-colors duration-200">
       <div className="container mx-auto px-4">
         <div className="flex h-14 md:h-16 items-center justify-between">
           {/* Logo */}
