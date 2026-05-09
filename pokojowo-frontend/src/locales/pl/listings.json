@@ -5,6 +5,21 @@
     "subtitle": "Nasz algorytm AI znajduje kompatybilnych współlokatorów na podstawie stylu życia, zainteresowań i preferencji. Dołącz do tysięcy osób szukających idealnej sytuacji mieszkaniowej.",
     "searchButton": "Szukaj",
     "signupNow": "Zarejestruj się",
+    "dateline": "Co tydzień nowy wybór",
+    "headline": "Pokoje i współlokatorzy,",
+    "italic": "z troską.",
+    "subhead": "Pokojowo to spokojniejszy sposób na znalezienie domu. Przeglądaj pokoje z uwagą, poznawaj współlokatorów, którzy naprawdę pasują, i omiń szum przeciętnych ogłoszeń.",
+    "cta": "Znajdź pokój",
+    "cities": "Miasta",
+    "featured": "Polecane teraz",
+    "trust": {
+      "rating": "średnia ocena gospodarzy",
+      "match": "zgodności wśród dopasowań"
+    },
+    "tag": {
+      "roommates": "Współlokatorzy",
+      "rooms": "Pokoje"
+    },
     "slides": {
       "roommate1": {
         "title": "Znajdź Idealnego Współlokatora",
@@ -41,17 +56,36 @@
     }
   },
   "search": {
-    "placeholder": "Szukaj po lokalizacji, mieście lub dzielnicy...",
+    "placeholder": "Miasto, dzielnica, klimat…",
     "filter": "Filtry",
     "sort": "Sortuj",
+    "cta": "Znajdź pokój",
     "sortOptions": {
       "newest": "Najnowsze",
       "priceAsc": "Cena: od najniższej",
       "priceDesc": "Cena: od najwyższej"
     }
   },
+  "cities": {
+    "warsaw": "Warszawa",
+    "krakow": "Kraków",
+    "wroclaw": "Wrocław",
+    "poznan": "Poznań",
+    "gdansk": "Gdańsk",
+    "lodz": "Łódź"
+  },
   "results": {
-    "count": "znalezionych ogłoszeń"
+    "count_one": "{{count}} ogłoszenie",
+    "count_few": "{{count}} ogłoszenia",
+    "count_many": "{{count}} ogłoszeń",
+    "count_other": "{{count}} ogłoszeń",
+    "count": "znalezionych ogłoszeń",
+    "section": "Indeks numeru",
+    "eyebrow": "Ogłoszenia",
+    "heading": "Pokoje w indeksie,",
+    "italic": "w tym tygodniu.",
+    "searching": "Wybieramy pokoje",
+    "tagline": "Każdy pokój sprawdzamy ręcznie. Bez krzykliwych zdjęć i niespodziewanych opłat."
   },
   "filters": {
     "title": "Filtry wyszukiwania",
@@ -81,34 +115,54 @@
     "viewDetails": "Zobacz szczegóły",
     "beds": "łóżka",
     "baths": "łazienki",
-    "tenants": "{{count}} lokator",
-    "tenants_plural": "{{count}} lokatorów"
+    "tenants_one": "{{count}} lokator",
+    "tenants_few": "{{count}} lokatorów",
+    "tenants_many": "{{count}} lokatorów",
+    "tenants_other": "{{count}} lokatorów",
+    "tenants": "{{count}} lokatorów",
+    "from": "Od",
+    "month": "mies."
   },
   "details": {
     "description": "Opis",
     "amenities": "Udogodnienia",
     "location": "Lokalizacja",
-    "landlord": "Właściciel",
-    "contactLandlord": "Skontaktuj się",
+    "landlord": "Twój gospodarz",
+    "contactLandlord": "Napisz do gospodarza",
     "available": "Dostępny od",
     "deposit": "Kaucja",
     "utilities": "Media",
-    "utilitiesIncluded": "W cenie",
-    "utilitiesExtra": "Dodatkowo"
+    "utilitiesIncluded": "Media w cenie",
+    "utilitiesExtra": "Media płatne osobno",
+    "descriptionEyebrow": "O tym pokoju",
+    "factsEyebrow": "Najważniejsze fakty",
+    "amenitiesEyebrow": "Udogodnienia",
+    "nearbyEyebrow": "W okolicy",
+    "suitedEyebrow": "Najlepiej dla",
+    "size": "Powierzchnia",
+    "roomType": "Pokój",
+    "buildingType": "Budynek",
+    "availableFromLabel": "Dostępny od"
   },
   "empty": {
     "title": "Brak ogłoszeń",
-    "subtitle": "Spróbuj zmienić filtry lub kryteria wyszukiwania, aby znaleźć więcej wyników"
+    "subtitle": "Spróbuj zmienić filtry lub kryteria wyszukiwania, aby znaleźć więcej wyników",
+    "eyebrow": "Dziś cisza w numerze"
   },
   "error": {
     "title": "Ups! Coś poszło nie tak",
     "loadingFailed": "Nie udało się załadować ogłoszeń. Spróbuj ponownie.",
-    "retry": "Spróbuj ponownie"
+    "retry": "Spróbuj ponownie",
+    "eyebrow": "Coś zatrzymało druk"
   },
   "interestedUsers": {
     "title": "Również zainteresowani",
-    "singleMatch": "{{name}} ({{score}}% dopasowania) jest również zainteresowany/a",
-    "multipleMatches": "{{count}} dopasowanych współlokatorów jest zainteresowanych",
+    "singleMatch": "{{name}} ({{score}}% dopasowania) też jest zainteresowany/a",
+    "multipleMatches_one": "{{count}} dopasowany współlokator też jest zainteresowany",
+    "multipleMatches_few": "{{count}} dopasowanych współlokatorów też jest zainteresowanych",
+    "multipleMatches_many": "{{count}} dopasowanych współlokatorów też jest zainteresowanych",
+    "multipleMatches_other": "{{count}} dopasowanych współlokatorów też jest zainteresowanych",
+    "multipleMatches": "{{count}} dopasowanych współlokatorów też jest zainteresowanych",
     "viewAll": "Zobacz wszystkich",
     "noMatches": "Bądź pierwszym zainteresowanym!"
   },
@@ -120,18 +174,26 @@
   "detail": {
     "contactInfo": "Dane kontaktowe",
     "phoneNumber": "Numer telefonu",
-    "tapToCall": "Kliknij aby zadzwonić",
+    "tapToCall": "Stuknij, aby zadzwonić",
     "notProvided": "Dane kontaktowe niedostępne",
     "originalListing": "Oryginalne ogłoszenie",
     "viewOnSource": "Zobacz źródło",
-    "viewOriginal": "Zobacz oryginalne ogłoszenie",
+    "viewOriginal": "Zobacz oryginał",
     "call": "Zadzwoń",
-    "scrapedNotice": "To ogłoszenie zostało zaimportowane z zewnętrznego źródła. Skontaktuj się z właścicielem bezpośrednio przez oryginalną stronę lub numer telefonu.",
-    "notFound": "Nie znaleziono ogłoszenia",
+    "scrapedNotice": "To ogłoszenie zostało zaimportowane z zewnętrznego źródła. Skontaktuj się z gospodarzem przez oryginalną stronę lub numer telefonu.",
+    "notFound": "Ta strona jest między numerami",
+    "notFoundEyebrow": "Brak ogłoszenia",
     "notFoundDescription": "To ogłoszenie mogło zostać usunięte lub nie istnieje.",
     "backToListings": "Wróć do ogłoszeń",
-    "availableNow": "Dostępne teraz",
+    "availableNow": "Dostępne",
     "maxTenants": "Maks. {{count}} lokatorów",
-    "availableFrom": "Dostępne od {{date}}"
+    "availableFrom": "Dostępne od {{date}}",
+    "imported": "Ogłoszenie zewnętrzne",
+    "curated": "Wybrane przez Pokojowo",
+    "listing": "Ogłoszenie",
+    "priceEyebrow": "Czynsz miesięczny",
+    "verifiedHost": "Zweryfikowany gospodarz",
+    "curatedFooter": "Tworzone dla świadomego wynajmu",
+    "noDescription": "Spokojny, wygodny pokój czekający na nowego lokatora."
   }
 }

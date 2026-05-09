@@ -1,64 +1,18 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Search,
   MapPin,
   Home,
   Bed,
-  Bath,
-  Wifi,
-  Car,
-  ChevronRight,
   Users,
-  Heart,
-  Sparkles,
-  ArrowRight,
+  ArrowUpRight,
 } from "lucide-react";
 
-// Hero slides with images and promo content (titles/subtitles use translation keys)
-const HERO_SLIDES = [
-  {
-    image: "/images/promo/romm1.png",
-    fallback:
-      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80",
-    titleKey: "hero.slides.roommate1.title",
-    subtitleKey: "hero.slides.roommate1.subtitle",
-    type: "roommate",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80",
-    titleKey: "hero.slides.room1.title",
-    subtitleKey: "hero.slides.room1.subtitle",
-    type: "room",
-  },
-  {
-    image: "/images/promo/Roommate-Finder.webp",
-    fallback:
-      "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1920&q=80",
-    titleKey: "hero.slides.roommate2.title",
-    subtitleKey: "hero.slides.roommate2.subtitle",
-    type: "roommate",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80",
-    titleKey: "hero.slides.room2.title",
-    subtitleKey: "hero.slides.room2.subtitle",
-    type: "room",
-  },
-];
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -68,7 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import {
+  EditorialSection,
+  Eyebrow,
+  DisplayTitle,
+  EditorialRule,
+  LuxuryPanel,
+  MediaFrame,
+} from "@/components/shared/editorial";
 import SearchFilters from "../components/SearchFilters";
 import InterestedUsersPreview from "../components/InterestedUsersPreview";
 import ListingLikeButton from "../components/ListingLikeButton";
@@ -76,6 +37,8 @@ import api from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
 import useListingInteractionStore from "@/stores/listingInteractionStore";
 import useAuthStore from "@/stores/authStore";
+
+const FALLBACK_LISTING_IMAGE = "/images/promo/modern-room.avif";
 
 const DEFAULT_FILTERS = {
   minPrice: 0,
@@ -88,316 +51,200 @@ const DEFAULT_FILTERS = {
   maxTenants: null,
 };
 
+// Each chip displays a localized label but searches with the canonical English
+// query so it matches addresses already stored in the database.
+const CITY_CHIPS = [
+  { key: "warsaw", query: "Warsaw" },
+  { key: "krakow", query: "Krakow" },
+  { key: "wroclaw", query: "Wroclaw" },
+  { key: "poznan", query: "Poznan" },
+  { key: "gdansk", query: "Gdansk" },
+  { key: "lodz", query: "Lodz" },
+];
+
 export default function HomeListings() {
   const { t } = useTranslation("listings");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { user } = useAuthStore();
-  const {
-    fetchBatchInterestedUsers,
-    fetchMyLikedListings,
-    getInterestedUsers,
-  } = useListingInteractionStore();
+  const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } =
+    useListingInteractionStore();
 
-  // Rotate hero slides every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Get current slide content
-  const currentSlide = HERO_SLIDES[currentImageIndex];
-
-  // Debounced search query
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
-
-  // Debounce search input
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 300);
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const {
-    data: rawListings,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: rawListings, isLoading, error } = useQuery({
     queryKey: ["listings", debouncedSearch, sortBy, filters],
     queryFn: async () => {
       const params = new URLSearchParams();
-
-      // Search
       if (debouncedSearch) params.append("search", debouncedSearch);
-
-      // Sort
       params.append("sort", sortBy);
-
-      // Price filters
       if (filters.minPrice > 0) params.append("min_price", filters.minPrice);
-      if (filters.maxPrice < 10000)
-        params.append("max_price", filters.maxPrice);
-
-      // Size filters
+      if (filters.maxPrice < 10000) params.append("max_price", filters.maxPrice);
       if (filters.minSize > 0) params.append("min_size", filters.minSize);
       if (filters.maxSize < 200) params.append("max_size", filters.maxSize);
-
-      // Room type (send first selected if any)
-      if (filters.roomTypes?.length > 0) {
-        params.append("room_type", filters.roomTypes[0]);
-      }
-
-      // Building type (send first selected if any)
-      if (filters.buildingTypes?.length > 0) {
-        params.append("building_type", filters.buildingTypes[0]);
-      }
-
-      // Max tenants
+      if (filters.roomTypes?.length > 0) params.append("room_type", filters.roomTypes[0]);
+      if (filters.buildingTypes?.length > 0) params.append("building_type", filters.buildingTypes[0]);
       if (filters.maxTenants) params.append("max_tenants", filters.maxTenants);
-
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
     },
   });
 
-  // Process listings (handle response format)
   const listings = useMemo(() => {
-    const listingsArray = Array.isArray(rawListings)
-      ? rawListings
-      : rawListings?.listings || [];
-    return listingsArray;
+    return Array.isArray(rawListings) ? rawListings : rawListings?.listings || [];
   }, [rawListings]);
 
-  // Batch fetch interested users and liked listings when user is logged in and listings are loaded
   useEffect(() => {
     if (user && listings && listings.length > 0) {
       const listingIds = listings.map((l) => l._id || l.id).filter(Boolean);
-      if (listingIds.length > 0) {
-        fetchBatchInterestedUsers(listingIds, 70, 3);
-      }
+      if (listingIds.length > 0) fetchBatchInterestedUsers(listingIds, 70, 3);
     }
   }, [user, listings, fetchBatchInterestedUsers]);
 
-  // Fetch user's liked listings on mount
   useEffect(() => {
-    if (user) {
-      fetchMyLikedListings();
-    }
+    if (user) fetchMyLikedListings();
   }, [user, fetchMyLikedListings]);
 
-  const handleFiltersChange = (newFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleFiltersReset = () => {
-    setFilters(DEFAULT_FILTERS);
-  };
-
   return (
-    <div className="space-y-8">
-      {/* Hero Section with Rotating Images and Interactive Promo Cards */}
-      <div className="relative rounded-2xl overflow-hidden min-h-[320px] md:min-h-[380px]">
-        {/* Background Images */}
-        {HERO_SLIDES.map((slide, index) => (
-          <div
-            key={slide.image}
-            className={cn(
-              "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-              index === currentImageIndex ? "opacity-100" : "opacity-0",
+    <div className="space-y-12 lg:space-y-16">
+      {/* ─── DISCOVER HEADER ─────────────────────────────────────────── */}
+      <EditorialSection className="reveal-up">
+        <div className="space-y-3">
+          <Eyebrow>{t("results.section", "The Index")}</Eyebrow>
+          <DisplayTitle size="md" italicWord={t("results.italic", "this week.")} as="h1">
+            {t("results.heading", "Rooms in the index,")}
+          </DisplayTitle>
+          <p className="max-w-xl text-sm text-muted-foreground sm:text-base">
+            {t(
+              "results.tagline",
+              "Every room is reviewed by hand. No screaming photos, no surprise fees.",
             )}
-          >
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                if (slide.fallback) e.target.src = slide.fallback;
-              }}
+          </p>
+        </div>
+
+        <div className="mt-7 flex flex-col gap-3 rounded-2xl border border-border/70 bg-card p-2.5 shadow-editorial sm:flex-row sm:items-center sm:p-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={t("search.placeholder", "City, neighbourhood, vibe…")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-12 border-none bg-transparent pl-11 text-base placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
             />
           </div>
-        ))}
-
-        {/* Dark Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-
-        {/* Content */}
-        <div className="relative z-10 p-4 sm:p-6 md:p-8 h-full flex flex-col justify-between min-h-[320px] md:min-h-[380px]">
-          {/* Top - Title & Search */}
-          <div className="max-w-xl">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-white transition-all duration-500">
-              {t(currentSlide.titleKey)}
-            </h1>
-            <p className="text-sm md:text-base text-white/80 mb-4 transition-all duration-500">
-              {t(currentSlide.subtitleKey)}
-            </p>
-
-            {/* Search Bar */}
-            <div className="flex gap-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                <Input
-                  placeholder={t("search.placeholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm"
-                />
-              </div>
-              <Button size="sm" variant="secondary" className="h-10 px-4">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Bottom - Get Started Button */}
-          {!user && (
-            <div className="flex justify-end mt-4">
-              <Link to="/login">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-9 px-5 bg-transparent hover:bg-white/10 text-white text-sm font-medium gap-2 border border-white/30"
-                >
-                  {t("hero.signupNow")}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Image Indicators */}
-        <div className="absolute bottom-3 right-3 z-10 flex gap-1.5">
-          {HERO_SLIDES.map((slide, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={cn(
-                "w-1.5 h-1.5 rounded-full transition-all duration-300",
-                index === currentImageIndex
-                  ? slide.type === "roommate"
-                    ? "bg-teal-400 w-4"
-                    : "bg-white w-4"
-                  : "bg-white/50 hover:bg-white/70",
-              )}
-              aria-label={`Go to slide ${index + 1}`}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-11 min-w-[170px] rounded-full border-border/70 bg-surface-canvas px-5 text-sm">
+                <SelectValue placeholder={t("search.sort")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">{t("search.sortOptions.newest")}</SelectItem>
+                <SelectItem value="price_asc">{t("search.sortOptions.priceAsc")}</SelectItem>
+                <SelectItem value="price_desc">{t("search.sortOptions.priceDesc")}</SelectItem>
+              </SelectContent>
+            </Select>
+            <SearchFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              onReset={() => setFilters(DEFAULT_FILTERS)}
             />
-          ))}
-        </div>
-      </div>
-
-      {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-card rounded-xl border border-border shadow-sm">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Home className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">
-            {listings?.length || 0} {t("results.count")}
-          </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-auto sm:min-w-[160px]">
-              <SelectValue placeholder={t("search.sort")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">
-                {t("search.sortOptions.newest")}
-              </SelectItem>
-              <SelectItem value="price_asc">
-                {t("search.sortOptions.priceAsc")}
-              </SelectItem>
-              <SelectItem value="price_desc">
-                {t("search.sortOptions.priceDesc")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <SearchFilters
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onReset={handleFiltersReset}
-          />
-        </div>
-      </div>
-
-      {/* Listings Grid */}
-      {isLoading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-52 w-full" />
-              <CardHeader className="space-y-3">
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Skeleton className="h-6 w-16" />
-                  <Skeleton className="h-6 w-16" />
-                </div>
-                <Skeleton className="h-4 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : error ? (
-        <Card className="bg-red-50 dark:bg-red-950/30 border-red-100 dark:border-red-800">
-          <CardHeader className="text-center py-12">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
-              <Home className="h-8 w-8 text-red-600 dark:text-red-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-red-900 dark:text-red-100">
-              {t("error.title")}
-            </h3>
-            <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-              {error.message || t("error.loadingFailed")}
-            </p>
-            <Button
-              variant="outline"
-              className="mt-4 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
-            >
-              {t("error.retry")}
-            </Button>
-          </CardHeader>
-        </Card>
-      ) : listings?.length === 0 ? (
-        <Card className="border-dashed">
-          <CardHeader className="text-center py-16">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <Home className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground">
-              {t("empty.title")}
-            </h3>
-            <p className="text-muted-foreground mt-2 max-w-sm mx-auto">
-              {t("empty.subtitle")}
-            </p>
-          </CardHeader>
-        </Card>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {listings?.map((listing) => {
-            const listingId = listing._id || listing.id;
-            const interestedUsers = getInterestedUsers(listingId);
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <span className="text-eyebrow mr-2">{t("hero.cities", "Cities")}</span>
+          {CITY_CHIPS.map((city) => {
+            const label = t(`cities.${city.key}`, city.query);
+            const isActive = searchQuery.toLowerCase() === city.query.toLowerCase();
             return (
-              <ListingCard
-                key={listingId}
-                listing={listing}
-                interestedUsers={interestedUsers}
-              />
+              <button
+                key={city.key}
+                onClick={() => setSearchQuery(city.query)}
+                className={cn(
+                  "rounded-full border px-3.5 py-1 text-xs font-medium transition-colors duration-300",
+                  isActive
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border/60 bg-surface-paper text-foreground/80 hover:border-foreground/30 hover:text-foreground",
+                )}
+              >
+                {label}
+              </button>
             );
           })}
         </div>
-      )}
+      </EditorialSection>
+
+      <EditorialRule
+        label={
+          isLoading
+            ? t("results.searching", "Curating rooms")
+            : t("results.count", { count: listings?.length || 0 })
+        }
+      />
+
+      {/* ─── LISTINGS GRID ────────────────────────────────────────────── */}
+      <EditorialSection>
+        {isLoading ? (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-4">
+                <Skeleton className="aspect-[4/5] w-full rounded-[1.5rem]" />
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <LuxuryPanel className="text-center py-16" tone="parchment">
+            <Eyebrow>{t("error.eyebrow", "Something went off the press")}</Eyebrow>
+            <h3 className="mt-3 font-display text-2xl font-medium text-foreground">
+              {t("error.title")}
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {error.message || t("error.loadingFailed")}
+            </p>
+            <Button variant="outline" className="mt-6">
+              {t("error.retry")}
+            </Button>
+          </LuxuryPanel>
+        ) : listings?.length === 0 ? (
+          <LuxuryPanel className="text-center py-20" tone="parchment">
+            <Eyebrow>{t("empty.eyebrow", "Quiet pages today")}</Eyebrow>
+            <h3 className="mt-3 font-display text-2xl font-medium text-foreground">
+              {t("empty.title")}
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto">
+              {t("empty.subtitle")}
+            </p>
+          </LuxuryPanel>
+        ) : (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {listings.map((listing, index) => {
+              const listingId = listing._id || listing.id;
+              const interestedUsers = getInterestedUsers(listingId);
+              return (
+                <ListingCard
+                  key={listingId}
+                  listing={listing}
+                  interestedUsers={interestedUsers}
+                  index={index}
+                />
+              );
+            })}
+          </div>
+        )}
+      </EditorialSection>
     </div>
   );
 }
 
-function ListingCard({ listing, interestedUsers = [] }) {
+function ListingCard({ listing, interestedUsers = [], index = 0 }) {
   const { t, i18n } = useTranslation("listings");
 
   const getLocalizedText = (field) => {
@@ -407,122 +254,109 @@ function ListingCard({ listing, interestedUsers = [] }) {
   };
 
   const listingId = listing._id || listing.id;
+  const image =
+    listing.images?.[0] || listing.photos?.[0]?.url || FALLBACK_LISTING_IMAGE;
+  const description = getLocalizedText(listing.description);
 
   return (
-    <Card className="group overflow-hidden border-border hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-      {/* Image Container */}
-      <div className="relative h-52 overflow-hidden bg-muted">
-        <img
-          src={
-            listing.images?.[0] ||
-            listing.photos?.[0]?.url ||
-            "/placeholder-room.jpg"
-          }
+    <motion.article
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, delay: Math.min(index, 6) * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      className="group/card relative flex flex-col"
+    >
+      <Link to={`/listing/${listingId}`} className="block">
+        <MediaFrame
+          src={image}
+          fallbackSrc={FALLBACK_LISTING_IMAGE}
           alt={getLocalizedText(listing.title) || listing.address}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+          rounded="rounded-[1.5rem]"
+          aspect="aspect-[4/5]"
+          className="shadow-editorial transition-shadow duration-500 group-hover/card:shadow-premium-lg"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-onyx/55 via-surface-onyx/0 to-surface-onyx/0" />
 
-        {/* Like Button - Top Right */}
-        <div className="absolute top-3 right-3 z-10">
-          <ListingLikeButton listingId={listingId} size="small" />
-        </div>
-
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          {listing.available && (
-            <Badge className="bg-green-500 hover:bg-green-600 text-white font-medium shadow-lg">
-              {t("card.available")}
-            </Badge>
-          )}
-        </div>
-
-        {/* Price Badge */}
-        <div className="absolute bottom-3 right-3">
-          <div className="bg-background/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg">
-            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              {formatCurrency(listing.price || listing.rent)}
-            </p>
-            <p className="text-xs text-muted-foreground text-right">
-              {t("card.perMonth")}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <CardContent className="p-5">
-        {/* Title & Location */}
-        <h3 className="font-semibold text-foreground text-lg line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-          {getLocalizedText(listing.title) || listing.address}
-        </h3>
-        <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground">
-          <MapPin className="h-4 w-4 flex-shrink-0" />
-          <span className="text-sm truncate">
-            {listing.location || listing.address}
-          </span>
-        </div>
-
-        <Separator className="my-4" />
-
-        {/* Room Details */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          {listing.roomType && (
-            <Badge variant="outline" className="font-normal">
-              {listing.roomType}
-            </Badge>
-          )}
-          {listing.size && <span>{listing.size}m²</span>}
-          {listing.maxTenants && (
-            <span>
-              {t("card.tenants", { count: listing.maxTenants })}
+          {/* Top markers */}
+          <div className="absolute left-4 top-4 flex items-center gap-2">
+            <span className="rounded-full bg-surface-paper/90 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-foreground backdrop-blur">
+              № {String(index + 1).padStart(2, "0")}
             </span>
-          )}
-        </div>
+            {listing.roomType && (
+              <span className="rounded-full bg-surface-paper/85 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-foreground backdrop-blur">
+                {listing.roomType}
+              </span>
+            )}
+          </div>
 
-        {/* Description */}
-        {getLocalizedText(listing.description) && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-3">
-            {getLocalizedText(listing.description)}
-          </p>
-        )}
+          <div className="absolute right-4 top-4">
+            <ListingLikeButton listingId={listingId} size="small" />
+          </div>
 
-        {/* Amenities */}
-        {listing.amenities?.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {listing.amenities.slice(0, 3).map((amenity) => (
-              <Badge
-                key={amenity}
-                variant="secondary"
-                className="bg-muted text-muted-foreground hover:bg-muted/80"
-              >
-                {amenity}
-              </Badge>
-            ))}
-            {listing.amenities.length > 3 && (
-              <Badge
-                variant="secondary"
-                className="bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-              >
-                +{listing.amenities.length - 3}
+          {/* Bottom price tag */}
+          <div className="absolute inset-x-4 bottom-4 flex items-end justify-between text-white">
+            <div className="space-y-1">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">
+                {listing.location || t("card.from", "From")}
+              </p>
+              <p className="font-display text-3xl font-medium leading-none">
+                {formatCurrency(listing.price || listing.rent)}
+                <span className="ml-1 align-baseline text-xs font-medium text-white/70">
+                  / {t("card.month", "mo")}
+                </span>
+              </p>
+            </div>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 backdrop-blur transition-transform duration-500 group-hover/card:scale-110 group-hover/card:bg-white group-hover/card:text-foreground">
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
+          </div>
+        </MediaFrame>
+
+        <div className="space-y-3 px-1 pt-5">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="font-display text-xl font-medium leading-snug tracking-editorial text-foreground transition-colors duration-300 group-hover/card:text-accent">
+              {getLocalizedText(listing.title) || listing.address}
+            </h3>
+            {listing.available && (
+              <Badge variant="olive" className="flex-shrink-0">
+                {t("card.available")}
               </Badge>
             )}
           </div>
-        )}
 
-        {/* Interested Users Preview */}
-        {interestedUsers.length > 0 && (
-          <InterestedUsersPreview users={interestedUsers} className="mt-4" />
-        )}
-      </CardContent>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5" />
+            <span className="truncate">{listing.location || listing.address}</span>
+          </div>
 
-      <CardFooter className="p-5 pt-0">
-        <Link to={`/listing/${listing._id || listing.id}`} className="w-full">
-          <Button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white group/btn">
-            {t("card.viewDetails")}
-            <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover/btn:translate-x-1" />
-          </Button>
-        </Link>
-      </CardFooter>
-    </Card>
+          {description ? (
+            <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+            {listing.size && (
+              <span className="inline-flex items-center gap-1.5">
+                <Home className="h-3 w-3" /> {listing.size} m²
+              </span>
+            )}
+            {listing.maxTenants && (
+              <span className="inline-flex items-center gap-1.5">
+                <Users className="h-3 w-3" /> {t("card.tenants", { count: listing.maxTenants })}
+              </span>
+            )}
+            {listing.buildingType && (
+              <span className="inline-flex items-center gap-1.5">
+                <Bed className="h-3 w-3" /> {listing.buildingType}
+              </span>
+            )}
+          </div>
+
+          {interestedUsers.length > 0 && (
+            <InterestedUsersPreview users={interestedUsers} className="mt-1" />
+          )}
+        </div>
+      </Link>
+    </motion.article>
   );
 }

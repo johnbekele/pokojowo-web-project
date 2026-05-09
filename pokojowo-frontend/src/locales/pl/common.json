@@ -1,18 +1,32 @@
 {
   "appName": "Pokojowo",
-  "tagline": "Znajdź Idealnego Współlokatora",
+  "tagline": "Redakcyjny sposób na znalezienie domu",
   "nav": {
     "home": "Strona główna",
     "listings": "Ogłoszenia",
     "matches": "Dopasowania",
-    "chat": "Czat",
+    "chat": "Wiadomości",
     "profile": "Profil",
     "login": "Zaloguj się",
     "signup": "Zarejestruj się",
     "logout": "Wyloguj się",
     "dashboard": "Panel",
-    "favorites": "Ulubione",
-    "likes": "Polubienia"
+    "favorites": "Lista obserwowanych",
+    "likes": "Polubienia",
+    "discover": "Odkrywaj",
+    "studio": "Pracownia",
+    "signIn": "Zaloguj się",
+    "signUp": "Dołącz do Pokojowo",
+    "settings": "Ustawienia",
+    "contents": "Spis treści",
+    "theme": "Motyw",
+    "language": "Język"
+  },
+  "footer": {
+    "tagline": "Starannie dobrany sposób na znalezienie pokoi, współlokatorów i domów dopasowanych do Twojego stylu życia.",
+    "rights": "Tworzone z dbałością o świadome wynajmowanie.",
+    "discover": "Odkrywaj",
+    "studio": "Pracownia"
   },
   "actions": {
     "save": "Zapisz",

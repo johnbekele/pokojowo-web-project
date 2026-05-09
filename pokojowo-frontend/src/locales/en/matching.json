@@ -1,6 +1,8 @@
 {
-  "title": "Your Matches",
-  "subtitle": "People who might be a great fit",
+  "title": "Flatmates who actually",
+  "italic": "fit.",
+  "eyebrow": "The Matchmaker",
+  "subtitle": "A short, considered shortlist — not an endless feed. Tap a card to read deeper, or swipe to keep things moving.",
   "score": {
     "label": "Compatibility",
     "excellent": "Excellent Match",
@@ -17,13 +19,13 @@
     "preferences": "Preferences"
   },
   "card": {
-    "viewProfile": "View Profile",
+    "viewProfile": "View profile",
     "sendMessage": "Message",
     "chat": "Chat",
     "compatible": "{{score}}% Compatible",
-    "yearsOld": "{{age}} years old",
+    "yearsOld": "{{age}} yrs",
     "whyYouMatch": "Why you match",
-    "newUser": "NEW",
+    "newUser": "New",
     "matchMessages": {
       "perfect": "You two could be great roommates!",
       "great": "You have a lot in common!",
@@ -42,7 +44,8 @@
   "empty": {
     "title": "No matches yet",
     "subtitle": "Complete your profile to start matching with others",
-    "completeProfile": "Complete Your Profile"
+    "completeProfile": "Complete Your Profile",
+    "eyebrow": "Quiet ledger"
   },
   "filters": {
     "minScore": "Minimum Score",
@@ -53,24 +56,43 @@
     "title": "Error loading matches",
     "subtitle": "Please try again later.",
     "loadingFailed": "Failed to load matches. Please try again.",
-    "notFound": "Match not found"
+    "notFound": "Match not found",
+    "eyebrow": "A pause in matching"
   },
   "stats": {
-    "matchesFound": "{{count}} matches found from {{total}} candidates",
-    "filtered": "{{count}} filtered"
+    "matchesFound": "{{count}} of {{total}} candidates",
+    "filtered": "{{count}} filtered out"
   },
   "viewMode": {
     "swipe": "Swipe",
-    "grid": "Grid"
+    "grid": "Index"
+  },
+  "rule": {
+    "swipe": "Featured profile",
+    "grid": "Curated index"
   },
   "dashboard": {
     "welcome": "Welcome back, {{name}}!",
+    "welcomeName": "Hello,",
+    "italic": "{{name}}.",
     "overview": "Here's an overview of your matching activity",
-    "pleaseLogin": "Please log in",
-    "loginRequired": "You need to be logged in to view your dashboard.",
-    "completeProfile": "Complete Your Profile",
-    "profileIncomplete": "Your profile is incomplete. Complete it to start matching with potential roommates.",
-    "continueSetup": "Continue Profile Setup",
+    "subtitle": "A quiet ledger of every connection you've sent, received, and confirmed. Pick up exactly where you left off.",
+    "indexLabel": "The ledger",
+    "eyebrow": "Your salon",
+    "signedOut": "Signed out",
+    "pleaseLogin": "Sign in to see your matches",
+    "loginRequired": "A few quick details and you're back in.",
+    "completeProfile": "Finish your story first",
+    "profileIncomplete": "Adding a few personal details lets us match you with people who fit how you actually live.",
+    "continueSetup": "Continue setup",
+    "browseMatches": "Browse matches",
+    "findMatches": "Find matches",
+    "updateProfile": "Refine your profile",
+    "tabs": {
+      "matches": "Mutual",
+      "sent": "I liked",
+      "received": "Liked me"
+    },
     "stats": {
       "compatibleMatches": "Compatible Matches",
       "highCompatibility": "{{count}} high compatibility",
@@ -80,7 +102,10 @@
       "pending": "{{count}} pending",
       "peopleWhoLiked": "People who liked you",
       "savedProfiles": "Saved Profiles",
-      "bookmarkedForLater": "Bookmarked for later"
+      "bookmarkedForLater": "Bookmarked for later",
+      "mutual": "Mutual",
+      "sent": "Liked",
+      "received": "Liked you"
     },
     "topMatches": {
       "title": "Top Matches",
@@ -101,6 +126,18 @@
       "viewLikes": "View Likes",
       "savedProfiles": "Saved Profiles",
       "messages": "Messages"
+    },
+    "emptyMatches": {
+      "title": "No mutual matches yet",
+      "subtitle": "When someone you like also says yes, you'll meet them here."
+    },
+    "emptySent": {
+      "title": "You haven't liked anyone yet",
+      "subtitle": "Browse our shortlist of compatible flatmates whenever you're ready."
+    },
+    "emptyReceived": {
+      "title": "No likes yet",
+      "subtitle": "Keep your profile fresh — a few small details make a real difference."
     },
     "unknownLocation": "Unknown location"
   },
@@ -151,9 +188,9 @@
       "likeSent": "Your interest has been sent."
     },
     "match": {
-      "title": "You're Connected!",
+      "title": "It's mutual",
       "subtitle": "You and {{name}} are both interested!",
-      "startChatting": "You both showed interest. Start chatting now!"
+      "startChatting": "You both said yes. The next move is up to you."
     }
   },
   "favorites": {

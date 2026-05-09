@@ -1,0 +1,83 @@
+{
+  "hero": {
+    "dateline": "Vol. 01 — Pokojowo Magazyn",
+    "eyebrow": "Pokojowo kwartalnik",
+    "headline": "Pokoje i współlokatorzy,",
+    "italic": "z troską.",
+    "subhead": "Pokojowo to spokojniejszy sposób na znalezienie domu. Przeglądaj starannie wybrane pokoje, poznawaj współlokatorów, którzy naprawdę pasują, i omiń szum przeciętnych ogłoszeń.",
+    "primaryCta": "Znajdź pokój",
+    "primaryCtaAuthed": "Otwórz indeks",
+    "secondaryCta": "Znajdź współlokatora",
+    "secondaryCtaAuthed": "Moje dopasowania",
+    "metric": {
+      "rating": "średnia ocena gospodarzy",
+      "compatibility": "zgodności wśród dopasowań",
+      "reviewed": "każdy pokój sprawdzany ręcznie"
+    }
+  },
+  "pathways": {
+    "eyebrow": "Dwie drogi",
+    "title": "Pokój dla siebie,",
+    "italic": "albo ktoś, z kim go dzielić.",
+    "description": "Wybierz ścieżkę, która pasuje na dziś — możesz przełączać się między nimi, kiedy zechcesz.",
+    "rooms": {
+      "tag": "Indeks numeru",
+      "title": "Przeglądaj pokoje",
+      "description": "Krótka, ręcznie sprawdzana lista mieszkań i pokoi w Warszawie, Krakowie, Wrocławiu i nie tylko.",
+      "cta": "Otwórz indeks",
+      "stat": "Wybrane pokoje w 6 miastach"
+    },
+    "flatmates": {
+      "tag": "Dopasowanie współlokatora",
+      "title": "Znajdź współlokatora",
+      "description": "Poznaj ludzi pasujących do Twojego rytmu, a nie tylko do budżetu. Świadome dopasowania oparte na wzajemnym zainteresowaniu.",
+      "ctaSignedOut": "Utwórz profil",
+      "ctaSignedIn": "Moje dopasowania",
+      "stat": "94% średniej zgodności wśród potwierdzonych dopasowań",
+      "loginPrompt": "Masz już konto?",
+      "signIn": "Zaloguj się"
+    }
+  },
+  "story": {
+    "eyebrow": "Jak działa Pokojowo",
+    "title": "Trzy spokojne kroki,",
+    "italic": "bez szumu.",
+    "steps": {
+      "one": {
+        "title": "Opowiedz, jak żyjesz",
+        "description": "Krótki profil — rytm dnia, czystość, goście, praca z domu — pozwala nam dobrać Cię trafnie."
+      },
+      "two": {
+        "title": "Przeglądaj pokoje lub poznawaj współlokatorów",
+        "description": "Otwórz indeks po sprawdzone pokoje albo otwórz dopasowania, by poznać ludzi pasujących do Twojego stylu."
+      },
+      "three": {
+        "title": "Połączcie się, gdy poczujesz, że to to",
+        "description": "Wzajemne zainteresowanie otwiera prywatny czat. Bez zimnych wiadomości, bez kopiuj-wklej, bez hałasu."
+      }
+    }
+  },
+  "featured": {
+    "eyebrow": "Z indeksu",
+    "title": "Polecane pokoje",
+    "italic": "tego tygodnia.",
+    "viewAll": "Zobacz cały indeks"
+  },
+  "manifesto": {
+    "eyebrow": "Zaproszenie",
+    "title": "Znajdź współlokatora, który",
+    "italic": "naprawdę pasuje.",
+    "description": "Zaloguj się lub utwórz profil, aby zobaczyć wskaźniki zgodności, wzajemne dopasowania i osoby, które po cichu polubiły Twój profil.",
+    "primaryCta": "Utwórz profil",
+    "secondaryCta": "Zaloguj się",
+    "signedInCta": "Moje dopasowania",
+    "signedInSecondary": "Zobacz indeks"
+  },
+  "hosts": {
+    "eyebrow": "Dla gospodarzy",
+    "title": "Masz pokój do wynajęcia?",
+    "description": "Wystaw swoją przestrzeń z Pokojowo, a my dopasujemy Ci zweryfikowanych, kompatybilnych najemców — nie obcych przejazdem.",
+    "cta": "Zostań gospodarzem",
+    "ctaSignedIn": "Przejdź do pracowni"
+  }
+}

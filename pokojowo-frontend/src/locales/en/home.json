@@ -1,0 +1,83 @@
+{
+  "hero": {
+    "dateline": "Vol. 01 — Editorial Rentals",
+    "eyebrow": "Pokojowo Quarterly",
+    "headline": "Rooms & flatmates,",
+    "italic": "considered.",
+    "subhead": "Pokojowo is a quieter way to find a home. Browse handpicked rooms, meet flatmates who actually fit, and skip the noise of generic listings.",
+    "primaryCta": "Find a room",
+    "primaryCtaAuthed": "Browse the index",
+    "secondaryCta": "Find a flatmate",
+    "secondaryCtaAuthed": "Open my matches",
+    "metric": {
+      "rating": "average host rating",
+      "compatibility": "compatibility for matches",
+      "reviewed": "every room reviewed by hand"
+    }
+  },
+  "pathways": {
+    "eyebrow": "Two ways in",
+    "title": "A room of your own,",
+    "italic": "or someone to share it with.",
+    "description": "Pick the path that suits you today — you can switch between them whenever you like.",
+    "rooms": {
+      "tag": "The Index",
+      "title": "Browse rooms",
+      "description": "A short, hand-reviewed shortlist of apartments and rooms across Warsaw, Krakow, Wroclaw and beyond.",
+      "cta": "Open the index",
+      "stat": "Curated rooms across 6 cities"
+    },
+    "flatmates": {
+      "tag": "Flatmate matching",
+      "title": "Find a flatmate",
+      "description": "Meet people who fit your routine, not just your budget. Lifestyle-aware matches with mutual interest at the heart.",
+      "ctaSignedOut": "Create your profile",
+      "ctaSignedIn": "Open my matches",
+      "stat": "94% average compatibility for confirmed matches",
+      "loginPrompt": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "story": {
+    "eyebrow": "How Pokojowo works",
+    "title": "Three quiet steps,",
+    "italic": "no spam.",
+    "steps": {
+      "one": {
+        "title": "Tell us how you live",
+        "description": "A short profile — sleep schedule, cleanliness, guests, work-from-home — gets us most of the way there."
+      },
+      "two": {
+        "title": "Browse rooms or meet flatmates",
+        "description": "Open the index for hand-reviewed rooms, or open your matches for people who fit your routine."
+      },
+      "three": {
+        "title": "Connect when it feels right",
+        "description": "Mutual interest opens a private chat. No cold outreach, no copy-pasted messages, no noise."
+      }
+    }
+  },
+  "featured": {
+    "eyebrow": "From the index",
+    "title": "Featured rooms,",
+    "italic": "this week.",
+    "viewAll": "Browse the full index"
+  },
+  "manifesto": {
+    "eyebrow": "An invitation",
+    "title": "Find a flatmate who actually",
+    "italic": "fits.",
+    "description": "Sign in or create your profile to see compatibility scores, mutual matches, and the people who quietly liked yours back.",
+    "primaryCta": "Create your profile",
+    "secondaryCta": "Sign in",
+    "signedInCta": "Open my matches",
+    "signedInSecondary": "View the index"
+  },
+  "hosts": {
+    "eyebrow": "For hosts",
+    "title": "Have a room to rent?",
+    "description": "List your space with Pokojowo and we'll match you with verified, compatible tenants — not strangers passing through.",
+    "cta": "Become a host",
+    "ctaSignedIn": "Go to studio"
+  }
+}

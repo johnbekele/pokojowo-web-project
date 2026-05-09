@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { RotateCcw, Users, Sparkles } from 'lucide-react';
+import { RotateCcw, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SwipeCard from './SwipeCard';
 import useLikesStore from '@/stores/likesStore';
@@ -42,14 +42,14 @@ export default function SwipeStack({ matches = [], onCardClick, onEmpty }) {
   if (currentMatches.length === 0) {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-12 text-center"
+        className="flex flex-col items-center justify-center py-16 text-center"
       >
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-6">
-          <Sparkles className="h-10 w-10 text-primary" />
+        <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-border/70 bg-surface-paper">
+          <Users className="h-6 w-6 text-foreground" />
         </div>
-        <h3 className="text-2xl font-bold mb-2">You've seen everyone!</h3>
+        <h3 className="font-display text-3xl font-medium tracking-editorial mb-2">You've seen everyone!</h3>
         <p className="text-muted-foreground mb-6 max-w-sm">
           You've gone through all potential flatmates. Check back later for new matches!
         </p>

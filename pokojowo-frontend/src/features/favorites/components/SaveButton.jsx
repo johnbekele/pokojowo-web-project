@@ -44,23 +44,19 @@ export default function SaveButton({
 
   return (
     <Button
-      variant={saved ? 'default' : variant}
+      variant={saved ? 'accent' : variant}
       size={size}
       onClick={handleToggle}
       disabled={isLoading}
-      className={cn(
-        'transition-all duration-200',
-        saved && 'bg-amber-500 hover:bg-amber-600 text-white',
-        className
-      )}
-      title={saved ? 'Remove from saved' : 'Save profile'}
+      className={cn('transition-all duration-300', className)}
+      title={saved ? 'Remove from shortlist' : 'Save to shortlist'}
     >
       {saved ? (
-        <BookmarkCheck className={cn('h-4 w-4', showLabel && 'mr-2')} />
+        <BookmarkCheck className={cn('h-4 w-4', showLabel && 'mr-1.5')} />
       ) : (
-        <Bookmark className={cn('h-4 w-4', showLabel && 'mr-2')} />
+        <Bookmark className={cn('h-4 w-4', showLabel && 'mr-1.5')} />
       )}
-      {showLabel && (saved ? 'Saved' : 'Save')}
+      {showLabel && (saved ? 'Shortlisted' : 'Shortlist')}
     </Button>
   );
 }

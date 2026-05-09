@@ -1,19 +1,24 @@
 import { motion, useMotionValue, useTransform, useAnimation } from 'framer-motion';
-import { ThumbsUp, X, MapPin, Languages, Info, Home, Sparkles } from 'lucide-react';
+import { ThumbsUp, X, MapPin, Languages, Info } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
+import { ScoreRing, TrustBadge } from '@/components/shared/editorial';
 import { cn } from '@/lib/utils';
 
 const SWIPE_THRESHOLD = 150;
-const ROTATION_RANGE = 20;
+const ROTATION_RANGE = 14;
 
+/**
+ * Editorial swipe card.
+ * Looks like a magazine portrait page rather than a casual dating card.
+ */
 export default function SwipeCard({
   match,
   onSwipeLeft,
   onSwipeRight,
   onCardClick,
   isTop = false,
-  style = {}
+  style = {},
 }) {
   const controls = useAnimation();
   const x = useMotionValue(0);
@@ -29,7 +34,6 @@ export default function SwipeCard({
     age,
     bio,
     location,
-    languages,
     compatibility_score,
     explanations,
     shared_languages,
@@ -38,180 +42,167 @@ export default function SwipeCard({
 
   const score = Math.round(compatibility_score || 0);
   const user = { firstname, lastname, photo };
-  const positivePoints = explanations?.filter(e => e.impact === 'positive').slice(0, 2) || [];
-
-  const getScoreColor = (score) => {
-    if (score >= 85) return 'from-green-500 to-emerald-600';
-    if (score >= 70) return 'from-blue-500 to-indigo-600';
-    if (score >= 55) return 'from-yellow-500 to-orange-600';
-    return 'from-gray-400 to-gray-500';
-  };
+  const positivePoints = explanations?.filter((e) => e.impact === 'positive').slice(0, 2) || [];
 
   const handleDragEnd = (_, info) => {
     const { offset, velocity } = info;
-
     if (Math.abs(offset.x) > SWIPE_THRESHOLD || Math.abs(velocity.x) > 500) {
       const direction = offset.x > 0 ? 'right' : 'left';
-      controls.start({
-        x: direction === 'right' ? 500 : -500,
-        opacity: 0,
-        transition: { duration: 0.3 }
-      }).then(() => {
-        if (direction === 'right') {
-          onSwipeRight?.(user_id);
-        } else {
-          onSwipeLeft?.(user_id);
-        }
-      });
+      controls
+        .start({
+          x: direction === 'right' ? 600 : -600,
+          opacity: 0,
+          transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+        })
+        .then(() => {
+          if (direction === 'right') onSwipeRight?.(user_id);
+          else onSwipeLeft?.(user_id);
+        });
     } else {
-      controls.start({ x: 0, transition: { type: 'spring', stiffness: 500, damping: 30 } });
+      controls.start({ x: 0, transition: { type: 'spring', stiffness: 400, damping: 30 } });
     }
   };
 
   const handleButtonSwipe = (direction) => {
-    controls.start({
-      x: direction === 'right' ? 500 : -500,
-      opacity: 0,
-      transition: { duration: 0.3 }
-    }).then(() => {
-      if (direction === 'right') {
-        onSwipeRight?.(user_id);
-      } else {
-        onSwipeLeft?.(user_id);
-      }
-    });
+    controls
+      .start({
+        x: direction === 'right' ? 600 : -600,
+        opacity: 0,
+        transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+      })
+      .then(() => {
+        if (direction === 'right') onSwipeRight?.(user_id);
+        else onSwipeLeft?.(user_id);
+      });
   };
 
   return (
     <motion.div
       className={cn(
-        "absolute w-full max-w-[380px] aspect-[3/4] cursor-grab active:cursor-grabbing touch-none select-none",
-        !isTop && "pointer-events-none"
+        'absolute aspect-[3/4] w-full max-w-[400px] cursor-grab touch-none select-none active:cursor-grabbing',
+        !isTop && 'pointer-events-none',
       )}
       style={{ x, rotate, ...style }}
-      drag={isTop ? "x" : false}
+      drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.9}
+      dragElastic={0.85}
       onDragEnd={handleDragEnd}
       animate={controls}
-      whileTap={{ scale: isTop ? 1.02 : 1 }}
+      whileTap={{ scale: isTop ? 1.01 : 1 }}
     >
-      {/* Card Container */}
       <div
-        className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-card border border-border"
+        className="relative h-full w-full overflow-hidden rounded-[2rem] bg-card shadow-premium-lg border border-border/70"
         onClick={() => onCardClick?.(match)}
       >
-        {/* Background gradient */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-b opacity-90",
-          getScoreColor(score)
-        )} />
-
-        {/* Photo section */}
-        <div className="absolute inset-0">
+        {/* Photo */}
+        <div className="absolute inset-0 bg-surface-parchment">
           {photo ? (
             <img
               src={photo}
-              alt={`${firstname}'s photo`}
-              className="w-full h-full object-cover"
+              alt={`${firstname}'s portrait`}
+              className="h-full w-full object-cover"
               draggable={false}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+            <div className="flex h-full w-full items-center justify-center">
               <UserAvatar user={user} size="xl" className="h-32 w-32" />
             </div>
           )}
-
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-onyx/85 via-surface-onyx/15 to-transparent" />
         </div>
 
-        {/* Yes/Pass overlays */}
+        {/* Yes / Pass overlays */}
         <motion.div
-          className="absolute top-8 right-8 z-20 rotate-12"
+          className="absolute right-8 top-10 z-20 rotate-[10deg]"
           style={{ opacity: likeOpacity }}
         >
-          <div className="px-4 py-2 border-4 border-teal-500 rounded-lg bg-teal-500/20">
-            <span className="text-3xl font-black text-teal-500">YES!</span>
+          <div className="rounded-2xl border-2 border-olive bg-olive/20 px-4 py-2 backdrop-blur">
+            <span className="font-display text-2xl font-semibold uppercase tracking-[0.24em] text-olive">
+              Yes
+            </span>
           </div>
         </motion.div>
 
         <motion.div
-          className="absolute top-8 left-8 z-20 -rotate-12"
+          className="absolute left-8 top-10 z-20 -rotate-[10deg]"
           style={{ opacity: nopeOpacity }}
         >
-          <div className="px-4 py-2 border-4 border-gray-400 rounded-lg bg-gray-400/20">
-            <span className="text-3xl font-black text-gray-400">PASS</span>
+          <div className="rounded-2xl border-2 border-rose bg-rose/20 px-4 py-2 backdrop-blur">
+            <span className="font-display text-2xl font-semibold uppercase tracking-[0.24em] text-rose">
+              Pass
+            </span>
           </div>
         </motion.div>
 
-        {/* Compatibility Score Badge */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
-          {is_new_user && (
-            <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-amber-500 text-white shadow-lg">
-              <Sparkles className="h-3 w-3" />
-              <span className="text-xs font-bold">NEW</span>
+        {/* Top markers */}
+        <div className="absolute inset-x-5 top-5 z-10 flex items-start justify-between">
+          <div className="flex flex-col gap-2">
+            <span className="rounded-full bg-surface-paper/90 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-foreground backdrop-blur">
+              {firstname}
+            </span>
+            {is_new_user && (
+              <TrustBadge tone="accent">New voice</TrustBadge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-full bg-surface-paper/85 p-2 text-foreground backdrop-blur transition-transform hover:scale-105"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCardClick?.(match);
+              }}
+              aria-label="More info"
+            >
+              <Info className="h-4 w-4" />
+            </button>
+            <div className="rounded-full bg-surface-paper/90 p-1 backdrop-blur shadow-lg">
+              <ScoreRing value={score} size={56} />
             </div>
-          )}
-          <div className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 backdrop-blur-sm shadow-lg"
-          )}>
-            <Home className="h-4 w-4 text-teal-600" />
-            <span className="text-sm font-bold text-foreground">{score}% Compatible</span>
           </div>
         </div>
 
-        {/* Info button */}
-        <button
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            onCardClick?.(match);
-          }}
-        >
-          <Info className="h-5 w-5 text-white" />
-        </button>
-
-        {/* Content section */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          {/* Name and age */}
-          <div className="mb-2">
-            <h2 className="text-3xl font-bold">
-              {firstname}{age ? `, ${age}` : ''}
+        {/* Bottom content */}
+        <div className="absolute inset-x-0 bottom-0 z-10 space-y-3 p-6 text-white">
+          <div className="space-y-1">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/65">
+              {age ? `${age} · ` : ''}
+              {location || ''}
+            </p>
+            <h2 className="font-display text-4xl font-medium leading-[1.05] tracking-editorial">
+              {firstname}
+              {lastname ? <span className="text-white/70 font-light"> {lastname[0]}.</span> : null}
             </h2>
-            {location && (
-              <div className="flex items-center gap-1 text-white/80 mt-1">
-                <MapPin className="h-4 w-4" />
-                <span>{location}</span>
-              </div>
-            )}
           </div>
 
-          {/* Bio snippet */}
-          {bio && (
-            <p className="text-white/90 text-sm line-clamp-2 mb-3">
-              {bio}
+          {location && (
+            <p className="flex items-center gap-1.5 text-xs text-white/75">
+              <MapPin className="h-3 w-3" />
+              {location}
             </p>
           )}
 
-          {/* Positive match points */}
-          {positivePoints.length > 0 && (
-            <div className="space-y-1 mb-3">
-              {positivePoints.map((point, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-sm text-green-300">
-                  <span className="text-green-400">✓</span>
-                  <span className="line-clamp-1">{point.reason}</span>
-                </div>
-              ))}
-            </div>
+          {bio && (
+            <p className="font-display text-sm font-light italic leading-relaxed text-white/85 line-clamp-2">
+              "{bio}"
+            </p>
           )}
 
-          {/* Languages */}
+          {positivePoints.length > 0 && (
+            <ul className="space-y-1">
+              {positivePoints.map((point, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-xs text-white/85">
+                  <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-accent" />
+                  <span className="line-clamp-1">{point.reason}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
           {shared_languages?.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Languages className="h-4 w-4 text-white/70" />
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <Languages className="h-3 w-3 text-white/60" />
               {shared_languages.slice(0, 3).map((lang) => (
-                <Badge key={lang} className="bg-white/20 text-white border-0 text-xs">
+                <Badge key={lang} variant="editorial" className="bg-white/15 text-white border-white/20">
                   {lang}
                 </Badge>
               ))}
@@ -220,31 +211,33 @@ export default function SwipeCard({
         </div>
       </div>
 
-      {/* Action buttons - only show for top card */}
+      {/* Action buttons */}
       {isTop && (
-        <div className="absolute -bottom-20 left-0 right-0 flex justify-center gap-6">
+        <div className="absolute -bottom-24 left-0 right-0 flex justify-center gap-5">
           <motion.button
-            className="w-16 h-16 rounded-full bg-white dark:bg-card shadow-xl flex items-center justify-center border-2 border-gray-300 dark:border-gray-600 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            className="flex h-14 w-14 items-center justify-center rounded-full border border-border/70 bg-surface-paper text-muted-foreground shadow-premium transition-colors hover:border-rose/50 hover:bg-rose/10 hover:text-rose"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
             onClick={(e) => {
               e.stopPropagation();
               handleButtonSwipe('left');
             }}
+            aria-label="Pass"
           >
-            <X className="h-8 w-8" />
+            <X className="h-5 w-5" />
           </motion.button>
 
           <motion.button
-            className="w-16 h-16 rounded-full bg-white dark:bg-card shadow-xl flex items-center justify-center border-2 border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-foreground text-background shadow-premium-lg transition-colors hover:bg-surface-ink"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
             onClick={(e) => {
               e.stopPropagation();
               handleButtonSwipe('right');
             }}
+            aria-label="Like"
           >
-            <ThumbsUp className="h-8 w-8" />
+            <ThumbsUp className="h-6 w-6" />
           </motion.button>
         </div>
       )}

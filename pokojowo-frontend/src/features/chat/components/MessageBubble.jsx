@@ -87,7 +87,7 @@ export default function MessageBubble({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDelete}
-                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <Trash2 size={14} className="mr-2" />
                   Delete
@@ -99,32 +99,32 @@ export default function MessageBubble({
 
         {/* Message Bubble */}
         <div
-          className={`max-w-[70%] ${
+          className={`max-w-[75%] shadow-editorial ${
             isMine
-              ? 'bg-blue-500 dark:bg-blue-600 text-white rounded-2xl rounded-br-md'
-              : 'bg-card text-card-foreground rounded-2xl rounded-bl-md shadow-sm border border-border'
+              ? 'rounded-3xl rounded-br-md bg-foreground text-background'
+              : 'rounded-3xl rounded-bl-md border border-border/70 bg-card text-card-foreground'
           }`}
         >
           {/* Reply Preview (if replying to another message) */}
           {message.replyToData && !isDeleted && (
             <div
               onClick={handleReplyClick}
-              className={`px-3 pt-2 pb-1 cursor-pointer ${
+              className={`mx-3 mt-3 cursor-pointer rounded-lg px-3 py-2 ${
                 isMine
-                  ? 'border-l-2 border-blue-300 ml-3 mr-3 mt-2'
-                  : 'border-l-2 border-muted-foreground/50 ml-3 mr-3 mt-2'
+                  ? 'border-l-2 border-accent bg-background/10'
+                  : 'border-l-2 border-border bg-surface-parchment'
               }`}
             >
               <p
-                className={`text-xs font-medium ${
-                  isMine ? 'text-blue-200' : 'text-muted-foreground'
+                className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                  isMine ? 'text-background/60' : 'text-muted-foreground'
                 }`}
               >
                 Reply to
               </p>
               <p
-                className={`text-xs truncate ${
-                  isMine ? 'text-blue-100' : 'text-muted-foreground/70'
+                className={`mt-0.5 truncate text-xs ${
+                  isMine ? 'text-background/80' : 'text-muted-foreground/80'
                 }`}
               >
                 {message.replyToData.content}
@@ -133,23 +133,25 @@ export default function MessageBubble({
           )}
 
           {/* Message Content */}
-          <div className="px-4 py-2">
+          <div className="px-4 py-3">
             {isDeleted ? (
-              <p className={`text-sm italic ${isMine ? 'text-blue-200' : 'text-muted-foreground'}`}>
+              <p
+                className={`font-display text-sm italic ${
+                  isMine ? 'text-background/65' : 'text-muted-foreground'
+                }`}
+              >
                 Message deleted
               </p>
             ) : (
-              <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.content}</p>
             )}
           </div>
 
           {/* Timestamp */}
-          <div
-            className={`px-4 pb-2 ${isMine ? 'text-right' : 'text-left'}`}
-          >
+          <div className={`px-4 pb-2 ${isMine ? 'text-right' : 'text-left'}`}>
             <span
-              className={`text-[10px] ${
-                isMine ? 'text-blue-200' : 'text-muted-foreground'
+              className={`text-[10px] uppercase tracking-[0.16em] ${
+                isMine ? 'text-background/55' : 'text-muted-foreground/80'
               }`}
             >
               {formatTime(message.createdAt)}
@@ -188,7 +190,7 @@ export default function MessageBubble({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>
