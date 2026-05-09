@@ -58,29 +58,27 @@ export default function LikeButton({
 
   return (
     <Button
-      variant={liked ? 'default' : variant}
+      variant={mutual ? 'olive' : liked ? 'default' : variant}
       size={size}
       onClick={handleToggle}
       disabled={isLoading}
       className={cn(
-        'transition-all duration-200 group',
-        liked && 'bg-teal-500 hover:bg-teal-600 text-white',
-        mutual && 'bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600',
-        isAnimating && 'scale-110',
-        className
+        'group/like transition-all duration-300',
+        isAnimating && 'scale-105',
+        className,
       )}
       title={mutual ? 'Connected!' : liked ? 'Remove interest' : 'Show interest'}
     >
       <ThumbsUp
         className={cn(
-          'h-4 w-4 transition-transform duration-200',
-          showLabel && 'mr-2',
+          'h-4 w-4 transition-transform duration-300',
+          showLabel && 'mr-1.5',
           liked && 'fill-current',
           isAnimating && 'animate-pulse',
-          !liked && 'group-hover:scale-110'
+          !liked && 'group-hover/like:scale-110',
         )}
       />
-      {showLabel && (mutual ? 'Connected!' : liked ? 'Interested' : 'Interested?')}
+      {showLabel && (mutual ? 'Connected' : liked ? 'Interested' : 'Show interest')}
     </Button>
   );
 }

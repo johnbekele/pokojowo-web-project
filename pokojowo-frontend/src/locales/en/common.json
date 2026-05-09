@@ -1,18 +1,32 @@
 {
   "appName": "Pokojowo",
-  "tagline": "Find Your Perfect Flatmate",
+  "tagline": "The Editorial Way to Find a Home",
   "nav": {
     "home": "Home",
     "listings": "Listings",
     "matches": "Matches",
-    "chat": "Chat",
+    "chat": "Messages",
     "profile": "Profile",
     "login": "Log In",
     "signup": "Sign Up",
-    "logout": "Log Out",
+    "logout": "Sign out",
     "dashboard": "Dashboard",
-    "favorites": "Favorites",
-    "likes": "Likes"
+    "favorites": "Shortlist",
+    "likes": "Likes",
+    "discover": "Discover",
+    "studio": "Studio",
+    "signIn": "Sign in",
+    "signUp": "Join Pokojowo",
+    "settings": "Settings",
+    "contents": "Contents",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "footer": {
+    "tagline": "A curated way to find rooms, flatmates, and homes that actually fit how you live.",
+    "rights": "Crafted with care for considered renting.",
+    "discover": "Discover",
+    "studio": "Studio"
   },
   "actions": {
     "save": "Save",
@@ -32,7 +46,7 @@
     "viewAll": "View All",
     "viewProfile": "View Profile",
     "remove": "Remove",
-    "keepBrowsing": "Keep Browsing",
+    "keepBrowsing": "Keep browsing",
     "sendMessage": "Send Message"
   },
   "validation": {

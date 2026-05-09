@@ -60,9 +60,9 @@ export default function ChatRoom() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       // Flash highlight effect
-      element.classList.add('bg-yellow-100');
+      element.classList.add('ring-2', 'ring-accent');
       setTimeout(() => {
-        element.classList.remove('bg-yellow-100');
+        element.classList.remove('ring-2', 'ring-accent');
       }, 1500);
     }
   }, []);
@@ -270,20 +270,20 @@ export default function ChatRoom() {
   // Loading state
   if (chatLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-10">
-        <Loader2 size={32} className="animate-spin text-primary" />
-        <p className="mt-2 text-muted-foreground">{t('loading')}</p>
+      <div className="flex flex-col items-center justify-center p-12">
+        <Loader2 size={28} className="animate-spin text-accent" />
+        <p className="mt-3 text-sm text-muted-foreground">{t('loading')}</p>
       </div>
     );
   }
 
   if (!chat) {
     return (
-      <div className="flex flex-col items-center justify-center p-10">
-        <p className="text-muted-foreground">{t('error.chatNotFound')}</p>
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <p className="text-sm text-muted-foreground">{t('error.chatNotFound')}</p>
         <button
           onClick={() => navigate('/chat')}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-surface-ink"
         >
           {t('backToChats')}
         </button>
@@ -292,49 +292,55 @@ export default function ChatRoom() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-10rem)] md:h-[calc(100vh-200px)] border border-border rounded-xl overflow-hidden bg-card">
+    <div className="flex flex-col h-[calc(100dvh-10rem)] md:h-[calc(100vh-220px)] overflow-hidden rounded-3xl border border-border/70 bg-card shadow-editorial">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted">
+      <div className="flex items-center gap-3 border-b border-border/60 bg-surface-paper px-5 py-4">
         <button
           onClick={() => navigate('/chat')}
-          className="p-2 rounded-full hover:bg-accent transition-colors touch-target flex items-center justify-center"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-surface-parchment hover:text-foreground touch-target"
+          aria-label="Back"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
         </button>
-        <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-          {otherUser?.firstname?.[0]?.toUpperCase() || '?'}
+        <div className="relative">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-foreground font-display text-base font-medium text-background">
+            {otherUser?.firstname?.[0]?.toUpperCase() || '?'}
+          </div>
+          {otherUser?.isOnline && (
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card bg-olive" />
+          )}
         </div>
-        <div>
-          <div className="font-semibold text-foreground">
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-display text-base font-medium tracking-editorial text-foreground">
             {otherUser?.firstname} {otherUser?.lastname}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {otherUser?.isOnline ? (
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-success"></span>
-                {t('online')}
-              </span>
-            ) : (
-              t('offline')
-            )}
-          </div>
+          </p>
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {otherUser?.isOnline ? t('online', 'Online') : t('offline', 'Offline')}
+          </p>
         </div>
       </div>
 
       {/* Messages */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 bg-muted/50"
+        className="relative flex-1 overflow-y-auto bg-surface-canvas px-4 py-6 md:px-6"
       >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-grain opacity-30"
+        />
         {messagesLoading ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Loader2 size={24} className="animate-spin text-primary" />
-            <p className="mt-2 text-muted-foreground">{t('loadingMessages')}</p>
+          <div className="relative flex flex-col items-center justify-center py-12">
+            <Loader2 size={22} className="animate-spin text-accent" />
+            <p className="mt-2 text-sm text-muted-foreground">{t('loadingMessages')}</p>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-            <p>{t('noMessages')}</p>
-            <p className="text-sm">{t('startConversation')}</p>
+          <div className="relative flex flex-col items-center justify-center py-16 text-center">
+            <span className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-surface-paper text-muted-foreground">
+              <Send className="h-5 w-5" />
+            </span>
+            <p className="font-display text-lg font-medium text-foreground">{t('noMessages', 'A blank page awaits')}</p>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">{t('startConversation', 'Say hello — the rest writes itself.')}</p>
           </div>
         ) : (
           <>
@@ -370,22 +376,22 @@ export default function ChatRoom() {
       {/* Input */}
       <form
         onSubmit={handleSend}
-        className="flex gap-3 px-4 py-3 border-t border-border bg-card pb-safe"
+        className="flex gap-3 border-t border-border/60 bg-surface-paper px-4 py-3 pb-safe md:px-5"
       >
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={replyingTo ? t('replyPlaceholder') : t('inputPlaceholder')}
-          className="flex-1 px-4 py-3 border border-input bg-background rounded-full outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all text-base md:text-sm"
+          className="flex-1 rounded-full border border-border/70 bg-card px-5 py-3 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground/70 focus:border-foreground/40 focus:ring-2 focus:ring-ring/30 md:text-sm"
         />
         <button
           type="submit"
           disabled={!message.trim()}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors touch-target active:scale-95 ${
+          className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 touch-target active:scale-95 ${
             message.trim()
-              ? 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer'
-              : 'bg-muted text-muted-foreground cursor-not-allowed'
+              ? 'bg-foreground text-background shadow-[0_4px_18px_hsl(var(--surface-onyx)/0.18)] hover:bg-surface-ink'
+              : 'bg-surface-parchment text-muted-foreground cursor-not-allowed'
           }`}
         >
           <Send size={20} />

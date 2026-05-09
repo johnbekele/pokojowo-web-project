@@ -1,30 +1,46 @@
 {
-  "title": "Wiadomości",
-  "subtitle": "Rozmawiaj ze swoimi dopasowaniami",
+  "title": "Rozmowy,",
+  "italic": "w ruchu.",
+  "eyebrow": "Korespondencja",
+  "subtitle": "Niewielka, świadoma skrzynka. Odpowiedzi, które coś znaczą — nie strumień powiadomień.",
+  "rule": "Aktywne wątki",
   "search": {
-    "placeholder": "Szukaj rozmów..."
+    "placeholder": "Szukaj rozmów…"
+  },
+  "stats": {
+    "threads_one": "{{count}} wątek",
+    "threads_few": "{{count}} wątki",
+    "threads_many": "{{count}} wątków",
+    "threads_other": "{{count}} wątków",
+    "threads": "{{count}} wątków",
+    "unread_one": "{{count}} nieprzeczytany",
+    "unread_few": "{{count}} nieprzeczytane",
+    "unread_many": "{{count}} nieprzeczytanych",
+    "unread_other": "{{count}} nieprzeczytanych",
+    "unread": "{{count}} nieprzeczytanych"
   },
   "empty": {
     "title": "Brak wiadomości",
     "subtitle": "Rozpocznij rozmowę ze swoimi dopasowaniami, aby znaleźć idealnego współlokatora",
-    "findMatches": "Znajdź dopasowania"
+    "findMatches": "Znajdź dopasowania",
+    "eyebrow": "Brak wątków"
   },
-  "noMessages": "Brak wiadomości",
-  "startConversation": "Wyślij wiadomość, aby rozpocząć rozmowę",
-  "loading": "Ładowanie czatu...",
-  "loadingMessages": "Ładowanie wiadomości...",
-  "replyPlaceholder": "Napisz odpowiedź...",
+  "noMessages": "Pusta strona czeka",
+  "startConversation": "Przywitaj się — reszta sama się napisze.",
+  "loading": "Otwieranie rozmowy…",
+  "loadingMessages": "Ładowanie wiadomości…",
+  "replyPlaceholder": "Napisz odpowiedź…",
   "conversation": {
     "online": "Online",
     "offline": "Offline",
-    "typing": "pisze...",
+    "typing": "pisze…",
     "lastSeen": "Ostatnio widziano {{time}}"
   },
   "input": {
-    "placeholder": "Napisz wiadomość...",
+    "placeholder": "Napisz wiadomość…",
     "send": "Wyślij"
   },
-  "inputPlaceholder": "Napisz wiadomość...",
+  "inputPlaceholder": "Napisz wiadomość…",
   "message": {
     "sent": "Wysłano",
     "delivered": "Dostarczono",
@@ -35,16 +51,17 @@
     "loadFailed": "Nie udało się załadować rozmów. Spróbuj ponownie.",
     "chatNotFound": "Nie znaleziono czatu",
     "sendFailed": "Nie udało się wysłać wiadomości",
-    "connectionLost": "Utracono połączenie"
+    "connectionLost": "Utracono połączenie",
+    "eyebrow": "Utracono połączenie"
   },
   "connection": {
     "connected": "Połączono",
-    "reconnecting": "Ponowne łączenie...",
+    "reconnecting": "Ponowne łączenie…",
     "offline": "Offline"
   },
-  "backToChats": "Wróć do czatów",
+  "backToChats": "Wróć do skrzynki",
   "viewProfile": "Zobacz profil",
   "online": "Online",
   "offline": "Offline",
-  "typing": "pisze..."
+  "typing": "pisze…"
 }

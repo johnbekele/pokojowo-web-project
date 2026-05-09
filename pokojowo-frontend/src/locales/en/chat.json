@@ -1,30 +1,42 @@
 {
-  "title": "Messages",
-  "subtitle": "Chat with your matches",
+  "title": "Conversations,",
+  "italic": "in motion.",
+  "eyebrow": "Correspondence",
+  "subtitle": "A small, considered inbox. Replies that mean something, not a feed of pings.",
+  "rule": "Active threads",
   "search": {
-    "placeholder": "Search conversations..."
+    "placeholder": "Search conversations…"
+  },
+  "stats": {
+    "threads_one": "{{count}} thread",
+    "threads_other": "{{count}} threads",
+    "threads": "{{count}} threads",
+    "unread_one": "{{count}} unread",
+    "unread_other": "{{count}} unread",
+    "unread": "{{count}} unread"
   },
   "empty": {
     "title": "No messages yet",
     "subtitle": "Start a conversation with your matches to find your perfect roommate",
-    "findMatches": "Find Matches"
+    "findMatches": "Find Matches",
+    "eyebrow": "No threads yet"
   },
-  "noMessages": "No messages yet",
-  "startConversation": "Send a message to start the conversation",
-  "loading": "Loading chat...",
-  "loadingMessages": "Loading messages...",
-  "replyPlaceholder": "Type your reply...",
+  "noMessages": "A blank page awaits",
+  "startConversation": "Say hello — the rest writes itself.",
+  "loading": "Opening conversation…",
+  "loadingMessages": "Loading messages…",
+  "replyPlaceholder": "Type your reply…",
   "conversation": {
     "online": "Online",
     "offline": "Offline",
-    "typing": "typing...",
+    "typing": "typing…",
     "lastSeen": "Last seen {{time}}"
   },
   "input": {
-    "placeholder": "Type a message...",
+    "placeholder": "Type a message…",
     "send": "Send"
   },
-  "inputPlaceholder": "Type a message...",
+  "inputPlaceholder": "Type a message…",
   "message": {
     "sent": "Sent",
     "delivered": "Delivered",
@@ -35,16 +47,17 @@
     "loadFailed": "Failed to load conversations. Please try again.",
     "chatNotFound": "Chat not found",
     "sendFailed": "Failed to send message",
-    "connectionLost": "Connection lost"
+    "connectionLost": "Connection lost",
+    "eyebrow": "Lost connection"
   },
   "connection": {
     "connected": "Connected",
-    "reconnecting": "Reconnecting...",
+    "reconnecting": "Reconnecting…",
     "offline": "Offline"
   },
-  "backToChats": "Back to Chats",
+  "backToChats": "Back to inbox",
   "viewProfile": "View Profile",
   "online": "Online",
   "offline": "Offline",
-  "typing": "typing..."
+  "typing": "typing…"
 }

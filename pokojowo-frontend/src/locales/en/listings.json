@@ -5,6 +5,21 @@
     "subtitle": "Our AI-powered matching finds compatible roommates based on lifestyle, interests, and preferences. Join thousands finding their ideal living situation.",
     "searchButton": "Search",
     "signupNow": "Sign up now",
+    "dateline": "Curated weekly",
+    "headline": "Rooms & flatmates,",
+    "italic": "considered.",
+    "subhead": "Pokojowo is a quieter way to find a home. Browse rooms with care, meet flatmates who actually fit, and skip the noise of generic listings.",
+    "cta": "Find a room",
+    "cities": "Cities",
+    "featured": "Currently featured",
+    "trust": {
+      "rating": "average host rating",
+      "match": "compatibility for matches"
+    },
+    "tag": {
+      "roommates": "Flatmates",
+      "rooms": "Rooms"
+    },
     "slides": {
       "roommate1": {
         "title": "Find Your Perfect Roommate",
@@ -41,17 +56,34 @@
     }
   },
   "search": {
-    "placeholder": "Search by location, city, or neighborhood...",
+    "placeholder": "City, neighbourhood, vibe…",
     "filter": "Filters",
     "sort": "Sort by",
+    "cta": "Find a room",
     "sortOptions": {
       "newest": "Newest first",
       "priceAsc": "Price: Low to High",
       "priceDesc": "Price: High to Low"
     }
   },
+  "cities": {
+    "warsaw": "Warsaw",
+    "krakow": "Krakow",
+    "wroclaw": "Wroclaw",
+    "poznan": "Poznan",
+    "gdansk": "Gdansk",
+    "lodz": "Lodz"
+  },
   "results": {
-    "count": "listings found"
+    "count_one": "{{count}} listing",
+    "count_other": "{{count}} listings",
+    "count": "listings found",
+    "section": "The Index",
+    "eyebrow": "Listings",
+    "heading": "Rooms in the index,",
+    "italic": "this week.",
+    "searching": "Curating rooms",
+    "tagline": "Every room is reviewed by hand. No screaming photos, no surprise fees."
   },
   "filters": {
     "title": "Search Filters",
@@ -81,33 +113,49 @@
     "viewDetails": "View Details",
     "beds": "beds",
     "baths": "baths",
-    "tenants": "{{count}} tenant",
-    "tenants_plural": "{{count}} tenants"
+    "tenants_one": "{{count}} tenant",
+    "tenants_other": "{{count}} tenants",
+    "tenants": "{{count}} tenants",
+    "from": "From",
+    "month": "mo"
   },
   "details": {
     "description": "Description",
     "amenities": "Amenities",
     "location": "Location",
-    "landlord": "Landlord",
-    "contactLandlord": "Contact Landlord",
+    "landlord": "Your host",
+    "contactLandlord": "Message host",
     "available": "Available from",
     "deposit": "Deposit",
     "utilities": "Utilities",
-    "utilitiesIncluded": "Included",
-    "utilitiesExtra": "Extra"
+    "utilitiesIncluded": "Utilities included",
+    "utilitiesExtra": "Utilities billed separately",
+    "descriptionEyebrow": "About this room",
+    "factsEyebrow": "The Facts",
+    "amenitiesEyebrow": "Amenities",
+    "nearbyEyebrow": "In the neighbourhood",
+    "suitedEyebrow": "Best suited for",
+    "size": "Size",
+    "roomType": "Room",
+    "buildingType": "Building",
+    "availableFromLabel": "Available from"
   },
   "empty": {
     "title": "No listings found",
-    "subtitle": "Try adjusting your filters or search criteria to find more results"
+    "subtitle": "Try adjusting your filters or search criteria to find more results",
+    "eyebrow": "Quiet pages today"
   },
   "error": {
     "title": "Oops! Something went wrong",
     "loadingFailed": "Failed to load listings. Please try again.",
-    "retry": "Try Again"
+    "retry": "Try Again",
+    "eyebrow": "Something went off the press"
   },
   "interestedUsers": {
     "title": "Also interested",
     "singleMatch": "{{name}} ({{score}}% match) is also interested",
+    "multipleMatches_one": "{{count}} compatible roommate is also interested",
+    "multipleMatches_other": "{{count}} compatible roommates are also interested",
     "multipleMatches": "{{count}} compatible roommates are also interested",
     "viewAll": "View all",
     "noMatches": "Be the first to show interest!"
@@ -120,18 +168,26 @@
   "detail": {
     "contactInfo": "Contact Information",
     "phoneNumber": "Phone Number",
-    "tapToCall": "Click to call",
+    "tapToCall": "Tap to call",
     "notProvided": "Contact information not available",
     "originalListing": "Original Listing",
     "viewOnSource": "View on source",
-    "viewOriginal": "View Original Listing",
+    "viewOriginal": "View original",
     "call": "Call",
-    "scrapedNotice": "This listing was imported from an external source. Contact the landlord directly through the original website or phone number.",
-    "notFound": "Listing Not Found",
+    "scrapedNotice": "This listing was imported from an external source. Contact the host directly through the original website or phone number.",
+    "notFound": "This page is between issues",
+    "notFoundEyebrow": "Listing missing",
     "notFoundDescription": "This listing may have been removed or doesn't exist.",
-    "backToListings": "Back to Listings",
-    "availableNow": "Available Now",
+    "backToListings": "Back to listings",
+    "availableNow": "Available",
     "maxTenants": "Max {{count}} tenants",
-    "availableFrom": "Available from {{date}}"
+    "availableFrom": "Available from {{date}}",
+    "imported": "Imported listing",
+    "curated": "Curated by Pokojowo",
+    "listing": "Listing",
+    "priceEyebrow": "Monthly rent",
+    "verifiedHost": "Verified host",
+    "curatedFooter": "Curated for thoughtful renting",
+    "noDescription": "A quiet, comfortable room awaiting its next tenant."
   }
 }

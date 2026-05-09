@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import {
   Heart,
   MessageSquare,
-  Sparkles,
+  Check,
   ArrowRight,
   Target,
   ThumbsUp,
@@ -14,28 +15,28 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserAvatar from '@/components/shared/UserAvatar';
+import {
+  Eyebrow,
+  DisplayTitle,
+  EditorialRule,
+  LuxuryPanel,
+  ScoreRing,
+  TrustBadge,
+} from '@/components/shared/editorial';
 import useAuthStore from '@/stores/authStore';
 import useLikesStore from '@/stores/likesStore';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
 import api from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 export default function TenantDashboard() {
   const { t } = useTranslation('matching');
   const { user } = useAuthStore();
-  const { fetchStats, stats } = useLikesStore();
+  const { fetchStats } = useLikesStore();
   const [activeTab, setActiveTab] = useState('matches');
 
-  // Fetch likes sent by user
   const { data: likesSent, isLoading: loadingSent } = useQuery({
     queryKey: ['likes-sent'],
     queryFn: async () => {
@@ -45,7 +46,6 @@ export default function TenantDashboard() {
     enabled: !!user?.isProfileComplete,
   });
 
-  // Fetch mutual matches
   const { data: mutualMatches, isLoading: loadingMatches } = useQuery({
     queryKey: ['mutual-matches'],
     queryFn: async () => {
@@ -55,7 +55,6 @@ export default function TenantDashboard() {
     enabled: !!user?.isProfileComplete,
   });
 
-  // Fetch likes received
   const { data: likesReceived, isLoading: loadingReceived } = useQuery({
     queryKey: ['likes-received'],
     queryFn: async () => {
@@ -65,46 +64,55 @@ export default function TenantDashboard() {
     enabled: !!user?.isProfileComplete,
   });
 
-  // Load stats on mount
   useEffect(() => {
-    if (user?.isProfileComplete) {
-      fetchStats();
-    }
+    if (user?.isProfileComplete) fetchStats();
   }, [user?.isProfileComplete, fetchStats]);
 
   if (!user) {
     return (
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle>{t('dashboard.pleaseLogin')}</CardTitle>
-          <CardDescription>{t('dashboard.loginRequired')}</CardDescription>
-        </CardHeader>
-      </Card>
+      <LuxuryPanel className="text-center py-16" tone="parchment">
+        <Eyebrow>{t('dashboard.signedOut', 'Signed out')}</Eyebrow>
+        <h2 className="mt-3 font-display text-2xl font-medium text-foreground">
+          {t('dashboard.pleaseLogin', 'Sign in to see your matches')}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t('dashboard.loginRequired', 'A few quick details and you’re back in.')}
+        </p>
+      </LuxuryPanel>
     );
   }
 
   if (!user.isProfileComplete) {
     return (
-      <div className="space-y-6">
-        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Target className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              {t('dashboard.completeProfile')}
-            </CardTitle>
-            <CardDescription>
-              {t('dashboard.profileIncomplete')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link to="/profile-completion/tenant">
-              <Button className="w-full sm:w-auto">
-                {t('dashboard.continueSetup')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="space-y-8">
+        <header className="space-y-3">
+          <Eyebrow>{t('dashboard.eyebrow', 'Your salon')}</Eyebrow>
+          <DisplayTitle size="md" italicWord={t('dashboard.italic', 'started.')}>
+            {t('dashboard.welcomeName', 'Hello,')} {user.firstname || user.username},
+          </DisplayTitle>
+        </header>
+        <LuxuryPanel className="space-y-4 text-center" tone="parchment">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-warning/40 bg-warning/10 text-warning">
+            <Target className="h-5 w-5" />
+          </span>
+          <div className="space-y-1">
+            <h3 className="font-display text-2xl font-medium text-foreground">
+              {t('dashboard.completeProfile', 'Finish your story first')}
+            </h3>
+            <p className="mx-auto max-w-md text-sm text-muted-foreground">
+              {t(
+                'dashboard.profileIncomplete',
+                'Adding a few personal details lets us match you with people who fit how you actually live.',
+              )}
+            </p>
+          </div>
+          <Link to="/profile-completion/tenant">
+            <Button>
+              {t('dashboard.continueSetup', 'Continue setup')}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </LuxuryPanel>
       </div>
     );
   }
@@ -114,285 +122,305 @@ export default function TenantDashboard() {
   const receivedList = likesReceived?.likes || [];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-teal-500 via-teal-600 to-emerald-600 rounded-xl p-6 text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">
-              {t('dashboard.welcome', { name: user.firstname || user.username })}
-            </h1>
-            <p className="text-white/80 mt-1">
-              Your connections and matches
-            </p>
-          </div>
-          <Link to="/matches">
-            <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0">
-              <Users className="mr-2 h-4 w-4" />
-              Find More Matches
-            </Button>
-          </Link>
+    <div className="space-y-12">
+      <header className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-10">
+        <div className="space-y-3">
+          <Eyebrow>{t('dashboard.eyebrow', 'Your salon')}</Eyebrow>
+          <DisplayTitle size="md" italicWord={t('dashboard.italic', `${user.firstname || user.username}.`)}>
+            {t('dashboard.welcomeName', 'Hello,')}
+          </DisplayTitle>
+          <p className="max-w-xl text-sm text-muted-foreground sm:text-base">
+            {t(
+              'dashboard.subtitle',
+              'A quiet ledger of every connection you’ve sent, received, and confirmed. Pick up exactly where you left off.',
+            )}
+          </p>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="text-center p-3 bg-white/10 rounded-lg">
-            <div className="text-2xl font-bold">{matchesList.length}</div>
-            <div className="text-sm text-white/70">Mutual Matches</div>
-          </div>
-          <div className="text-center p-3 bg-white/10 rounded-lg">
-            <div className="text-2xl font-bold">{sentList.length}</div>
-            <div className="text-sm text-white/70">People You Liked</div>
-          </div>
-          <div className="text-center p-3 bg-white/10 rounded-lg">
-            <div className="text-2xl font-bold">{receivedList.length}</div>
-            <div className="text-sm text-white/70">Likes Received</div>
-          </div>
+        <div className="grid grid-cols-3 gap-3">
+          <StatTile
+            icon={<Handshake className="h-3.5 w-3.5" />}
+            value={matchesList.length}
+            label={t('dashboard.stats.mutual', 'Mutual')}
+            tone="ink"
+          />
+          <StatTile
+            icon={<ThumbsUp className="h-3.5 w-3.5" />}
+            value={sentList.length}
+            label={t('dashboard.stats.sent', 'Liked')}
+          />
+          <StatTile
+            icon={<Heart className="h-3.5 w-3.5" />}
+            value={receivedList.length}
+            label={t('dashboard.stats.received', 'Liked you')}
+            tone="rose"
+          />
         </div>
-      </div>
+      </header>
 
-      {/* Tabs for Matches, Sent, Received */}
+      <EditorialRule label={t('dashboard.indexLabel', 'The ledger')} />
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
-          <TabsTrigger value="matches" className="flex items-center gap-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3 rounded-full border border-border/70 bg-surface-paper p-1">
+          <TabsTrigger
+            value="matches"
+            className="gap-2 rounded-full px-4 data-[state=active]:bg-foreground data-[state=active]:text-background"
+          >
             <Handshake className="h-4 w-4" />
-            <span className="hidden sm:inline">Matches</span>
+            <span className="hidden sm:inline">{t('dashboard.tabs.matches', 'Mutual')}</span>
             {matchesList.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              <span className="ml-1 rounded-full bg-current/20 px-1.5 py-0.5 text-[10px] font-medium">
                 {matchesList.length}
-              </Badge>
+              </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="sent" className="flex items-center gap-2">
+          <TabsTrigger
+            value="sent"
+            className="gap-2 rounded-full px-4 data-[state=active]:bg-foreground data-[state=active]:text-background"
+          >
             <ThumbsUp className="h-4 w-4" />
-            <span className="hidden sm:inline">I Liked</span>
+            <span className="hidden sm:inline">{t('dashboard.tabs.sent', 'I liked')}</span>
             {sentList.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              <span className="ml-1 rounded-full bg-current/20 px-1.5 py-0.5 text-[10px] font-medium">
                 {sentList.length}
-              </Badge>
+              </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="received" className="flex items-center gap-2">
+          <TabsTrigger
+            value="received"
+            className="gap-2 rounded-full px-4 data-[state=active]:bg-foreground data-[state=active]:text-background"
+          >
             <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">Liked Me</span>
+            <span className="hidden sm:inline">{t('dashboard.tabs.received', 'Liked me')}</span>
             {receivedList.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs bg-pink-100 text-pink-600">
+              <span className="ml-1 rounded-full bg-current/20 px-1.5 py-0.5 text-[10px] font-medium">
                 {receivedList.length}
-              </Badge>
+              </span>
             )}
           </TabsTrigger>
         </TabsList>
 
-        {/* Mutual Matches Tab */}
-        <TabsContent value="matches">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-teal-500" />
-                Your Mutual Matches
-              </CardTitle>
-              <CardDescription>
-                People you both showed interest in each other
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingMatches ? (
-                <LoadingState />
-              ) : matchesList.length === 0 ? (
-                <EmptyState
-                  icon={<Handshake className="h-12 w-12" />}
-                  title="No mutual matches yet"
-                  description="When someone you like also likes you back, they'll appear here"
-                  action={
-                    <Link to="/matches">
-                      <Button>Browse Matches</Button>
-                    </Link>
-                  }
-                />
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {matchesList.map((match) => (
-                    <MatchCard
-                      key={match.matched_user_id}
-                      user={match.user}
-                      userId={match.matched_user_id}
-                      score={match.compatibility_score}
-                      showChat
-                    />
-                  ))}
-                </div>
+        <TabsContent value="matches" className="mt-8">
+          {loadingMatches ? (
+            <LoadingState />
+          ) : matchesList.length === 0 ? (
+            <EmptyState
+              icon={<Handshake className="h-6 w-6" />}
+              title={t('dashboard.emptyMatches.title', 'No mutual matches yet')}
+              description={t(
+                'dashboard.emptyMatches.subtitle',
+                'When someone you like also says yes, you’ll meet them here.',
               )}
-            </CardContent>
-          </Card>
+              action={
+                <Link to="/matches">
+                  <Button>
+                    {t('dashboard.browseMatches', 'Browse matches')}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              }
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {matchesList.map((match, idx) => (
+                <PersonCard
+                  key={match.matched_user_id}
+                  index={idx}
+                  user={match.user}
+                  userId={match.matched_user_id}
+                  score={match.compatibility_score}
+                  showChat
+                  status="mutual"
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        {/* Sent Likes Tab */}
-        <TabsContent value="sent">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ThumbsUp className="h-5 w-5 text-teal-500" />
-                People You Liked
-              </CardTitle>
-              <CardDescription>
-                Users you've shown interest in
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingSent ? (
-                <LoadingState />
-              ) : sentList.length === 0 ? (
-                <EmptyState
-                  icon={<ThumbsUp className="h-12 w-12" />}
-                  title="You haven't liked anyone yet"
-                  description="Start exploring and like people you'd like to connect with"
-                  action={
-                    <Link to="/matches">
-                      <Button>Find Matches</Button>
-                    </Link>
-                  }
-                />
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {sentList.map((like) => (
-                    <MatchCard
-                      key={like.liked_user_id}
-                      user={like.user}
-                      userId={like.liked_user_id}
-                      score={like.compatibility_score}
-                      status={like.is_mutual ? 'mutual' : 'pending'}
-                    />
-                  ))}
-                </div>
+        <TabsContent value="sent" className="mt-8">
+          {loadingSent ? (
+            <LoadingState />
+          ) : sentList.length === 0 ? (
+            <EmptyState
+              icon={<ThumbsUp className="h-6 w-6" />}
+              title={t('dashboard.emptySent.title', 'You haven’t liked anyone yet')}
+              description={t(
+                'dashboard.emptySent.subtitle',
+                'Browse our shortlist of compatible flatmates whenever you’re ready.',
               )}
-            </CardContent>
-          </Card>
+              action={
+                <Link to="/matches">
+                  <Button>{t('dashboard.findMatches', 'Find matches')}</Button>
+                </Link>
+              }
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {sentList.map((like, idx) => (
+                <PersonCard
+                  key={like.liked_user_id}
+                  index={idx}
+                  user={like.user}
+                  userId={like.liked_user_id}
+                  score={like.compatibility_score}
+                  status={like.is_mutual ? 'mutual' : 'pending'}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
 
-        {/* Received Likes Tab */}
-        <TabsContent value="received">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-pink-500" />
-                People Who Liked You
-              </CardTitle>
-              <CardDescription>
-                Users interested in connecting with you
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingReceived ? (
-                <LoadingState />
-              ) : receivedList.length === 0 ? (
-                <EmptyState
-                  icon={<Heart className="h-12 w-12" />}
-                  title="No likes received yet"
-                  description="Keep your profile updated to attract more interest"
-                  action={
-                    <Link to="/profile">
-                      <Button variant="outline">Update Profile</Button>
-                    </Link>
-                  }
-                />
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {receivedList.map((like) => (
-                    <MatchCard
-                      key={like.liker_id}
-                      user={like.user}
-                      userId={like.liker_id}
-                      score={like.compatibility_score}
-                      status={like.is_mutual ? 'mutual' : 'new'}
-                      isNew={!like.is_mutual}
-                    />
-                  ))}
-                </div>
+        <TabsContent value="received" className="mt-8">
+          {loadingReceived ? (
+            <LoadingState />
+          ) : receivedList.length === 0 ? (
+            <EmptyState
+              icon={<Heart className="h-6 w-6" />}
+              title={t('dashboard.emptyReceived.title', 'No likes yet')}
+              description={t(
+                'dashboard.emptyReceived.subtitle',
+                'Keep your profile fresh — a few small details make a real difference.',
               )}
-            </CardContent>
-          </Card>
+              action={
+                <Link to="/profile">
+                  <Button variant="outline">
+                    {t('dashboard.updateProfile', 'Refine your profile')}
+                  </Button>
+                </Link>
+              }
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {receivedList.map((like, idx) => (
+                <PersonCard
+                  key={like.liker_id}
+                  index={idx}
+                  user={like.user}
+                  userId={like.liker_id}
+                  score={like.compatibility_score}
+                  status={like.is_mutual ? 'mutual' : 'new'}
+                  isNew={!like.is_mutual}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
-      {/* Mutual Match Modal */}
       <MutualMatchModal />
     </div>
   );
 }
 
-function MatchCard({ user, userId, score, showChat, status, isNew }) {
+function StatTile({ icon, value, label, tone = 'paper' }) {
+  const tones = {
+    paper: 'bg-card border-border/70 text-foreground',
+    ink: 'bg-surface-ink border-transparent text-[hsl(var(--surface-paper))]',
+    rose: 'bg-rose/10 border-rose/40 text-foreground',
+  };
   return (
-    <Card className={`overflow-hidden hover:shadow-lg transition-shadow ${isNew ? 'ring-2 ring-pink-300 dark:ring-pink-700' : ''}`}>
-      <div className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <UserAvatar
-              user={user}
-              size="lg"
-              className="h-14 w-14"
-            />
-            {status === 'mutual' && (
-              <div className="absolute -bottom-1 -right-1 bg-teal-500 rounded-full p-1">
-                <Sparkles className="h-3 w-3 text-white" />
-              </div>
-            )}
-            {isNew && (
-              <div className="absolute -top-1 -right-1 bg-pink-500 rounded-full p-1">
-                <Heart className="h-3 w-3 text-white fill-white" />
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold truncate text-foreground">
-              {user?.firstname} {user?.lastname}
-            </p>
-            <p className="text-sm text-muted-foreground truncate">
-              {user?.location || 'Location not set'}
-            </p>
-            {score && (
-              <Badge variant="outline" className="mt-1 text-xs border-teal-300 text-teal-600 dark:border-teal-700 dark:text-teal-400">
-                {Math.round(score)}% compatible
-              </Badge>
-            )}
-          </div>
-        </div>
+    <div
+      className={cn(
+        'flex flex-col gap-1 rounded-2xl border px-4 py-4 transition-colors duration-500',
+        tones[tone] || tones.paper,
+      )}
+    >
+      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] opacity-80">
+        {icon}
+        {label}
+      </span>
+      <span className="font-display text-3xl font-medium leading-none tracking-editorial">
+        {value}
+      </span>
+    </div>
+  );
+}
 
-        <div className="flex gap-2 mt-4">
-          <Link to={`/matches/${userId}`} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full">
-              View Profile
-            </Button>
-          </Link>
-          {showChat && (
-            <Link to={`/chat/with/${userId}`}>
-              <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
-                <MessageSquare className="h-4 w-4" />
-              </Button>
-            </Link>
+function PersonCard({ user, userId, score, showChat, status, isNew, index = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: Math.min(index, 6) * 0.04 }}
+      className={cn(
+        'group/person relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-editorial transition-all duration-500',
+        'hover:-translate-y-0.5 hover:shadow-premium-lg',
+        isNew && 'ring-1 ring-rose/40',
+      )}
+    >
+      <div className="flex items-start gap-4">
+        <div className="relative">
+          <UserAvatar user={user} size="lg" className="h-16 w-16" />
+          {status === 'mutual' && (
+            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background ring-2 ring-card">
+              <Check className="h-3 w-3" strokeWidth={2.5} />
+            </span>
+          )}
+          {isNew && (
+            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-rose text-rose-foreground ring-2 ring-card">
+              <Heart className="h-3 w-3 fill-current" />
+            </span>
           )}
         </div>
+
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="truncate font-display text-lg font-medium tracking-editorial text-foreground">
+            {user?.firstname} {user?.lastname}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
+            {user?.location || 'Location not set'}
+          </p>
+          {status && (
+            <div className="pt-1">
+              <TrustBadge tone={status === 'mutual' ? 'olive' : status === 'new' ? 'rose' : 'ink'}>
+                {status === 'mutual' ? 'Mutual' : status === 'new' ? 'New' : 'Pending'}
+              </TrustBadge>
+            </div>
+          )}
+        </div>
+
+        {score ? (
+          <div className="flex-shrink-0">
+            <ScoreRing value={score} size={48} />
+          </div>
+        ) : null}
       </div>
-    </Card>
+
+      <div className="mt-5 flex gap-2">
+        <Link to={`/matches/${userId}`} className="flex-1">
+          <Button variant="outline" size="sm" className="w-full">
+            View profile
+          </Button>
+        </Link>
+        {showChat && (
+          <Link to={`/chat/with/${userId}`}>
+            <Button size="icon" aria-label="Message">
+              <MessageSquare className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
+      </div>
+    </motion.div>
   );
 }
 
 function LoadingState() {
   return (
-    <div className="flex items-center justify-center py-12">
-      <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
+    <div className="flex items-center justify-center py-16 text-muted-foreground">
+      <Loader2 className="h-6 w-6 animate-spin text-accent" />
     </div>
   );
 }
 
 function EmptyState({ icon, title, description, action }) {
   return (
-    <div className="text-center py-12">
-      <div className="text-muted-foreground/50 mb-4 flex justify-center">
+    <LuxuryPanel className="space-y-4 py-14 text-center" tone="parchment">
+      <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-surface-paper text-muted-foreground">
         {icon}
-      </div>
-      <h3 className="font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground text-sm mb-4">{description}</p>
-      {action}
-    </div>
+      </span>
+      <Eyebrow>{title}</Eyebrow>
+      <p className="mx-auto max-w-md text-sm text-muted-foreground">{description}</p>
+      {action ? <div className="pt-2">{action}</div> : null}
+    </LuxuryPanel>
   );
 }

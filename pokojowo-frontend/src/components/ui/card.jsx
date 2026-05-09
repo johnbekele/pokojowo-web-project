@@ -1,11 +1,17 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Editorial card primitive.
+ * The default uses the warm "paper" surface with the soft editorial shadow so
+ * cards feel like inserts in a property magazine rather than dashboard tiles.
+ */
 const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl border border-border bg-card text-card-foreground shadow-premium transition-all duration-300",
+      "group/card relative rounded-2xl border border-border/70 bg-card text-card-foreground shadow-editorial transition-all duration-500",
+      "hover:-translate-y-0.5 hover:shadow-premium-lg hover:border-border",
       className
     )}
     {...props}
@@ -26,7 +32,7 @@ const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h3
     ref={ref}
     className={cn(
-      "text-xl font-semibold leading-none tracking-tight",
+      "font-display text-2xl font-medium leading-[1.1] tracking-editorial",
       className
     )}
     {...props}
@@ -37,7 +43,7 @@ CardTitle.displayName = "CardTitle";
 const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm leading-relaxed text-muted-foreground", className)}
     {...props}
   />
 ));

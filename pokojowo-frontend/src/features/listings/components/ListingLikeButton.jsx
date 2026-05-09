@@ -71,38 +71,36 @@ export default function ListingLikeButton({
     <button
       onClick={handleClick}
       className={cn(
-        'relative flex items-center justify-center rounded-full transition-all duration-200',
-        'bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-md',
-        'hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg',
-        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+        'relative flex items-center justify-center rounded-full border border-border/60 transition-all duration-300',
+        'bg-surface-paper/90 backdrop-blur-md shadow-[0_2px_8px_hsl(var(--surface-onyx)/0.10)]',
+        'hover:bg-surface-paper hover:border-border hover:shadow-[0_4px_18px_hsl(var(--surface-onyx)/0.14)]',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'active:scale-95',
         sizeClasses[size],
-        className
+        className,
       )}
       title={liked ? t('actions.unlike') : t('actions.like')}
     >
       <Heart
         size={iconSizes[size]}
         className={cn(
-          'transition-all duration-200',
-          liked
-            ? 'fill-red-500 text-red-500'
-            : 'fill-transparent text-gray-500 hover:text-red-400',
-          animating && 'scale-125'
+          'transition-all duration-300',
+          liked ? 'fill-rose text-rose' : 'fill-transparent text-muted-foreground hover:text-rose',
+          animating && 'scale-125',
         )}
       />
 
-      {/* Like animation burst */}
       {animating && (
-        <span className="absolute inset-0 rounded-full animate-ping bg-red-400/30" />
+        <span className="absolute inset-0 rounded-full animate-ping bg-rose/30" />
       )}
 
-      {/* Optional label */}
       {showLabel && (
-        <span className={cn(
-          'ml-2 text-sm font-medium',
-          liked ? 'text-red-500' : 'text-gray-600 dark:text-gray-400'
-        )}>
+        <span
+          className={cn(
+            'ml-2 text-sm font-medium',
+            liked ? 'text-rose' : 'text-muted-foreground',
+          )}
+        >
           {liked ? t('actions.liked') : t('actions.like')}
         </span>
       )}

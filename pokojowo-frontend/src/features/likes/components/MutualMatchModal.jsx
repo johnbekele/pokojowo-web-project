@@ -1,19 +1,24 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { MessageSquare, X, Handshake, Check, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { MessageSquare, X, Check, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import UserAvatar from '@/components/shared/UserAvatar';
+import { Eyebrow, ScoreRing } from '@/components/shared/editorial';
 import useLikesStore from '@/stores/likesStore';
 import useAuthStore from '@/stores/authStore';
 import api from '@/lib/api';
 
+/**
+ * Mutual match celebration — kept calm and editorial.
+ * Two portraits face each other with a quiet score halo between them.
+ */
 export default function MutualMatchModal() {
   const { showMutualMatchModal, mutualMatchUser, closeMutualMatchModal } = useLikesStore();
   const { user: currentUser } = useAuthStore();
@@ -21,7 +26,6 @@ export default function MutualMatchModal() {
   const matchedUser = mutualMatchUser?.user || mutualMatchUser;
   const matchedUserId = mutualMatchUser?.matched_user_id || matchedUser?.id;
 
-  // Fetch detailed match data for common traits
   const { data: matchData } = useQuery({
     queryKey: ['match-detail', matchedUserId],
     queryFn: async () => {
@@ -38,170 +42,179 @@ export default function MutualMatchModal() {
   const sharedLanguages = matchData?.shared_languages || [];
   const explanations = matchData?.explanations || [];
 
-  // Get common traits (positive impacts)
-  const commonTraits = explanations
-    .filter(e => e.impact === 'positive')
-    .slice(0, 4);
-
-  // Get differences (negative/neutral impacts)
+  const commonTraits = explanations.filter((e) => e.impact === 'positive').slice(0, 4);
   const differences = explanations
-    .filter(e => e.impact === 'negative' || e.impact === 'neutral')
+    .filter((e) => e.impact === 'negative' || e.impact === 'neutral')
     .slice(0, 3);
 
   return (
     <Dialog open={showMutualMatchModal} onOpenChange={closeMutualMatchModal}>
-      <DialogContent className="sm:max-w-md overflow-hidden p-0 gap-0 [&>button]:hidden" aria-describedby={undefined}>
-        <DialogTitle className="sr-only">You're Connected!</DialogTitle>
-        {/* Close button */}
+      <DialogContent
+        className="overflow-hidden gap-0 p-0 sm:max-w-md border-border/70 [&>button]:hidden"
+        aria-describedby={undefined}
+      >
+        <DialogTitle className="sr-only">It's mutual</DialogTitle>
+
         <button
           onClick={closeMutualMatchModal}
-          className="absolute right-3 top-3 z-10 rounded-full p-1.5 bg-black/20 hover:bg-black/30 transition-colors text-white"
+          className="absolute right-3 top-3 z-10 rounded-full p-1.5 bg-surface-paper/80 text-foreground hover:bg-surface-paper transition-colors"
+          aria-label="Close"
         >
           <X className="h-4 w-4" />
         </button>
 
-        {/* Header with photos and match percent */}
-        <div className="bg-gradient-to-br from-teal-500 via-teal-600 to-emerald-600 p-8 text-white">
-          {/* Title */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-sm mb-3">
-              <Handshake className="h-4 w-4" />
-              <span>You're Connected!</span>
-            </div>
-            <p className="text-white/80 text-sm">You both showed interest</p>
-          </div>
+        {/* Editorial header */}
+        <div className="relative overflow-hidden bg-surface-ink p-8 text-[hsl(var(--surface-paper))]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-50 bg-mesh"
+          />
+          <div className="relative space-y-5 text-center">
+            <motion.div
+              initial={{ y: 8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Eyebrow className="text-[hsl(var(--surface-paper)/0.6)]">
+                Vol. {new Date().getFullYear()} · Mutual interest
+              </Eyebrow>
+            </motion.div>
 
-          {/* Photos side by side with match percent in center */}
-          <div className="flex items-center justify-center gap-3">
-            {/* Current user photo */}
-            <div className="text-center">
-              <UserAvatar
-                user={currentUser}
-                size="xl"
-                className="h-24 w-24 ring-4 ring-white/30 shadow-xl"
-              />
-              <p className="mt-2 text-sm font-medium truncate max-w-[100px]">
-                {currentUser?.firstname || 'You'}
-              </p>
-            </div>
+            <motion.h2
+              initial={{ y: 12, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.55, delay: 0.05 }}
+              className="font-display text-4xl font-medium leading-tight tracking-editorial"
+            >
+              It’s
+              <span className="font-display italic text-accent"> mutual.</span>
+            </motion.h2>
 
-            {/* Match percent circle in center */}
-            <div className="flex flex-col items-center mx-2">
-              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
-                <span className="text-xl font-bold text-teal-600">
-                  {Math.round(compatibilityScore)}%
+            <p className="text-sm text-[hsl(var(--surface-paper)/0.7)]">
+              You both said yes. The next move is up to you.
+            </p>
+
+            <div className="mt-4 flex items-center justify-center gap-4">
+              <PortraitTile user={currentUser} label="You" />
+              <div className="relative flex flex-col items-center">
+                <div className="rounded-full bg-surface-paper p-1.5 shadow-premium">
+                  <ScoreRing value={compatibilityScore} size={64} />
+                </div>
+                <span className="mt-1 text-[10px] uppercase tracking-[0.22em] text-[hsl(var(--surface-paper)/0.6)]">
+                  Compatibility
                 </span>
               </div>
-              <p className="mt-1 text-xs text-white/70">Match</p>
-            </div>
-
-            {/* Matched user photo */}
-            <div className="text-center">
-              <UserAvatar
-                user={matchedUser}
-                size="xl"
-                className="h-24 w-24 ring-4 ring-white/30 shadow-xl"
-              />
-              <p className="mt-2 text-sm font-medium truncate max-w-[100px]">
-                {matchedUser?.firstname || 'User'}
-              </p>
+              <PortraitTile user={matchedUser} label={matchedUser?.firstname || 'Match'} />
             </div>
           </div>
         </div>
 
-        {/* Content - Common interests and differences */}
-        <div className="p-5 space-y-4 max-h-[300px] overflow-y-auto">
-          {/* Common Interests */}
+        {/* Body */}
+        <div className="max-h-[300px] space-y-5 overflow-y-auto p-6">
           {(sharedInterests.length > 0 || sharedLanguages.length > 0 || commonTraits.length > 0) && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Check className="h-4 w-4 text-teal-600" />
-                <span className="text-sm font-semibold text-foreground">What You Have in Common</span>
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-olive/15 text-olive">
+                  <Check className="h-3.5 w-3.5" />
+                </span>
+                <Eyebrow>What you share</Eyebrow>
               </div>
 
-              {/* Shared interests badges */}
               {(sharedInterests.length > 0 || sharedLanguages.length > 0) && (
-                <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="flex flex-wrap gap-1.5">
                   {sharedInterests.slice(0, 4).map((interest) => (
-                    <Badge
-                      key={interest}
-                      className="bg-teal-100 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border-0 text-xs"
-                    >
+                    <Badge key={interest} variant="secondary">
                       {interest}
                     </Badge>
                   ))}
                   {sharedLanguages.slice(0, 2).map((lang) => (
-                    <Badge
-                      key={lang}
-                      variant="outline"
-                      className="border-teal-300 dark:border-teal-700 text-xs"
-                    >
+                    <Badge key={lang} variant="outline">
                       {lang}
                     </Badge>
                   ))}
                 </div>
               )}
 
-              {/* Common traits from explanations */}
               {commonTraits.length > 0 && (
-                <ul className="space-y-1">
+                <ul className="space-y-1.5">
                   {commonTraits.map((trait, idx) => (
-                    <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-teal-500 mt-0.5">•</span>
+                    <li
+                      key={idx}
+                      className="flex items-start gap-2 text-sm leading-snug text-foreground/80"
+                    >
+                      <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-olive" />
                       <span>{trait.reason}</span>
                     </li>
                   ))}
                 </ul>
               )}
-            </div>
+            </section>
           )}
 
-          {/* Differences */}
           {differences.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="h-4 w-4 text-amber-500" />
-                <span className="text-sm font-semibold text-foreground">Things to Discuss</span>
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-warning/15 text-warning">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                </span>
+                <Eyebrow>Worth a chat</Eyebrow>
               </div>
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {differences.map((diff, idx) => (
-                  <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="text-amber-500 mt-0.5">•</span>
+                  <li
+                    key={idx}
+                    className="flex items-start gap-2 text-sm leading-snug text-muted-foreground"
+                  >
+                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-warning" />
                     <span>{diff.reason}</span>
                   </li>
                 ))}
               </ul>
-            </div>
+            </section>
           )}
 
-          {/* Empty state if no data */}
-          {sharedInterests.length === 0 && sharedLanguages.length === 0 && commonTraits.length === 0 && differences.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-2">
-              Start chatting to learn more about each other!
-            </p>
-          )}
+          {sharedInterests.length === 0 &&
+            sharedLanguages.length === 0 &&
+            commonTraits.length === 0 &&
+            differences.length === 0 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                Start the conversation — there’s plenty to talk about.
+              </p>
+            )}
         </div>
 
-        {/* Actions */}
-        <div className="p-4 border-t bg-muted/30 flex gap-3">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={closeMutualMatchModal}
-          >
-            Keep Browsing
+        <div className="flex gap-3 border-t border-border/60 bg-surface-canvas p-4">
+          <Button variant="outline" className="flex-1" onClick={closeMutualMatchModal}>
+            Keep browsing
           </Button>
-          <Link to={matchedUserId ? `/chat/with/${matchedUserId}` : '/chat'} className="flex-1">
-            <Button
-              className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
-              onClick={closeMutualMatchModal}
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Start Chat
+          <Link
+            to={matchedUserId ? `/chat/with/${matchedUserId}` : '/chat'}
+            className="flex-1"
+          >
+            <Button className="w-full" onClick={closeMutualMatchModal}>
+              <MessageSquare className="h-4 w-4" />
+              Start chat
             </Button>
           </Link>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PortraitTile({ user, label }) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <div className="rounded-full bg-surface-paper/15 p-1 ring-1 ring-[hsl(var(--surface-paper)/0.25)]">
+        <UserAvatar
+          user={user}
+          size="xl"
+          className="h-20 w-20 ring-2 ring-[hsl(var(--surface-paper)/0.3)]"
+        />
+      </div>
+      <span className="mt-2 max-w-[110px] truncate font-display text-sm font-medium tracking-tight">
+        {user?.firstname || label}
+      </span>
+    </div>
   );
 }

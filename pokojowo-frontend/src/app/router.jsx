@@ -5,6 +5,7 @@ import ProtectedRoute from '@/components/shared/ProtectedRoute';
 import LoadingPage from '@/components/shared/LoadingPage';
 
 // Lazy load pages for code splitting
+const Home = lazy(() => import('@/features/home/pages/Home'));
 const HomeListings = lazy(() => import('@/features/listings/pages/HomeListings'));
 const ListingDetails = lazy(() => import('@/features/listings/pages/ListingDetails'));
 
@@ -48,7 +49,7 @@ export default function AppRouter() {
       <Routes>
         {/* Public routes with layout */}
         <Route element={<PageLayout />}>
-          <Route path="/" element={<HomeListings />} />
+          <Route path="/" element={<Home />} />
           <Route path="/discover" element={<HomeListings />} />
           <Route path="/listing/:id" element={<ListingDetails />} />
           <Route path="/tenant/:username" element={<TenantDashboard />} />

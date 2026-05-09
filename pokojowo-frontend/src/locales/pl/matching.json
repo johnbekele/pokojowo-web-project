@@ -1,6 +1,8 @@
 {
-  "title": "Twoje dopasowania",
-  "subtitle": "Osoby, które mogą być świetnym wyborem",
+  "title": "Współlokatorzy, którzy",
+  "italic": "naprawdę pasują.",
+  "eyebrow": "Swat",
+  "subtitle": "Krótka, starannie dobrana lista — nie nieskończony feed. Stuknij kartę, by przeczytać więcej, albo przesuń, by ruszyć dalej.",
   "score": {
     "label": "Kompatybilność",
     "excellent": "Doskonałe dopasowanie",
@@ -23,7 +25,7 @@
     "compatible": "{{score}}% Zgodność",
     "yearsOld": "{{age}} lat",
     "whyYouMatch": "Dlaczego pasujesz",
-    "newUser": "NOWY",
+    "newUser": "Nowy",
     "matchMessages": {
       "perfect": "Możecie być świetnymi współlokatorami!",
       "great": "Macie wiele wspólnego!",
@@ -42,7 +44,8 @@
   "empty": {
     "title": "Brak dopasowań",
     "subtitle": "Uzupełnij profil aby zacząć dopasowywanie",
-    "completeProfile": "Uzupełnij profil"
+    "completeProfile": "Uzupełnij profil",
+    "eyebrow": "Cisza w księdze"
   },
   "filters": {
     "minScore": "Minimalny wynik",
@@ -53,24 +56,43 @@
     "title": "Błąd ładowania dopasowań",
     "subtitle": "Spróbuj ponownie później.",
     "loadingFailed": "Nie udało się załadować dopasowań. Spróbuj ponownie.",
-    "notFound": "Nie znaleziono dopasowania"
+    "notFound": "Nie znaleziono dopasowania",
+    "eyebrow": "Krótka przerwa w dopasowaniach"
   },
   "stats": {
-    "matchesFound": "{{count}} dopasowań z {{total}} kandydatów",
+    "matchesFound": "{{count}} z {{total}} kandydatów",
     "filtered": "{{count}} odfiltrowanych"
   },
   "viewMode": {
-    "swipe": "Przesuwaj",
-    "grid": "Siatka"
+    "swipe": "Karuzela",
+    "grid": "Indeks"
+  },
+  "rule": {
+    "swipe": "Wybrany profil",
+    "grid": "Wybrany indeks"
   },
   "dashboard": {
     "welcome": "Witaj ponownie, {{name}}!",
+    "welcomeName": "Witaj,",
+    "italic": "{{name}}.",
     "overview": "Oto przegląd Twojej aktywności dopasowań",
-    "pleaseLogin": "Zaloguj się",
-    "loginRequired": "Musisz być zalogowany, aby zobaczyć panel.",
-    "completeProfile": "Uzupełnij swój profil",
-    "profileIncomplete": "Twój profil jest niekompletny. Uzupełnij go, aby zacząć dopasowywanie.",
-    "continueSetup": "Kontynuuj konfigurację profilu",
+    "subtitle": "Spokojny rejestr każdego połączenia, które wysłałaś/eś, otrzymałaś/eś i potwierdziłaś/eś. Wracaj dokładnie tam, gdzie skończyłaś/eś.",
+    "indexLabel": "Rejestr",
+    "eyebrow": "Twój salon",
+    "signedOut": "Wylogowano",
+    "pleaseLogin": "Zaloguj się, by zobaczyć dopasowania",
+    "loginRequired": "Kilka szczegółów i wracasz na miejsce.",
+    "completeProfile": "Najpierw dokończ swoją historię",
+    "profileIncomplete": "Dodanie kilku osobistych szczegółów pozwoli nam dopasować Cię do osób, które naprawdę pasują do Twojego stylu życia.",
+    "continueSetup": "Kontynuuj konfigurację",
+    "browseMatches": "Przeglądaj dopasowania",
+    "findMatches": "Znajdź dopasowania",
+    "updateProfile": "Dopracuj profil",
+    "tabs": {
+      "matches": "Wzajemne",
+      "sent": "Polubione",
+      "received": "Polubili Cię"
+    },
     "stats": {
       "compatibleMatches": "Zgodne dopasowania",
       "highCompatibility": "{{count}} wysoka zgodność",
@@ -80,7 +102,10 @@
       "pending": "{{count}} oczekujących",
       "peopleWhoLiked": "Osoby, które Cię polubiły",
       "savedProfiles": "Zapisane profile",
-      "bookmarkedForLater": "Zapisane na później"
+      "bookmarkedForLater": "Zapisane na później",
+      "mutual": "Wzajemne",
+      "sent": "Polubione",
+      "received": "Polubili Cię"
     },
     "topMatches": {
       "title": "Najlepsze dopasowania",
@@ -101,6 +126,18 @@
       "viewLikes": "Zobacz polubienia",
       "savedProfiles": "Zapisane profile",
       "messages": "Wiadomości"
+    },
+    "emptyMatches": {
+      "title": "Brak wzajemnych dopasowań",
+      "subtitle": "Gdy ktoś, kogo polubisz, też powie tak, spotkasz tę osobę tutaj."
+    },
+    "emptySent": {
+      "title": "Nikogo jeszcze nie polubiłaś/eś",
+      "subtitle": "Przejrzyj naszą listę dopasowanych współlokatorów, kiedy tylko zechcesz."
+    },
+    "emptyReceived": {
+      "title": "Brak polubień",
+      "subtitle": "Dbaj o świeżość swojego profilu — kilka drobiazgów potrafi zrobić różnicę."
     },
     "unknownLocation": "Nieznana lokalizacja"
   },
@@ -137,23 +174,23 @@
     "mutual": {
       "empty": {
         "title": "Brak wzajemnych dopasowań",
-        "subtitle": "Gdy Ty i ktoś inny polubicie się nawzajem, to dopasowanie!"
+        "subtitle": "Gdy Ty i ktoś inny polubicie się nawzajem, połączymy was!"
       },
-      "findMatches": "Znajdź dopasowania",
-      "matched": "Dopasowano {{time}}",
-      "matchBadge": "Dopasowanie!"
+      "findMatches": "Znajdź współlokatorów",
+      "matched": "Połączono {{time}}",
+      "matchBadge": "Połączeni!"
     },
     "actions": {
-      "like": "Polub",
-      "liked": "Polubiono",
-      "matched": "Dopasowano!",
-      "unliked": "Twoje polubienie zostało usunięte.",
-      "likeSent": "Twoje polubienie zostało wysłane."
+      "like": "Zainteresowany/a",
+      "liked": "Zainteresowany/a",
+      "matched": "Połączeni!",
+      "unliked": "Twoje zainteresowanie zostało usunięte.",
+      "likeSent": "Twoje zainteresowanie zostało wysłane."
     },
     "match": {
-      "title": "Masz dopasowanie!",
-      "subtitle": "Ty i {{name}} polubiliście się nawzajem!",
-      "startChatting": "Oboje się polubiliście. Zacznijcie rozmawiać!"
+      "title": "To wzajemne",
+      "subtitle": "Ty i {{name}} jesteście zainteresowani sobą nawzajem!",
+      "startChatting": "Oboje powiedzieliście tak. Następny ruch należy do Ciebie."
     }
   },
   "favorites": {

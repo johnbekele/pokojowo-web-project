@@ -18,38 +18,35 @@ export default function InterestedUsersPreview({ users = [], className }) {
   const displayUsers = users.slice(0, 3);
   const remainingCount = Math.max(0, users.length - 3);
 
-  // Single user - show name and score
   if (users.length === 1) {
     const user = users[0];
     return (
-      <div className={cn('flex items-center gap-2 py-2 px-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg', className)}>
+      <div className={cn('flex items-center gap-2 py-2 px-3 rounded-full bg-olive/10 border border-olive/30 text-olive', className)}>
         <UserAvatar user={user} />
-        <span className="text-xs text-blue-700 dark:text-blue-300 flex-1">
+        <span className="text-[11px] font-medium tracking-tight flex-1">
           {t('interestedUsers.singleMatch', {
             name: user.firstname || 'Someone',
-            score: Math.round(user.compatibilityScore)
+            score: Math.round(user.compatibilityScore),
           })}
         </span>
       </div>
     );
   }
 
-  // Multiple users - show avatars and count
   return (
-    <div className={cn('flex items-center gap-2 py-2 px-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg', className)}>
-      {/* Stacked Avatars */}
+    <div className={cn('flex items-center gap-2 py-2 px-3 rounded-full bg-olive/10 border border-olive/30 text-olive', className)}>
       <div className="flex -space-x-2">
         {displayUsers.map((user, index) => (
           <UserAvatar
             key={user.userId || index}
             user={user}
-            className="ring-2 ring-white dark:ring-gray-900"
+            className="ring-2 ring-card"
             style={{ zIndex: 3 - index }}
           />
         ))}
         {remainingCount > 0 && (
           <div
-            className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-[10px] font-medium text-blue-700 dark:text-blue-300 ring-2 ring-white dark:ring-gray-900"
+            className="w-6 h-6 rounded-full bg-olive/20 flex items-center justify-center text-[10px] font-medium text-olive ring-2 ring-card"
             style={{ zIndex: 0 }}
           >
             +{remainingCount}
@@ -57,14 +54,12 @@ export default function InterestedUsersPreview({ users = [], className }) {
         )}
       </div>
 
-      {/* Message */}
-      <span className="text-xs text-blue-700 dark:text-blue-300 flex-1">
+      <span className="text-[11px] font-medium tracking-tight flex-1">
         {t('interestedUsers.multipleMatches', { count: users.length })}
       </span>
 
-      {/* Online indicator for any online user */}
-      {users.some(u => u.isOnline) && (
-        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="Online" />
+      {users.some((u) => u.isOnline) && (
+        <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" title="Online" />
       )}
     </div>
   );
@@ -90,7 +85,7 @@ function UserAvatar({ user, className, style }) {
   return (
     <div
       className={cn(
-        'w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-[10px] font-medium text-white',
+        'w-6 h-6 rounded-full bg-foreground flex items-center justify-center text-[10px] font-medium text-background',
         className
       )}
       style={style}
