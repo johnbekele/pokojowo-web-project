@@ -1,0 +1,79 @@
+name: CI - SEC - Python SAST
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: "Application name (used in artifact names)"
+        required: true
+        type: string
+      app_path:
+        description: "Path to the application directory (e.g. pokojowo-fastapi)"
+        required: true
+        type: string
+      requirements_path:
+        description: "Path to requirements.txt"
+        required: true
+        type: string
+      python_version:
+        description: "Python version to use"
+        required: false
+        type: string
+        default: "3.11"
+      bandit_severity:
+        description: "Minimum Bandit severity (low, medium, high)"
+        required: false
+        type: string
+        default: "high"
+      scan_paths:
+        description: "Space-separated paths to scan (relative to app_path)"
+        required: false
+        type: string
+        default: "app/ scripts/"
+
+permissions:
+  contents: read
+
+jobs:
+  sast:
+    name: SAST (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ inputs.python_version }}
+          cache: pip
+          cache-dependency-path: ${{ inputs.requirements_path }}
+
+      - name: Install dependencies
+        working-directory: ./${{ inputs.app_path }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit
+
+      - name: Run Bandit SAST scan
+        working-directory: ./${{ inputs.app_path }}
+        env:
+          SCAN_PATHS: ${{ inputs.scan_paths }}
+          BANDIT_SEVERITY: ${{ inputs.bandit_severity }}
+        run: |
+          # shellcheck disable=SC2086
+          python -m bandit -r $SCAN_PATHS \
+            -f json \
+            -o bandit-report.json \
+            --severity-level "$BANDIT_SEVERITY" \
+            --skip B101
+
+      - name: Upload Bandit report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bandit-report-${{ inputs.app_name }}
+          path: ${{ inputs.app_path }}/bandit-report.json
+          retention-days: 30
+          if-no-files-found: warn

@@ -1,0 +1,120 @@
+name: CI - SEC - Semgrep
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Weekly full-scan to catch regressions across the entire codebase
+  schedule:
+    - cron: "0 4 * * 1"
+
+concurrency:
+  group: semgrep-${{ github.event_name }}-${{ github.head_ref || github.sha }}
+  # Don't cancel scheduled scans — they are independent sweeps
+  cancel-in-progress: ${{ github.event_name != 'schedule' }}
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep@sha256:21cf7b0a1c8d04fa03b0d0a7eedf55da6d68a76eafb9929cfbf21cebb77bce42
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep scan
+        env:
+          SEMGREP_SEND_METRICS: "off"
+        run: |
+          # Scope to the application directories so we don't scan node_modules,
+          # build output, or scraper artifacts.
+          TARGETS="pokojowo-frontend/src pokojowo-fastapi/app pokojowo-fastapi/main.py pokojowo-fastapi/scripts"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_COMMIT="${{ github.event.pull_request.base.sha }}"
+            # shellcheck disable=SC2086
+            semgrep scan \
+              --config p/security-audit \
+              --config p/secrets \
+              --config p/python \
+              --config p/javascript \
+              --config p/typescript \
+              --config p/react \
+              --baseline-commit "$BASE_COMMIT" \
+              --json \
+              --output semgrep-report.json \
+              --exclude node_modules \
+              --exclude dist \
+              --exclude build \
+              $TARGETS || true
+          else
+            # shellcheck disable=SC2086
+            semgrep scan \
+              --config p/security-audit \
+              --config p/secrets \
+              --config p/python \
+              --config p/javascript \
+              --config p/typescript \
+              --config p/react \
+              --json \
+              --output semgrep-report.json \
+              --exclude node_modules \
+              --exclude dist \
+              --exclude build \
+              $TARGETS || true
+          fi
+
+      - name: Upload Semgrep report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Fail on ERROR-level findings
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+
+          try:
+              with open("semgrep-report.json") as f:
+                  data = json.load(f)
+          except FileNotFoundError:
+              print("::error::semgrep-report.json missing — scan step may have failed.")
+              sys.exit(1)
+
+          results = data.get("results", [])
+          errors   = [r for r in results if r.get("extra", {}).get("severity") == "ERROR"]
+          warnings = [r for r in results if r.get("extra", {}).get("severity") == "WARNING"]
+
+          print(f"Semgrep results: {len(errors)} ERROR, {len(warnings)} WARNING")
+
+          if warnings:
+              print("\nWARNING findings (informational, not merge-blocking):")
+              for r in warnings[:20]:
+                  path = r.get("path", "?")
+                  line = r.get("start", {}).get("line", "?")
+                  rule = r.get("check_id", "?").split(".")[-1]
+                  msg  = r.get("extra", {}).get("message", "")[:120]
+                  print(f"  WARN  {path}:{line} [{rule}] {msg}")
+
+          if errors:
+              print("\nERROR findings (merge-blocking):")
+              for r in errors:
+                  path = r.get("path", "?")
+                  line = r.get("start", {}).get("line", "?")
+                  rule = r.get("check_id", "?").split(".")[-1]
+                  msg  = r.get("extra", {}).get("message", "")[:120]
+                  print(f"  ERROR {path}:{line} [{rule}] {msg}")
+              print(f"\n::error::Semgrep found {len(errors)} ERROR-level finding(s) — merge blocked")
+              sys.exit(1)
+          EOF

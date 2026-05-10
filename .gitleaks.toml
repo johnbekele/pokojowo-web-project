@@ -1,0 +1,46 @@
+# Pokojowo Gitleaks config
+# Extends the upstream default ruleset and whitelists files that legitimately
+# contain example tokens, mock fixtures, and lockfiles.
+
+title = "Pokojowo Gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Files and paths that legitimately contain placeholder tokens or non-secret strings"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)\.env\.development$''',
+  '''(^|/)\.env\.production$''',
+  '''(^|/)README\.md$''',
+  '''(^|/)CONTEXT\.md$''',
+  '''(^|/)PRODUCT_CONTEXT\.md$''',
+  '''(^|/)EXECUTION_PLAN\.md$''',
+  '''(^|/)UI-contxt\.md$''',
+  '''(^|/)project_context\.md$''',
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)yarn\.lock$''',
+  '''(^|/)uv\.lock$''',
+  '''(^|/)public/.*''',
+  '''(^|/)dist/.*''',
+  '''(^|/)build/.*''',
+  '''(^|/)node_modules/.*''',
+  '''(^|/)\.venv/.*''',
+  '''(^|/)__pycache__/.*''',
+  '''(^|/)pokojowo-mobile/(android|ios)/.*''',
+  '''(^|/)pokojowo-frontend/src/locales/.*\.json$''',
+  '''(^|/)docs/.*''',
+  '''(^|/)scripts/seed_mock_data\.py$''',
+  '''(^|/).*\.lock\.json$''',
+]
+
+regexes = [
+  # Test / mock JWTs frequently used in fixtures
+  '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+''',
+  # Common placeholder secrets in templates
+  '''your-[a-z0-9-]{2,}-(secret|key|token|password)-here''',
+  '''change-this-(in-production|before-production)''',
+  '''Test123!''',
+]

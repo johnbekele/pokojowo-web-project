@@ -1,0 +1,105 @@
+name: CI - Workflow Security
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: "1.7.7"
+        run: |
+          curl -sLO "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          tar xzf "actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          chmod +x actionlint
+
+      - name: Run actionlint
+        run: |
+          ./actionlint -color \
+            -ignore 'shellcheck reported issue' \
+            -ignore 'SC[0-9]+' \
+            -ignore 'is potentially untrusted'
+
+  injection-scan:
+    name: Workflow injection scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Get changed workflow files
+        id: changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          FILES=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- '.github/workflows/*.yml' || true)
+          if [ -z "$FILES" ]; then
+            echo "No workflow files changed"
+            echo "files=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changed workflow files:"
+            echo "$FILES"
+            {
+              echo 'files<<EOF'
+              echo "$FILES"
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Scan changed files for injection patterns
+        if: steps.changed.outputs.files != ''
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+        run: |
+          FOUND=0
+          while IFS= read -r FILE; do
+            [ -z "$FILE" ] && continue
+            [ ! -f "$FILE" ] && continue
+
+            echo "--- Scanning $FILE ---"
+
+            # Detect unsafe interpolation of user-supplied input inside run blocks.
+            # Workflow inputs and PR titles/branches must be passed via env vars,
+            # not interpolated directly into shell commands.
+            if grep -Pn '\$\{\{\s*(github\.event\.inputs\.|inputs\.|github\.head_ref|github\.event\.pull_request\.title|github\.event\.pull_request\.body)' "$FILE" 2>/dev/null \
+              | grep -v 'env:' | grep -v '#' | grep -v 'if:' | grep -v 'with:' | grep -v 'name:' \
+              | grep -q 'run:'; then
+              echo "::error file=$FILE::Unsafe interpolation of user input in run blocks. Pass through env: instead."
+              FOUND=1
+            fi
+          done <<< "$CHANGED_FILES"
+
+          exit $FOUND
+
+  pin-check:
+    name: Action pin verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Check for unpinned actions
+        run: |
+          UNPINNED=$(grep -rPoh 'uses:\s+\S+@v\d+(\.\d+)*' .github/workflows/ | sort -u || true)
+          if [ -n "$UNPINNED" ]; then
+            echo "::warning::Found actions pinned to tags instead of SHA:"
+            echo "$UNPINNED"
+            echo ""
+            echo "Pin these to commit SHA for supply-chain security."
+          else
+            echo "All actions are SHA-pinned."
+          fi

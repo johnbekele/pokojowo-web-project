@@ -1,0 +1,184 @@
+name: PR - Claude Code Review
+run-name: "Claude Code Review — PR #${{ inputs.pr_number || github.event.pull_request.number }}"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review"
+        required: true
+        type: number
+      debug:
+        description: "Show full Claude output in logs"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: claude-pr-review-${{ inputs.pr_number || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Skip drafts, bot PRs, and PRs whose title contains [WIP].
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.actor != 'dependabot[bot]'
+        && github.event.pull_request.user.type != 'Bot'
+        && github.event.pull_request.draft != true
+        && !contains(github.event.pull_request.title, '[WIP]')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    env:
+      PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Review PR with Claude
+        id: review
+        continue-on-error: true
+        uses: anthropics/claude-code-action@1c8b699d43e9bfed42b48ef15da85d89bab70960 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          use_sticky_comment: "true"
+          allowed_bots: "*"
+          show_full_output: ${{ inputs.debug && 'true' || 'false' }}
+
+          prompt: |
+            You are an experienced senior engineer doing a careful code review on
+            pull request #${{ env.PR_NUMBER }} in ${{ github.repository }}.
+
+            Goals
+            -----
+            1. Read the diff and the relevant surrounding code.
+            2. Post a single sticky review comment on the PR with structured feedback.
+            3. Keep it actionable and concise. Praise where it is genuinely earned;
+               do not pad the review.
+
+            How to read the change
+            ----------------------
+            - Use `gh pr view ${{ env.PR_NUMBER }} --json title,body,headRefName,baseRefName,labels,additions,deletions`
+              to get the PR metadata.
+            - Use `gh pr diff ${{ env.PR_NUMBER }}` for the full diff.
+            - Use `Read`, `Glob`, and `Grep` to inspect the touched files in
+              context (do not just review the diff in isolation).
+            - This repository is a room-rental marketplace with a React/Vite
+              frontend in `pokojowo-frontend/` and a FastAPI backend in
+              `pokojowo-fastapi/`. There is also a mobile app in
+              `pokojowo-mobile/` and a scraper in `pokojowo-scraper/`.
+
+            Review checklist (apply to the touched code only)
+            -------------------------------------------------
+            Frontend (React 19 + Vite + Tailwind):
+              - Hooks correctness and dependency arrays
+              - React Query / Zustand state usage; no fetch/axios in components
+              - Avoid `useEffect` for data fetching
+              - Accessibility: focus states, contrast, alt text, keyboard targets
+              - i18n: any new user-facing string should be in both EN and PL
+              - Tailwind: no ad-hoc colors that should be tokens; respects the
+                editorial design system (`globals.css` and shared primitives in
+                `src/components/shared/editorial.jsx`)
+              - Performance: avoid unnecessary re-renders, image sizing, animation
+                that ignores prefers-reduced-motion
+
+            Backend (FastAPI + Beanie + MongoDB):
+              - Authentication / authorization on every protected route
+              - Input validation via Pydantic schemas
+              - Proper async usage (no blocking IO in request handlers)
+              - Error handling and HTTP status codes
+              - Index/query efficiency on Beanie documents
+              - No secrets or PII in logs
+
+            Cross-cutting:
+              - Security: injection risks, SSRF, unsafe file uploads, weak crypto
+              - Tests / runnable verification (note when missing if relevant)
+              - Naming, dead code, obvious refactors
+              - Docker, CI, env handling
+
+            Output format (post as a single sticky review comment)
+            -----------------------------------------------------
+            Use these sections, in this order, and skip any that don't apply:
+
+            ### Summary
+            One short paragraph describing what the PR does and the overall
+            verdict (Approve / Request Changes / Comment).
+
+            ### Must Fix
+            - Concrete, blocking issues with file paths and line refs.
+
+            ### Should Consider
+            - Important but non-blocking suggestions.
+
+            ### Nits
+            - Tiny polish items.
+
+            ### Praise
+            - Anything genuinely well-done that's worth calling out.
+
+            If there are zero Must Fix items and the change is small and obviously
+            correct, you may simply say so and stop there.
+
+            Tools
+            -----
+            - Use `gh pr comment` only via the action's sticky-comment helper.
+            - Do not push commits or modify code; this is a read-only review.
+
+          claude_args: |
+            --model claude-sonnet-4-5
+            --max-turns 30
+            --allowedTools "Read,Glob,Grep,Bash(git diff:*),Bash(git log:*),Bash(git status:*),Bash(git show:*),Bash(git rev-parse:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*)"
+
+      - name: Upload Claude execution log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: claude-execution-log-pr-${{ env.PR_NUMBER }}
+          path: /home/runner/work/_temp/claude-execution-output.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Cost summary
+        if: always() && steps.review.outcome != 'cancelled'
+        env:
+          LOG_FILE: /home/runner/work/_temp/claude-execution-output.json
+          PR_URL: "https://github.com/${{ github.repository }}/pull/${{ env.PR_NUMBER }}"
+        run: |
+          if [ ! -f "$LOG_FILE" ]; then
+            echo "::warning::Execution log not found — cannot compute cost summary"
+            exit 0
+          fi
+
+          COST=$(jq -r 'last | .total_cost_usd // 0' "$LOG_FILE")
+          TURNS=$(jq -r 'last | .num_turns // 0' "$LOG_FILE")
+          DURATION=$(jq -r 'last | ((.duration_ms // 0) / 1000 | floor)' "$LOG_FILE")
+          INPUT=$(jq -r 'last | .usage.cache_read_input_tokens // 0' "$LOG_FILE")
+          CACHE_WRITE=$(jq -r 'last | .usage.cache_creation_input_tokens // 0' "$LOG_FILE")
+          OUTPUT=$(jq -r 'last | .usage.output_tokens // 0' "$LOG_FILE")
+
+          MINS=$((DURATION / 60))
+          SECS=$((DURATION % 60))
+
+          {
+            echo "## Claude Code Review Summary"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| PR | [#${{ env.PR_NUMBER }}]($PR_URL) |"
+            printf "| Cost | \$%.2f |\n" "$COST"
+            echo "| Turns | $TURNS |"
+            echo "| Duration | ${MINS}m ${SECS}s |"
+            echo "| Input tokens (cache read) | $INPUT |"
+            echo "| Input tokens (cache write) | $CACHE_WRITE |"
+            echo "| Output tokens | $OUTPUT |"
+          } >> "$GITHUB_STEP_SUMMARY"
