@@ -30,10 +30,14 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     location: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[int] = None  # transitional; prefer date_of_birth
+    date_of_birth: Optional[str] = Field(None, alias="dateOfBirth")
     gender: Optional[str] = None
     bio: Optional[str] = None
     languages: Optional[List[str]] = None
+
+    class Config:
+        populate_by_name = True
 
 
 class UserResponse(BaseModel):

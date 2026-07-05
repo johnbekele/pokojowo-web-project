@@ -139,7 +139,7 @@ class FavoritesService:
                         "lastname": user.lastname,
                         "username": user.username,
                         "photo": user.photo.dict() if user.photo else None,
-                        "age": user.age,
+                        "age": user.current_age(),
                         "gender": user.gender.value if user.gender else None,
                         "location": user.location,
                         "bio": user.bio,

@@ -147,7 +147,7 @@ class MatchingService:
                 "firstname": candidate.firstname,
                 "lastname": candidate.lastname,
                 "photo": candidate.photo.url if candidate.photo else None,
-                "age": candidate.age,
+                "age": candidate.current_age(),
                 "gender": candidate.gender.value if candidate.gender else None,
                 "bio": candidate.bio,
                 "location": candidate.location,
@@ -255,11 +255,12 @@ class MatchingService:
                     return f"Gender mismatch (same gender required)"
 
         # Age restrictions
-        if candidate.age:
-            if user_db.min_age and candidate.age < user_db.min_age:
-                return f"Candidate age {candidate.age} below minimum {user_db.min_age}"
-            if user_db.max_age and candidate.age > user_db.max_age:
-                return f"Candidate age {candidate.age} above maximum {user_db.max_age}"
+        candidate_age = candidate.current_age()
+        if candidate_age:
+            if user_db.min_age and candidate_age < user_db.min_age:
+                return f"Candidate age {candidate_age} below minimum {user_db.min_age}"
+            if user_db.max_age and candidate_age > user_db.max_age:
+                return f"Candidate age {candidate_age} above maximum {user_db.max_age}"
 
         # Cleanliness minimum
         if user_db.min_cleanliness and candidate_traits:
@@ -1086,28 +1087,30 @@ class MatchingService:
             candidate_prefs = candidate.tenant_profile.preferences
 
         # 1. Age preference scoring
-        if user_prefs and user_prefs.age_range and candidate.age:
-            min_age, max_age = user_prefs.age_range[0], user_prefs.age_range[1] if len(user_prefs.age_range) > 1 else 100
-            if min_age <= candidate.age <= max_age:
+        candidate_age = candidate.current_age()
+        if user_prefs and user_prefs.age_range and candidate_age:
+            min_age = user_prefs.age_range[0]
+            max_age = user_prefs.age_range[1] if len(user_prefs.age_range) > 1 else 100
+            if min_age <= candidate_age <= max_age:
                 scores.append(100)
                 explanations.append({
                     "category": "Preferences",
-                    "reason": f"Candidate age {candidate.age} within your preferred range",
+                    "reason": f"Candidate age {candidate_age} within your preferred range",
                     "impact": "positive",
                     "score": 100
                 })
             else:
                 # Calculate how far outside the range
-                if candidate.age < min_age:
-                    diff = min_age - candidate.age
+                if candidate_age < min_age:
+                    diff = min_age - candidate_age
                 else:
-                    diff = candidate.age - max_age
+                    diff = candidate_age - max_age
                 score = max(20, 100 - diff * 10)
                 scores.append(score)
                 if score < 60:
                     explanations.append({
                         "category": "Preferences",
-                        "reason": f"Candidate age {candidate.age} outside your preferred {min_age}-{max_age} range",
+                        "reason": f"Candidate age {candidate_age} outside your preferred {min_age}-{max_age} range",
                         "impact": "negative",
                         "score": score
                     })

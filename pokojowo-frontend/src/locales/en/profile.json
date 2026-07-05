@@ -31,7 +31,9 @@
       "preferNotToSay": "Prefer not to say"
     },
     "bio": "About Me",
-    "bioPlaceholder": "Write a few sentences about yourself, your interests, and what you're looking for..."
+    "bioPlaceholder": "Write a few sentences about yourself, your interests, and what you're looking for...",
+    "dateOfBirth": "Date of birth",
+    "dateOfBirthHint": "Your age updates automatically and only your age is shown to others."
   },
   "contact": {
     "title": "Contact Information",
@@ -119,5 +121,8 @@
     "back": "Back",
     "skip": "Skip for now",
     "saving": "Saving..."
+  },
+  "validation": {
+    "mustBe18": "You must be at least 18 years old."
   }
 }

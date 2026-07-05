@@ -285,7 +285,10 @@ class User(Document):
     preferred_language: Optional[str] = Field(default="pl", alias="preferredLanguage")
 
     # Profile Info
+    # age is denormalized from date_of_birth on save; kept for legacy
+    # users who registered before DOB existed and for Mongo-side reads.
     age: Optional[int] = None
+    date_of_birth: Optional[datetime] = Field(None, alias="dateOfBirth")
     gender: Optional[GenderEnum] = None
     bio: Optional[str] = None
     job: Optional[JobModel] = None
@@ -368,3 +371,14 @@ class User(Document):
     @property
     def is_tenant(self) -> bool:
         return RoleEnum.TENANT in self.role
+
+    def current_age(self) -> Optional[int]:
+        """Age computed from date_of_birth, falling back to the legacy
+        static age field for users who never provided a DOB."""
+        if self.date_of_birth:
+            today = datetime.utcnow().date()
+            dob = self.date_of_birth.date()
+            return today.year - dob.year - (
+                (today.month, today.day) < (dob.month, dob.day)
+            )
+        return self.age
