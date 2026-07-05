@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -77,7 +78,7 @@ export default function HomeListings() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data: rawListings, isLoading, error } = useQuery({
+  const { data: rawListings, isLoading, error, refetch } = useQuery({
     queryKey: ["listings", debouncedSearch, sortBy, filters],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -87,8 +88,9 @@ export default function HomeListings() {
       if (filters.maxPrice < 10000) params.append("max_price", filters.maxPrice);
       if (filters.minSize > 0) params.append("min_size", filters.minSize);
       if (filters.maxSize < 200) params.append("max_size", filters.maxSize);
-      if (filters.roomTypes?.length > 0) params.append("room_type", filters.roomTypes[0]);
-      if (filters.buildingTypes?.length > 0) params.append("building_type", filters.buildingTypes[0]);
+      filters.roomTypes?.forEach((v) => params.append("room_type", v));
+      filters.buildingTypes?.forEach((v) => params.append("building_type", v));
+      filters.rentFor?.forEach((v) => params.append("rent_for", v));
       if (filters.maxTenants) params.append("max_tenants", filters.maxTenants);
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
@@ -209,7 +211,7 @@ export default function HomeListings() {
             <p className="mt-2 text-sm text-muted-foreground">
               {error.message || t("error.loadingFailed")}
             </p>
-            <Button variant="outline" className="mt-6">
+            <Button variant="outline" className="mt-6" onClick={() => refetch()}>
               {t("error.retry")}
             </Button>
           </LuxuryPanel>

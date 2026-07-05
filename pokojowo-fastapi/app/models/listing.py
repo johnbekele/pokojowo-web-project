@@ -71,6 +71,13 @@ class Listing(Document):
     class Settings:
         name = "listings"
         use_state_management = True
+        # Indexes use the stored (alias) field names
+        indexes = [
+            "price",
+            "ownerId",
+            "sourceSite",
+            "createdAt",
+        ]
 
     class Config:
         populate_by_name = True
