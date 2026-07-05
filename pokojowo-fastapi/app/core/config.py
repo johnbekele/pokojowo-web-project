@@ -39,7 +39,16 @@ class Settings(BaseSettings):
     def get_secret_key(cls, v, values):
         import os
         if v is None:
-            return os.getenv('ACCESS_TOKEN_SECRET', os.getenv('SECRET_KEY', 'default-secret-key'))
+            v = os.getenv('ACCESS_TOKEN_SECRET', os.getenv('SECRET_KEY'))
+        debug = os.getenv('DEBUG', '').lower() in ('1', 'true', 'yes')
+        if not v or v in ('default-secret-key', 'your-secret-key-here-change-this-in-production'):
+            if debug:
+                # Local development only — never reachable with DEBUG off
+                return 'insecure-dev-only-secret'
+            raise ValueError(
+                "SECRET_KEY (or ACCESS_TOKEN_SECRET) must be set to a strong "
+                "value when DEBUG is off. Refusing to start with a default secret."
+            )
         return v
 
     # CORS - Accept either string or list
@@ -62,6 +71,10 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return ["http://localhost:5173"]
+
+    # Shared secret the scraper must present (X-Scraper-Key header)
+    # to use POST /api/listings/import
+    SCRAPER_API_KEY: Optional[str] = None
 
     # Google OAuth
     GOOGLE_CLIENT_ID: Optional[str] = None

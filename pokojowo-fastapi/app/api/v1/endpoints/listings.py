@@ -1,11 +1,13 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Query
+from fastapi import APIRouter, HTTPException, status, Depends, Query, Header
 from pydantic import BaseModel
 from app.schemas.listing_schema import ListingCreate, ListingUpdate, ListingResponse
 from app.models.listing import Listing
 from app.models.user import User
 from app.core.dependencies import get_current_user
+from app.core.config import settings
 from typing import List, Optional
 from datetime import datetime
+import secrets
 
 # IMPORTANT — two traps in this file:
 # 1. Route ordering: FastAPI matches routes in declaration order, so every
@@ -215,12 +217,22 @@ async def get_listings_by_owner(owner_id: str, skip: int = 0, limit: int = 20):
 
 
 @router.post("/import", response_model=dict, status_code=status.HTTP_201_CREATED)
-async def import_scraped_listing(listing_data: ScrapedListingImport):
+async def import_scraped_listing(
+    listing_data: ScrapedListingImport,
+    x_scraper_key: Optional[str] = Header(None)
+):
     """
     Import a scraped listing from external sources (OLX, Otodom, etc.)
-    No authentication required - these are reference listings.
-    Users can click through to the original source.
+    Requires the shared scraper key in the X-Scraper-Key header.
     """
+    if not settings.SCRAPER_API_KEY or not x_scraper_key or not secrets.compare_digest(
+        x_scraper_key, settings.SCRAPER_API_KEY
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Valid X-Scraper-Key header is required"
+        )
+
     from app.models.listing import RoomTypeEnum, BuildingTypeEnum, RentForEnum
 
     # Check for duplicate by source URL (stored under the camelCase alias)

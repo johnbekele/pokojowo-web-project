@@ -39,6 +39,16 @@ async def register(user_data: UserCreate, background_tasks: BackgroundTasks):
             detail="Username already taken"
         )
 
+    # Self-registration may only grant these roles — anything else
+    # (Admin, Moderator, Agent) must be assigned server-side.
+    ALLOWED_SIGNUP_ROLES = {"User", "Tenant", "Landlord"}
+    requested_roles = user_data.role or ["User"]
+    if not set(requested_roles).issubset(ALLOWED_SIGNUP_ROLES):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid role. Allowed roles: User, Tenant, Landlord"
+        )
+
     # Hash password
     hashed_password = get_password_hash(user_data.password)
 
@@ -52,7 +62,7 @@ async def register(user_data: UserCreate, background_tasks: BackgroundTasks):
         password=hashed_password,
         firstname=user_data.firstname,
         lastname=user_data.lastname,
-        role=user_data.role or ["User"],
+        role=requested_roles,
         verification_token=verification_token,
         is_verified=False
     )

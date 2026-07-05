@@ -139,10 +139,18 @@ async def update_profile_completion(
             detail="Step is required"
         )
 
+    # Only profile fields may be set through this endpoint — never
+    # privileged attributes like role, is_verified or trust_score.
+    COMPLETION_ALLOWED_FIELDS = {
+        "firstname", "lastname", "alias", "age", "gender", "bio", "phone",
+        "address", "location", "job", "languages", "preferred_language",
+        "photo", "tenant_profile", "landlord_profile",
+    }
+
     # Update profile data based on step
     for field, value in data.items():
         snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in field]).lstrip('_')
-        if hasattr(current_user, snake_field):
+        if snake_field in COMPLETION_ALLOWED_FIELDS and hasattr(current_user, snake_field):
             setattr(current_user, snake_field, value)
 
     current_user.profile_completion_step = step
