@@ -107,7 +107,10 @@
     "reset": "Reset All",
     "clear": "Clear All",
     "neighbourhood": "Neighbourhood",
-    "anyCity": "Any city"
+    "anyCity": "Any city",
+    "offeredBy": "Offered by",
+    "privateOwner": "Private owner",
+    "agency": "Agency"
   },
   "card": {
     "perMonth": "/month",
@@ -119,7 +122,9 @@
     "tenants_other": "{{count}} tenants",
     "tenants": "{{count}} tenants",
     "from": "From",
-    "month": "mo"
+    "month": "mo",
+    "privateOwner": "Private owner",
+    "agency": "Agency"
   },
   "details": {
     "description": "Description",
@@ -190,7 +195,9 @@
     "priceEyebrow": "Monthly rent",
     "verifiedHost": "Verified host",
     "curatedFooter": "Curated for thoughtful renting",
-    "noDescription": "A quiet, comfortable room awaiting its next tenant."
+    "noDescription": "A quiet, comfortable room awaiting its next tenant.",
+    "privateOwner": "Private owner",
+    "agency": "Agency"
   },
   "create": {
     "location": {

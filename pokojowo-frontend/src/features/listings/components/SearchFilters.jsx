@@ -110,6 +110,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
       maxTenants: null,
       city: '',
       districts: [],
+      offeredBy: null,
     };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
@@ -138,6 +139,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
     if (localFilters.maxTenants) count++;
     if (localFilters.city) count++;
     if (localFilters.districts?.length > 0) count++;
+    if (localFilters.offeredBy) count++;
     return count;
   };
 
@@ -430,6 +432,35 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                   key={option.value}
                   selected={localFilters.rentFor?.includes(option.value)}
                   onClick={() => toggleArrayFilter('rentFor', option.value)}
+                  icon={option.icon}
+                >
+                  {option.label}
+                </FilterChip>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Offered By */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                <Building2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <Label className="font-semibold text-base">{t('filters.offeredBy', 'Offered by')}</Label>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: 'owner', label: t('filters.privateOwner', 'Private owner'), icon: '🔑' },
+                { value: 'agency', label: t('filters.agency', 'Agency'), icon: '🏢' },
+              ].map((option) => (
+                <FilterChip
+                  key={option.value}
+                  selected={localFilters.offeredBy === option.value}
+                  onClick={() =>
+                    updateFilter('offeredBy', localFilters.offeredBy === option.value ? null : option.value)
+                  }
                   icon={option.icon}
                 >
                   {option.label}

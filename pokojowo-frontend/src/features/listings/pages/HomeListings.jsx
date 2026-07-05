@@ -52,6 +52,7 @@ const DEFAULT_FILTERS = {
   maxTenants: null,
   city: '',
   districts: [],
+  offeredBy: null,
 };
 
 // Each chip displays a localized label but searches with the canonical English
@@ -96,6 +97,7 @@ export default function HomeListings() {
       if (filters.maxTenants) params.append("max_tenants", filters.maxTenants);
       if (filters.city) params.append("city", filters.city);
       filters.districts?.forEach((v) => params.append("district", v));
+      if (filters.offeredBy) params.append("offered_by", filters.offeredBy);
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
     },
@@ -290,6 +292,13 @@ function ListingCard({ listing, interestedUsers = [], index = 0 }) {
             {listing.roomType && (
               <span className="rounded-full bg-surface-paper/85 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-foreground backdrop-blur">
                 {listing.roomType}
+              </span>
+            )}
+            {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
+              <span className="rounded-full bg-surface-paper/85 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-foreground backdrop-blur">
+                {listing.offeredBy === 'owner'
+                  ? t('card.privateOwner', 'Private owner')
+                  : t('card.agency', 'Agency')}
               </span>
             )}
           </div>

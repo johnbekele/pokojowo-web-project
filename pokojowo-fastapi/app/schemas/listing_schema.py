@@ -31,7 +31,7 @@ class ListingBase(BaseModel):
 
 
 class ListingCreate(ListingBase):
-    pass
+    pass  # offeredBy is set server-side (landlords are owners)
 
 
 class ListingUpdate(BaseModel):

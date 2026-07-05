@@ -20,6 +20,12 @@ class BuildingTypeEnum(str, Enum):
     DETACHED_HOUSE = "Detached_House"
 
 
+class OfferedByEnum(str, Enum):
+    OWNER = "owner"
+    AGENCY = "agency"
+    UNKNOWN = "unknown"
+
+
 class RentForEnum(str, Enum):
     WOMEN = "Women"
     MAN = "Man"
@@ -55,6 +61,10 @@ class Listing(Document):
     can_be_contacted: List[str] = Field(..., alias="canBeContacted")
     close_to: Optional[List[str]] = Field(None, alias="closeTo")
     ai_help: bool = Field(False, alias="AIHelp")
+
+    # Who offers the flat: private owner or an agency/realtor.
+    # unknown = legacy/scraped listings without the badge.
+    offered_by: OfferedByEnum = Field(OfferedByEnum.UNKNOWN, alias="offeredBy")
 
     # Scraped listing fields (for external sources like OLX, Otodom)
     is_scraped: bool = Field(False, alias="isScraped")
