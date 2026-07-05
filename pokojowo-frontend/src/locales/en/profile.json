@@ -106,7 +106,10 @@
     "subtitle": "What languages do you speak?",
     "select": "Select languages you speak",
     "preferredLanguage": "Preferred Language",
-    "selectPreferred": "Select preferred language"
+    "selectPreferred": "Select preferred language",
+    "other": "Other language",
+    "otherPlaceholder": "e.g. Czech, Portuguese…",
+    "add": "Add"
   },
   "photo": {
     "title": "Profile Photo",

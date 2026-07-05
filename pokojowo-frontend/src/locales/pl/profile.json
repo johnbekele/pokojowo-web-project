@@ -106,7 +106,10 @@
     "subtitle": "Jakimi językami mówisz?",
     "select": "Wybierz języki którymi mówisz",
     "preferredLanguage": "Preferowany język",
-    "selectPreferred": "Wybierz preferowany język"
+    "selectPreferred": "Wybierz preferowany język",
+    "other": "Inny język",
+    "otherPlaceholder": "np. czeski, portugalski…",
+    "add": "Dodaj"
   },
   "photo": {
     "title": "Zdjęcie profilowe",
