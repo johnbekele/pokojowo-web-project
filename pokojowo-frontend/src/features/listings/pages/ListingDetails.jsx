@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserAvatar from '@/components/shared/UserAvatar';
+import ListingMap from '@/components/shared/ListingMap';
 import {
   Eyebrow,
   DisplayTitle,
@@ -156,6 +157,8 @@ export default function ListingDetails() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
+              {[listing.district, listing.city].filter(Boolean).join(', ') || null}
+              {(listing.district || listing.city) && ' · '}
               {typeof listing.address === 'string'
                 ? listing.address
                 : `${listing.address?.street || ''}, ${listing.address?.city || ''}`}
@@ -296,17 +299,25 @@ export default function ListingDetails() {
             </>
           )}
 
-          {listing.closeTo?.length > 0 && (
+          {(listing.locationGeo || listing.closeTo?.length > 0) && (
             <>
               <EditorialRule label={t('details.nearbyEyebrow', 'In the neighbourhood')} />
-              <div className="flex flex-wrap gap-2">
-                {listing.closeTo.map((spot) => (
-                  <Badge key={spot} variant="secondary">
-                    <MapPin className="h-3 w-3" />
-                    {spot}
-                  </Badge>
-                ))}
-              </div>
+              {listing.locationGeo && (
+                <ListingMap
+                  locationGeo={listing.locationGeo}
+                  className="overflow-hidden rounded-2xl border border-border/70 shadow-editorial"
+                />
+              )}
+              {listing.closeTo?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {listing.closeTo.map((spot) => (
+                    <Badge key={spot} variant="secondary">
+                      <MapPin className="h-3 w-3" />
+                      {spot}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </>
           )}
 

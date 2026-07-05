@@ -107,7 +107,9 @@
     "available": "Dostępne teraz",
     "apply": "Zastosuj filtry",
     "reset": "Resetuj wszystko",
-    "clear": "Wyczyść wszystko"
+    "clear": "Wyczyść wszystko",
+    "neighbourhood": "Dzielnica",
+    "anyCity": "Dowolne miasto"
   },
   "card": {
     "perMonth": "/miesiąc",
@@ -195,5 +197,12 @@
     "verifiedHost": "Zweryfikowany gospodarz",
     "curatedFooter": "Tworzone dla świadomego wynajmu",
     "noDescription": "Spokojny, wygodny pokój czekający na nowego lokatora."
+  },
+  "create": {
+    "location": {
+      "findOnMap": "Znajdź na mapie",
+      "notFound": "Nie znaleziono adresu — kliknij mapę, aby ustawić pinezkę.",
+      "dragHint": "Kliknij mapę lub przeciągnij pinezkę w dokładne miejsce."
+    }
   }
 }

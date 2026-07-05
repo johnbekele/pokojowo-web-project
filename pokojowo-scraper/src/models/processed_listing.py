@@ -54,6 +54,10 @@ class ProcessedListing(BaseModel):
 
     # Required Pokojowo fields
     address: str = Field(..., description="Full address")
+    city: Optional[str] = Field(None, description="City name")
+    district: Optional[str] = Field(None, description="District/neighbourhood name")
+    latitude: Optional[float] = Field(None, description="Latitude (WGS84)")
+    longitude: Optional[float] = Field(None, description="Longitude (WGS84)")
     price: float = Field(..., description="Monthly rent in PLN")
     size: float = Field(..., description="Size in square meters")
     max_tenants: int = Field(default=2, alias="maxTenants")
@@ -93,6 +97,10 @@ class ProcessedListing(BaseModel):
 
         return {
             "address": self.address,
+            "city": self.city,
+            "district": self.district,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
             "price": self.price,
             "size": self.size,
             "maxTenants": self.max_tenants,

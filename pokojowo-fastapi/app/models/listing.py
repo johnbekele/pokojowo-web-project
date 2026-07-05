@@ -1,3 +1,4 @@
+import pymongo
 from beanie import Document
 from pydantic import Field, field_validator
 from typing import List, Optional
@@ -37,6 +38,11 @@ class DescriptionModel(dict):
 class Listing(Document):
     owner_id: str = Field(..., alias="ownerId")
     address: str
+    # Structured location (all optional — legacy docs only have address)
+    city: Optional[str] = None
+    district: Optional[str] = None
+    # GeoJSON Point: {"type": "Point", "coordinates": [lng, lat]}
+    location_geo: Optional[dict] = Field(None, alias="locationGeo")
     price: float
     size: float
     max_tenants: int = Field(..., alias="maxTenants")
@@ -77,6 +83,9 @@ class Listing(Document):
             "ownerId",
             "sourceSite",
             "createdAt",
+            "city",
+            "district",
+            [("locationGeo", pymongo.GEOSPHERE)],
         ]
 
     class Config:

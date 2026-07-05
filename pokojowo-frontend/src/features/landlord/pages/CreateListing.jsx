@@ -31,6 +31,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/useToast';
 import api from '@/lib/api';
+import LocationPicker from '@/components/shared/LocationPicker';
+import { CITIES, districtsForCity } from '@/lib/districts';
 
 const STEPS = [
   { id: 1, title: 'Location', icon: MapPin },
@@ -92,6 +94,9 @@ export default function CreateListing() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [formData, setFormData] = useState({
     address: '',
+    city: '',
+    district: '',
+    coordinates: null, // { latitude, longitude }
     price: '',
     size: '',
     maxTenants: 1,
@@ -121,6 +126,14 @@ export default function CreateListing() {
     if (existingListing) {
       setFormData({
         address: existingListing.address || '',
+        city: existingListing.city || '',
+        district: existingListing.district || '',
+        coordinates: existingListing.locationGeo?.coordinates
+          ? {
+              latitude: existingListing.locationGeo.coordinates[1],
+              longitude: existingListing.locationGeo.coordinates[0],
+            }
+          : null,
         price: existingListing.price?.toString() || '',
         size: existingListing.size?.toString() || '',
         maxTenants: existingListing.maxTenants || 1,
@@ -142,8 +155,14 @@ export default function CreateListing() {
   // Create/Update listing mutation
   const saveMutation = useMutation({
     mutationFn: async (data) => {
+      const { coordinates, ...rest } = data;
       const payload = {
-        ...data,
+        ...rest,
+        city: data.city || null,
+        district: data.district || null,
+        locationGeo: coordinates
+          ? { type: 'Point', coordinates: [coordinates.longitude, coordinates.latitude] }
+          : null,
         price: parseFloat(data.price),
         size: parseFloat(data.size),
         maxTenants: parseInt(data.maxTenants),
@@ -306,6 +325,52 @@ export default function CreateListing() {
               <p className="text-sm text-muted-foreground">
                 Enter the full address of your property
               </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Select
+                  value={formData.city}
+                  onValueChange={(value) => {
+                    handleInputChange('city', value);
+                    handleInputChange('district', '');
+                  }}
+                >
+                  <SelectTrigger id="city">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CITIES.map((city) => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="district">Neighbourhood / District</Label>
+                <Input
+                  id="district"
+                  list="district-suggestions"
+                  placeholder="e.g., Mokotów"
+                  value={formData.district}
+                  onChange={(e) => handleInputChange('district', e.target.value)}
+                />
+                <datalist id="district-suggestions">
+                  {districtsForCity(formData.city).map((d) => (
+                    <option key={d} value={d} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Location on map</Label>
+              <LocationPicker
+                address={formData.address}
+                city={formData.city}
+                district={formData.district}
+                value={formData.coordinates}
+                onChange={(coords) => handleInputChange('coordinates', coords)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="availableFrom">Available From *</Label>

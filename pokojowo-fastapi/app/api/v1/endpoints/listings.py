@@ -5,8 +5,10 @@ from app.models.listing import Listing
 from app.models.user import User
 from app.core.dependencies import get_current_user
 from app.core.config import settings
+from app.core.locations import CITY_DISTRICTS, canonical_city, districts_for_city
 from typing import List, Optional
 from datetime import datetime
+import re
 import secrets
 
 # IMPORTANT — two traps in this file:
@@ -39,6 +41,11 @@ class ScrapedListingImport(BaseModel):
     sourceUrl: str  # Required - link to original post
     sourceSite: str  # Required - olx, otodom, etc.
     phone: Optional[str] = None
+    # Structured location (optional; scraper forwards when available)
+    city: Optional[str] = None
+    district: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 def listing_to_dict(listing: Listing) -> dict:
@@ -47,6 +54,9 @@ def listing_to_dict(listing: Listing) -> dict:
         "_id": str(listing.id),
         "ownerId": listing.owner_id,
         "address": listing.address,
+        "city": listing.city,
+        "district": listing.district,
+        "locationGeo": listing.location_geo,
         "price": listing.price,
         "size": listing.size,
         "maxTenants": listing.max_tenants,
@@ -109,12 +119,16 @@ async def get_listings(
     room_type: Optional[List[str]] = Query(None),
     building_type: Optional[List[str]] = Query(None),
     rent_for: Optional[List[str]] = Query(None),
-    max_tenants: Optional[int] = None
+    max_tenants: Optional[int] = None,
+    city: Optional[str] = None,
+    district: Optional[List[str]] = Query(None)
 ):
     """Get all listings with optional filtering, search, and sorting.
 
-    room_type, building_type and rent_for accept repeated params and
-    match listings containing ANY of the given values.
+    room_type, building_type, rent_for and district accept repeated
+    params and match listings containing ANY of the given values.
+    The district filter also matches the district name inside the legacy
+    free-text address, so pre-migration listings still surface.
     """
     query = {}
 
@@ -160,6 +174,26 @@ async def get_listings(
     if max_tenants is not None:
         query["maxTenants"] = {"$lte": max_tenants}
 
+    if city:
+        city_name = canonical_city(city)
+        # Match the structured field or the legacy free-text address
+        city_clause = {"$or": [
+            {"city": {"$regex": f"^{re.escape(city_name)}$", "$options": "i"}},
+            {"address": {"$regex": re.escape(city), "$options": "i"}},
+            {"address": {"$regex": re.escape(city_name), "$options": "i"}},
+        ]}
+        query.setdefault("$and", []).append(city_clause)
+
+    if district:
+        districts = [d.strip() for d in district if d and d.strip()]
+        if districts:
+            district_clause = {"$or": [
+                {"district": {"$in": districts}},
+                # Legacy fallback: district name inside the address string
+                {"address": {"$regex": "|".join(re.escape(d) for d in districts), "$options": "i"}},
+            ]}
+            query.setdefault("$and", []).append(district_clause)
+
     # Determine sort order
     sort_field = "-createdAt"  # Default: newest first
     if sort == "price_asc":
@@ -172,6 +206,15 @@ async def get_listings(
     listings = await Listing.find(query).sort(sort_field).skip(skip).limit(limit).to_list()
 
     return [listing_to_dict(listing) for listing in listings]
+
+
+@router.get("/meta/districts", response_model=dict)
+async def get_districts(city: Optional[str] = None):
+    """Curated district suggestions. With ?city= returns that city's
+    districts; without, returns the full city->districts map."""
+    if city:
+        return {"city": canonical_city(city), "districts": districts_for_city(city)}
+    return {"cities": CITY_DISTRICTS}
 
 
 @router.get("/my-listings", response_model=List[dict])
@@ -274,10 +317,20 @@ async def import_scraped_listing(
         except:
             pass
 
+    location_geo = None
+    if listing_data.latitude is not None and listing_data.longitude is not None:
+        location_geo = {
+            "type": "Point",
+            "coordinates": [listing_data.longitude, listing_data.latitude]
+        }
+
     # Create listing with scraped flag
     listing = Listing(
         owner_id="scraped",  # Special owner ID for scraped listings
         address=listing_data.address,
+        city=canonical_city(listing_data.city) if listing_data.city else None,
+        district=listing_data.district,
+        location_geo=location_geo,
         price=listing_data.price,
         size=listing_data.size,
         max_tenants=listing_data.maxTenants,
