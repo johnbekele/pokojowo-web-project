@@ -58,6 +58,9 @@ class ProcessedListing(BaseModel):
     district: Optional[str] = Field(None, description="District/neighbourhood name")
     latitude: Optional[float] = Field(None, description="Latitude (WGS84)")
     longitude: Optional[float] = Field(None, description="Longitude (WGS84)")
+    seller_type: Optional[str] = Field(
+        None, description="owner | agency | unknown (from Prywatne/Firmowe etc.)"
+    )
     price: float = Field(..., description="Monthly rent in PLN")
     size: float = Field(..., description="Size in square meters")
     max_tenants: int = Field(default=2, alias="maxTenants")
@@ -101,6 +104,7 @@ class ProcessedListing(BaseModel):
             "district": self.district,
             "latitude": self.latitude,
             "longitude": self.longitude,
+            "offeredBy": self.seller_type if self.seller_type in ("owner", "agency") else "unknown",
             "price": self.price,
             "size": self.size,
             "maxTenants": self.max_tenants,

@@ -119,6 +119,8 @@ async def publish_to_pokojowo(listing: dict) -> dict:
             "city": listing.get("city"),
             "district": listing.get("district"),
             "locationGeo": location_geo,
+            "offeredBy": listing.get("seller_type")
+                if listing.get("seller_type") in ("owner", "agency") else "unknown",
             "price": float(listing.get("price", 0)),
             "size": float(listing.get("size", 0)),
             "maxTenants": int(listing.get("max_tenants", 1)),

@@ -133,6 +133,13 @@ export default function ListingDetails() {
               {t('detail.availableNow', 'Available')}
             </TrustBadge>
           )}
+          {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
+            <TrustBadge tone="olive">
+              {listing.offeredBy === 'owner'
+                ? t('detail.privateOwner', 'Private owner')
+                : t('detail.agency', 'Agency')}
+            </TrustBadge>
+          )}
           {isScraped ? (
             <TrustBadge tone="ink">
               {t('detail.imported', 'Imported listing')}

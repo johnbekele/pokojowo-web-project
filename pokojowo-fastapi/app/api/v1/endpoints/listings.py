@@ -46,6 +46,8 @@ class ScrapedListingImport(BaseModel):
     district: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    # owner | agency | unknown (scraper maps Prywatne/Firmowe etc.)
+    offeredBy: Optional[str] = None
 
 
 def listing_to_dict(listing: Listing) -> dict:
@@ -70,6 +72,7 @@ def listing_to_dict(listing: Listing) -> dict:
         "canBeContacted": listing.can_be_contacted,
         "closeTo": listing.close_to,
         "AIHelp": listing.ai_help,
+        "offeredBy": listing.offered_by.value if listing.offered_by else "unknown",
         "isScraped": listing.is_scraped,
         "sourceUrl": listing.source_url,
         "sourceSite": listing.source_site,
@@ -91,9 +94,11 @@ async def create_listing(
             detail="Only landlords can create listings"
         )
 
-    # Create listing
+    # Create listing — platform landlords offer their own property
+    from app.models.listing import OfferedByEnum
     listing = Listing(
         owner_id=str(current_user.id),
+        offered_by=OfferedByEnum.OWNER,
         **listing_data.dict(by_alias=True)
     )
 
@@ -121,7 +126,8 @@ async def get_listings(
     rent_for: Optional[List[str]] = Query(None),
     max_tenants: Optional[int] = None,
     city: Optional[str] = None,
-    district: Optional[List[str]] = Query(None)
+    district: Optional[List[str]] = Query(None),
+    offered_by: Optional[str] = None
 ):
     """Get all listings with optional filtering, search, and sorting.
 
@@ -129,6 +135,10 @@ async def get_listings(
     params and match listings containing ANY of the given values.
     The district filter also matches the district name inside the legacy
     free-text address, so pre-migration listings still surface.
+
+    offered_by is deliberately asymmetric: 'owner' excludes only
+    agency-tagged listings (untagged legacy listings stay visible),
+    while 'agency' matches strictly.
     """
     query = {}
 
@@ -193,6 +203,11 @@ async def get_listings(
                 {"address": {"$regex": "|".join(re.escape(d) for d in districts), "$options": "i"}},
             ]}
             query.setdefault("$and", []).append(district_clause)
+
+    if offered_by == "owner":
+        query["offeredBy"] = {"$nin": ["agency"]}
+    elif offered_by == "agency":
+        query["offeredBy"] = "agency"
 
     # Determine sort order
     sort_field = "-createdAt"  # Default: newest first
@@ -276,7 +291,7 @@ async def import_scraped_listing(
             detail="Valid X-Scraper-Key header is required"
         )
 
-    from app.models.listing import RoomTypeEnum, BuildingTypeEnum, RentForEnum
+    from app.models.listing import RoomTypeEnum, BuildingTypeEnum, RentForEnum, OfferedByEnum
 
     # Check for duplicate by source URL (stored under the camelCase alias)
     existing = await Listing.find_one({"sourceUrl": listing_data.sourceUrl})
@@ -324,6 +339,11 @@ async def import_scraped_listing(
             "coordinates": [listing_data.longitude, listing_data.latitude]
         }
 
+    try:
+        offered_by = OfferedByEnum(listing_data.offeredBy or "unknown")
+    except ValueError:
+        offered_by = OfferedByEnum.UNKNOWN
+
     # Create listing with scraped flag
     listing = Listing(
         owner_id="scraped",  # Special owner ID for scraped listings
@@ -343,6 +363,7 @@ async def import_scraped_listing(
         can_be_contacted=listing_data.canBeContacted,
         close_to=listing_data.closeTo,
         ai_help=listing_data.AIHelp,
+        offered_by=offered_by,
         # Scraped-specific fields
         is_scraped=True,
         source_url=listing_data.sourceUrl,

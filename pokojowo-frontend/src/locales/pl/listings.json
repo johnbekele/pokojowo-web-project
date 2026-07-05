@@ -109,7 +109,10 @@
     "reset": "Resetuj wszystko",
     "clear": "Wyczyść wszystko",
     "neighbourhood": "Dzielnica",
-    "anyCity": "Dowolne miasto"
+    "anyCity": "Dowolne miasto",
+    "offeredBy": "Oferowane przez",
+    "privateOwner": "Właściciel prywatny",
+    "agency": "Agencja"
   },
   "card": {
     "perMonth": "/miesiąc",
@@ -123,7 +126,9 @@
     "tenants_other": "{{count}} lokatorów",
     "tenants": "{{count}} lokatorów",
     "from": "Od",
-    "month": "mies."
+    "month": "mies.",
+    "privateOwner": "Właściciel prywatny",
+    "agency": "Agencja"
   },
   "details": {
     "description": "Opis",
@@ -196,7 +201,9 @@
     "priceEyebrow": "Czynsz miesięczny",
     "verifiedHost": "Zweryfikowany gospodarz",
     "curatedFooter": "Tworzone dla świadomego wynajmu",
-    "noDescription": "Spokojny, wygodny pokój czekający na nowego lokatora."
+    "noDescription": "Spokojny, wygodny pokój czekający na nowego lokatora.",
+    "privateOwner": "Właściciel prywatny",
+    "agency": "Agencja"
   },
   "create": {
     "location": {

@@ -399,6 +399,15 @@ def extract_olx_listings_from_search(html: str, city: str) -> list[dict]:
                         images.append(src)
                         break
 
+            # Seller type: OLX cards carry a "Prywatne" (private) or
+            # "Firmowe" (business/agency) badge in the card text
+            seller_type = "unknown"
+            card_text = card.get_text(" ", strip=True)
+            if re.search(r'\bPrywatne\b', card_text, re.IGNORECASE):
+                seller_type = "owner"
+            elif re.search(r'\bFirmowe\b', card_text, re.IGNORECASE):
+                seller_type = "agency"
+
             source_id = hashlib.md5(url.encode()).hexdigest()[:12]
 
             # OLX location strings look like "Warszawa, Mokotów"
@@ -416,6 +425,7 @@ def extract_olx_listings_from_search(html: str, city: str) -> list[dict]:
                 "address": location,
                 "city": listing_city,
                 "district": listing_district,
+                "seller_type": seller_type,
                 "size": 40.0,
                 "images": images,
                 "scraped_at": datetime.utcnow(),
@@ -1014,6 +1024,25 @@ async def extract_otodom_detail_page(url: str, html: str) -> Optional[dict]:
 
                     source_id = str(ad.get("id", hashlib.md5(url.encode()).hexdigest()[:12]))
 
+                    # Advertiser type: private owner vs agency/developer.
+                    # Otodom exposes it in several places depending on
+                    # page version — check them all.
+                    seller_type = "unknown"
+                    advertiser_raw = str(
+                        ad.get("advertiserType")
+                        or (ad.get("owner") or {}).get("type")
+                        or (ad.get("agency") or {}).get("type")
+                        or ad.get("target", {}).get("Advert_type")
+                        or ""
+                    ).lower()
+                    if "private" in advertiser_raw or "prywat" in advertiser_raw:
+                        seller_type = "owner"
+                    elif any(k in advertiser_raw for k in ("agency", "business", "developer", "biuro")):
+                        seller_type = "agency"
+                    elif ad.get("agency"):
+                        # An agency object on the ad implies a broker
+                        seller_type = "agency"
+
                     return {
                         "source_url": url,
                         "source_site": "otodom",
@@ -1026,6 +1055,7 @@ async def extract_otodom_detail_page(url: str, html: str) -> Optional[dict]:
                         "district": district,
                         "latitude": latitude,
                         "longitude": longitude,
+                        "seller_type": seller_type,
                         "size": size or 40.0,
                         "rooms": rooms,
                         "phone": phone,
