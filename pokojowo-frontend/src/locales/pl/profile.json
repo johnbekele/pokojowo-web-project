@@ -31,7 +31,9 @@
       "preferNotToSay": "Wolę nie podawać"
     },
     "bio": "O mnie",
-    "bioPlaceholder": "Napisz kilka zdań o sobie, swoich zainteresowaniach i czego szukasz..."
+    "bioPlaceholder": "Napisz kilka zdań o sobie, swoich zainteresowaniach i czego szukasz...",
+    "dateOfBirth": "Data urodzenia",
+    "dateOfBirthHint": "Twój wiek aktualizuje się automatycznie, a inni widzą tylko wiek."
   },
   "contact": {
     "title": "Dane kontaktowe",
@@ -119,5 +121,8 @@
     "back": "Wstecz",
     "skip": "Pomiń na razie",
     "saving": "Zapisywanie..."
+  },
+  "validation": {
+    "mustBe18": "Musisz mieć co najmniej 18 lat."
   }
 }

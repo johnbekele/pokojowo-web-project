@@ -31,7 +31,8 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "phone": current_user.phone,
         "address": current_user.address,
         "location": current_user.location,
-        "age": current_user.age,
+        "age": current_user.current_age(),
+        "dateOfBirth": current_user.date_of_birth,
         "gender": current_user.gender.value if current_user.gender else None,
         "bio": current_user.bio,
         "createdAt": current_user.created_at
@@ -45,6 +46,13 @@ async def update_current_user(
 ):
     """Update current user information"""
     update_data = user_data.dict(exclude_unset=True)
+
+    dob_value = update_data.pop("date_of_birth", None)
+    if dob_value:
+        from app.utils.dates import parse_and_validate_dob, age_from_dob
+        current_user.date_of_birth = parse_and_validate_dob(dob_value)
+        update_data.pop("age", None)
+        current_user.age = age_from_dob(current_user.date_of_birth)
 
     for field, value in update_data.items():
         setattr(current_user, field, value)

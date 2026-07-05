@@ -27,6 +27,15 @@ import api from '@/lib/api';
 import useAuthStore from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 
+// Latest selectable birth date: exactly 18 years ago today
+const maxDateOfBirth = () => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 18);
+  return d.toISOString().slice(0, 10);
+};
+
+const isAtLeast18 = (isoDate) => isoDate && isoDate <= maxDateOfBirth();
+
 const STEPS = [
   { id: 'basic', number: 1, title: 'Basic Info', icon: User },
   { id: 'contact', number: 2, title: 'Contact', icon: Phone },
@@ -45,10 +54,12 @@ export default function ProfileCompletionTenant() {
   const [currentStep, setCurrentStep] = useState(0);
   const isEditMode = user?.isProfileComplete;
 
+  const [dobError, setDobError] = useState('');
+
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
-    age: '',
+    dateOfBirth: '',
     gender: '',
     bio: '',
     phone: '',
@@ -75,7 +86,7 @@ export default function ProfileCompletionTenant() {
         ...prev,
         firstname: user.firstname || searchParams.get('googleFirstName') || '',
         lastname: user.lastname || searchParams.get('googleLastName') || '',
-        age: user.age || '',
+        dateOfBirth: user.dateOfBirth ? String(user.dateOfBirth).slice(0, 10) : '',
         gender: user.gender || '',
         bio: user.bio || '',
         phone: user.phone || '',
@@ -128,6 +139,11 @@ export default function ProfileCompletionTenant() {
   };
 
   const handleNext = () => {
+    if (currentStep === 0 && formData.dateOfBirth && !isAtLeast18(formData.dateOfBirth)) {
+      setDobError(t('validation.mustBe18'));
+      return;
+    }
+    setDobError('');
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
@@ -145,7 +161,7 @@ export default function ProfileCompletionTenant() {
     const payload = {
       firstname: formData.firstname,
       lastname: formData.lastname,
-      age: formData.age ? parseInt(formData.age) : null,
+      dateOfBirth: formData.dateOfBirth || null,
       gender: formData.gender || null,
       bio: formData.bio,
       phone: formData.phone,
@@ -290,16 +306,23 @@ export default function ProfileCompletionTenant() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="age" className="text-sm font-medium">{t('basicInfo.age')}</Label>
+                    <Label htmlFor="dateOfBirth" className="text-sm font-medium">{t('basicInfo.dateOfBirth')}</Label>
                     <Input
-                      id="age"
-                      type="number"
-                      min="18"
-                      max="99"
-                      value={formData.age}
-                      onChange={(e) => handleInputChange('age', e.target.value)}
+                      id="dateOfBirth"
+                      type="date"
+                      max={maxDateOfBirth()}
+                      value={formData.dateOfBirth}
+                      onChange={(e) => {
+                        handleInputChange('dateOfBirth', e.target.value);
+                        setDobError('');
+                      }}
                       className="h-11"
                     />
+                    {dobError ? (
+                      <p className="text-xs text-destructive">{dobError}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t('basicInfo.dateOfBirthHint')}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="gender" className="text-sm font-medium">{t('basicInfo.gender')}</Label>

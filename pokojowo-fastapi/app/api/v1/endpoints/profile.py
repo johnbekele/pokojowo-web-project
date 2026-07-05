@@ -27,7 +27,8 @@ async def get_profile(current_user: User = Depends(get_current_user)):
         "preferredContact": current_user.preferred_contact,
         "languages": current_user.languages,
         "preferredLanguage": current_user.preferred_language,
-        "age": current_user.age,
+        "age": current_user.current_age(),
+        "dateOfBirth": current_user.date_of_birth,
         "gender": current_user.gender.value if current_user.gender else None,
         "bio": current_user.bio,
         "job": current_user.job.dict() if current_user.job else None,
@@ -54,6 +55,12 @@ async def update_profile(
         "age", "gender", "bio", "job", "tenant_profile", "landlord_profile",
         "chat_settings", "notification_preferences"
     ]
+
+    if profile_data.get("dateOfBirth"):
+        from app.utils.dates import parse_and_validate_dob, age_from_dob
+        current_user.date_of_birth = parse_and_validate_dob(profile_data.pop("dateOfBirth"))
+        profile_data.pop("age", None)
+        current_user.age = age_from_dob(current_user.date_of_birth)
 
     for field, value in profile_data.items():
         # Convert camelCase to snake_case
@@ -193,7 +200,13 @@ async def complete_tenant_profile(
         current_user.location = profile_data["location"]
     if "bio" in profile_data:
         current_user.bio = profile_data["bio"]
-    if "age" in profile_data:
+    if profile_data.get("dateOfBirth"):
+        from app.utils.dates import parse_and_validate_dob, age_from_dob
+        current_user.date_of_birth = parse_and_validate_dob(profile_data["dateOfBirth"])
+        # Denormalize so legacy readers and Mongo-side queries keep working
+        current_user.age = age_from_dob(current_user.date_of_birth)
+    elif "age" in profile_data:
+        # Transitional: old clients that still send a raw age
         current_user.age = profile_data["age"]
     if "gender" in profile_data and profile_data["gender"]:
         try:
@@ -384,7 +397,7 @@ async def get_user_profile(user_id: str):
         "photo": user.photo.dict() if user.photo else None,
         "bio": user.bio,
         "location": user.location,
-        "age": user.age,
+        "age": user.current_age(),
         "gender": user.gender.value if user.gender else None,
         "role": [role.value for role in user.role],
         "isVerified": user.is_verified,
