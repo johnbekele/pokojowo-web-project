@@ -29,6 +29,8 @@ import {
   ExternalLink,
 } from 'lucide-react-native';
 
+import MapView, { Marker } from 'react-native-maps';
+
 import { Button, Badge, Avatar, LoadingSpinner, Card } from '@/components/ui';
 import { useListing } from '@/hooks/listings/useListings';
 import { useSaveListing, useUnsaveListing, useIsListingSaved } from '@/hooks/favorites/useFavorites';
@@ -253,16 +255,55 @@ export default function ListingDetailScreen() {
               {formatCurrency(listing.price)}
               <Text className="text-base font-normal text-gray-500">/mo</Text>
             </Text>
-            {listing.room_type && (
-              <Badge variant="primary">{listing.room_type}</Badge>
-            )}
+            <View className="flex-row items-center gap-2">
+              {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
+                <Badge variant="default">
+                  {listing.offeredBy === 'owner'
+                    ? t('detail.privateOwner', 'Private owner')
+                    : t('detail.agency', 'Agency')}
+                </Badge>
+              )}
+              {listing.room_type && (
+                <Badge variant="primary">{listing.room_type}</Badge>
+              )}
+            </View>
           </View>
 
           {/* Address */}
           <View className="flex-row items-center mb-4">
             <MapPin size={18} color={COLORS.gray[500]} />
-            <Text className="text-gray-700 ml-2 flex-1">{listing.address}</Text>
+            <Text className="text-gray-700 ml-2 flex-1">
+              {[listing.district, listing.city].filter(Boolean).join(', ')}
+              {(listing.district || listing.city) ? ' · ' : ''}
+              {listing.address}
+            </Text>
           </View>
+
+          {/* Map */}
+          {listing.locationGeo?.coordinates && (
+            <View className="mb-4 rounded-xl overflow-hidden border border-gray-100" style={{ height: 200 }}>
+              <MapView
+                style={{ flex: 1 }}
+                initialRegion={{
+                  latitude: listing.locationGeo.coordinates[1],
+                  longitude: listing.locationGeo.coordinates[0],
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                pitchEnabled={false}
+                rotateEnabled={false}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: listing.locationGeo.coordinates[1],
+                    longitude: listing.locationGeo.coordinates[0],
+                  }}
+                />
+              </MapView>
+            </View>
+          )}
 
           {/* Quick info */}
           <View className="flex-row flex-wrap gap-4 mb-6">

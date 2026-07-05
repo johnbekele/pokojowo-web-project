@@ -49,6 +49,15 @@ export interface Listing {
   isScraped?: boolean;
   sourceUrl?: string;
   sourceSite?: string;
+  // Structured location
+  city?: string;
+  district?: string;
+  locationGeo?: {
+    type: 'Point';
+    coordinates: [number, number]; // [lng, lat]
+  };
+  // Who offers the flat
+  offeredBy?: 'owner' | 'agency' | 'unknown';
 }
 
 export interface ListingFilters {
@@ -63,6 +72,9 @@ export interface ListingFilters {
   building_types?: string[];
   rent_for?: string[];
   max_tenants?: number;
+  city?: string;
+  districts?: string[];
+  offered_by?: 'owner' | 'agency';
   available_from?: string;
   sort_by?: 'price' | 'created_at' | 'size';
   sort_order?: 'asc' | 'desc';

@@ -8,7 +8,8 @@ export interface User {
   address?: string;
   location?: string;
   photo?: string | { url?: string };
-  age?: number;
+  age?: number; // computed server-side from dateOfBirth when set
+  dateOfBirth?: string;
   gender?: 'male' | 'female' | 'other';
   bio?: string;
   languages?: string[];
@@ -45,6 +46,9 @@ export interface TenantProfile {
   cooking_frequency?: string;
   work_schedule?: string;
   sleep_schedule?: string;
+  hasPartner?: boolean;
+  hasChildren?: boolean;
+  childrenCount?: number | null;
 }
 
 export interface DealBreakers {
@@ -53,6 +57,8 @@ export interface DealBreakers {
   no_parties?: boolean;
   same_gender_only?: boolean;
   quiet_hours_required?: boolean;
+  noChildren?: boolean;
+  noCouples?: boolean;
   min_age?: number;
   max_age?: number;
   min_cleanliness?: string;

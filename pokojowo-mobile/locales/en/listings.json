@@ -80,7 +80,11 @@
     "available": "Available Now",
     "apply": "Apply Filters",
     "reset": "Reset",
-    "clear": "Clear All"
+    "clear": "Clear All",
+    "neighbourhood": "Neighbourhood",
+    "offeredBy": "Offered by",
+    "privateOwner": "Private owner",
+    "agency": "Agency"
   },
   "card": {
     "perMonth": "/month",
@@ -95,7 +99,9 @@
     "baths_other": "{{count}} baths",
     "rooms": "room",
     "rooms_one": "1 room",
-    "rooms_other": "{{count}} rooms"
+    "rooms_other": "{{count}} rooms",
+    "privateOwner": "Private owner",
+    "agency": "Agency"
   },
   "details": {
     "title": "Listing Details",
@@ -165,6 +171,8 @@
     "noPhone": "Phone not available",
     "noPhoneMessage": "The owner has not provided a phone number. Try sending a message instead.",
     "linkError": "Cannot open link",
-    "linkErrorMessage": "Unable to open the original listing."
+    "linkErrorMessage": "Unable to open the original listing.",
+    "privateOwner": "Private owner",
+    "agency": "Agency"
   }
 }

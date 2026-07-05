@@ -7,7 +7,8 @@ export interface UserUpdateData {
   phone?: string;
   address?: string;
   location?: string;
-  age?: number;
+  age?: number; // transitional; prefer dateOfBirth
+  dateOfBirth?: string; // ISO date, e.g. 1995-04-23
   gender?: string;
   bio?: string;
 }
@@ -15,7 +16,8 @@ export interface UserUpdateData {
 export interface TenantProfileData {
   firstname: string;
   lastname: string;
-  age?: number | null;
+  age?: number | null; // transitional; prefer dateOfBirth
+  dateOfBirth?: string | null; // ISO date, e.g. 1995-04-23
   gender?: string | null;
   bio?: string;
   phone?: string;
@@ -42,7 +44,12 @@ export interface TenantProfileData {
       noParties: boolean;
       sameGenderOnly: boolean;
       quietHoursRequired: boolean;
+      noChildren?: boolean;
+      noCouples?: boolean;
     };
+    hasPartner?: boolean;
+    hasChildren?: boolean;
+    childrenCount?: number | null;
   };
 }
 

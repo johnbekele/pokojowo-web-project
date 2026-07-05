@@ -8,6 +8,12 @@ import { Button } from '@/components/ui';
 import FilterChip from '@/components/ui/FilterChip';
 import type { ListingFilters } from '@/types/listing.types';
 import { COLORS } from '@/lib/constants';
+import { CITIES, districtsForCity } from '@/lib/districts';
+
+const OFFERED_BY_OPTIONS = [
+  { value: 'owner' as const, label: 'Private owner', icon: '🔑' },
+  { value: 'agency' as const, label: 'Agency', icon: '🏢' },
+];
 
 const ROOM_TYPES = [
   { value: 'Single', label: 'Single', icon: '🛏️' },
@@ -62,7 +68,7 @@ export default function SearchFiltersModal({
     }
   }, [visible, filters]);
 
-  const toggleArrayFilter = (key: 'room_types' | 'building_types' | 'rent_for', value: string) => {
+  const toggleArrayFilter = (key: 'room_types' | 'building_types' | 'rent_for' | 'districts', value: string) => {
     setLocalFilters((prev) => {
       const currentValues = prev[key] || [];
       const newValues = currentValues.includes(value)
@@ -93,6 +99,9 @@ export default function SearchFiltersModal({
     if (localFilters.building_types?.length) count++;
     if (localFilters.rent_for?.length) count++;
     if (localFilters.max_tenants) count++;
+    if (localFilters.city) count++;
+    if (localFilters.districts?.length) count++;
+    if (localFilters.offered_by) count++;
     return count;
   };
 
@@ -115,6 +124,68 @@ export default function SearchFiltersModal({
         </View>
 
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+          {/* Neighbourhood */}
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-gray-900 mb-3">
+              {t('filters.neighbourhood', 'Neighbourhood')}
+            </Text>
+            <View className="flex-row flex-wrap gap-2 mb-2">
+              {CITIES.map((city) => (
+                <FilterChip
+                  key={city}
+                  label={city}
+                  selected={localFilters.city === city}
+                  onPress={() =>
+                    setLocalFilters((prev) => ({
+                      ...prev,
+                      city: prev.city === city ? undefined : city,
+                      districts: [],
+                    }))
+                  }
+                />
+              ))}
+            </View>
+            {localFilters.city ? (
+              <View className="flex-row flex-wrap gap-2">
+                {districtsForCity(localFilters.city).map((district) => (
+                  <FilterChip
+                    key={district}
+                    label={district}
+                    selected={localFilters.districts?.includes(district) || false}
+                    onPress={() => toggleArrayFilter('districts', district)}
+                  />
+                ))}
+              </View>
+            ) : null}
+          </View>
+
+          {/* Offered By */}
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-gray-900 mb-3">
+              {t('filters.offeredBy', 'Offered by')}
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              {OFFERED_BY_OPTIONS.map((option) => (
+                <FilterChip
+                  key={option.value}
+                  label={
+                    option.value === 'owner'
+                      ? t('filters.privateOwner', 'Private owner')
+                      : t('filters.agency', 'Agency')
+                  }
+                  icon={option.icon}
+                  selected={localFilters.offered_by === option.value}
+                  onPress={() =>
+                    setLocalFilters((prev) => ({
+                      ...prev,
+                      offered_by: prev.offered_by === option.value ? undefined : option.value,
+                    }))
+                  }
+                />
+              ))}
+            </View>
+          </View>
+
           {/* Price Range */}
           <View className="mb-6">
             <Text className="text-base font-semibold text-gray-900 mb-3">
