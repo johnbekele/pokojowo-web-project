@@ -254,6 +254,15 @@ class MatchingService:
                 if user.gender != candidate.gender:
                     return f"Gender mismatch (same gender required)"
 
+        # Co-occupant deal-breakers. find_matches runs this check in both
+        # directions, so a parent is hidden from child-rejecting users
+        # and vice versa.
+        candidate_tp = candidate.tenant_profile
+        if user_db.no_children and candidate_tp and candidate_tp.has_children:
+            return "Candidate has children (deal-breaker)"
+        if user_db.no_couples and candidate_tp and candidate_tp.has_partner:
+            return "Candidate moves in with a partner (deal-breaker)"
+
         # Age restrictions
         candidate_age = candidate.current_age()
         if candidate_age:

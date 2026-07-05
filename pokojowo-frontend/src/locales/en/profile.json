@@ -99,7 +99,9 @@
     "noPets": "No pets",
     "noParties": "No parties",
     "sameGenderOnly": "Same gender only",
-    "quietHoursRequired": "Quiet hours required"
+    "quietHoursRequired": "Quiet hours required",
+    "noChildren": "Prefer no children in the flat",
+    "noCouples": "Prefer no couples"
   },
   "languages": {
     "title": "Languages",
@@ -127,5 +129,12 @@
   },
   "validation": {
     "mustBe18": "You must be at least 18 years old."
+  },
+  "coOccupants": {
+    "title": "Who will live with you?",
+    "subtitle": "Let flatmates know who is moving in with you.",
+    "partner": "I'll move in with a partner",
+    "children": "I have children living with me",
+    "childrenCount": "How many children?"
   }
 }

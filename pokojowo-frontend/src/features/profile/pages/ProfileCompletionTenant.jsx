@@ -78,6 +78,11 @@ export default function ProfileCompletionTenant() {
     noParties: false,
     sameGenderOnly: false,
     quietHoursRequired: false,
+    noChildren: false,
+    noCouples: false,
+    hasPartner: false,
+    hasChildren: false,
+    childrenCount: '',
     languages: [],
     preferredLanguage: '',
   });
@@ -108,6 +113,11 @@ export default function ProfileCompletionTenant() {
           noParties: user.tenantProfile.dealBreakers?.noParties || false,
           sameGenderOnly: user.tenantProfile.dealBreakers?.sameGenderOnly || false,
           quietHoursRequired: user.tenantProfile.dealBreakers?.quietHoursRequired || false,
+          noChildren: user.tenantProfile.dealBreakers?.noChildren || false,
+          noCouples: user.tenantProfile.dealBreakers?.noCouples || false,
+          hasPartner: user.tenantProfile.hasPartner || false,
+          hasChildren: user.tenantProfile.hasChildren || false,
+          childrenCount: user.tenantProfile.childrenCount || '',
         }),
       }));
     }
@@ -214,7 +224,14 @@ export default function ProfileCompletionTenant() {
           noParties: formData.noParties,
           sameGenderOnly: formData.sameGenderOnly,
           quietHoursRequired: formData.quietHoursRequired,
+          noChildren: formData.noChildren,
+          noCouples: formData.noCouples,
         },
+        hasPartner: formData.hasPartner,
+        hasChildren: formData.hasChildren,
+        childrenCount: formData.hasChildren && formData.childrenCount
+          ? parseInt(formData.childrenCount)
+          : null,
       },
     };
     saveMutation.mutate(payload);
@@ -524,6 +541,53 @@ export default function ProfileCompletionTenant() {
                 <Separator className="my-4" />
 
                 <div className="space-y-4">
+                  <Label className="text-sm font-medium">{t('coOccupants.title')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('coOccupants.subtitle')}</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[
+                      { key: 'hasPartner', label: t('coOccupants.partner') },
+                      { key: 'hasChildren', label: t('coOccupants.children') },
+                    ].map((item) => (
+                      <div
+                        key={item.key}
+                        className={cn(
+                          'flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer',
+                          formData[item.key] ? 'bg-primary/10 border-primary/20' : 'bg-muted border-border hover:bg-muted/80'
+                        )}
+                        onClick={() => handleInputChange(item.key, !formData[item.key])}
+                      >
+                        <Checkbox
+                          id={item.key}
+                          checked={formData[item.key]}
+                          onCheckedChange={(checked) => handleInputChange(item.key, checked)}
+                        />
+                        <Label htmlFor={item.key} className="font-normal cursor-pointer text-sm">
+                          {item.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  {formData.hasChildren && (
+                    <div className="space-y-2 sm:max-w-[50%]">
+                      <Label htmlFor="childrenCount" className="text-sm font-medium">
+                        {t('coOccupants.childrenCount')}
+                      </Label>
+                      <Input
+                        id="childrenCount"
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={formData.childrenCount}
+                        onChange={(e) => handleInputChange('childrenCount', e.target.value)}
+                        className="h-11"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-4">
                   <Label className="text-sm font-medium">{t('dealBreakers.title')}</Label>
                   <p className="text-xs text-muted-foreground">{t('dealBreakers.subtitle')}</p>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -533,6 +597,8 @@ export default function ProfileCompletionTenant() {
                       { key: 'noParties', label: t('dealBreakers.noParties') },
                       { key: 'sameGenderOnly', label: t('dealBreakers.sameGenderOnly') },
                       { key: 'quietHoursRequired', label: t('dealBreakers.quietHoursRequired') },
+                      { key: 'noChildren', label: t('dealBreakers.noChildren') },
+                      { key: 'noCouples', label: t('dealBreakers.noCouples') },
                     ].map((item) => (
                       <div
                         key={item.key}
