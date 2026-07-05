@@ -167,9 +167,10 @@ async def get_user_by_id(user_id: str):
 async def get_all_users(
     skip: int = 0,
     limit: int = 20,
-    role: str = None
+    role: str = None,
+    current_user: User = Depends(get_current_user)
 ):
-    """Get all users with optional filtering"""
+    """Get all users with optional filtering (public fields only)"""
     query = {}
     if role:
         query["role"] = role
@@ -182,7 +183,6 @@ async def get_all_users(
             "username": user.username,
             "firstname": user.firstname,
             "lastname": user.lastname,
-            "email": user.email,
             "role": [r.value for r in user.role],
             "isVerified": user.is_verified,
             "location": user.location

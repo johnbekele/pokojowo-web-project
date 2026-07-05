@@ -11,8 +11,10 @@ from pydantic import BaseModel
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# Main Pokojowo database connection (direct access)
-POKOJOWO_MONGODB_URL = "mongodb+srv://john:pass123@cluster3.ubson3n.mongodb.net/test?appName=Cluster3&tlsAllowInvalidCertificates=true"
+from src.config.settings import settings
+
+# Main Pokojowo database connection (direct access, configured via
+# POKOJOWO_MONGODB_URL / POKOJOWO_DATABASE_NAME env vars)
 _pokojowo_client: Optional[AsyncIOMotorClient] = None
 _pokojowo_db = None
 
@@ -21,8 +23,13 @@ async def get_pokojowo_db():
     """Get connection to main Pokojowo database."""
     global _pokojowo_client, _pokojowo_db
     if _pokojowo_client is None:
-        _pokojowo_client = AsyncIOMotorClient(POKOJOWO_MONGODB_URL)
-        _pokojowo_db = _pokojowo_client.test  # 'test' database
+        if not settings.pokojowo_mongodb_url:
+            raise HTTPException(
+                status_code=503,
+                detail="POKOJOWO_MONGODB_URL is not configured; cannot publish listings."
+            )
+        _pokojowo_client = AsyncIOMotorClient(settings.pokojowo_mongodb_url)
+        _pokojowo_db = _pokojowo_client[settings.pokojowo_database_name]
         logger.info("Connected to main Pokojowo database")
     return _pokojowo_db
 

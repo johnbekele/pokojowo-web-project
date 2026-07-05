@@ -47,6 +47,14 @@ class Settings(BaseSettings):
         default="pokojowo_scraper", description="Database name for scraper data"
     )
 
+    # Main Pokojowo MongoDB (direct publishing of approved listings)
+    pokojowo_mongodb_url: str = Field(
+        default="", description="Connection URL of the main Pokojowo MongoDB"
+    )
+    pokojowo_database_name: str = Field(
+        default="test", description="Main Pokojowo database name"
+    )
+
     # Rate Limiting (requests per minute)
     rate_limit_olx: int = Field(default=30, description="Rate limit for OLX")
     rate_limit_otodom: int = Field(default=20, description="Rate limit for Otodom")
