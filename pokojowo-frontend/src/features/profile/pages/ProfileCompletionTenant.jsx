@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/useToast';
 import api from '@/lib/api';
 import useAuthStore from '@/stores/authStore';
 import { cn } from '@/lib/utils';
+import { SUPPORTED_LANGUAGES } from '@/lib/languages';
 
 // Latest selectable birth date: exactly 18 years ago today
 const maxDateOfBirth = () => {
@@ -55,6 +56,7 @@ export default function ProfileCompletionTenant() {
   const isEditMode = user?.isProfileComplete;
 
   const [dobError, setDobError] = useState('');
+  const [customLanguage, setCustomLanguage] = useState('');
 
   const [formData, setFormData] = useState({
     firstname: '',
@@ -136,6 +138,30 @@ export default function ProfileCompletionTenant() {
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toggleLanguage = (lang) => {
+    if (formData.languages.includes(lang)) {
+      handleInputChange('languages', formData.languages.filter((l) => l !== lang));
+      if (formData.preferredLanguage === lang) {
+        handleInputChange('preferredLanguage', '');
+      }
+    } else {
+      handleInputChange('languages', [...formData.languages, lang]);
+    }
+  };
+
+  const addCustomLanguage = () => {
+    const cleaned = customLanguage.trim().replace(/\s+/g, ' ');
+    if (!cleaned) return;
+    const titled = cleaned
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+    if (!formData.languages.some((l) => l.toLowerCase() === titled.toLowerCase())) {
+      handleInputChange('languages', [...formData.languages, titled]);
+    }
+    setCustomLanguage('');
   };
 
   const handleNext = () => {
@@ -537,40 +563,70 @@ export default function ProfileCompletionTenant() {
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">{t('languages.select')}</Label>
                   <div className="grid grid-cols-2 gap-3">
-                    {['English', 'Polish', 'German', 'French', 'Spanish', 'Ukrainian', 'Russian', 'Italian'].map(
-                      (lang) => (
-                        <div
-                          key={lang}
-                          className={cn(
-                            'flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer',
-                            formData.languages.includes(lang) ? 'bg-primary/10 border-primary/20' : 'bg-muted border-border hover:bg-muted/80'
-                          )}
-                          onClick={() => {
-                            if (formData.languages.includes(lang)) {
-                              handleInputChange('languages', formData.languages.filter((l) => l !== lang));
-                            } else {
-                              handleInputChange('languages', [...formData.languages, lang]);
-                            }
-                          }}
-                        >
-                          <Checkbox
-                            id={`lang-${lang}`}
-                            checked={formData.languages.includes(lang)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                handleInputChange('languages', [...formData.languages, lang]);
-                              } else {
-                                handleInputChange('languages', formData.languages.filter((l) => l !== lang));
-                              }
-                            }}
-                          />
-                          <Label htmlFor={`lang-${lang}`} className="font-normal cursor-pointer text-sm">
-                            {lang}
-                          </Label>
-                        </div>
-                      )
-                    )}
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <div
+                        key={lang}
+                        className={cn(
+                          'flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer',
+                          formData.languages.includes(lang) ? 'bg-primary/10 border-primary/20' : 'bg-muted border-border hover:bg-muted/80'
+                        )}
+                        onClick={() => toggleLanguage(lang)}
+                      >
+                        <Checkbox
+                          id={`lang-${lang}`}
+                          checked={formData.languages.includes(lang)}
+                          onCheckedChange={() => toggleLanguage(lang)}
+                        />
+                        <Label htmlFor={`lang-${lang}`} className="font-normal cursor-pointer text-sm">
+                          {lang}
+                        </Label>
+                      </div>
+                    ))}
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="customLanguage" className="text-sm font-medium">{t('languages.other')}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="customLanguage"
+                      placeholder={t('languages.otherPlaceholder')}
+                      value={customLanguage}
+                      onChange={(e) => setCustomLanguage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addCustomLanguage();
+                        }
+                      }}
+                      className="h-11"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addCustomLanguage}
+                      disabled={!customLanguage.trim()}
+                      className="h-11 px-5"
+                    >
+                      {t('languages.add')}
+                    </Button>
+                  </div>
+                  {formData.languages.filter((l) => !SUPPORTED_LANGUAGES.includes(l)).length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {formData.languages
+                        .filter((l) => !SUPPORTED_LANGUAGES.includes(l))
+                        .map((lang) => (
+                          <button
+                            key={lang}
+                            type="button"
+                            onClick={() => toggleLanguage(lang)}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-sm"
+                          >
+                            {lang}
+                            <span aria-hidden className="text-muted-foreground">×</span>
+                          </button>
+                        ))}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="preferredLanguage" className="text-sm font-medium">{t('languages.preferredLanguage')}</Label>

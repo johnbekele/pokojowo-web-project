@@ -62,6 +62,10 @@ async def update_profile(
         profile_data.pop("age", None)
         current_user.age = age_from_dob(current_user.date_of_birth)
 
+    if profile_data.get("languages") is not None:
+        from app.core.constants import normalize_languages
+        profile_data["languages"] = normalize_languages(profile_data["languages"])
+
     for field, value in profile_data.items():
         # Convert camelCase to snake_case
         snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in field]).lstrip('_')
@@ -214,7 +218,8 @@ async def complete_tenant_profile(
         except ValueError:
             pass
     if "languages" in profile_data:
-        current_user.languages = profile_data["languages"]
+        from app.core.constants import normalize_languages
+        current_user.languages = normalize_languages(profile_data["languages"])
     if "preferredLanguage" in profile_data:
         current_user.preferred_language = profile_data["preferredLanguage"]
 

@@ -54,6 +54,10 @@ async def update_current_user(
         update_data.pop("age", None)
         current_user.age = age_from_dob(current_user.date_of_birth)
 
+    if update_data.get("languages") is not None:
+        from app.core.constants import normalize_languages
+        update_data["languages"] = normalize_languages(update_data["languages"])
+
     for field, value in update_data.items():
         setattr(current_user, field, value)
 
