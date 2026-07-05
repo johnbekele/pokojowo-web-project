@@ -28,6 +28,23 @@ import { Button } from '@/components/ui';
 import { userService, TenantProfileData } from '@/services/user.service';
 import useAuthStore from '@/stores/authStore';
 import { COLORS } from '@/lib/constants';
+import { SUPPORTED_LANGUAGES } from '@/lib/languages';
+
+// Latest valid birth date: exactly 18 years ago today
+const maxDateOfBirth = (): string => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 18);
+  return d.toISOString().slice(0, 10);
+};
+
+const DOB_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const isValidDob = (value: string): boolean => {
+  if (!DOB_PATTERN.test(value)) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return value <= maxDateOfBirth();
+};
 
 const STEPS = [
   { id: 'basic', title: 'Basic Info', icon: User },
@@ -64,12 +81,10 @@ const GUESTS_OPTIONS = [
   { value: 'never', label: 'Never' },
 ];
 
-const LANGUAGES = ['English', 'Polish', 'German', 'French', 'Spanish', 'Ukrainian', 'Russian'];
-
 interface FormData {
   firstname: string;
   lastname: string;
-  age: string;
+  dateOfBirth: string;
   gender: string;
   bio: string;
   phone: string;
@@ -86,6 +101,11 @@ interface FormData {
   noParties: boolean;
   sameGenderOnly: boolean;
   quietHoursRequired: boolean;
+  noChildren: boolean;
+  noCouples: boolean;
+  hasPartner: boolean;
+  hasChildren: boolean;
+  childrenCount: string;
   languages: string[];
   preferredLanguage: string;
 }
@@ -96,10 +116,12 @@ export default function TenantProfileCompletion() {
   const { user, fetchUser } = useAuthStore();
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [dobError, setDobError] = useState('');
+  const [customLanguage, setCustomLanguage] = useState('');
   const [formData, setFormData] = useState<FormData>({
     firstname: '',
     lastname: '',
-    age: '',
+    dateOfBirth: '',
     gender: '',
     bio: '',
     phone: '',
@@ -116,6 +138,11 @@ export default function TenantProfileCompletion() {
     noParties: false,
     sameGenderOnly: false,
     quietHoursRequired: false,
+    noChildren: false,
+    noCouples: false,
+    hasPartner: false,
+    hasChildren: false,
+    childrenCount: '',
     languages: [],
     preferredLanguage: '',
   });
@@ -126,7 +153,7 @@ export default function TenantProfileCompletion() {
         ...prev,
         firstname: user.firstname || '',
         lastname: user.lastname || '',
-        age: user.age?.toString() || '',
+        dateOfBirth: user.dateOfBirth ? String(user.dateOfBirth).slice(0, 10) : '',
         gender: user.gender || '',
         bio: user.bio || '',
         phone: user.phone || '',
@@ -160,6 +187,11 @@ export default function TenantProfileCompletion() {
   };
 
   const handleNext = () => {
+    if (currentStep === 0 && formData.dateOfBirth && !isValidDob(formData.dateOfBirth)) {
+      setDobError(t('validation.mustBe18', 'You must be at least 18 years old (format: YYYY-MM-DD).'));
+      return;
+    }
+    setDobError('');
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
@@ -177,7 +209,7 @@ export default function TenantProfileCompletion() {
     const payload: TenantProfileData = {
       firstname: formData.firstname,
       lastname: formData.lastname,
-      age: formData.age ? parseInt(formData.age) : null,
+      dateOfBirth: formData.dateOfBirth || null,
       gender: formData.gender || null,
       bio: formData.bio,
       phone: formData.phone,
@@ -204,7 +236,15 @@ export default function TenantProfileCompletion() {
           noParties: formData.noParties,
           sameGenderOnly: formData.sameGenderOnly,
           quietHoursRequired: formData.quietHoursRequired,
+          noChildren: formData.noChildren,
+          noCouples: formData.noCouples,
         },
+        hasPartner: formData.hasPartner,
+        hasChildren: formData.hasChildren,
+        childrenCount:
+          formData.hasChildren && formData.childrenCount
+            ? parseInt(formData.childrenCount)
+            : null,
       },
     };
     saveMutation.mutate(payload);
@@ -288,21 +328,31 @@ export default function TenantProfileCompletion() {
               </View>
             </View>
 
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.age', 'Age')}</Text>
-                <TextInput
-                  className="border border-gray-200 rounded-lg px-4 py-3 text-base"
-                  value={formData.age}
-                  onChangeText={(text) => handleInputChange('age', text)}
-                  keyboardType="number-pad"
-                  placeholder="25"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.gender', 'Gender')}</Text>
-                {renderSelectOption(GENDER_OPTIONS, formData.gender, (v) => handleInputChange('gender', v))}
-              </View>
+            <View>
+              <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.dateOfBirth', 'Date of birth')}</Text>
+              <TextInput
+                className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                value={formData.dateOfBirth}
+                onChangeText={(text) => {
+                  handleInputChange('dateOfBirth', text);
+                  setDobError('');
+                }}
+                keyboardType="numbers-and-punctuation"
+                placeholder="YYYY-MM-DD"
+                maxLength={10}
+              />
+              {dobError ? (
+                <Text className="text-red-500 text-xs mt-1">{dobError}</Text>
+              ) : (
+                <Text className="text-gray-400 text-xs mt-1">
+                  {t('basicInfo.dateOfBirthHint', 'Your age updates automatically; others only see your age.')}
+                </Text>
+              )}
+            </View>
+
+            <View>
+              <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.gender', 'Gender')}</Text>
+              {renderSelectOption(GENDER_OPTIONS, formData.gender, (v) => handleInputChange('gender', v))}
             </View>
 
             <View>
@@ -429,6 +479,28 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View className="mt-2">
+              <Text className="text-gray-700 font-semibold mb-1">{t('coOccupants.title', 'Who will live with you?')}</Text>
+              <Text className="text-gray-500 text-sm mb-3">{t('coOccupants.subtitle', 'Let flatmates know who is moving in with you.')}</Text>
+              <View className="gap-2">
+                {renderCheckboxOption(t('coOccupants.partner', "I'll move in with a partner"), formData.hasPartner, () => handleInputChange('hasPartner', !formData.hasPartner))}
+                {renderCheckboxOption(t('coOccupants.children', 'I have children living with me'), formData.hasChildren, () => handleInputChange('hasChildren', !formData.hasChildren))}
+              </View>
+              {formData.hasChildren && (
+                <View className="mt-3">
+                  <Text className="text-gray-700 font-medium mb-2">{t('coOccupants.childrenCount', 'How many children?')}</Text>
+                  <TextInput
+                    className="border border-gray-200 rounded-lg px-4 py-3 text-base w-24"
+                    value={formData.childrenCount}
+                    onChangeText={(text) => handleInputChange('childrenCount', text)}
+                    keyboardType="number-pad"
+                    placeholder="1"
+                    maxLength={1}
+                  />
+                </View>
+              )}
+            </View>
+
+            <View className="mt-2">
               <Text className="text-gray-700 font-semibold mb-1">{t('dealBreakers.title', 'Deal Breakers')}</Text>
               <Text className="text-gray-500 text-sm mb-3">{t('dealBreakers.subtitle', "What's absolutely not acceptable?")}</Text>
               <View className="gap-2">
@@ -437,6 +509,8 @@ export default function TenantProfileCompletion() {
                 {renderCheckboxOption(t('dealBreakers.noParties', 'No parties'), formData.noParties, () => handleInputChange('noParties', !formData.noParties))}
                 {renderCheckboxOption(t('dealBreakers.sameGenderOnly', 'Same gender only'), formData.sameGenderOnly, () => handleInputChange('sameGenderOnly', !formData.sameGenderOnly))}
                 {renderCheckboxOption(t('dealBreakers.quietHoursRequired', 'Quiet hours required'), formData.quietHoursRequired, () => handleInputChange('quietHoursRequired', !formData.quietHoursRequired))}
+                {renderCheckboxOption(t('dealBreakers.noChildren', 'Prefer no children in the flat'), formData.noChildren, () => handleInputChange('noChildren', !formData.noChildren))}
+                {renderCheckboxOption(t('dealBreakers.noCouples', 'Prefer no couples'), formData.noCouples, () => handleInputChange('noCouples', !formData.noCouples))}
               </View>
             </View>
           </View>
@@ -448,7 +522,7 @@ export default function TenantProfileCompletion() {
             <View>
               <Text className="text-gray-700 font-medium mb-2">{t('languages.select', 'Select languages you speak')}</Text>
               <View className="flex-row flex-wrap gap-2">
-                {LANGUAGES.map((lang) => {
+                {SUPPORTED_LANGUAGES.map((lang) => {
                   const isSelected = formData.languages.includes(lang);
                   return (
                     <TouchableOpacity
@@ -471,6 +545,58 @@ export default function TenantProfileCompletion() {
                   );
                 })}
               </View>
+            </View>
+
+            <View>
+              <Text className="text-gray-700 font-medium mb-2">{t('languages.other', 'Other language')}</Text>
+              <View className="flex-row gap-2">
+                <TextInput
+                  className="flex-1 border border-gray-200 rounded-lg px-4 py-3 text-base"
+                  value={customLanguage}
+                  onChangeText={setCustomLanguage}
+                  placeholder={t('languages.otherPlaceholder', 'e.g. Czech, Portuguese…')}
+                />
+                <TouchableOpacity
+                  disabled={!customLanguage.trim()}
+                  onPress={() => {
+                    const cleaned = customLanguage.trim().replace(/\s+/g, ' ');
+                    if (!cleaned) return;
+                    const titled = cleaned
+                      .split(' ')
+                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                      .join(' ');
+                    if (!formData.languages.some((l) => l.toLowerCase() === titled.toLowerCase())) {
+                      handleInputChange('languages', [...formData.languages, titled]);
+                    }
+                    setCustomLanguage('');
+                  }}
+                  className={`px-4 rounded-lg border items-center justify-center ${
+                    customLanguage.trim() ? 'bg-primary-600 border-primary-600' : 'bg-gray-100 border-gray-200'
+                  }`}
+                >
+                  <Text className={customLanguage.trim() ? 'text-white font-medium' : 'text-gray-400 font-medium'}>
+                    {t('languages.add', 'Add')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {formData.languages.filter((l) => !SUPPORTED_LANGUAGES.includes(l)).length > 0 && (
+                <View className="flex-row flex-wrap gap-2 mt-2">
+                  {formData.languages
+                    .filter((l) => !SUPPORTED_LANGUAGES.includes(l))
+                    .map((lang) => (
+                      <TouchableOpacity
+                        key={lang}
+                        onPress={() =>
+                          handleInputChange('languages', formData.languages.filter((l) => l !== lang))
+                        }
+                        className="flex-row items-center px-3 py-2 rounded-lg bg-primary-50 border border-primary-300"
+                      >
+                        <Text className="text-primary-700 font-medium mr-1">{lang}</Text>
+                        <Text className="text-primary-400">×</Text>
+                      </TouchableOpacity>
+                    ))}
+                </View>
+              )}
             </View>
 
             {formData.languages.length > 0 && (

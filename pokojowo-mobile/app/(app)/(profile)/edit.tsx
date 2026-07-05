@@ -21,12 +21,25 @@ import { useUpdateProfile } from '@/hooks/user/useUser';
 import useAuthStore from '@/stores/authStore';
 import { COLORS } from '@/lib/constants';
 
+// Latest valid birth date: exactly 18 years ago today
+const maxDateOfBirth = (): string => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 18);
+  return d.toISOString().slice(0, 10);
+};
+
 const profileSchema = z.object({
   firstname: z.string().min(1, 'First name is required'),
   lastname: z.string().optional(),
   phone: z.string().optional(),
   location: z.string().optional(),
-  age: z.string().optional(),
+  dateOfBirth: z
+    .string()
+    .optional()
+    .refine(
+      (v) => !v || (/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= maxDateOfBirth()),
+      'You must be at least 18 years old (format: YYYY-MM-DD)'
+    ),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
 });
 
@@ -51,7 +64,7 @@ export default function EditProfileScreen() {
       lastname: user?.lastname || '',
       phone: user?.phone || '',
       location: user?.location || '',
-      age: user?.age?.toString() || '',
+      dateOfBirth: user?.dateOfBirth ? String(user.dateOfBirth).slice(0, 10) : '',
       bio: user?.bio || '',
     },
   });
@@ -86,7 +99,7 @@ export default function EditProfileScreen() {
         lastname: data.lastname,
         phone: data.phone,
         location: data.location,
-        age: data.age ? parseInt(data.age, 10) : undefined,
+        dateOfBirth: data.dateOfBirth || undefined,
         bio: data.bio,
       },
       {
@@ -96,7 +109,7 @@ export default function EditProfileScreen() {
             lastname: data.lastname,
             phone: data.phone,
             location: data.location,
-            age: data.age ? parseInt(data.age, 10) : undefined,
+            dateOfBirth: data.dateOfBirth || undefined,
             bio: data.bio,
           });
           Alert.alert(
@@ -217,15 +230,17 @@ export default function EditProfileScreen() {
 
         <Controller
           control={control}
-          name="age"
+          name="dateOfBirth"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label={t('edit.age', 'Age')}
+              label={t('edit.dateOfBirth', 'Date of birth')}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
-              error={errors.age?.message}
-              keyboardType="number-pad"
+              error={errors.dateOfBirth?.message}
+              keyboardType="numbers-and-punctuation"
+              placeholder="YYYY-MM-DD"
+              maxLength={10}
             />
           )}
         />

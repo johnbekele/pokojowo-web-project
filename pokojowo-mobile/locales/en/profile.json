@@ -40,7 +40,9 @@
       "preferNotToSay": "Prefer not to say"
     },
     "bio": "About Me",
-    "bioPlaceholder": "Write a few sentences about yourself, your interests, and what you're looking for..."
+    "bioPlaceholder": "Write a few sentences about yourself, your interests, and what you're looking for...",
+    "dateOfBirth": "Date of birth",
+    "dateOfBirthHint": "Your age updates automatically; others only see your age."
   },
   "contact": {
     "title": "Contact Information",
@@ -119,7 +121,9 @@
     "noPets": "No pets",
     "noParties": "No parties",
     "sameGenderOnly": "Same gender only",
-    "quietHoursRequired": "Quiet hours required"
+    "quietHoursRequired": "Quiet hours required",
+    "noChildren": "Prefer no children in the flat",
+    "noCouples": "Prefer no couples"
   },
   "languages": {
     "title": "Languages",
@@ -135,7 +139,10 @@
       "russian": "Russian",
       "spanish": "Spanish",
       "french": "French"
-    }
+    },
+    "other": "Other language",
+    "otherPlaceholder": "e.g. Czech, Portuguese…",
+    "add": "Add"
   },
   "photo": {
     "title": "Profile Photo",
@@ -168,7 +175,8 @@
     "successTitle": "Success",
     "successMessage": "Profile updated successfully",
     "errorTitle": "Error",
-    "errorMessage": "Failed to update profile"
+    "errorMessage": "Failed to update profile",
+    "dateOfBirth": "Date of birth"
   },
   "favorites": {
     "title": "Saved Matches",
@@ -195,5 +203,15 @@
     "deleteConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
     "error": "Error",
     "deleteError": "Failed to delete account"
+  },
+  "validation": {
+    "mustBe18": "You must be at least 18 years old (format: YYYY-MM-DD)."
+  },
+  "coOccupants": {
+    "title": "Who will live with you?",
+    "subtitle": "Let flatmates know who is moving in with you.",
+    "partner": "I'll move in with a partner",
+    "children": "I have children living with me",
+    "childrenCount": "How many children?"
   }
 }

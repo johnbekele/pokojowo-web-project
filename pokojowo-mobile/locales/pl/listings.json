@@ -81,7 +81,11 @@
     "available": "Dostępne teraz",
     "apply": "Zastosuj",
     "reset": "Resetuj",
-    "clear": "Wyczyść"
+    "clear": "Wyczyść",
+    "neighbourhood": "Dzielnica",
+    "offeredBy": "Oferowane przez",
+    "privateOwner": "Właściciel prywatny",
+    "agency": "Agencja"
   },
   "card": {
     "perMonth": "/mies.",
@@ -99,7 +103,9 @@
     "rooms": "pokój",
     "rooms_one": "1 pokój",
     "rooms_few": "{{count}} pokoje",
-    "rooms_many": "{{count}} pokoi"
+    "rooms_many": "{{count}} pokoi",
+    "privateOwner": "Właściciel prywatny",
+    "agency": "Agencja"
   },
   "details": {
     "title": "Szczegóły ogłoszenia",
@@ -169,6 +175,8 @@
     "noPhone": "Brak numeru telefonu",
     "noPhoneMessage": "Właściciel nie podał numeru telefonu. Spróbuj wysłać wiadomość.",
     "linkError": "Nie można otworzyć linku",
-    "linkErrorMessage": "Nie można otworzyć oryginalnego ogłoszenia."
+    "linkErrorMessage": "Nie można otworzyć oryginalnego ogłoszenia.",
+    "privateOwner": "Właściciel prywatny",
+    "agency": "Agencja"
   }
 }

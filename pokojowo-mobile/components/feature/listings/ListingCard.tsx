@@ -58,6 +58,16 @@ export default function ListingCard({ listing }: ListingCardProps) {
               </Text>
             </View>
           )}
+          {/* Offered-by badge */}
+          {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
+            <View className="absolute top-3 left-3 bg-white/95 px-2.5 py-1 rounded-full">
+              <Text className="text-gray-700 text-xs font-medium">
+                {listing.offeredBy === 'owner'
+                  ? t('card.privateOwner', 'Private owner')
+                  : t('card.agency', 'Agency')}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Content */}
@@ -66,7 +76,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <View className="flex-row items-center mb-2">
             <MapPin size={16} color={COLORS.gray[500]} />
             <Text className="text-gray-900 font-semibold ml-1.5 flex-1" numberOfLines={1}>
-              {listing.address}
+              {[listing.district, listing.city].filter(Boolean).join(', ') || listing.address}
             </Text>
           </View>
 
