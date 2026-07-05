@@ -105,7 +105,9 @@
     "available": "Available Now",
     "apply": "Apply Filters",
     "reset": "Reset All",
-    "clear": "Clear All"
+    "clear": "Clear All",
+    "neighbourhood": "Neighbourhood",
+    "anyCity": "Any city"
   },
   "card": {
     "perMonth": "/month",
@@ -189,5 +191,12 @@
     "verifiedHost": "Verified host",
     "curatedFooter": "Curated for thoughtful renting",
     "noDescription": "A quiet, comfortable room awaiting its next tenant."
+  },
+  "create": {
+    "location": {
+      "findOnMap": "Find on map",
+      "notFound": "Address not found — click the map to place the pin.",
+      "dragHint": "Click the map or drag the pin to the exact spot."
+    }
   }
 }

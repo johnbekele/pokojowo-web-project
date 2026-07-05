@@ -10,6 +10,9 @@ class DescriptionSchema(BaseModel):
 
 class ListingBase(BaseModel):
     address: str
+    city: Optional[str] = None
+    district: Optional[str] = None
+    location_geo: Optional[dict] = Field(None, alias="locationGeo")
     price: float
     size: float
     max_tenants: int = Field(..., alias="maxTenants")
@@ -33,6 +36,9 @@ class ListingCreate(ListingBase):
 
 class ListingUpdate(BaseModel):
     address: Optional[str] = None
+    city: Optional[str] = None
+    district: Optional[str] = None
+    location_geo: Optional[dict] = Field(None, alias="locationGeo")
     price: Optional[float] = None
     size: Optional[float] = None
     max_tenants: Optional[int] = Field(None, alias="maxTenants")

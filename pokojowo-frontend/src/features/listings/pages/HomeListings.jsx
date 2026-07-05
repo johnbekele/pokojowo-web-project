@@ -50,6 +50,8 @@ const DEFAULT_FILTERS = {
   buildingTypes: [],
   rentFor: [],
   maxTenants: null,
+  city: '',
+  districts: [],
 };
 
 // Each chip displays a localized label but searches with the canonical English
@@ -92,6 +94,8 @@ export default function HomeListings() {
       filters.buildingTypes?.forEach((v) => params.append("building_type", v));
       filters.rentFor?.forEach((v) => params.append("rent_for", v));
       if (filters.maxTenants) params.append("max_tenants", filters.maxTenants);
+      if (filters.city) params.append("city", filters.city);
+      filters.districts?.forEach((v) => params.append("district", v));
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
     },

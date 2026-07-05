@@ -401,6 +401,11 @@ def extract_olx_listings_from_search(html: str, city: str) -> list[dict]:
 
             source_id = hashlib.md5(url.encode()).hexdigest()[:12]
 
+            # OLX location strings look like "Warszawa, Mokotów"
+            loc_parts = [p.strip() for p in location.split(",") if p.strip()]
+            listing_city = loc_parts[0] if loc_parts else city.capitalize()
+            listing_district = loc_parts[1] if len(loc_parts) > 1 else None
+
             listings.append({
                 "source_url": url,
                 "source_site": "olx",
@@ -409,6 +414,8 @@ def extract_olx_listings_from_search(html: str, city: str) -> list[dict]:
                 "description": title,
                 "price": price,
                 "address": location,
+                "city": listing_city,
+                "district": listing_district,
                 "size": 40.0,
                 "images": images,
                 "scraped_at": datetime.utcnow(),
@@ -912,16 +919,32 @@ async def extract_otodom_detail_page(url: str, html: str) -> Optional[dict]:
                         desc_soup = BeautifulSoup(description, "lxml")
                         description = clean_text(desc_soup.get_text())
 
-                    # Address/Location
+                    # Address/Location — keep the structured parts, not
+                    # just the flattened address string
                     location = ad.get("location", {})
-                    address_parts = []
-                    if location.get("address", {}).get("city", {}).get("name"):
-                        address_parts.append(location["address"]["city"]["name"])
-                    if location.get("address", {}).get("district", {}).get("name"):
-                        address_parts.append(location["address"]["district"]["name"])
-                    if location.get("address", {}).get("street", {}).get("name"):
-                        address_parts.append(location["address"]["street"]["name"])
+                    loc_address = location.get("address", {}) or {}
+                    city = (loc_address.get("city") or {}).get("name")
+                    district = (loc_address.get("district") or {}).get("name")
+                    street = (loc_address.get("street") or {}).get("name")
+                    address_parts = [p for p in (city, district, street) if p]
                     address = ", ".join(address_parts) if address_parts else ""
+
+                    # Coordinates (paths vary between Otodom page versions)
+                    latitude = longitude = None
+                    coords = location.get("coordinates") or {}
+                    if coords.get("latitude") and coords.get("longitude"):
+                        latitude = coords["latitude"]
+                        longitude = coords["longitude"]
+                    else:
+                        map_details = location.get("mapDetails") or {}
+                        if map_details.get("latitude") and map_details.get("longitude"):
+                            latitude = map_details["latitude"]
+                            longitude = map_details["longitude"]
+                    try:
+                        latitude = float(latitude) if latitude is not None else None
+                        longitude = float(longitude) if longitude is not None else None
+                    except (TypeError, ValueError):
+                        latitude = longitude = None
 
                     # Images - get all from the images array
                     images = []
@@ -999,6 +1022,10 @@ async def extract_otodom_detail_page(url: str, html: str) -> Optional[dict]:
                         "description": description[:2000] if description else "",
                         "price": price,
                         "address": address,
+                        "city": city,
+                        "district": district,
+                        "latitude": latitude,
+                        "longitude": longitude,
                         "size": size or 40.0,
                         "rooms": rooms,
                         "phone": phone,

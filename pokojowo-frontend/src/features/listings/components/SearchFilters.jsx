@@ -9,6 +9,7 @@ import {
   Users,
   Building2,
   Check,
+  MapPin,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { CITIES, districtsForCity } from '@/lib/districts';
 
 const ROOM_TYPES = [
   { value: 'Single', label: 'Single Room', icon: '🛏️' },
@@ -106,6 +108,8 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
       buildingTypes: [],
       rentFor: [],
       maxTenants: null,
+      city: '',
+      districts: [],
     };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
@@ -132,6 +136,8 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
     if (localFilters.buildingTypes?.length > 0) count++;
     if (localFilters.rentFor?.length > 0) count++;
     if (localFilters.maxTenants) count++;
+    if (localFilters.city) count++;
+    if (localFilters.districts?.length > 0) count++;
     return count;
   };
 
@@ -189,6 +195,51 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
         </SheetHeader>
 
         <div className="overflow-y-auto max-h-[calc(85vh-200px)] sm:max-h-[calc(90vh-200px)] pb-4 space-y-6 px-1">
+          {/* Neighbourhood */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                <MapPin className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
+              <Label className="font-semibold text-base">{t('filters.neighbourhood', 'Neighbourhood')}</Label>
+            </div>
+            <Select
+              value={localFilters.city || 'any'}
+              onValueChange={(value) =>
+                setLocalFilters((prev) => ({
+                  ...prev,
+                  city: value === 'any' ? '' : value,
+                  districts: [],
+                }))
+              }
+            >
+              <SelectTrigger className="h-12 text-base">
+                <SelectValue placeholder={t('filters.anyCity', 'Any city')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any" className="h-12">{t('filters.anyCity', 'Any city')}</SelectItem>
+                {CITIES.map((city) => (
+                  <SelectItem key={city} value={city} className="h-12">{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {localFilters.city && (
+              <div className="flex flex-wrap gap-2">
+                {districtsForCity(localFilters.city).map((district) => (
+                  <FilterChip
+                    key={district}
+                    selected={localFilters.districts?.includes(district)}
+                    onClick={() => toggleArrayFilter('districts', district)}
+                  >
+                    {district}
+                  </FilterChip>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
           {/* Price Range */}
           <div className="space-y-4 bg-muted/30 rounded-xl p-4">
             <div className="flex items-center justify-between">

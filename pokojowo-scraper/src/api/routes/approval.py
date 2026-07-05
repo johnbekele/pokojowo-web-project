@@ -102,10 +102,23 @@ async def publish_to_pokojowo(listing: dict) -> dict:
         if not rent_for_only:
             rent_for_only = ["Open to All"]
 
+        # GeoJSON point only when both coordinates are present
+        location_geo = None
+        latitude = listing.get("latitude")
+        longitude = listing.get("longitude")
+        if latitude is not None and longitude is not None:
+            location_geo = {
+                "type": "Point",
+                "coordinates": [float(longitude), float(latitude)]
+            }
+
         # Build the listing document matching Pokojowo schema (using Beanie aliases)
         listing_doc = {
             "ownerId": "scraped",  # Special owner for scraped listings
             "address": listing.get("address", ""),
+            "city": listing.get("city"),
+            "district": listing.get("district"),
+            "locationGeo": location_geo,
             "price": float(listing.get("price", 0)),
             "size": float(listing.get("size", 0)),
             "maxTenants": int(listing.get("max_tenants", 1)),
