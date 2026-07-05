@@ -133,12 +133,20 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await api.put('/users/me/role', { role });
-          const { accessToken, refreshToken, user } = response.data;
+          // Backend returns { message, data: { token, refresh_token, user } }
+          const data = response.data?.data || {};
+          const token = data.token;
+          const refreshToken = data.refresh_token;
 
-          if (accessToken) {
-            get().setTokens(accessToken, refreshToken);
+          if (token) {
+            get().setTokens(token, refreshToken);
           }
-          set({ user, isLoading: false });
+          if (data.user) {
+            set((state) => ({
+              user: state.user ? { ...state.user, ...data.user } : data.user,
+            }));
+          }
+          set({ isLoading: false });
           return { success: true };
         } catch (error) {
           const message = error.response?.data?.detail || 'Failed to update role';

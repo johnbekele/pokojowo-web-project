@@ -284,7 +284,8 @@ async def change_password(
 @router.post("/refresh")
 async def refresh_token(refresh_data: dict):
     """Refresh access token"""
-    refresh_token = refresh_data.get("refresh_token")
+    # Accept both spellings for backward compatibility with deployed clients
+    refresh_token = refresh_data.get("refresh_token") or refresh_data.get("refreshToken")
 
     if not refresh_token:
         raise HTTPException(
@@ -314,6 +315,8 @@ async def refresh_token(refresh_data: dict):
 
     return {
         "access_token": access_token,
+        # Duplicate key kept until all deployed clients read snake_case
+        "accessToken": access_token,
         "token_type": "bearer"
     }
 
