@@ -99,7 +99,9 @@
     "noPets": "Bez zwierząt",
     "noParties": "Bez imprez",
     "sameGenderOnly": "Tylko ta sama płeć",
-    "quietHoursRequired": "Wymagane godziny ciszy"
+    "quietHoursRequired": "Wymagane godziny ciszy",
+    "noChildren": "Wolę mieszkanie bez dzieci",
+    "noCouples": "Wolę bez par"
   },
   "languages": {
     "title": "Języki",
@@ -127,5 +129,12 @@
   },
   "validation": {
     "mustBe18": "Musisz mieć co najmniej 18 lat."
+  },
+  "coOccupants": {
+    "title": "Kto zamieszka z Tobą?",
+    "subtitle": "Daj znać współlokatorom, kto się z Tobą wprowadza.",
+    "partner": "Wprowadzę się z partnerem/partnerką",
+    "children": "Mieszkają ze mną dzieci",
+    "childrenCount": "Ile dzieci?"
   }
 }

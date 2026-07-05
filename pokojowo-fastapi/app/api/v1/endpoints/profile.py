@@ -273,14 +273,34 @@ async def complete_tenant_profile(
             no_pets=deal_data.get("noPets", False),
             no_parties=deal_data.get("noParties", False),
             same_gender_only=deal_data.get("sameGenderOnly", False),
-            quiet_hours_required=deal_data.get("quietHoursRequired", False)
+            quiet_hours_required=deal_data.get("quietHoursRequired", False),
+            no_children=deal_data.get("noChildren", False),
+            no_couples=deal_data.get("noCouples", False)
         )
+
+        # Co-occupants; fall back to previously saved values so partial
+        # updates that omit them don't silently reset the flags
+        prev = current_user.tenant_profile
+        has_partner = tenant_data.get(
+            "hasPartner", prev.has_partner if prev else False
+        )
+        has_children = tenant_data.get(
+            "hasChildren", prev.has_children if prev else False
+        )
+        children_count = tenant_data.get(
+            "childrenCount", prev.children_count if prev else None
+        )
+        if not has_children:
+            children_count = None
 
         current_user.tenant_profile = TenantProfileModel(
             preferences=preferences,
             flatmate_traits=flatmate_traits,
             deal_breakers=deal_breakers,
-            interests=tenant_data.get("interests", [])
+            interests=tenant_data.get("interests", []),
+            has_partner=bool(has_partner),
+            has_children=bool(has_children),
+            children_count=children_count
         )
 
     # Calculate completion percentage based on filled fields

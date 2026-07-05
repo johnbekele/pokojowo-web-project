@@ -1,8 +1,16 @@
 from beanie import Document, Indexed
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel as PydanticBaseModel, ConfigDict, Field, EmailStr, validator
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
+
+
+class BaseModel(PydanticBaseModel):
+    """Sub-model base: accepts BOTH the snake_case field names and their
+    camelCase aliases as constructor kwargs / input keys. Without this,
+    Pydantic v2 only accepts aliases and silently drops snake_case
+    kwargs, losing data on endpoints that build these models in code."""
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class RoleEnum(str, Enum):
@@ -153,6 +161,8 @@ class DealBreakersModel(BaseModel):
     no_parties: bool = Field(False, alias="noParties")
     same_gender_only: bool = Field(False, alias="sameGenderOnly")
     quiet_hours_required: bool = Field(False, alias="quietHoursRequired")
+    no_children: bool = Field(False, alias="noChildren")
+    no_couples: bool = Field(False, alias="noCouples")
     min_age: Optional[int] = Field(None, alias="minAge")
     max_age: Optional[int] = Field(None, alias="maxAge")
     min_cleanliness: Optional[CleanlinessEnum] = Field(None, alias="minCleanliness")
@@ -166,6 +176,10 @@ class TenantProfileModel(BaseModel):
     preferences: Optional[PreferencesModel] = None
     flatmate_traits: Optional[FlatmateTraitsModel] = Field(None, alias="flatmateTraits")
     deal_breakers: Optional[DealBreakersModel] = Field(None, alias="dealBreakers")
+    # Co-occupants: people who will move in with the tenant
+    has_partner: bool = Field(False, alias="hasPartner")
+    has_children: bool = Field(False, alias="hasChildren")
+    children_count: Optional[int] = Field(None, alias="childrenCount")
 
 
 class PoliciesModel(BaseModel):
