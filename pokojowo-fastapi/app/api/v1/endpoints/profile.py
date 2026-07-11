@@ -3,6 +3,7 @@ from app.models.user import User
 from app.core.dependencies import get_current_user
 from app.services.notification_service import notification_service
 from app.services import matching_cache
+from app.services.trust_service import trust_level as _trust_level
 from datetime import datetime
 
 router = APIRouter()
@@ -24,6 +25,8 @@ async def get_profile(current_user: User = Depends(get_current_user)):
         "photo": current_user.photo.dict() if current_user.photo else None,
         "phone": current_user.phone,
         "phoneVerified": current_user.phone_verified,
+        "trustScore": current_user.trust_score,
+        "trustLevel": _trust_level(current_user),
         "address": current_user.address,
         "location": current_user.location,
         "preferredContact": current_user.preferred_contact,
@@ -83,6 +86,9 @@ async def update_profile(
     await current_user.save()
     matching_cache.clear()
 
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(current_user)
+
     return {"message": "Profile updated successfully"}
 
 
@@ -105,6 +111,9 @@ async def update_profile_photo(
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
     matching_cache.clear()
+
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(current_user)
 
     return {
         "message": "Profile photo updated successfully",
@@ -181,6 +190,9 @@ async def update_profile_completion(
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
     matching_cache.clear()
+
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(current_user)
 
     return {
         "message": "Profile completion updated",
@@ -365,6 +377,9 @@ async def complete_tenant_profile(
     await current_user.save()
     matching_cache.clear()
 
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(current_user)
+
     # If profile just became complete, notify other users about new potential match
     if current_user.is_profile_complete and not was_previously_complete:
         background_tasks.add_task(
@@ -414,6 +429,9 @@ async def update_landlord_profile(
     await current_user.save()
     matching_cache.clear()
 
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(current_user)
+
     return {
         "message": "Landlord profile updated successfully",
         "isProfileComplete": current_user.is_profile_complete,
@@ -445,6 +463,9 @@ async def get_user_profile(user_id: str):
         "gender": user.gender.value if user.gender else None,
         "role": [role.value for role in user.role],
         "isVerified": user.is_verified,
+        "phoneVerified": user.phone_verified,
+        "trustScore": user.trust_score,
+        "trustLevel": _trust_level(user),
         "languages": user.languages,
         # Include relevant profile based on role
         "tenantProfile": user.tenant_profile.dict(by_alias=True) if user.tenant_profile and user.is_tenant else None,

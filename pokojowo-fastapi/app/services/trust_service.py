@@ -11,9 +11,9 @@ from app.models.user import RoleEnum, User
 
 ACCOUNT_AGE_BONUS_DAYS = 90
 
-# Component weights (sum for a fully-verified landlord = 105, capped 100;
-# tenants top out at 70 by design — landlord docs are their only missing
-# component and don't apply to them)
+# Component weights (sum for a fully-verified landlord = 110, capped 100;
+# tenants top out at 75 by design — the landlord-docs component doesn't
+# apply to them)
 POINTS_EMAIL = 20
 POINTS_PHONE = 25
 POINTS_LANDLORD_DOCS = 30

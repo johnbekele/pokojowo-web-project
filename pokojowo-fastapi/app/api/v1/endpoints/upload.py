@@ -142,6 +142,9 @@ async def upload_photo(
     _record_upload(current_user, file_path)
     await current_user.save()
 
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(current_user)
+
     return {
         "message": "Photo uploaded successfully",
         "url": file_path,

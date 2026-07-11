@@ -4,6 +4,7 @@ from app.schemas.user_schema import UserResponse, UserUpdate
 from app.models.user import User, RoleEnum
 from app.core.dependencies import get_current_user, require_role
 from app.core.security import create_access_token, create_refresh_token
+from app.services.trust_service import trust_level as _trust_level
 from typing import List, Optional
 from datetime import datetime
 
@@ -30,6 +31,8 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "photo": current_user.photo.dict() if current_user.photo else None,
         "phone": current_user.phone,
         "phoneVerified": current_user.phone_verified,
+        "trustScore": current_user.trust_score,
+        "trustLevel": _trust_level(current_user),
         "address": current_user.address,
         "location": current_user.location,
         "age": current_user.current_age(),

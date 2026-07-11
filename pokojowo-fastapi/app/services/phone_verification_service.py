@@ -132,6 +132,9 @@ class PhoneVerificationService:
         user.phone_otp_expires = None
         await user.save()
 
+        from app.services.trust_service import recompute_trust_score
+        await recompute_trust_score(user)
+
         return {"message": "Phone verified successfully", "phone": user.phone}
 
 
