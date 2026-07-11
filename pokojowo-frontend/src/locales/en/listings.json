@@ -197,7 +197,8 @@
     "curatedFooter": "Curated for thoughtful renting",
     "noDescription": "A quiet, comfortable room awaiting its next tenant.",
     "privateOwner": "Private owner",
-    "agency": "Agency"
+    "agency": "Agency",
+    "idVerifiedHost": "ID Verified host"
   },
   "create": {
     "location": {

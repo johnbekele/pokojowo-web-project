@@ -103,5 +103,9 @@
       "utility_bill": "Utility bill",
       "business_registration": "Business registration"
     }
+  },
+  "trust": {
+    "verified": "Verified",
+    "idVerified": "ID Verified"
   }
 }

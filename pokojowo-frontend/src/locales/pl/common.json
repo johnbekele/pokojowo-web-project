@@ -103,5 +103,9 @@
       "utility_bill": "Rachunek za media",
       "business_registration": "Rejestracja działalności"
     }
+  },
+  "trust": {
+    "verified": "Zweryfikowany",
+    "idVerified": "Zweryfikowany (ID)"
   }
 }

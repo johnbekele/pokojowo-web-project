@@ -155,5 +155,19 @@
       "approved": "approved",
       "rejected": "rejected"
     }
+  },
+  "phoneVerification": {
+    "title": "Verify your phone",
+    "verifiedTitle": "Phone verified",
+    "subtitle": "A verified phone number earns a trust badge and ranks you higher in matching.",
+    "sendCode": "Send code",
+    "confirm": "Confirm",
+    "changeNumber": "Change number",
+    "codeSent": "Verification code sent by SMS",
+    "success": "Phone verified!",
+    "startFailed": "Could not send the code",
+    "checkFailed": "Incorrect code",
+    "rateLimited": "Too many attempts",
+    "rateLimitedHint": "Try again in about {{minutes}} minutes."
   }
 }

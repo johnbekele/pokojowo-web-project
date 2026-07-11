@@ -34,6 +34,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Verification gate: normalize the structured 403 so screens can
+    // show the verify-email CTA instead of a generic error message.
+    const detail = error.response?.data?.detail;
+    if (error.response?.status === 403 && detail?.code === 'EMAIL_NOT_VERIFIED') {
+      error.isEmailNotVerified = true;
+      error.friendlyMessage = detail.message;
+      window.dispatchEvent(new CustomEvent('email-not-verified'));
+      return Promise.reject(error);
+    }
+
     // If 401 and not already retrying
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -74,6 +84,14 @@ api.interceptors.response.use(
  * Normalize API errors for consistent handling
  */
 export function normalizeError(error) {
+  if (error.isEmailNotVerified) {
+    return {
+      message: error.friendlyMessage || 'Please verify your email address to use this feature',
+      status: 403,
+      code: 'EMAIL_NOT_VERIFIED',
+      data: error.response?.data,
+    };
+  }
   if (error.response) {
     // Server responded with error
     return {

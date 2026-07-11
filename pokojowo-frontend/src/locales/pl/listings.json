@@ -203,7 +203,8 @@
     "curatedFooter": "Tworzone dla świadomego wynajmu",
     "noDescription": "Spokojny, wygodny pokój czekający na nowego lokatora.",
     "privateOwner": "Właściciel prywatny",
-    "agency": "Agencja"
+    "agency": "Agencja",
+    "idVerifiedHost": "Gospodarz zweryfikowany (ID)"
   },
   "create": {
     "location": {
