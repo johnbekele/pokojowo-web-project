@@ -73,3 +73,4 @@ python-dotenv==1.2.1
 # Monitoring & Logging (Production)
 # ===========================================
 structlog==24.1.0
+twilio==9.4.3
