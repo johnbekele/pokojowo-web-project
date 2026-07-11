@@ -23,6 +23,7 @@ from typing import List, Dict, Tuple, Optional, Set
 from datetime import datetime, timedelta
 from app.core.locations import region_for_location
 from app.services.explanation_keys import annotate as annotate_explanations
+from app.services.trust_service import trust_level as _trust_level
 from app.models.user import (
     User,
     CleanlinessEnum,
@@ -246,6 +247,7 @@ class MatchingService:
                 "joined_at": created_at.isoformat() if created_at else None,
                 "data_completeness": breakdown.get("dataCompleteness"),
                 "phone_verified": bool(getattr(candidate, "phone_verified", False)),
+                "trust_level": _trust_level(candidate),
             })
 
         results.sort(key=self._sort_key)

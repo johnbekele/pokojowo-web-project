@@ -180,6 +180,9 @@ async def verify_email(token: str = Query(...)):
     user.verification_token_expires = None
     await user.save()
 
+    from app.services.trust_service import recompute_trust_score
+    await recompute_trust_score(user)
+
     return {"message": "Email verified successfully"}
 
 

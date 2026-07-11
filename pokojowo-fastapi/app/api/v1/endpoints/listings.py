@@ -386,7 +386,7 @@ async def import_scraped_listing(
 
 @router.get("/{listing_id}", response_model=dict)
 async def get_listing_by_id(listing_id: str):
-    """Get listing by ID"""
+    """Get listing by ID (with the owner's public trust info)"""
     listing = await Listing.get(listing_id)
 
     if not listing:
@@ -395,7 +395,31 @@ async def get_listing_by_id(listing_id: str):
             detail="Listing not found"
         )
 
-    return listing_to_dict(listing)
+    result = listing_to_dict(listing)
+
+    # Attach owner trust/badge data for non-scraped listings
+    if listing.owner_id and listing.owner_id != "scraped":
+        owner = await User.get(listing.owner_id)
+        if owner:
+            from app.services.trust_service import trust_level
+            result["owner"] = {
+                "id": str(owner.id),
+                "username": owner.username,
+                "firstname": owner.firstname,
+                "lastname": owner.lastname,
+                "photo": owner.photo.url if owner.photo else None,
+                "is_verified": owner.is_verified,
+                "phoneVerified": owner.phone_verified,
+                "trustLevel": trust_level(owner),
+                "trustScore": owner.trust_score,
+                "isVerifiedLandlord": bool(
+                    owner.landlord_profile
+                    and owner.landlord_profile.verification
+                    and owner.landlord_profile.verification.is_verified_landlord
+                ),
+            }
+
+    return result
 
 
 @router.put("/{listing_id}", response_model=dict)
