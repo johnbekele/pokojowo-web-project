@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FloatingHeader from './FloatingHeader';
 import BottomNavigation from './BottomNavigation';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
+import VerifyEmailBanner from '@/components/shared/VerifyEmailBanner';
 
 /**
  * Global app shell with the editorial luxury frame.
@@ -31,6 +32,9 @@ export default function PageLayout() {
 
       <main className="flex-1 pt-20 pb-28 lg:pt-28 lg:pb-12">
         <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12">
+          <div className="mb-4 overflow-hidden rounded-xl empty:hidden">
+            <VerifyEmailBanner />
+          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

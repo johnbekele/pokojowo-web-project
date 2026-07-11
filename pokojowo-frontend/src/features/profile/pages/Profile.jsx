@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Edit, Mail, Phone, MapPin, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import TrustLevelBadge from '@/components/shared/TrustLevelBadge';
+import PhoneVerificationCard from '../components/PhoneVerificationCard';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
@@ -40,11 +42,7 @@ export default function Profile() {
                     {role}
                   </Badge>
                 ))}
-                {user.isVerified && (
-                  <Badge variant="outline" className="text-success border-success">
-                    Verified
-                  </Badge>
-                )}
+                <TrustLevelBadge trustLevel={user.trustLevel} />
               </div>
             </div>
             <Link to={isTenant ? '/profile-completion/tenant' : '/profile-completion/landlord'}>
@@ -56,6 +54,8 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+
+      <PhoneVerificationCard />
 
       {/* Profile Completion */}
       {!isComplete && (

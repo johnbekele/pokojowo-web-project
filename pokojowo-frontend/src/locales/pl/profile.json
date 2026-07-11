@@ -155,5 +155,19 @@
       "approved": "zatwierdzony",
       "rejected": "odrzucony"
     }
+  },
+  "phoneVerification": {
+    "title": "Zweryfikuj telefon",
+    "verifiedTitle": "Telefon zweryfikowany",
+    "subtitle": "Zweryfikowany numer daje odznakę zaufania i wyższą pozycję w dopasowaniach.",
+    "sendCode": "Wyślij kod",
+    "confirm": "Potwierdź",
+    "changeNumber": "Zmień numer",
+    "codeSent": "Kod weryfikacyjny wysłany SMS-em",
+    "success": "Telefon zweryfikowany!",
+    "startFailed": "Nie udało się wysłać kodu",
+    "checkFailed": "Nieprawidłowy kod",
+    "rateLimited": "Zbyt wiele prób",
+    "rateLimitedHint": "Spróbuj ponownie za około {{minutes}} minut."
   }
 }

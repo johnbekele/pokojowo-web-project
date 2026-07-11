@@ -382,11 +382,15 @@ export default function ListingDetails() {
                         {landlord.firstname} {landlord.lastname}
                       </p>
                       <div className="mt-1 flex items-center gap-2">
-                        {landlord.isVerified && (
+                        {landlord.trustLevel === 'id_verified' || landlord.isVerifiedLandlord ? (
+                          <TrustBadge tone="accent" icon={ShieldCheck}>
+                            {t('detail.idVerifiedHost', 'ID Verified host')}
+                          </TrustBadge>
+                        ) : landlord.trustLevel === 'verified' ? (
                           <TrustBadge tone="olive" icon={ShieldCheck}>
                             {t('detail.verifiedHost', 'Verified host')}
                           </TrustBadge>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </div>

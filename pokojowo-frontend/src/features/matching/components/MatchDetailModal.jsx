@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { translateExplanation } from '../utils/explanations';
+import TrustLevelBadge from '@/components/shared/TrustLevelBadge';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -164,7 +165,10 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
 
                   {/* Info */}
                   <div className="text-center sm:text-left flex-1">
-                    <h2 className="text-2xl font-bold">{firstname} {lastname}</h2>
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      {firstname} {lastname}
+                      <TrustLevelBadge trustLevel={match?.trust_level} />
+                    </h2>
                     {age && (
                       <p className="text-muted-foreground">{age} years old</p>
                     )}

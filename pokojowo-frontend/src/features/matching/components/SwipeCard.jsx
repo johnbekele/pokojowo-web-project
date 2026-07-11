@@ -146,6 +146,9 @@ export default function SwipeCard({
             {is_new_user && (
               <TrustBadge tone="accent">New voice</TrustBadge>
             )}
+            {match.trust_level === 'verified' && (
+              <TrustBadge tone="olive">{t('trust.verified', 'Verified')}</TrustBadge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
