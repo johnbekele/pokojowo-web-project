@@ -32,22 +32,14 @@ async def get_tenant_dashboard(
 
     user_id = str(current_user.id)
 
-    # Get matching stats
-    total_users = await User.find({
-        "isProfileComplete": True,
-        "_id": {"$ne": current_user.id}
-    }).count()
-
-    candidates = await User.find({
-        "isProfileComplete": True,
-        "_id": {"$ne": current_user.id}
-    }).to_list(length=500)
+    candidates = await matching_service.get_candidates(current_user)
 
     match_results = await matching_service.find_matches(
         user=current_user,
         candidates=candidates,
         limit=50
     )
+    total_users = match_results["total_candidates"]
 
     # Get likes stats
     likes_stats = await likes_service.get_stats(user_id)
@@ -122,19 +114,12 @@ async def get_matches(
             detail="Please complete your profile before viewing matches"
         )
 
-    # Build query for candidates
-    # Note: Use camelCase field names as they're stored in MongoDB with aliases
-    query = {
-        "isProfileComplete": True,
-        "_id": {"$ne": current_user.id}
-    }
-
-    # Add location filter if specified
+    # Fetch candidates (active tenants with completed profiles)
+    import re as _re
+    extra_query = None
     if location:
-        query["location"] = {"$regex": location, "$options": "i"}
-
-    # Fetch candidates (tenants with completed profiles)
-    candidates = await User.find(query).to_list(length=500)
+        extra_query = {"location": {"$regex": _re.escape(location), "$options": "i"}}
+    candidates = await matching_service.get_candidates(current_user, extra_query=extra_query)
 
     # Run matching algorithm
     results = await matching_service.find_matches(
@@ -205,10 +190,7 @@ async def refresh_matches(
         )
 
     # Fetch all potential candidates
-    candidates = await User.find({
-        "isProfileComplete": True,
-        "_id": {"$ne": current_user.id}
-    }).to_list(length=500)
+    candidates = await matching_service.get_candidates(current_user)
 
     # Run matching algorithm
     results = await matching_service.find_matches(
@@ -270,21 +252,14 @@ async def get_matching_stats(
         }
 
     # Get quick stats
-    total_users = await User.find({
-        "isProfileComplete": True,
-        "_id": {"$ne": current_user.id}
-    }).count()
-
-    candidates = await User.find({
-        "isProfileComplete": True,
-        "_id": {"$ne": current_user.id}
-    }).to_list(length=500)
+    candidates = await matching_service.get_candidates(current_user)
 
     results = await matching_service.find_matches(
         user=current_user,
         candidates=candidates,
         limit=100
     )
+    total_users = results["total_candidates"]
 
     # Calculate score distribution
     high_matches = len([m for m in results["matches"] if m["compatibility_score"] >= 80])

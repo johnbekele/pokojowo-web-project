@@ -37,16 +37,12 @@ async def like_user(
             detail="User not found"
         )
 
-    # Calculate compatibility score for storage
+    # Calculate compatibility score for storage (deal-breakers apply)
     compatibility_score = None
     if current_user.is_profile_complete and target_user.is_profile_complete:
-        results = await matching_service.find_matches(
-            user=current_user,
-            candidates=[target_user],
-            limit=1
-        )
-        if results["matches"]:
-            compatibility_score = results["matches"][0].get("compatibility_score")
+        score, _, _, rejection = matching_service.score_pair(current_user, target_user)
+        if rejection is None and score is not None:
+            compatibility_score = round(score, 1)
 
     result = await likes_service.like_user(
         liker_id=str(current_user.id),

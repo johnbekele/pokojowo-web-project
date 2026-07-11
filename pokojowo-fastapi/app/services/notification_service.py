@@ -41,11 +41,8 @@ class NotificationService:
         if not user.is_profile_complete:
             return {"status": "skipped", "reason": "Profile not complete"}
 
-        # Find potential candidates
-        candidates = await User.find({
-            "isProfileComplete": True,
-            "_id": {"$ne": user.id}
-        }).to_list(length=500)
+        # Find potential candidates (active tenants only)
+        candidates = await matching_service.get_candidates(user)
 
         if not candidates:
             return {"status": "skipped", "reason": "No candidates available"}
@@ -94,11 +91,8 @@ class NotificationService:
         if not new_user.is_profile_complete:
             return {"status": "skipped", "reason": "New user profile not complete"}
 
-        # Find all users with completed profiles
-        existing_users = await User.find({
-            "isProfileComplete": True,
-            "_id": {"$ne": new_user.id}
-        }).to_list(length=500)
+        # Find all users who could be notified (active tenants only)
+        existing_users = await matching_service.get_candidates(new_user)
 
         if not existing_users:
             return {"status": "skipped", "reason": "No existing users to notify"}

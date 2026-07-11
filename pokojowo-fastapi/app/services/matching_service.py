@@ -81,6 +81,53 @@ class MatchingService:
         if total != 100:
             raise ValueError(f"Weights must sum to 100, got {total}")
 
+    async def get_candidates(
+        self,
+        user: User,
+        limit: int = 500,
+        extra_query: Optional[Dict] = None,
+        exclude_ids: Optional[Set] = None,
+    ) -> List[User]:
+        """Fetch match candidates for a user with consistent hygiene filters.
+
+        Only active tenants with completed profiles are candidates —
+        landlords used to leak into the swipe deck because callers
+        filtered on isProfileComplete alone.
+        Query keys use the stored camelCase alias names.
+        """
+        query = {
+            "isProfileComplete": True,
+            "isActive": True,
+            "role": "Tenant",
+            "_id": {"$ne": user.id},
+        }
+        if exclude_ids:
+            query["_id"] = {"$ne": user.id, "$nin": list(exclude_ids)}
+        if extra_query:
+            query.update(extra_query)
+        return await User.find(query).to_list(length=limit)
+
+    def score_pair(
+        self,
+        user: User,
+        candidate: User,
+    ) -> Tuple[Optional[float], Optional[Dict], Optional[List[Dict]], Optional[str]]:
+        """Score a single pair with deal-breakers applied first.
+
+        Returns (score, breakdown, explanations, deal_breaker_reason).
+        When a deal-breaker fires, score/breakdown/explanations are None
+        and the reason explains which direction rejected.
+        """
+        rejection = self._check_deal_breakers(user, candidate)
+        if rejection:
+            return None, None, None, rejection
+        mutual_rejection = self._check_deal_breakers(candidate, user)
+        if mutual_rejection:
+            return None, None, None, f"Mutual: {mutual_rejection}"
+
+        score, breakdown, explanations = self._calculate_compatibility(user, candidate)
+        return score, breakdown, explanations, None
+
     async def find_matches(
         self,
         user: User,
@@ -108,20 +155,11 @@ class MatchingService:
             if str(candidate.id) == str(user.id):
                 continue
 
-            # Phase 1: Bidirectional deal-breaker check
-            user_rejection = self._check_deal_breakers(user, candidate)
-            if user_rejection:
+            # Phase 1+2: bidirectional deal-breakers, then weighted scoring
+            score, breakdown, explanations, rejection = self.score_pair(user, candidate)
+            if rejection:
                 filtered_count += 1
                 continue
-
-            # Also check if candidate would reject user (bidirectional)
-            candidate_rejection = self._check_deal_breakers(candidate, user)
-            if candidate_rejection:
-                filtered_count += 1
-                continue
-
-            # Phase 2: Calculate comprehensive compatibility score
-            score, breakdown, explanations = self._calculate_compatibility(user, candidate)
 
             # Apply minimum score filter
             if score < min_score:
