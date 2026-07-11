@@ -12,11 +12,6 @@ from tests.conftest import make_user
 # Known bug 1: language weight appended unconditionally in _score_preferences
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BUG: weights.append(25) runs even when no language score exists, "
-    "deflating the preferences component (issue #32)",
-)
 def test_preferences_age_only_match_scores_100(service):
     """A candidate inside the user's age range, with no other preference
     data on either side, should score 100 on the preferences component."""
@@ -41,11 +36,6 @@ def test_preferences_shared_language_scores(service):
 # Known bug 2: _score_schedule crashes when exactly one routine is None
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="BUG: one-sided missing routine raises AttributeError (issue #32)",
-)
 def test_schedule_one_sided_routine_does_not_crash(service):
     user = make_user(wake_up="07:00", sleep_time="23:00")
     candidate = make_user()  # no routine at all
@@ -99,11 +89,6 @@ def test_empty_profiles_score_fair_not_good(service):
 # Known bug 4: region map covers only 6 of 16 voivodeships
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BUG: Łódź/Lublin voivodeships missing from hardcoded region map "
-    "(issue #32)",
-)
 def test_lodz_region_recognized(service):
     # callers pass lowercased strings
     assert service._locations_in_same_region("łódź", "piotrków trybunalski")

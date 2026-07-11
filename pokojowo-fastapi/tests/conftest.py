@@ -124,7 +124,12 @@ def make_user(
 
     # model_construct skips Beanie's Document.__init__ (which requires an
     # initialized Mongo collection) — fine for tests that only read fields.
+    # A unique id is required: find_matches skips candidates whose id
+    # matches the requesting user's.
+    from bson import ObjectId
+
     return User.model_construct(
+        id=ObjectId(),
         username=name,
         email=f"{name}@example.com",
         age=age,

@@ -14,11 +14,17 @@ class ImpactEnum(str, Enum):
 
 
 class MatchScoreBreakdown(BaseModel):
-    """Breakdown of compatibility scores by category."""
+    """Breakdown of compatibility scores by category.
+
+    Keys mirror the camelCase dict produced by
+    MatchingService._calculate_compatibility.
+    """
     budget_score: float = Field(..., alias="budgetScore", description="Budget compatibility (0-100)")
     lifestyle_score: float = Field(..., alias="lifestyleScore", description="Lifestyle compatibility (0-100)")
     personality_score: float = Field(..., alias="personalityScore", description="Personality alignment (0-100)")
     schedule_score: float = Field(..., alias="scheduleScore", description="Schedule compatibility (0-100)")
+    location_score: float = Field(..., alias="locationScore", description="Location compatibility (0-100)")
+    preferences_score: float = Field(..., alias="preferencesScore", description="Preference alignment (0-100)")
     interests_score: float = Field(..., alias="interestsScore", description="Shared interests score (0-100)")
     total_score: float = Field(..., alias="totalScore", description="Weighted total score (0-100)")
 
