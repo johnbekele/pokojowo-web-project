@@ -76,6 +76,12 @@ class Settings(BaseSettings):
     # to use POST /api/listings/import
     SCRAPER_API_KEY: Optional[str] = None
 
+    # Twilio Verify (phone verification). When unset, a dev fallback
+    # logs the OTP to the server log instead of sending SMS.
+    TWILIO_ACCOUNT_SID: Optional[str] = None
+    TWILIO_AUTH_TOKEN: Optional[str] = None
+    TWILIO_VERIFY_SERVICE_SID: Optional[str] = None
+
     # Google OAuth
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None

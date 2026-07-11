@@ -29,6 +29,7 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "isProfileComplete": current_user.is_profile_complete,
         "photo": current_user.photo.dict() if current_user.photo else None,
         "phone": current_user.phone,
+        "phoneVerified": current_user.phone_verified,
         "address": current_user.address,
         "location": current_user.location,
         "age": current_user.current_age(),
@@ -57,6 +58,10 @@ async def update_current_user(
     if update_data.get("languages") is not None:
         from app.core.constants import normalize_languages
         update_data["languages"] = normalize_languages(update_data["languages"])
+
+    if update_data.get("phone") is not None and update_data["phone"] != current_user.phone:
+        current_user.phone_verified = False
+        current_user.phone_verified_at = None
 
     for field, value in update_data.items():
         setattr(current_user, field, value)

@@ -290,6 +290,12 @@ class User(Document):
 
     # Contact Info
     phone: Optional[str] = None
+    # Phone verification: reset whenever phone changes
+    phone_verified: bool = Field(False, alias="phoneVerified")
+    phone_verified_at: Optional[datetime] = Field(None, alias="phoneVerifiedAt")
+    # Dev-mode OTP storage (only used when Twilio is unconfigured)
+    phone_otp_hash: Optional[str] = Field(None, alias="phoneOtpHash")
+    phone_otp_expires: Optional[datetime] = Field(None, alias="phoneOtpExpires")
     address: Optional[str] = None
     location: Optional[str] = None
     preferred_contact: List[str] = Field([], alias="preferredContact")

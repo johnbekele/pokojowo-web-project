@@ -22,6 +22,7 @@ async def get_profile(current_user: User = Depends(get_current_user)):
         "profileCompletionStep": current_user.profile_completion_step,
         "photo": current_user.photo.dict() if current_user.photo else None,
         "phone": current_user.phone,
+        "phoneVerified": current_user.phone_verified,
         "address": current_user.address,
         "location": current_user.location,
         "preferredContact": current_user.preferred_contact,
@@ -65,6 +66,10 @@ async def update_profile(
     if profile_data.get("languages") is not None:
         from app.core.constants import normalize_languages
         profile_data["languages"] = normalize_languages(profile_data["languages"])
+
+    if "phone" in profile_data and profile_data["phone"] != current_user.phone:
+        current_user.phone_verified = False
+        current_user.phone_verified_at = None
 
     for field, value in profile_data.items():
         # Convert camelCase to snake_case
@@ -199,6 +204,10 @@ async def complete_tenant_profile(
     if "lastname" in profile_data:
         current_user.lastname = profile_data["lastname"]
     if "phone" in profile_data:
+        if profile_data["phone"] != current_user.phone:
+            # Changing the number invalidates its verification
+            current_user.phone_verified = False
+            current_user.phone_verified_at = None
         current_user.phone = profile_data["phone"]
     if "location" in profile_data:
         current_user.location = profile_data["location"]
@@ -377,6 +386,10 @@ async def update_landlord_profile(
     if "lastname" in profile_data:
         current_user.lastname = profile_data["lastname"]
     if "phone" in profile_data:
+        if profile_data["phone"] != current_user.phone:
+            # Changing the number invalidates its verification
+            current_user.phone_verified = False
+            current_user.phone_verified_at = None
         current_user.phone = profile_data["phone"]
     if "location" in profile_data:
         current_user.location = profile_data["location"]
