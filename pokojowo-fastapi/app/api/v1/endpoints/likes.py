@@ -4,12 +4,73 @@ Likes API endpoints for managing the mutual matching system.
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import Optional
+from datetime import datetime
 from app.models.user import User
+from app.models.like import Like, LikeStatusEnum
+from app.models.pass_model import Pass
 from app.core.dependencies import get_current_user, require_verified
 from app.services.likes_service import likes_service
 from app.services.matching_service import matching_service
 
 router = APIRouter()
+
+
+# NOTE: /{user_id}/pass routes must be declared BEFORE the bare
+# /{user_id} routes or FastAPI matches the latter first.
+
+@router.post("/{user_id}/pass", response_model=dict)
+async def pass_user(
+    user_id: str,
+    current_user: User = Depends(require_verified)
+):
+    """Record a left-swipe. The passed user disappears from the deck
+    for 30 days (TTL on the pass document), then reappears."""
+    if str(current_user.id) == user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot pass yourself"
+        )
+
+    target_user = await User.get(user_id)
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Upsert: repeat passes refresh the cooldown instead of erroring
+    collection = Pass.get_motor_collection()
+    await collection.update_one(
+        {"passerId": str(current_user.id), "passedUserId": user_id},
+        {"$set": {"createdAt": datetime.utcnow()}},
+        upsert=True,
+    )
+
+    # A pass overrides an outstanding (pending) like from me to them
+    await Like.find({
+        "likerId": str(current_user.id),
+        "likedUserId": user_id,
+        "status": LikeStatusEnum.PENDING,
+    }).delete()
+
+    return {"status": "passed", "user_id": user_id}
+
+
+@router.delete("/{user_id}/pass", response_model=dict)
+async def undo_pass(
+    user_id: str,
+    current_user: User = Depends(require_verified)
+):
+    """Undo a left-swipe so the user re-enters the deck immediately."""
+    result = await Pass.find({
+        "passerId": str(current_user.id),
+        "passedUserId": user_id,
+    }).delete()
+
+    return {
+        "status": "unpassed" if result.deleted_count else "not_passed",
+        "user_id": user_id,
+    }
 
 
 @router.post("/{user_id}", response_model=dict)
@@ -43,6 +104,12 @@ async def like_user(
         score, _, _, rejection = matching_service.score_pair(current_user, target_user)
         if rejection is None and score is not None:
             compatibility_score = round(score, 1)
+
+    # Liking overrides any earlier pass on the same user
+    await Pass.find({
+        "passerId": str(current_user.id),
+        "passedUserId": user_id,
+    }).delete()
 
     result = await likes_service.like_user(
         liker_id=str(current_user.id),
