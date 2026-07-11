@@ -251,3 +251,105 @@ async def get_system_stats(
             "total_messages": total_messages,
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# Reports + user moderation (Admin only)
+# ---------------------------------------------------------------------------
+
+from app.models.report import Report, ReportStatusEnum
+
+
+@router.get("/reports", response_model=dict)
+async def list_reports(
+    status_filter: str = Query("open", description="open|resolved|dismissed|all"),
+    current_user: User = Depends(require_role(RoleEnum.ADMIN.value)),
+):
+    """Reports queue for moderation."""
+    query = {}
+    if status_filter != "all":
+        query["status"] = status_filter
+
+    reports = await Report.find(query).sort("-createdAt").to_list(length=200)
+
+    enriched = []
+    for report in reports:
+        reported = await User.get(report.reported_user_id)
+        reporter = await User.get(report.reporter_id)
+        enriched.append({
+            "id": str(report.id),
+            "reason": report.reason.value,
+            "details": report.details,
+            "status": report.status.value,
+            "createdAt": report.created_at,
+            "reported": {
+                "user_id": report.reported_user_id,
+                "username": reported.username if reported else None,
+                "isActive": reported.is_active if reported else None,
+            },
+            "reporter": {
+                "user_id": report.reporter_id,
+                "username": reporter.username if reporter else None,
+            },
+        })
+
+    return {"reports": enriched, "count": len(enriched)}
+
+
+@router.post("/reports/{report_id}/resolve", response_model=dict)
+async def resolve_report(
+    report_id: str,
+    body: dict,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN.value)),
+):
+    """Mark a report resolved or dismissed."""
+    outcome = body.get("outcome", "resolved")
+    if outcome not in ("resolved", "dismissed"):
+        raise HTTPException(status_code=422, detail="outcome must be resolved or dismissed")
+
+    report = await Report.get(report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    report.status = ReportStatusEnum(outcome)
+    report.resolved_by = str(current_user.id)
+    report.resolved_at = datetime.utcnow()
+    await report.save()
+
+    return {"message": outcome, "report_id": report_id}
+
+
+@router.post("/users/{user_id}/ban", response_model=dict)
+async def ban_user(
+    user_id: str,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN.value)),
+):
+    """Deactivate a user account (is_active=False fails every request
+    at the auth dependency). The legacy `freez` field stays unused."""
+    user = await User.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if RoleEnum.ADMIN in user.role:
+        raise HTTPException(status_code=400, detail="Cannot ban an admin")
+
+    user.is_active = False
+    await user.save()
+
+    from app.services import matching_cache
+    matching_cache.clear()
+
+    return {"message": "User banned", "user_id": user_id}
+
+
+@router.post("/users/{user_id}/unban", response_model=dict)
+async def unban_user(
+    user_id: str,
+    current_user: User = Depends(require_role(RoleEnum.ADMIN.value)),
+):
+    user = await User.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.is_active = True
+    await user.save()
+    return {"message": "User unbanned", "user_id": user_id}

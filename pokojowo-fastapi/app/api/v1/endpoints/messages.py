@@ -25,6 +25,18 @@ async def create_message(
             detail="Chat room not found"
         )
 
+    # Blocks are mutual: neither side can message the other
+    from app.core.blocking import is_blocked_between
+    for pid in chat.participants:
+        if pid == str(current_user.id):
+            continue
+        other = await User.get(pid)
+        if other and is_blocked_between(current_user, other):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You cannot message this user"
+            )
+
     if str(current_user.id) not in chat.participants:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

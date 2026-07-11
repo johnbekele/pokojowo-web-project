@@ -103,6 +103,13 @@ async def like_user(
             detail="User not found"
         )
 
+    from app.core.blocking import is_blocked_between
+    if is_blocked_between(current_user, target_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot like this user"
+        )
+
     # Calculate compatibility score for storage (deal-breakers apply)
     compatibility_score = None
     if current_user.is_profile_complete and target_user.is_profile_complete:

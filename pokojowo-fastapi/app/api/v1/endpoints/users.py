@@ -209,3 +209,88 @@ async def get_all_users(
         }
         for user in users
     ]
+
+
+# ---------------------------------------------------------------------------
+# Safety: report and block
+# (two-segment paths /{user_id}/report can't collide with /{user_id})
+# ---------------------------------------------------------------------------
+
+from app.core.dependencies import require_verified
+from app.models.report import Report, ReportReasonEnum
+from app.models.user import ChatSettingsModel
+
+
+@router.post("/{user_id}/report", response_model=dict)
+async def report_user(
+    user_id: str,
+    body: dict,
+    current_user: User = Depends(require_verified)
+):
+    """Report a user for moderation review."""
+    if str(current_user.id) == user_id:
+        raise HTTPException(status_code=400, detail="Cannot report yourself")
+
+    target = await User.get(user_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
+        reason = ReportReasonEnum(body.get("reason", "other"))
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"reason must be one of: {', '.join(r.value for r in ReportReasonEnum)}"
+        )
+
+    details = (body.get("details") or "")[:1000]
+
+    # Upsert: one report per reporter/reported pair (unique index)
+    collection = Report.get_motor_collection()
+    await collection.update_one(
+        {"reporterId": str(current_user.id), "reportedUserId": user_id},
+        {"$set": {"reason": reason.value, "details": details},
+         "$setOnInsert": {"status": "open", "createdAt": datetime.utcnow()}},
+        upsert=True,
+    )
+
+    return {"message": "Report submitted. Our team will review it."}
+
+
+@router.post("/{user_id}/block", response_model=dict)
+async def block_user(
+    user_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Block a user: no messages in either direction, hidden from matching."""
+    if str(current_user.id) == user_id:
+        raise HTTPException(status_code=400, detail="Cannot block yourself")
+
+    if current_user.chat_settings is None:
+        current_user.chat_settings = ChatSettingsModel()
+    if user_id not in current_user.chat_settings.blocked_users:
+        current_user.chat_settings.blocked_users.append(user_id)
+        await current_user.save()
+
+    from app.services import matching_cache
+    matching_cache.invalidate(str(current_user.id))
+    matching_cache.invalidate(user_id)
+
+    return {"message": "User blocked", "blocked_users": current_user.chat_settings.blocked_users}
+
+
+@router.delete("/{user_id}/block", response_model=dict)
+async def unblock_user(
+    user_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Unblock a user."""
+    if current_user.chat_settings and user_id in current_user.chat_settings.blocked_users:
+        current_user.chat_settings.blocked_users.remove(user_id)
+        await current_user.save()
+
+    from app.services import matching_cache
+    matching_cache.invalidate(str(current_user.id))
+    matching_cache.invalidate(user_id)
+
+    return {"message": "User unblocked"}

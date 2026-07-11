@@ -19,6 +19,18 @@ async def create_chat(
     if str(current_user.id) not in chat_data.participants:
         chat_data.participants.append(str(current_user.id))
 
+    # Blocks prevent opening a chat in either direction
+    from app.core.blocking import is_blocked_between
+    for pid in chat_data.participants:
+        if pid == str(current_user.id):
+            continue
+        other = await User.get(pid)
+        if other and is_blocked_between(current_user, other):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You cannot chat with this user"
+            )
+
     # Check if chat already exists between these participants
     existing_chat = await Chat.find_one({
         "participants": {"$all": chat_data.participants, "$size": len(chat_data.participants)}

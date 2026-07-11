@@ -102,10 +102,38 @@
       "ownership_deed": "Akt własności",
       "utility_bill": "Rachunek za media",
       "business_registration": "Rejestracja działalności"
+    },
+    "reports": {
+      "title": "Otwarte zgłoszenia",
+      "empty": "Brak otwartych zgłoszeń.",
+      "reportedLabel": "zgłosił(a)",
+      "resolve": "Rozwiąż",
+      "dismiss": "Odrzuć",
+      "ban": "Zbanuj",
+      "alreadyBanned": "Zbanowany",
+      "banned": "Użytkownik zbanowany"
     }
   },
   "trust": {
     "verified": "Zweryfikowany",
     "idVerified": "Zweryfikowany (ID)"
+  },
+  "safety": {
+    "report": "Zgłoś",
+    "block": "Zablokuj",
+    "cancel": "Anuluj",
+    "submitReport": "Wyślij",
+    "reported": "Zgłoszenie wysłane. Nasz zespół je sprawdzi.",
+    "reportFailed": "Nie udało się wysłać zgłoszenia",
+    "blocked": "Użytkownik zablokowany",
+    "blockFailed": "Nie udało się zablokować użytkownika",
+    "reasons": {
+      "spam": "Spam",
+      "scam": "Oszustwo",
+      "harassment": "Nękanie",
+      "fake_profile": "Fałszywy profil",
+      "inappropriate_content": "Nieodpowiednie treści",
+      "other": "Inne"
+    }
   }
 }
