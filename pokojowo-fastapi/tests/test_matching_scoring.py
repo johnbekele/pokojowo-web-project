@@ -60,29 +60,77 @@ def test_schedule_identical_routines_score_high(service):
 # Known bug 3: sparse profiles inflated by tolerant-nonsmoker defaults
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BUG: missing lifestyle data defaults to tolerant non-smoker "
-    "scoring 100 on smoking/pets (issue #33)",
-)
 def test_smoking_unknown_data_is_neutral(service):
-    """Two users with no lifestyle data should get a neutral smoking score,
+    """Two users with no lifestyle data get a neutral smoking score,
     not a perfect one."""
-    score, _ = service._score_smoking_compatibility(None, None)
-    assert score < 100
+    score = service._score_smoking_compatibility({}, {})
+    assert score == pytest.approx(60.0)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BUG: empty-vs-empty profiles land in 'good' tier (~59.7) via "
-    "permissive defaults; should be 'fair' (issue #33)",
-)
+def test_pets_unknown_data_is_neutral(service):
+    score = service._score_pets_compatibility({}, {})
+    assert score == pytest.approx(60.0)
+
+
+def test_smoking_known_data_still_scores(service):
+    both_non = service._score_smoking_compatibility(
+        {"smokes": False, "okWithSmoking": True},
+        {"smokes": False, "okWithSmoking": True},
+    )
+    assert both_non == pytest.approx(100.0)
+
+    conflict = service._score_smoking_compatibility(
+        {"smokes": False, "okWithSmoking": False},
+        {"smokes": True, "okWithSmoking": True},
+    )
+    assert conflict == pytest.approx(15.0)
+
+
 def test_empty_profiles_score_fair_not_good(service):
     empty_a = make_user()
     empty_b = make_user()
 
-    score, _breakdown, _expl = service._calculate_compatibility(empty_a, empty_b)
+    score, breakdown, _expl = service._calculate_compatibility(empty_a, empty_b)
     assert score < 55  # "fair" ceiling
+    assert breakdown["dataCompleteness"] == pytest.approx(0.0)
+
+
+def test_full_profiles_not_discounted(service):
+    kwargs = dict(
+        budget=(1500, 3000), smokes=False, has_pets=False,
+        ok_with_smoking=True, ok_with_pets=True,
+        cleanliness="clean", personality=["introvert"],
+        wake_up="07:00", sleep_time="23:00", location="Warszawa",
+        languages=["English"], interests=["cooking"], age_range=[20, 40],
+    )
+    a = make_user(age=25, **kwargs)
+    b = make_user(age=26, **kwargs)
+
+    score, breakdown, _ = service._calculate_compatibility(a, b)
+    assert breakdown["dataCompleteness"] == pytest.approx(1.0)
+    assert score > 80  # identical full profiles score high, undiscounted
+
+
+# ---------------------------------------------------------------------------
+# Bounded sort bonuses (was: absolute new-user priority)
+# ---------------------------------------------------------------------------
+
+def test_sort_new_user_bonus_is_bounded(service):
+    new_low = {"compatibility_score": 41.0, "is_new_user": True}
+    veteran_high = {"compatibility_score": 95.0, "is_new_user": False}
+    new_close = {"compatibility_score": 82.0, "is_new_user": True}
+    veteran_close = {"compatibility_score": 80.0, "is_new_user": False}
+
+    ranked = sorted([new_low, veteran_high, new_close, veteran_close], key=service._sort_key)
+    scores = [r["compatibility_score"] for r in ranked]
+    assert scores == [95.0, 82.0, 80.0, 41.0]
+
+
+def test_sort_phone_verified_tiebreak(service):
+    verified = {"compatibility_score": 70.0, "phone_verified": True}
+    unverified = {"compatibility_score": 71.0, "phone_verified": False}
+    ranked = sorted([unverified, verified], key=service._sort_key)
+    assert ranked[0]["phone_verified"] is True  # 70+2 beats 71
 
 
 # ---------------------------------------------------------------------------
