@@ -59,3 +59,4 @@ coverage/
 
 # Claude
 .claude/
+private_uploads/
