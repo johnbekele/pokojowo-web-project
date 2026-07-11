@@ -31,6 +31,7 @@ const ChatRoom = lazy(() => import('@/features/chat/pages/ChatRoom'));
 
 // Tenant pages
 const LikesPage = lazy(() => import('@/features/tenant/pages/Dashboard'));
+const VerificationQueue = lazy(() => import('@/features/admin/pages/VerificationQueue'));
 const SavedMatches = lazy(() => import('@/features/favorites/pages/SavedMatches'));
 
 // Landlord pages
@@ -86,6 +87,14 @@ export default function AppRouter() {
             <Route path="/chat/with/:userId" element={<ChatRoom />} />
             {/* Landlord routes */}
             <Route path="/landlord/dashboard" element={<LandlordDashboard />} />
+            <Route
+              path="/admin/verification"
+              element={
+                <ProtectedRoute requiredRole="Admin" skipProfileCheck>
+                  <VerificationQueue />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/landlord/listings" element={<MyListings />} />
           </Route>
 

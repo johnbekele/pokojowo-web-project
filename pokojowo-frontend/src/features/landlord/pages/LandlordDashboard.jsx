@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import VerificationSection from '../components/VerificationSection';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Home, Eye, MessageSquare, TrendingUp } from 'lucide-react';
@@ -71,6 +72,10 @@ export default function LandlordDashboard() {
       </div>
 
       {/* Stats Cards */}
+      <div className="mb-8">
+        <VerificationSection />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {stats.map((stat) => (
           <Card key={stat.title}>

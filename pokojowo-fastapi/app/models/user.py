@@ -191,9 +191,15 @@ class PoliciesModel(BaseModel):
 
 
 class VerificationDocumentModel(BaseModel):
-    type: Optional[str] = None
-    url: Optional[str] = None
-    status: str = "pending"
+    id: Optional[str] = None  # uuid assigned at upload
+    type: Optional[str] = None  # id_card|ownership_deed|utility_bill|business_registration
+    url: Optional[str] = None  # legacy field, unused for private docs
+    file_path: Optional[str] = Field(None, alias="filePath")  # private storage path
+    status: str = "pending"  # pending|approved|rejected
+    rejection_reason: Optional[str] = Field(None, alias="rejectionReason")
+    uploaded_at: Optional[datetime] = Field(None, alias="uploadedAt")
+    reviewed_at: Optional[datetime] = Field(None, alias="reviewedAt")
+    reviewed_by: Optional[str] = Field(None, alias="reviewedBy")
 
 
 class VerificationModel(BaseModel):
