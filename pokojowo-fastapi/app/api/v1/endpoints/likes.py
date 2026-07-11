@@ -5,7 +5,7 @@ Likes API endpoints for managing the mutual matching system.
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import Optional
 from app.models.user import User
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_verified
 from app.services.likes_service import likes_service
 from app.services.matching_service import matching_service
 
@@ -15,7 +15,7 @@ router = APIRouter()
 @router.post("/{user_id}", response_model=dict)
 async def like_user(
     user_id: str,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_verified)
 ):
     """
     Like a user.

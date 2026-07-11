@@ -84,6 +84,12 @@ class EmailService:
             logger.error("Failed to send email to %s: %s", to_email, str(e))
             return False
 
+    @property
+    def is_configured(self) -> bool:
+        """Public: whether SMTP credentials are present. Callers use this
+        to fail loudly instead of pretending an email was sent."""
+        return self._is_configured()
+
     async def send_verification_email(self, to_email: str, token: str) -> bool:
         """
         Send email verification email.
@@ -96,6 +102,13 @@ class EmailService:
             bool: True if email was sent successfully
         """
         verification_url = f"{self.frontend_url}/verify-email?token={token}"
+
+        if not self._is_configured():
+            # Dev convenience: surface the link in the server log so local
+            # signups can still be verified without SMTP.
+            logger.warning("SMTP not configured — verification link for %s: %s",
+                           to_email, verification_url)
+            return False
 
         subject = "Verify Your Pokojowo Account"
 

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from app.schemas.listing_schema import ListingCreate, ListingUpdate, ListingResponse
 from app.models.listing import Listing
 from app.models.user import User
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_verified
 from app.core.config import settings
 from app.core.locations import CITY_DISTRICTS, canonical_city, districts_for_city
 from typing import List, Optional
@@ -84,7 +84,7 @@ def listing_to_dict(listing: Listing) -> dict:
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_listing(
     listing_data: ListingCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_verified)
 ):
     """Create a new listing"""
     # Check if user is a landlord

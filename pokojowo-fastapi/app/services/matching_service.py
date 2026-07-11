@@ -98,6 +98,10 @@ class MatchingService:
         query = {
             "isProfileComplete": True,
             "isActive": True,
+            # Unverified users can't like back — showing them creates
+            # dead-end swipes, so they're excluded symmetrically (the
+            # matching endpoint also refuses unverified requesters).
+            "isVerified": True,
             "role": "Tenant",
             "_id": {"$ne": user.id},
         }

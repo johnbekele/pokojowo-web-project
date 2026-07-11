@@ -37,7 +37,7 @@ export const authService = {
     api.post('/auth/reset-password', { token, password }),
 
   resendVerification: (email: string) =>
-    api.post('/auth/resend-verification', { email }),
+    api.post('/auth/resend-verification-email', { email }),
 };
 
 export default authService;

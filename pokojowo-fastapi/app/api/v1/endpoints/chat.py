@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from app.schemas.chat_schema import ChatCreate, ChatResponse
 from app.models.chat import Chat
 from app.models.user import User
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_verified
 from typing import List
 from datetime import datetime
 
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_chat(
     chat_data: ChatCreate,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_verified)
 ):
     """Create a new chat room"""
     # Ensure current user is in participants
