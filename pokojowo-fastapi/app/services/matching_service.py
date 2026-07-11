@@ -243,10 +243,11 @@ class MatchingService:
                 "compatible": True,
                 "is_new_user": is_new_user,
                 "joined_at": created_at.isoformat() if created_at else None,
+                "data_completeness": breakdown.get("dataCompleteness"),
+                "phone_verified": bool(getattr(candidate, "phone_verified", False)),
             })
 
-        # Sort: New users first (sorted by compatibility), then others by compatibility
-        results.sort(key=lambda x: (not x["is_new_user"], -x["compatibility_score"]))
+        results.sort(key=self._sort_key)
 
         # Calculate match statistics
         stats = self._calculate_match_stats(results)
@@ -258,6 +259,21 @@ class MatchingService:
             "filtered_by_deal_breakers": filtered_count,
             "stats": stats,
         }
+
+    # Bounded ranking bonuses: applied to the SORT ORDER only, never to
+    # the displayed compatibility_score. A new user gets +5 so fresh
+    # profiles surface without letting a 41% new user outrank a 95%
+    # veteran (the old sort gave new users absolute priority).
+    NEW_USER_SORT_BONUS = 5
+    PHONE_VERIFIED_SORT_BONUS = 2
+
+    def _sort_key(self, result: Dict) -> float:
+        effective = result["compatibility_score"]
+        if result.get("is_new_user"):
+            effective += self.NEW_USER_SORT_BONUS
+        if result.get("phone_verified"):
+            effective += self.PHONE_VERIFIED_SORT_BONUS
+        return -effective
 
     def _get_match_tier(self, score: float) -> str:
         """Determine match quality tier based on score."""
@@ -447,6 +463,15 @@ class MatchingService:
             for cat in scores
         )
 
+        # Data-completeness discount: when fewer than 3 of the 7
+        # components had real data for this pair, the total is mostly
+        # neutral defaults — discount it so sparse profiles land in
+        # "fair" rather than "good" and can't outrank assessed pairs.
+        assessed = self._count_assessed_components(user, candidate)
+        data_completeness = round(assessed / len(self.weights), 2)
+        if assessed < 3:
+            total *= 0.85
+
         # Sort explanations by impact (positive first, then neutral, then negative)
         impact_order = {"positive": 0, "neutral": 1, "negative": 2}
         explanations.sort(key=lambda x: (impact_order.get(x.get("impact", "neutral"), 1), -x.get("score", 0)))
@@ -460,9 +485,51 @@ class MatchingService:
             "preferencesScore": round(scores["preferences"], 1),
             "interestsScore": round(scores["interests"], 1),
             "totalScore": round(total, 1),
+            # Additive field: fraction of components with real data
+            "dataCompleteness": data_completeness,
         }
 
         return total, breakdown, explanations
+
+    def _count_assessed_components(self, user: User, candidate: User) -> int:
+        """How many of the 7 scoring components had real (non-default)
+        data on both sides for this pair."""
+        count = 0
+
+        u_budget, c_budget = self._get_budget(user), self._get_budget(candidate)
+        if u_budget and c_budget:
+            count += 1
+
+        u_life, c_life = self._get_lifestyle_prefs(user), self._get_lifestyle_prefs(candidate)
+        u_traits, c_traits = self._get_flatmate_traits(user), self._get_flatmate_traits(candidate)
+        if (u_life.get("smokes") is not None and c_life.get("smokes") is not None) or (
+            any(v for v in u_traits.values()) and any(v for v in c_traits.values())
+        ):
+            count += 1  # lifestyle
+
+        u_pers = user.tenant_profile.personality if user.tenant_profile else []
+        c_pers = candidate.tenant_profile.personality if candidate.tenant_profile else []
+        if u_pers and c_pers:
+            count += 1
+
+        if self._get_daily_routine(user) and self._get_daily_routine(candidate):
+            count += 1  # schedule
+
+        if user.location and candidate.location:
+            count += 1  # location
+
+        u_prefs = user.tenant_profile.preferences if user.tenant_profile else None
+        if (u_prefs and (u_prefs.age_range or u_prefs.gender)) or (
+            user.languages and candidate.languages
+        ):
+            count += 1  # preferences
+
+        u_int = user.tenant_profile.interests if user.tenant_profile else []
+        c_int = candidate.tenant_profile.interests if candidate.tenant_profile else []
+        if u_int and c_int:
+            count += 1
+
+        return count
 
     def _score_budget(self, user: User, candidate: User) -> Tuple[float, List[Dict]]:
         """
@@ -707,7 +774,15 @@ class MatchingService:
         return final_score, explanations
 
     def _score_smoking_compatibility(self, user_prefs: Dict, candidate_prefs: Dict) -> float:
-        """Calculate detailed smoking compatibility score."""
+        """Calculate detailed smoking compatibility score.
+
+        Neutral 60 when either side never answered — defaulting unknowns
+        to "tolerant non-smoker" gave blank profiles a perfect 100 and
+        let them outrank genuinely-assessed pairs.
+        """
+        if user_prefs.get("smokes") is None or candidate_prefs.get("smokes") is None:
+            return 60.0
+
         user_smokes = user_prefs.get("smokes", False)
         user_ok = user_prefs.get("okWithSmoking", True)
         candidate_smokes = candidate_prefs.get("smokes", False)
@@ -736,7 +811,13 @@ class MatchingService:
         return 60.0
 
     def _score_pets_compatibility(self, user_prefs: Dict, candidate_prefs: Dict) -> float:
-        """Calculate detailed pets compatibility score."""
+        """Calculate detailed pets compatibility score.
+
+        Neutral 60 when either side never answered (see smoking scorer).
+        """
+        if user_prefs.get("hasPets") is None or candidate_prefs.get("hasPets") is None:
+            return 60.0
+
         user_has_pets = user_prefs.get("hasPets", False)
         user_ok = user_prefs.get("okWithPets", True)
         candidate_has_pets = candidate_prefs.get("hasPets", False)
