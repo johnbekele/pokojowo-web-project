@@ -83,5 +83,25 @@
     "minutesAgo": "{{count}} minut temu",
     "hoursAgo": "{{count}} godzin temu",
     "daysAgo": "{{count}} dni temu"
+  },
+  "admin": {
+    "verificationQueue": {
+      "title": "Kolejka weryfikacji wynajmujących",
+      "empty": "Brak oczekujących weryfikacji."
+    },
+    "review": {
+      "approve": "Zatwierdź",
+      "reject": "Odrzuć",
+      "approved": "Zatwierdzono",
+      "rejected": "Odrzucono",
+      "error": "Weryfikacja nie powiodła się",
+      "reasonPlaceholder": "Powód odrzucenia…"
+    },
+    "docTypes": {
+      "id_card": "Dowód osobisty",
+      "ownership_deed": "Akt własności",
+      "utility_bill": "Rachunek za media",
+      "business_registration": "Rejestracja działalności"
+    }
   }
 }

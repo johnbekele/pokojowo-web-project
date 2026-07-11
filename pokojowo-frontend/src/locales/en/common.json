@@ -83,5 +83,25 @@
     "minutesAgo": "{{count}} minutes ago",
     "hoursAgo": "{{count}} hours ago",
     "daysAgo": "{{count}} days ago"
+  },
+  "admin": {
+    "verificationQueue": {
+      "title": "Landlord verification queue",
+      "empty": "No pending verifications."
+    },
+    "review": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "error": "Review failed",
+      "reasonPlaceholder": "Rejection reason…"
+    },
+    "docTypes": {
+      "id_card": "ID card",
+      "ownership_deed": "Ownership deed",
+      "utility_bill": "Utility bill",
+      "business_registration": "Business registration"
+    }
   }
 }

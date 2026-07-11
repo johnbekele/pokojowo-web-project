@@ -136,5 +136,24 @@
     "partner": "I'll move in with a partner",
     "children": "I have children living with me",
     "childrenCount": "How many children?"
+  },
+  "verification": {
+    "title": "Landlord verification",
+    "verifiedTitle": "ID Verified landlord",
+    "subtitle": "Upload an ID and proof of ownership. An admin reviews your documents; verified landlords get a distinct badge on their listings.",
+    "upload": "Upload document",
+    "submitted": "Document submitted for review",
+    "uploadFailed": "Upload failed",
+    "docTypes": {
+      "id_card": "ID card / passport",
+      "ownership_deed": "Ownership deed",
+      "utility_bill": "Utility bill",
+      "business_registration": "Business registration"
+    },
+    "status": {
+      "pending": "pending review",
+      "approved": "approved",
+      "rejected": "rejected"
+    }
   }
 }
