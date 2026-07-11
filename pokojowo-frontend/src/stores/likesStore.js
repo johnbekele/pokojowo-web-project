@@ -60,6 +60,28 @@ const useLikesStore = create((set, get) => ({
     }
   },
 
+  // Pass (swipe left) on a user — hides them from the deck for 30 days
+  passUser: async (userId) => {
+    try {
+      const response = await api.post(`/likes/${userId}/pass`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Failed to pass user';
+      return { success: false, error: message };
+    }
+  },
+
+  // Undo a pass so the user re-enters the deck immediately
+  undoPass: async (userId) => {
+    try {
+      const response = await api.delete(`/likes/${userId}/pass`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Failed to undo pass';
+      return { success: false, error: message };
+    }
+  },
+
   // Unlike a user
   unlikeUser: async (userId) => {
     try {

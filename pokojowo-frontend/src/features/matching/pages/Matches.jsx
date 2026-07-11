@@ -20,6 +20,7 @@ import LikeButton from '@/features/likes/components/LikeButton';
 import SaveButton from '@/features/favorites/components/SaveButton';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
 import SwipeStack from '../components/SwipeStack';
+import { translateExplanation } from '../utils/explanations';
 import MatchDetailModal from '../components/MatchDetailModal';
 import {
   Eyebrow,
@@ -293,7 +294,7 @@ function MatchCard({ match, onClick, index = 0 }) {
             {positivePoints.map((point, idx) => (
               <li key={idx} className="flex items-start gap-2 text-xs text-foreground/80">
                 <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-olive" />
-                <span>{point.reason}</span>
+                <span>{translateExplanation(t, point)}</span>
               </li>
             ))}
           </ul>

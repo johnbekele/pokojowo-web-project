@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { translateExplanation } from '../utils/explanations';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -242,19 +243,19 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
                           {explanations.positive.map((exp, i) => (
                             <div key={i} className="flex items-start gap-2 text-sm bg-green-50 dark:bg-green-950/30 rounded-lg p-3">
                               <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                              <span className="text-green-700 dark:text-green-300">{exp.reason}</span>
+                              <span className="text-green-700 dark:text-green-300">{translateExplanation(t, exp)}</span>
                             </div>
                           ))}
                           {explanations.neutral.map((exp, i) => (
                             <div key={i} className="flex items-start gap-2 text-sm bg-muted rounded-lg p-3">
                               <Minus className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                              <span className="text-muted-foreground">{exp.reason}</span>
+                              <span className="text-muted-foreground">{translateExplanation(t, exp)}</span>
                             </div>
                           ))}
                           {explanations.negative.map((exp, i) => (
                             <div key={i} className="flex items-start gap-2 text-sm bg-yellow-50 dark:bg-yellow-950/30 rounded-lg p-3">
                               <X className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
-                              <span className="text-yellow-700 dark:text-yellow-300">{exp.reason}</span>
+                              <span className="text-yellow-700 dark:text-yellow-300">{translateExplanation(t, exp)}</span>
                             </div>
                           ))}
                         </div>

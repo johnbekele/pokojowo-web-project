@@ -1,9 +1,11 @@
 import { motion, useMotionValue, useTransform, useAnimation } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ThumbsUp, X, MapPin, Languages, Info } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { ScoreRing, TrustBadge } from '@/components/shared/editorial';
 import { cn } from '@/lib/utils';
+import { translateExplanation } from '../utils/explanations';
 
 const SWIPE_THRESHOLD = 150;
 const ROTATION_RANGE = 14;
@@ -20,6 +22,7 @@ export default function SwipeCard({
   isTop = false,
   style = {},
 }) {
+  const { t } = useTranslation('matching');
   const controls = useAnimation();
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-ROTATION_RANGE, 0, ROTATION_RANGE]);
@@ -192,7 +195,7 @@ export default function SwipeCard({
               {positivePoints.map((point, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-xs text-white/85">
                   <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-accent" />
-                  <span className="line-clamp-1">{point.reason}</span>
+                  <span className="line-clamp-1">{translateExplanation(t, point)}</span>
                 </li>
               ))}
             </ul>
