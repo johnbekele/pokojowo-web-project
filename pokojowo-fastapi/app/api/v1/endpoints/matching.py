@@ -32,7 +32,8 @@ async def get_tenant_dashboard(
 
     user_id = str(current_user.id)
 
-    candidates = await matching_service.get_candidates(current_user)
+    exclusions = await matching_service.get_interaction_exclusions(current_user)
+    candidates = await matching_service.get_candidates(current_user, exclude_ids=exclusions)
 
     match_results = await matching_service.find_matches(
         user=current_user,
@@ -88,6 +89,7 @@ async def get_matches(
     limit: int = Query(20, ge=1, le=100, description="Maximum number of matches to return"),
     location: Optional[str] = Query(None, description="Filter by location (partial match)"),
     min_score: float = Query(0, ge=0, le=100, alias="minScore", description="Minimum compatibility score"),
+    include_passed: bool = Query(False, description="Include users you swiped left on"),
     current_user: User = Depends(require_verified)
 ):
     """
@@ -114,12 +116,18 @@ async def get_matches(
             detail="Please complete your profile before viewing matches"
         )
 
-    # Fetch candidates (active tenants with completed profiles)
+    # Fetch candidates (active tenants with completed profiles),
+    # excluding users already passed / pending-liked / mutually matched
     import re as _re
     extra_query = None
     if location:
         extra_query = {"location": {"$regex": _re.escape(location), "$options": "i"}}
-    candidates = await matching_service.get_candidates(current_user, extra_query=extra_query)
+    exclusions = await matching_service.get_interaction_exclusions(
+        current_user, include_passed=include_passed
+    )
+    candidates = await matching_service.get_candidates(
+        current_user, extra_query=extra_query, exclude_ids=exclusions
+    )
 
     # Run matching algorithm
     results = await matching_service.find_matches(
@@ -189,8 +197,9 @@ async def refresh_matches(
             detail="Please complete your profile before refreshing matches"
         )
 
-    # Fetch all potential candidates
-    candidates = await matching_service.get_candidates(current_user)
+    # Fetch all potential candidates (with swipe-memory exclusions)
+    exclusions = await matching_service.get_interaction_exclusions(current_user)
+    candidates = await matching_service.get_candidates(current_user, exclude_ids=exclusions)
 
     # Run matching algorithm
     results = await matching_service.find_matches(

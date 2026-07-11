@@ -81,6 +81,44 @@ class MatchingService:
         if total != 100:
             raise ValueError(f"Weights must sum to 100, got {total}")
 
+    async def get_interaction_exclusions(
+        self,
+        user: User,
+        include_passed: bool = False,
+    ) -> Set:
+        """Ids the user has already interacted with: passed (within the
+        30-day cooldown), liked-but-pending, and mutual matches. These
+        are removed from the deck so swipes have memory."""
+        from bson import ObjectId
+        from app.models.like import Like, LikeStatusEnum
+        from app.models.mutual_match import MutualMatch
+        from app.models.pass_model import Pass
+
+        me = str(user.id)
+        excluded: Set = set()
+
+        if not include_passed:
+            async for p in Pass.find({"passerId": me}):
+                excluded.add(p.passed_user_id)
+
+        async for like in Like.find({"likerId": me, "status": LikeStatusEnum.PENDING}):
+            excluded.add(like.liked_user_id)
+
+        async for mm in MutualMatch.find({
+            "$or": [{"user1Id": me}, {"user2Id": me}],
+            "status": "active",
+        }):
+            excluded.add(mm.user_2_id if mm.user_1_id == me else mm.user_1_id)
+
+        # Candidate query compares against ObjectIds
+        result = set()
+        for uid in excluded:
+            try:
+                result.add(ObjectId(uid))
+            except Exception:
+                continue
+        return result
+
     async def get_candidates(
         self,
         user: User,
