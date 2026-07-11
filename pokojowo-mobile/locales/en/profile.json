@@ -7,7 +7,9 @@
     "favorites": "Saved Matches",
     "language": "Language",
     "settings": "Settings",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "verifyPhone": "Verify phone",
+    "landlordVerification": "Landlord verification"
   },
   "completion": {
     "title": "Complete Your Profile",
@@ -213,5 +215,39 @@
     "partner": "I'll move in with a partner",
     "children": "I have children living with me",
     "childrenCount": "How many children?"
+  },
+  "phoneVerification": {
+    "title": "Verify your phone",
+    "verifiedTitle": "Phone verified",
+    "subtitle": "A verified phone number earns a trust badge and ranks you higher in matching.",
+    "sendCode": "Send code",
+    "confirm": "Confirm",
+    "changeNumber": "Change number",
+    "enterCode": "Enter the 6-digit code we sent to {{phone}}.",
+    "success": "Phone verified!",
+    "startFailed": "Could not send the code",
+    "checkFailed": "Incorrect code",
+    "rateLimited": "Too many attempts",
+    "rateLimitedHintShort": "Please try again later."
+  },
+  "verification": {
+    "title": "Landlord verification",
+    "verifiedTitle": "ID Verified landlord",
+    "subtitle": "Upload an ID and proof of ownership. An admin reviews your documents; verified landlords get a distinct badge on their listings.",
+    "selectType": "Document type",
+    "upload": "Upload document",
+    "submitted": "Document submitted for review",
+    "uploadFailed": "Upload failed",
+    "docTypes": {
+      "id_card": "ID card / passport",
+      "ownership_deed": "Ownership deed",
+      "utility_bill": "Utility bill",
+      "business_registration": "Business registration"
+    },
+    "status": {
+      "pending": "pending review",
+      "approved": "approved",
+      "rejected": "rejected"
+    }
   }
 }

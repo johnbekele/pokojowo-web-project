@@ -202,5 +202,71 @@
       "removed": "This profile has been removed from your saved list.",
       "added": "This profile has been added to your saved list."
     }
+  },
+  "explanations": {
+    "budget": {
+      "incomplete": "Budget information incomplete - cannot fully assess",
+      "currencyMismatch": "Different currencies ({{a}} vs {{b}})",
+      "excellent": "Excellent budget match ({{range}} overlaps well)",
+      "good": "Good budget overlap with some flexibility needed",
+      "limited": "Limited budget overlap - may need to negotiate",
+      "mismatch": "Significant budget mismatch (your {{yours}} vs their {{theirs}})"
+    },
+    "lifestyle": {
+      "smokingConflict": "Smoking preference conflict",
+      "bothNonSmokers": "Both non-smokers - clean air environment",
+      "petMismatch": "Pet preference mismatch - needs discussion",
+      "openToPets": "You're open to pets - candidate has pets",
+      "similarCleanliness": "Similar cleanliness standards ({{level}})",
+      "differentCleanliness": "Different cleanliness expectations - potential friction",
+      "compatibleSocial": "Compatible social levels",
+      "differentGuests": "Different guest frequency preferences",
+      "differentNoise": "Very different noise tolerance - may cause conflicts",
+      "bothCook": "Both enjoy cooking - can share kitchen time"
+    },
+    "personality": {
+      "notSpecified": "Personality traits not specified",
+      "bothIntroverts": "Both introverts - will respect each other's space",
+      "bothExtroverts": "Both extroverts - great for socializing together",
+      "introExtroMix": "Introvert-extrovert mix may require adjustment",
+      "bothEarlyBirds": "Both early birds - synchronized morning routines",
+      "bothNightOwls": "Both night owls - late night compatibility",
+      "oppositeSleep": "Opposite sleep schedules - potential noise conflicts",
+      "bothTidy": "Both value tidiness - clean shared spaces",
+      "differentTidiness": "Different tidiness standards - may cause tension",
+      "quietTalkativeMix": "Quiet-talkative mix - balance your communication styles"
+    },
+    "schedule": {
+      "notAvailable": "Schedule information not available",
+      "wakeIdentical": "Wake up times nearly identical ({{time}})",
+      "wakeDifferent": "Very different wake times ({{a}} vs {{b}})",
+      "sleepAligned": "Sleep times align perfectly",
+      "sleepDifferent": "Very different sleep times - noise consideration needed",
+      "staggeredWork": "Staggered work times - less morning rush"
+    },
+    "location": {
+      "bothInterested": "Both interested in {{location}}",
+      "similarRegions": "Looking in similar regions",
+      "different": "Different locations ({{a}} vs {{b}})",
+      "differentCountry": "Different country preferences",
+      "notSpecified": "Location preferences not specified"
+    },
+    "preferences": {
+      "ageInRange": "Their age ({{age}}) is within your preferred range",
+      "ageOutOfRange": "Their age ({{age}}) is outside your preferred {{range}} range",
+      "sameLease": "Same lease duration preference ({{months}} months)",
+      "differentLease": "Different lease preferences ({{a}} vs {{b}} months)",
+      "sharedLanguages": "You share {{count}} languages: {{languages}}",
+      "noCommonLanguages": "No common languages - communication may be difficult",
+      "incomplete": "Preference information incomplete"
+    },
+    "interests": {
+      "strongOverlap": "Strong interest overlap: {{interests}}",
+      "shared": "You share {{count}} interests: {{interests}}",
+      "one": "One shared interest: {{interest}}",
+      "none": "No overlapping interests - different hobbies",
+      "noneYours": "No interests specified in your profile",
+      "noneTheirs": "They have no interests listed"
+    }
   }
 }

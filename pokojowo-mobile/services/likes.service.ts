@@ -30,6 +30,14 @@ export const likesService = {
   unlikeUser: (userId: string) =>
     api.delete<LikeResponse>(`/likes/${userId}`),
 
+  // Pass (swipe left) — hides the user from the deck for 30 days
+  passUser: (userId: string) =>
+    api.post<{ status: string; user_id: string }>(`/likes/${userId}/pass`),
+
+  // Undo a pass so the user re-enters the deck immediately
+  undoPass: (userId: string) =>
+    api.delete<{ status: string; user_id: string }>(`/likes/${userId}/pass`),
+
   // Get likes sent by current user
   getLikesSent: (params?: { limit?: number; offset?: number }) =>
     api.get<LikesListResponse>('/likes/sent', { params }),

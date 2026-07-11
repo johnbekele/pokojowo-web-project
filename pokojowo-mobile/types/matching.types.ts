@@ -7,6 +7,22 @@ export interface MatchResult {
   score_breakdown: ScoreBreakdown;
   matched_preferences: string[];
   potential_issues: string[];
+  // Additive fields from the matching/verification work — optional so
+  // an older backend can't crash the app
+  trust_level?: 'unverified' | 'verified' | 'id_verified';
+  phone_verified?: boolean;
+  data_completeness?: number;
+  explanations?: MatchExplanation[];
+  is_new_user?: boolean;
+}
+
+export interface MatchExplanation {
+  category: string;
+  reason: string;
+  impact: 'positive' | 'neutral' | 'negative';
+  score: number;
+  reason_key?: string;
+  params?: Record<string, string>;
 }
 
 export interface ScoreBreakdown {

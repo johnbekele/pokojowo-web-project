@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Text } from 'react-native';
 import { Home, Users, MessageSquare, User } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useAuthStore from '@/stores/authStore';
+import VerifyEmailBanner from '@/components/shared/VerifyEmailBanner';
 
 export default function AppLayout() {
   const { isAuthenticated } = useAuthStore();
@@ -14,6 +15,7 @@ export default function AppLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <VerifyEmailBanner />
       <View style={{ flex: 1 }}>
         <Slot />
       </View>

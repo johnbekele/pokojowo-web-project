@@ -88,6 +88,28 @@ export function useUnlikeUser() {
   });
 }
 
+export function usePassUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => likesService.passUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MATCHING_KEYS.dashboard });
+    },
+  });
+}
+
+export function useUndoPass() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => likesService.undoPass(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MATCHING_KEYS.dashboard });
+    },
+  });
+}
+
 export function useUnmatchUser() {
   const queryClient = useQueryClient();
 
