@@ -21,6 +21,7 @@ The algorithm evaluates 10+ compatibility dimensions including:
 
 from typing import List, Dict, Tuple, Optional, Set
 from datetime import datetime, timedelta
+from app.core.locations import region_for_location
 from app.models.user import (
     User,
     CleanlinessEnum,
@@ -101,7 +102,6 @@ class MatchingService:
         """
         results = []
         filtered_count = 0
-        deal_breaker_reasons = {}
 
         for candidate in candidates:
             # Skip self-matching
@@ -112,14 +112,12 @@ class MatchingService:
             user_rejection = self._check_deal_breakers(user, candidate)
             if user_rejection:
                 filtered_count += 1
-                deal_breaker_reasons[str(candidate.id)] = user_rejection
                 continue
 
             # Also check if candidate would reject user (bidirectional)
             candidate_rejection = self._check_deal_breakers(candidate, user)
             if candidate_rejection:
                 filtered_count += 1
-                deal_breaker_reasons[str(candidate.id)] = f"Mutual: {candidate_rejection}"
                 continue
 
             # Phase 2: Calculate comprehensive compatibility score
@@ -175,7 +173,8 @@ class MatchingService:
 
         return {
             "matches": results[:limit],
-            "total_candidates": len(candidates) - 1,  # Exclude self
+            # Callers already exclude self from the candidate list
+            "total_candidates": len(candidates),
             "filtered_by_deal_breakers": filtered_count,
             "stats": stats,
         }
@@ -858,7 +857,9 @@ class MatchingService:
         user_routine = self._get_daily_routine(user)
         candidate_routine = self._get_daily_routine(candidate)
 
-        if not user_routine and not candidate_routine:
+        # Neutral when EITHER side lacks routine data — a one-sided None
+        # previously crashed on .get below.
+        if not user_routine or not candidate_routine:
             return 65.0, [{
                 "category": "Schedule",
                 "reason": "Schedule information not available",
@@ -1051,27 +1052,10 @@ class MatchingService:
         return sum(scores) / len(scores), explanations
 
     def _locations_in_same_region(self, loc1: str, loc2: str) -> bool:
-        """Check if two locations are in the same region (Poland-specific)."""
-        # Define regions with cities
-        regions = {
-            "mazowieckie": ["warsaw", "warszawa", "radom", "płock"],
-            "malopolskie": ["krakow", "kraków", "tarnow", "tarnów"],
-            "wielkopolskie": ["poznan", "poznań", "kalisz", "konin"],
-            "pomorskie": ["gdansk", "gdańsk", "gdynia", "sopot"],
-            "dolnoslaskie": ["wroclaw", "wrocław", "legnica", "wałbrzych"],
-            "slaskie": ["katowice", "gliwice", "zabrze", "bielsko-biała"],
-        }
-
-        loc1_region = None
-        loc2_region = None
-
-        for region, cities in regions.items():
-            if any(city in loc1 for city in cities):
-                loc1_region = region
-            if any(city in loc2 for city in cities):
-                loc2_region = region
-
-        return loc1_region and loc2_region and loc1_region == loc2_region
+        """Check if two locations are in the same voivodeship."""
+        region1 = region_for_location(loc1)
+        region2 = region_for_location(loc2)
+        return bool(region1 and region2 and region1 == region2)
 
     def _score_preferences(self, user: User, candidate: User) -> Tuple[float, List[Dict]]:
         """
@@ -1162,10 +1146,13 @@ class MatchingService:
             weights.append(25)
 
         # 4. Language compatibility
+        # NOTE: every scores.append must be paired with an adjacent
+        # weights.append — an unpaired weight misaligns the zip below.
         shared_languages = self._get_shared_languages(user, candidate)
         if shared_languages:
             lang_score = min(100, 60 + len(shared_languages) * 20)
             scores.append(lang_score)
+            weights.append(25)
             if len(shared_languages) >= 2:
                 explanations.append({
                     "category": "Preferences",
@@ -1173,16 +1160,15 @@ class MatchingService:
                     "impact": "positive",
                     "score": lang_score
                 })
-        else:
-            if user.languages and candidate.languages:
-                scores.append(30)
-                explanations.append({
-                    "category": "Preferences",
-                    "reason": "No common languages - communication may be difficult",
-                    "impact": "negative",
-                    "score": 30
-                })
-        weights.append(25)
+        elif user.languages and candidate.languages:
+            scores.append(30)
+            weights.append(25)
+            explanations.append({
+                "category": "Preferences",
+                "reason": "No common languages - communication may be difficult",
+                "impact": "negative",
+                "score": 30
+            })
 
         if not scores:
             return 60.0, [{
