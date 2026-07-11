@@ -10,6 +10,7 @@ from app.models.like import Like
 from app.models.mutual_match import MutualMatch
 from app.models.listing_interaction import ListingInteraction
 from app.models.notification import Notification
+from app.models.rate_limit import RateLimitEntry
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ async def connect_to_mongo():
         # Initialize beanie with document models
         await init_beanie(
             database=db.client[settings.DATABASE_NAME],
-            document_models=[User, Listing, Message, Chat, SavedMatch, Like, MutualMatch, ListingInteraction, Notification]
+            document_models=[User, Listing, Message, Chat, SavedMatch, Like, MutualMatch, ListingInteraction, Notification, RateLimitEntry]
         )
 
         logger.info("Connected to MongoDB successfully")
