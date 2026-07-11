@@ -5,7 +5,7 @@ Matching API endpoints for finding compatible flatmates.
 from fastapi import APIRouter, HTTPException, status, Depends, Query, BackgroundTasks
 from typing import Optional, List
 from app.models.user import User, RoleEnum
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_verified
 from app.services.matching_service import matching_service
 from app.services.notification_service import notification_service
 from app.services.likes_service import likes_service
@@ -88,7 +88,7 @@ async def get_matches(
     limit: int = Query(20, ge=1, le=100, description="Maximum number of matches to return"),
     location: Optional[str] = Query(None, description="Filter by location (partial match)"),
     min_score: float = Query(0, ge=0, le=100, alias="minScore", description="Minimum compatibility score"),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_verified)
 ):
     """
     Get compatible flatmate matches for the current user.

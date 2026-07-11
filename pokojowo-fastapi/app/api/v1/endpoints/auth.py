@@ -53,6 +53,7 @@ async def register(user_data: UserCreate, background_tasks: BackgroundTasks):
     hashed_password = get_password_hash(user_data.password)
 
     # Create verification token
+    from datetime import timedelta
     verification_token = create_verification_token(user_data.email)
 
     # Create user
@@ -64,6 +65,7 @@ async def register(user_data: UserCreate, background_tasks: BackgroundTasks):
         lastname=user_data.lastname,
         role=requested_roles,
         verification_token=verification_token,
+        verification_token_expires=datetime.utcnow() + timedelta(hours=24),
         is_verified=False
     )
 
@@ -165,8 +167,17 @@ async def verify_email(token: str = Query(...)):
     if user.is_verified:
         return {"message": "Email already verified"}
 
+    # Only the most recently issued token is valid — a superseded (but
+    # still unexpired) JWT must not verify the account.
+    if not user.verification_token or token != user.verification_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token"
+        )
+
     user.is_verified = True
     user.verification_token = None
+    user.verification_token_expires = None
     await user.save()
 
     return {"message": "Email verified successfully"}
@@ -174,32 +185,48 @@ async def verify_email(token: str = Query(...)):
 
 @router.post("/resend-verification-email")
 async def resend_verification_email(email_data: dict, background_tasks: BackgroundTasks):
-    """Resend verification email"""
-    email = email_data.get("email")
-    user = await User.find_one({"email": email})
+    """Resend verification email.
 
-    if not user:
+    Always answers 200 for well-formed requests so account existence
+    can't be probed. Rate limited per email address.
+    """
+    from app.core.rate_limit import check_rate_limit
+    from datetime import timedelta
+
+    email = (email_data.get("email") or "").strip().lower()
+    if not email:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is required"
         )
 
-    if user.is_verified:
-        return {"message": "Email already verified"}
+    generic = {"message": "If the account exists, a verification email has been sent"}
 
-    # Create new verification token
+    await check_rate_limit(f"resend_email:{email}", 3)
+
+    user = await User.find_one({"email": email})
+    if not user or user.is_verified:
+        return generic
+
+    if not email_service.is_configured and not settings.DEBUG:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Email delivery is temporarily unavailable. Please try again later."
+        )
+
+    # Create new verification token (supersedes any previous one)
     verification_token = create_verification_token(user.email)
     user.verification_token = verification_token
+    user.verification_token_expires = datetime.utcnow() + timedelta(hours=24)
     await user.save()
 
-    # Send verification email in background
     background_tasks.add_task(
         email_service.send_verification_email,
         user.email,
         verification_token
     )
 
-    return {"message": "Verification email sent"}
+    return generic
 
 
 @router.post("/forgot-password")

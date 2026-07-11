@@ -217,6 +217,15 @@ async def send_message(sid, data):
         return
 
     try:
+        # Sending requires a verified email (mirrors the REST gate)
+        sender = await User.get(user_id)
+        if not sender or not sender.is_verified:
+            await sio.emit('error', {
+                'code': 'EMAIL_NOT_VERIFIED',
+                'message': 'Please verify your email address to send messages'
+            }, room=sid)
+            return
+
         # Verify chat exists and user is participant
         chat = await Chat.get(chat_id)
         if not chat:
