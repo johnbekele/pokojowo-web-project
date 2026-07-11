@@ -227,3 +227,29 @@ def test_deal_breaker_no_children_rejects_parent(service):
 
 def test_no_deal_breakers_passes(service):
     assert service._check_deal_breakers(make_user(), make_user()) is None
+
+
+# ---------------------------------------------------------------------------
+# Explanation i18n keys (additive)
+# ---------------------------------------------------------------------------
+
+def test_explanations_carry_reason_keys(service):
+    kwargs = dict(
+        budget=(1500, 3000), smokes=False, has_pets=False,
+        cleanliness="clean", personality=["introvert"],
+        wake_up="07:00", sleep_time="23:00",
+        languages=["English", "Polish"], interests=["cooking", "hiking"],
+    )
+    a = make_user(age=25, age_range=[20, 40], **kwargs)
+    b = make_user(age=26, **kwargs)
+
+    _, _, explanations = service._calculate_compatibility(a, b)
+    assert explanations, "expected explanations"
+    keyed = [e for e in explanations if "reason_key" in e]
+    # every emitted explanation template should map to a key
+    assert len(keyed) == len(explanations), [
+        e["reason"] for e in explanations if "reason_key" not in e
+    ]
+    # params extracted where the template has them
+    age_exp = next((e for e in explanations if e.get("reason_key") == "preferences.ageInRange"), None)
+    assert age_exp and age_exp["params"]["age"] == "26"

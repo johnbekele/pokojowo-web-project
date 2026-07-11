@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { translateExplanation } from '../utils/explanations';
 import { ArrowLeft, MessageSquare, MapPin, Check, X, Minus, UserPlus, UserCheck, Loader2, Handshake, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -137,9 +138,9 @@ export default function MatchDetail() {
 
   // Group explanations by impact
   const explanations = {
-    positive: rawExplanations?.filter(e => e.impact === 'positive').map(e => e.reason) || [],
-    neutral: rawExplanations?.filter(e => e.impact === 'neutral').map(e => e.reason) || [],
-    negative: rawExplanations?.filter(e => e.impact === 'negative').map(e => e.reason) || [],
+    positive: rawExplanations?.filter(e => e.impact === 'positive').map(e => translateExplanation(t, e)) || [],
+    neutral: rawExplanations?.filter(e => e.impact === 'neutral').map(e => translateExplanation(t, e)) || [],
+    negative: rawExplanations?.filter(e => e.impact === 'negative').map(e => translateExplanation(t, e)) || [],
   };
 
   const sharedInterests = shared_interests || [];

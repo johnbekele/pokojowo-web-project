@@ -22,6 +22,7 @@ The algorithm evaluates 10+ compatibility dimensions including:
 from typing import List, Dict, Tuple, Optional, Set
 from datetime import datetime, timedelta
 from app.core.locations import region_for_location
+from app.services.explanation_keys import annotate as annotate_explanations
 from app.models.user import (
     User,
     CleanlinessEnum,
@@ -475,6 +476,9 @@ class MatchingService:
         # Sort explanations by impact (positive first, then neutral, then negative)
         impact_order = {"positive": 0, "neutral": 1, "negative": 2}
         explanations.sort(key=lambda x: (impact_order.get(x.get("impact", "neutral"), 1), -x.get("score", 0)))
+
+        # Additive i18n keys; English `reason` retained as fallback
+        annotate_explanations(explanations)
 
         breakdown = {
             "budgetScore": round(scores["budget"], 1),

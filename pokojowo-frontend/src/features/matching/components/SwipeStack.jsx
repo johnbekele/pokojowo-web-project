@@ -9,15 +9,17 @@ import { cn } from '@/lib/utils';
 export default function SwipeStack({ matches = [], onCardClick, onEmpty }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipedCards, setSwipedCards] = useState([]);
-  const { likeUser } = useLikesStore();
+  const { likeUser, passUser, undoPass, unlikeUser } = useLikesStore();
 
   const currentMatches = matches.slice(currentIndex);
   const visibleCards = currentMatches.slice(0, 3);
 
   const handleSwipeLeft = useCallback((userId) => {
+    // Persist the pass so the user stays hidden across reloads
+    passUser(userId);
     setSwipedCards(prev => [...prev, { userId, direction: 'left' }]);
     setCurrentIndex(prev => prev + 1);
-  }, []);
+  }, [passUser]);
 
   const handleSwipeRight = useCallback(async (userId) => {
     // Like the user
@@ -28,10 +30,16 @@ export default function SwipeStack({ matches = [], onCardClick, onEmpty }) {
 
   const handleUndo = useCallback(() => {
     if (swipedCards.length > 0) {
+      const last = swipedCards[swipedCards.length - 1];
+      if (last.direction === 'left') {
+        undoPass(last.userId);
+      } else {
+        unlikeUser(last.userId);
+      }
       setSwipedCards(prev => prev.slice(0, -1));
       setCurrentIndex(prev => Math.max(0, prev - 1));
     }
-  }, [swipedCards]);
+  }, [swipedCards, undoPass, unlikeUser]);
 
   const handleReset = useCallback(() => {
     setCurrentIndex(0);
