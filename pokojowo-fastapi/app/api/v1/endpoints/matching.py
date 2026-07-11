@@ -7,12 +7,45 @@ from typing import Optional, List
 from app.models.user import User, RoleEnum
 from app.core.dependencies import get_current_user, require_verified
 from app.services.matching_service import matching_service
+from app.services import matching_cache
 from app.services.notification_service import notification_service
 from app.services.likes_service import likes_service
 from app.services.favorites_service import favorites_service
 from app.schemas.matching_schema import MatchResponse, MatchResult
 
 router = APIRouter()
+
+FULL_RESULT_LIMIT = 100  # cached entries hold up to this many matches
+
+
+async def get_scored_matches(current_user: User, use_cache: bool = True) -> dict:
+    """Compute (or fetch cached) full scored match results for a user.
+
+    The cache stores the unfiltered result; endpoints slice by their own
+    limit/min_score afterwards. Location-filtered requests bypass this
+    helper's cache path entirely.
+    """
+    user_id = str(current_user.id)
+
+    if use_cache:
+        cached = matching_cache.get(user_id)
+        if cached is not None:
+            return cached
+
+    exclusions = await matching_service.get_interaction_exclusions(current_user)
+    candidates = await matching_service.get_candidates(current_user, exclude_ids=exclusions)
+    results = await matching_service.find_matches(
+        user=current_user,
+        candidates=candidates,
+        limit=FULL_RESULT_LIMIT,
+    )
+    matching_cache.set(user_id, results)
+    return results
+
+
+def slice_results(results: dict, limit: int, min_score: float = 0) -> dict:
+    matches = [m for m in results["matches"] if m["compatibility_score"] >= min_score]
+    return {**results, "matches": matches[:limit]}
 
 
 @router.get("/dashboard", response_model=dict)
@@ -32,14 +65,7 @@ async def get_tenant_dashboard(
 
     user_id = str(current_user.id)
 
-    exclusions = await matching_service.get_interaction_exclusions(current_user)
-    candidates = await matching_service.get_candidates(current_user, exclude_ids=exclusions)
-
-    match_results = await matching_service.find_matches(
-        user=current_user,
-        candidates=candidates,
-        limit=50
-    )
+    match_results = slice_results(await get_scored_matches(current_user), limit=50)
     total_users = match_results["total_candidates"]
 
     # Get likes stats
@@ -116,8 +142,12 @@ async def get_matches(
             detail="Please complete your profile before viewing matches"
         )
 
-    # Fetch candidates (active tenants with completed profiles),
-    # excluding users already passed / pending-liked / mutually matched
+    # Standard deck fetches hit the 5-min cache; location-filtered or
+    # include-passed requests recompute (different candidate sets).
+    if not location and not include_passed:
+        results = await get_scored_matches(current_user)
+        return slice_results(results, limit=limit, min_score=min_score)
+
     import re as _re
     extra_query = None
     if location:
@@ -129,7 +159,6 @@ async def get_matches(
         current_user, extra_query=extra_query, exclude_ids=exclusions
     )
 
-    # Run matching algorithm
     results = await matching_service.find_matches(
         user=current_user,
         candidates=candidates,
@@ -197,16 +226,10 @@ async def refresh_matches(
             detail="Please complete your profile before refreshing matches"
         )
 
-    # Fetch all potential candidates (with swipe-memory exclusions)
-    exclusions = await matching_service.get_interaction_exclusions(current_user)
-    candidates = await matching_service.get_candidates(current_user, exclude_ids=exclusions)
-
-    # Run matching algorithm
-    results = await matching_service.find_matches(
-        user=current_user,
-        candidates=candidates,
-        limit=50  # More results on refresh
-    )
+    # Explicit refresh: bypass and repopulate the cache
+    matching_cache.invalidate(str(current_user.id))
+    full_results = await get_scored_matches(current_user, use_cache=False)
+    results = slice_results(full_results, limit=50)
 
     return {
         "message": "Matches refreshed successfully",
@@ -260,14 +283,8 @@ async def get_matching_stats(
             "message": "Complete your profile to see matching stats"
         }
 
-    # Get quick stats
-    candidates = await matching_service.get_candidates(current_user)
-
-    results = await matching_service.find_matches(
-        user=current_user,
-        candidates=candidates,
-        limit=100
-    )
+    # Get quick stats (shares the 5-min cache with the deck views)
+    results = await get_scored_matches(current_user)
     total_users = results["total_candidates"]
 
     # Calculate score distribution

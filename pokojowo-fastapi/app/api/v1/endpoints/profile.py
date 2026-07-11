@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks
 from app.models.user import User
 from app.core.dependencies import get_current_user
 from app.services.notification_service import notification_service
+from app.services import matching_cache
 from datetime import datetime
 
 router = APIRouter()
@@ -80,6 +81,7 @@ async def update_profile(
 
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
+    matching_cache.clear()
 
     return {"message": "Profile updated successfully"}
 
@@ -102,6 +104,7 @@ async def update_profile_photo(
     current_user.photo = PhotoModel(url=photo_url)
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
+    matching_cache.clear()
 
     return {
         "message": "Profile photo updated successfully",
@@ -177,6 +180,7 @@ async def update_profile_completion(
 
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
+    matching_cache.clear()
 
     return {
         "message": "Profile completion updated",
@@ -359,6 +363,7 @@ async def complete_tenant_profile(
 
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
+    matching_cache.clear()
 
     # If profile just became complete, notify other users about new potential match
     if current_user.is_profile_complete and not was_previously_complete:
@@ -407,6 +412,7 @@ async def update_landlord_profile(
 
     current_user.updated_at = datetime.utcnow()
     await current_user.save()
+    matching_cache.clear()
 
     return {
         "message": "Landlord profile updated successfully",
