@@ -173,6 +173,8 @@
     "linkError": "Cannot open link",
     "linkErrorMessage": "Unable to open the original listing.",
     "privateOwner": "Private owner",
-    "agency": "Agency"
+    "agency": "Agency",
+    "idVerifiedHost": "ID Verified host",
+    "verifiedHost": "Verified host"
   }
 }

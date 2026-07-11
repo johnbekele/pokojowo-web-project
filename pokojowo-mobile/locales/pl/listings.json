@@ -177,6 +177,8 @@
     "linkError": "Nie można otworzyć linku",
     "linkErrorMessage": "Nie można otworzyć oryginalnego ogłoszenia.",
     "privateOwner": "Właściciel prywatny",
-    "agency": "Agencja"
+    "agency": "Agencja",
+    "idVerifiedHost": "Gospodarz zweryfikowany (ID)",
+    "verifiedHost": "Zweryfikowany gospodarz"
   }
 }

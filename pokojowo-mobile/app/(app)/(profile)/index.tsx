@@ -11,6 +11,8 @@ import {
   Globe,
   Building2,
   Users,
+  Phone,
+  ShieldCheck,
 } from 'lucide-react-native';
 
 import useAuthStore from '@/stores/authStore';
@@ -34,12 +36,22 @@ export default function ProfileScreen() {
       label: t('menu.editProfile', 'Edit Profile'),
       href: '/(app)/(profile)/edit',
     },
+    {
+      icon: Phone,
+      label: t('menu.verifyPhone', 'Verify phone'),
+      href: '/(app)/(profile)/verify-phone',
+    },
     ...(isLandlord
       ? [
           {
             icon: Building2,
             label: t('menu.landlordDashboard', 'Landlord Dashboard'),
             href: '/(app)/(landlord)/dashboard',
+          },
+          {
+            icon: ShieldCheck,
+            label: t('menu.landlordVerification', 'Landlord verification'),
+            href: '/(app)/(landlord)/verification',
           },
         ]
       : []),

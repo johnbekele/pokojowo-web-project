@@ -10,6 +10,10 @@ export interface User {
   photo?: string | { url?: string };
   age?: number; // computed server-side from dateOfBirth when set
   dateOfBirth?: string;
+  phoneVerified?: boolean;
+  trustScore?: number;
+  trustLevel?: 'unverified' | 'verified' | 'id_verified';
+  isVerified?: boolean;
   gender?: 'male' | 'female' | 'other';
   bio?: string;
   languages?: string[];

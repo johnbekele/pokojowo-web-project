@@ -202,5 +202,71 @@
       "removed": "Profil usunięty z zapisanych.",
       "added": "Profil dodany do zapisanych."
     }
+  },
+  "explanations": {
+    "budget": {
+      "incomplete": "Niepełne informacje o budżecie - trudno w pełni ocenić",
+      "currencyMismatch": "Różne waluty ({{a}} vs {{b}})",
+      "excellent": "Świetne dopasowanie budżetu ({{range}} dobrze się pokrywa)",
+      "good": "Dobre pokrycie budżetów, potrzebna odrobina elastyczności",
+      "limited": "Ograniczone pokrycie budżetów - może wymagać negocjacji",
+      "mismatch": "Znacząca rozbieżność budżetów (Twój {{yours}} vs ich {{theirs}})"
+    },
+    "lifestyle": {
+      "smokingConflict": "Konflikt preferencji dotyczących palenia",
+      "bothNonSmokers": "Oboje niepalący - czyste powietrze w mieszkaniu",
+      "petMismatch": "Rozbieżność w kwestii zwierząt - do omówienia",
+      "openToPets": "Akceptujesz zwierzęta - kandydat je ma",
+      "similarCleanliness": "Podobne standardy czystości ({{level}})",
+      "differentCleanliness": "Różne oczekiwania co do czystości - możliwe tarcia",
+      "compatibleSocial": "Zgodny poziom towarzyskości",
+      "differentGuests": "Różne preferencje dotyczące gości",
+      "differentNoise": "Bardzo różna tolerancja hałasu - możliwe konflikty",
+      "bothCook": "Oboje lubicie gotować - wspólny czas w kuchni"
+    },
+    "personality": {
+      "notSpecified": "Cechy osobowości nieokreślone",
+      "bothIntroverts": "Oboje introwertycy - uszanujecie swoją przestrzeń",
+      "bothExtroverts": "Oboje ekstrawertycy - świetnie do wspólnego życia towarzyskiego",
+      "introExtroMix": "Mieszanka introwertyk-ekstrawertyk może wymagać dotarcia",
+      "bothEarlyBirds": "Oboje ranne ptaszki - zsynchronizowane poranki",
+      "bothNightOwls": "Oboje nocne marki - zgodność późnych godzin",
+      "oppositeSleep": "Przeciwne rytmy snu - możliwe konflikty hałasu",
+      "bothTidy": "Oboje cenicie porządek - czyste wspólne przestrzenie",
+      "differentTidiness": "Różne standardy porządku - możliwe napięcia",
+      "quietTalkativeMix": "Mieszanka cichy-rozmowny - zbalansujcie style komunikacji"
+    },
+    "schedule": {
+      "notAvailable": "Brak informacji o harmonogramie dnia",
+      "wakeIdentical": "Niemal identyczne pory wstawania ({{time}})",
+      "wakeDifferent": "Bardzo różne pory wstawania ({{a}} vs {{b}})",
+      "sleepAligned": "Pory snu idealnie się pokrywają",
+      "sleepDifferent": "Bardzo różne pory snu - uwaga na hałas",
+      "staggeredWork": "Przesunięte godziny pracy - mniejszy poranny tłok"
+    },
+    "location": {
+      "bothInterested": "Oboje zainteresowani lokalizacją {{location}}",
+      "similarRegions": "Szukacie w podobnych regionach",
+      "different": "Różne lokalizacje ({{a}} vs {{b}})",
+      "differentCountry": "Różne preferencje krajów",
+      "notSpecified": "Preferencje lokalizacji nieokreślone"
+    },
+    "preferences": {
+      "ageInRange": "Wiek ({{age}}) mieści się w Twoim preferowanym przedziale",
+      "ageOutOfRange": "Wiek ({{age}}) poza Twoim przedziałem {{range}}",
+      "sameLease": "Ta sama preferowana długość najmu ({{months}} mies.)",
+      "differentLease": "Różne preferencje najmu ({{a}} vs {{b}} mies.)",
+      "sharedLanguages": "Wspólne języki ({{count}}): {{languages}}",
+      "noCommonLanguages": "Brak wspólnego języka - komunikacja może być trudna",
+      "incomplete": "Niepełne informacje o preferencjach"
+    },
+    "interests": {
+      "strongOverlap": "Duże pokrycie zainteresowań: {{interests}}",
+      "shared": "Wspólne zainteresowania ({{count}}): {{interests}}",
+      "one": "Jedno wspólne zainteresowanie: {{interest}}",
+      "none": "Brak wspólnych zainteresowań - różne hobby",
+      "noneYours": "Nie podałeś/aś zainteresowań w profilu",
+      "noneTheirs": "Kandydat nie podał zainteresowań"
+    }
   }
 }

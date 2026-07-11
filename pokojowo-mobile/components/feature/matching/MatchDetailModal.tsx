@@ -1,5 +1,6 @@
 import { View, Text, Image, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import {
   Heart,
   MapPin,
@@ -16,6 +17,7 @@ import {
 import { Modal, Button, Badge, Avatar } from '@/components/ui';
 import { matchingService } from '@/services';
 import type { MatchResult } from '@/types/matching.types';
+import { translateExplanation } from '@/lib/explanations';
 import { COLORS } from '@/lib/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -92,6 +94,7 @@ export default function MatchDetailModal({
 
   const compatibility_score = userData.compatibility_score || 0;
   const score_breakdown = userData.score_breakdown;
+  const { t } = useTranslation('matching');
   const rawExplanations = (userData as any).explanations || [];
   const shared_interests = (userData as any).shared_interests || [];
   const shared_languages = (userData as any).shared_languages || [];
@@ -262,19 +265,19 @@ export default function MatchDetailModal({
                   {explanations.positive.map((exp: any, i: number) => (
                     <View key={i} className="flex-row items-start gap-2 bg-green-50 rounded-lg p-3">
                       <Check size={16} color={COLORS.success} className="mt-0.5" />
-                      <Text className="flex-1 text-green-700 text-sm">{exp.reason}</Text>
+                      <Text className="flex-1 text-green-700 text-sm">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                   {explanations.neutral.map((exp: any, i: number) => (
                     <View key={i} className="flex-row items-start gap-2 bg-gray-100 rounded-lg p-3">
                       <Minus size={16} color={COLORS.gray[500]} className="mt-0.5" />
-                      <Text className="flex-1 text-gray-600 text-sm">{exp.reason}</Text>
+                      <Text className="flex-1 text-gray-600 text-sm">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                   {explanations.negative.map((exp: any, i: number) => (
                     <View key={i} className="flex-row items-start gap-2 bg-yellow-50 rounded-lg p-3">
                       <X size={16} color={COLORS.warning} className="mt-0.5" />
-                      <Text className="flex-1 text-yellow-700 text-sm">{exp.reason}</Text>
+                      <Text className="flex-1 text-yellow-700 text-sm">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                 </View>

@@ -7,7 +7,9 @@
     "favorites": "Zapisane profile",
     "language": "Język",
     "settings": "Ustawienia",
-    "logout": "Wyloguj się"
+    "logout": "Wyloguj się",
+    "verifyPhone": "Zweryfikuj telefon",
+    "landlordVerification": "Weryfikacja wynajmującego"
   },
   "completion": {
     "title": "Uzupełnij profil",
@@ -213,5 +215,39 @@
     "partner": "Wprowadzę się z partnerem/partnerką",
     "children": "Mieszkają ze mną dzieci",
     "childrenCount": "Ile dzieci?"
+  },
+  "phoneVerification": {
+    "title": "Zweryfikuj telefon",
+    "verifiedTitle": "Telefon zweryfikowany",
+    "subtitle": "Zweryfikowany numer daje odznakę zaufania i wyższą pozycję w dopasowaniach.",
+    "sendCode": "Wyślij kod",
+    "confirm": "Potwierdź",
+    "changeNumber": "Zmień numer",
+    "enterCode": "Wpisz 6-cyfrowy kod wysłany na {{phone}}.",
+    "success": "Telefon zweryfikowany!",
+    "startFailed": "Nie udało się wysłać kodu",
+    "checkFailed": "Nieprawidłowy kod",
+    "rateLimited": "Zbyt wiele prób",
+    "rateLimitedHintShort": "Spróbuj ponownie później."
+  },
+  "verification": {
+    "title": "Weryfikacja wynajmującego",
+    "verifiedTitle": "Zweryfikowany wynajmujący (ID)",
+    "subtitle": "Prześlij dokument tożsamości i potwierdzenie własności. Administrator sprawdzi dokumenty; zweryfikowani wynajmujący otrzymują wyróżniającą odznakę.",
+    "selectType": "Rodzaj dokumentu",
+    "upload": "Prześlij dokument",
+    "submitted": "Dokument przesłany do weryfikacji",
+    "uploadFailed": "Przesyłanie nie powiodło się",
+    "docTypes": {
+      "id_card": "Dowód osobisty / paszport",
+      "ownership_deed": "Akt własności",
+      "utility_bill": "Rachunek za media",
+      "business_registration": "Rejestracja działalności"
+    },
+    "status": {
+      "pending": "oczekuje na weryfikację",
+      "approved": "zatwierdzony",
+      "rejected": "odrzucony"
+    }
   }
 }

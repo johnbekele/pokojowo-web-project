@@ -403,11 +403,15 @@ export default function ListingDetailScreen() {
                         ? `${listing.owner.firstname} ${listing.owner.lastname || ''}`.trim()
                         : listing.owner.username}
                     </Text>
-                    {listing.owner.is_verified && (
-                      <Badge variant="success" size="sm" className="mt-1">
-                        Verified
+                    {(listing.owner as any).trustLevel === 'id_verified' || (listing.owner as any).isVerifiedLandlord ? (
+                      <Badge variant="primary" size="sm" className="mt-1">
+                        {t('detail.idVerifiedHost', 'ID Verified host')}
                       </Badge>
-                    )}
+                    ) : (listing.owner as any).trustLevel === 'verified' ? (
+                      <Badge variant="success" size="sm" className="mt-1">
+                        {t('detail.verifiedHost', 'Verified host')}
+                      </Badge>
+                    ) : null}
                   </View>
                 </View>
               </Card>

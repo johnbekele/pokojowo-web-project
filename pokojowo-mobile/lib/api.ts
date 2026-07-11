@@ -55,6 +55,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    // Verification gate: tag the structured 403 so screens can show a
+    // verify-email CTA instead of a generic error
+    const notVerifiedDetail = (error.response?.data as any)?.detail;
+    if (
+      error.response?.status === 403 &&
+      notVerifiedDetail &&
+      typeof notVerifiedDetail === 'object' &&
+      notVerifiedDetail.code === 'EMAIL_NOT_VERIFIED'
+    ) {
+      (error as any).isEmailNotVerified = true;
+      (error as any).friendlyMessage = notVerifiedDetail.message;
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };

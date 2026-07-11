@@ -12,7 +12,7 @@ import { Heart, X, RotateCcw, Undo2 } from 'lucide-react-native';
 
 import SwipeCard from './SwipeCard';
 import { Button } from '@/components/ui';
-import { useUnlikeUser } from '@/hooks/likes/useLikes';
+import { usePassUser, useUndoPass, useUnlikeUser } from '@/hooks/likes/useLikes';
 import type { MatchResult } from '@/types/matching.types';
 import { COLORS } from '@/lib/constants';
 
@@ -45,6 +45,8 @@ export default function SwipeStack({
 
   const position = useRef(new Animated.ValueXY()).current;
   const { mutate: unlikeUser } = useUnlikeUser();
+  const { mutate: passUser } = usePassUser();
+  const { mutate: undoPass } = useUndoPass();
 
   const rotate = position.x.interpolate({
     inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
@@ -104,13 +106,15 @@ export default function SwipeStack({
       useNativeDriver: false,
     }).start(() => {
       if (match) {
+        // Persist the pass so the user stays hidden across restarts
+        passUser(match.user_id);
         onSwipeLeft(match);
         setLastSwipe({ direction: 'left', match });
       }
       setCurrentIndex((prev) => prev + 1);
       position.setValue({ x: 0, y: 0 });
     });
-  }, [currentIndex, matches, onSwipeLeft, position]);
+  }, [currentIndex, matches, onSwipeLeft, passUser, position]);
 
   const swipeRight = useCallback(() => {
     const match = matches[currentIndex];
@@ -139,15 +143,17 @@ export default function SwipeStack({
   const handleUndo = useCallback(() => {
     if (currentIndex <= 0 || !lastSwipe.match) return;
 
-    // If last swipe was a like (right), unlike the user
+    // Revert the persisted action for the last swipe
     if (lastSwipe.direction === 'right' && lastSwipe.match) {
       unlikeUser(lastSwipe.match.user_id);
+    } else if (lastSwipe.direction === 'left' && lastSwipe.match) {
+      undoPass(lastSwipe.match.user_id);
     }
 
     // Go back to previous card
     setCurrentIndex((prev) => prev - 1);
     setLastSwipe({ direction: null, match: null });
-  }, [currentIndex, lastSwipe, unlikeUser]);
+  }, [currentIndex, lastSwipe, undoPass, unlikeUser]);
 
   const canUndo = currentIndex > 0 && lastSwipe.match !== null;
   const visibleMatches = matches.slice(currentIndex, currentIndex + 2);
