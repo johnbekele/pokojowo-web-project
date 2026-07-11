@@ -11,6 +11,7 @@ from app.models.pass_model import Pass
 from app.core.dependencies import get_current_user, require_verified
 from app.services.likes_service import likes_service
 from app.services.matching_service import matching_service
+from app.services import matching_cache
 
 router = APIRouter()
 
@@ -53,6 +54,8 @@ async def pass_user(
         "status": LikeStatusEnum.PENDING,
     }).delete()
 
+    matching_cache.invalidate(str(current_user.id))
+
     return {"status": "passed", "user_id": user_id}
 
 
@@ -66,6 +69,8 @@ async def undo_pass(
         "passerId": str(current_user.id),
         "passedUserId": user_id,
     }).delete()
+
+    matching_cache.invalidate(str(current_user.id))
 
     return {
         "status": "unpassed" if result.deleted_count else "not_passed",
@@ -116,6 +121,11 @@ async def like_user(
         liked_user_id=user_id,
         compatibility_score=compatibility_score
     )
+
+    # Both decks change: mine (pending-like exclusion) and, on a mutual
+    # match, theirs too
+    matching_cache.invalidate(str(current_user.id))
+    matching_cache.invalidate(user_id)
 
     return result
 

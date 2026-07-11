@@ -99,20 +99,22 @@ class NotificationService:
 
         notifications_sent = 0
 
+        # One scoring pass per candidate instead of a full find_matches
+        # run each (was O(N * full-scoring) per profile completion)
         for existing_user in existing_users:
-            # Check if new_user is a good match for existing_user
-            results = await matching_service.find_matches(
-                user=existing_user,
-                candidates=[new_user],
-                limit=1,
-                min_score=self.min_score_for_notification
-            )
+            score, _, _, rejection = matching_service.score_pair(existing_user, new_user)
+            if rejection or score is None or score < self.min_score_for_notification:
+                continue
 
-            if results["matches"]:
-                match = results["matches"][0]
-                success = await self._send_match_notification(existing_user, match)
-                if success:
-                    notifications_sent += 1
+            match = {
+                "user_id": str(new_user.id),
+                "firstname": new_user.firstname,
+                "username": new_user.username,
+                "compatibility_score": round(score, 1),
+            }
+            success = await self._send_match_notification(existing_user, match)
+            if success:
+                notifications_sent += 1
 
         return {
             "status": "success",
