@@ -72,10 +72,12 @@ class ListingMatchService:
         compatible_users = []
 
         for candidate in interested_users:
-            # Calculate compatibility score using the matching service
-            score, breakdown, explanations = matching_service._calculate_compatibility(
+            # Score via score_pair so deal-breakers apply consistently
+            score, breakdown, explanations, rejection = matching_service.score_pair(
                 current_user, candidate
             )
+            if rejection:
+                continue
 
             # Only include if meets minimum threshold
             if score >= min_compatibility:
@@ -138,10 +140,12 @@ class ListingMatchService:
         # Build user lookup dict
         users_dict = {str(u.id): u for u in users_list}
 
-        # Pre-calculate compatibility for all unique users
+        # Pre-calculate compatibility for all unique users (deal-breakers apply)
         compatibility_cache = {}
         for user_id, user in users_dict.items():
-            score, _, _ = matching_service._calculate_compatibility(current_user, user)
+            score, _, _, rejection = matching_service.score_pair(current_user, user)
+            if rejection:
+                continue
             compatibility_cache[user_id] = {
                 "user_id": user_id,
                 "firstname": user.firstname,
