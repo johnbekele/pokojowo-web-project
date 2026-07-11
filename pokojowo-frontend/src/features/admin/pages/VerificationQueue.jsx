@@ -64,6 +64,25 @@ export default function VerificationQueue() {
     },
   });
 
+  const { data: reportsData } = useQuery({
+    queryKey: ['admin', 'reports'],
+    queryFn: async () => (await api.get('/admin/reports')).data,
+  });
+
+  const resolveMutation = useMutation({
+    mutationFn: async ({ reportId, outcome }) =>
+      (await api.post(`/admin/reports/${reportId}/resolve`, { outcome })).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'reports'] }),
+  });
+
+  const banMutation = useMutation({
+    mutationFn: async (userId) => (await api.post(`/admin/users/${userId}/ban`)).data,
+    onSuccess: () => {
+      toast({ title: t('admin.reports.banned', 'User banned') });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'reports'] });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -73,6 +92,7 @@ export default function VerificationQueue() {
   }
 
   const queue = data?.queue || [];
+  const reports = reportsData?.reports || [];
 
   return (
     <div className="container max-w-3xl mx-auto px-4 py-8 space-y-6">
@@ -133,6 +153,57 @@ export default function VerificationQueue() {
                     {t('admin.review.reject', 'Reject')}
                   </Button>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
+
+      <h2 className="text-2xl font-bold pt-6">
+        {t('admin.reports.title', 'Open reports')}
+      </h2>
+      {reports.length === 0 ? (
+        <p className="text-muted-foreground py-6 text-center">
+          {t('admin.reports.empty', 'No open reports.')}
+        </p>
+      ) : (
+        reports.map((report) => (
+          <Card key={report.id}>
+            <CardContent className="pt-6 space-y-3">
+              <p className="text-sm">
+                <span className="font-semibold">@{report.reporter?.username}</span>{' '}
+                {t('admin.reports.reportedLabel', 'reported')}{' '}
+                <span className="font-semibold">@{report.reported?.username}</span>{' '}
+                — <span className="uppercase text-xs tracking-wide">{report.reason}</span>
+              </p>
+              {report.details && (
+                <p className="text-sm text-muted-foreground">"{report.details}"</p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => resolveMutation.mutate({ reportId: report.id, outcome: 'resolved' })}
+                >
+                  {t('admin.reports.resolve', 'Resolve')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => resolveMutation.mutate({ reportId: report.id, outcome: 'dismissed' })}
+                >
+                  {t('admin.reports.dismiss', 'Dismiss')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={report.reported?.isActive === false}
+                  onClick={() => banMutation.mutate(report.reported.user_id)}
+                >
+                  {report.reported?.isActive === false
+                    ? t('admin.reports.alreadyBanned', 'Banned')
+                    : t('admin.reports.ban', 'Ban user')}
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import SafetyActions from '@/components/shared/SafetyActions';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -318,6 +319,12 @@ export default function ChatRoom() {
             {otherUser?.isOnline ? t('online', 'Online') : t('offline', 'Offline')}
           </p>
         </div>
+        {(otherUser?._id || otherUser?.id) && (
+          <SafetyActions
+            userId={otherUser._id || otherUser.id}
+            onBlocked={() => navigate('/chat')}
+          />
+        )}
       </div>
 
       {/* Messages */}

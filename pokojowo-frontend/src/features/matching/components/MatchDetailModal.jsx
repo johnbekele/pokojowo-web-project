@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { translateExplanation } from '../utils/explanations';
 import TrustLevelBadge from '@/components/shared/TrustLevelBadge';
+import SafetyActions from '@/components/shared/SafetyActions';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -300,6 +301,12 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
                     )}
                   </>
                 )}
+
+                <SafetyActions
+                  userId={user_id}
+                  onBlocked={onClose}
+                  className="justify-center mb-4"
+                />
 
                 {/* View full profile link */}
                 <Link

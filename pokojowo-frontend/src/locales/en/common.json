@@ -102,10 +102,38 @@
       "ownership_deed": "Ownership deed",
       "utility_bill": "Utility bill",
       "business_registration": "Business registration"
+    },
+    "reports": {
+      "title": "Open reports",
+      "empty": "No open reports.",
+      "reportedLabel": "reported",
+      "resolve": "Resolve",
+      "dismiss": "Dismiss",
+      "ban": "Ban user",
+      "alreadyBanned": "Banned",
+      "banned": "User banned"
     }
   },
   "trust": {
     "verified": "Verified",
     "idVerified": "ID Verified"
+  },
+  "safety": {
+    "report": "Report",
+    "block": "Block",
+    "cancel": "Cancel",
+    "submitReport": "Submit",
+    "reported": "Report submitted. Our team will review it.",
+    "reportFailed": "Could not submit the report",
+    "blocked": "User blocked",
+    "blockFailed": "Could not block the user",
+    "reasons": {
+      "spam": "Spam",
+      "scam": "Scam",
+      "harassment": "Harassment",
+      "fake_profile": "Fake profile",
+      "inappropriate_content": "Inappropriate content",
+      "other": "Other"
+    }
   }
 }

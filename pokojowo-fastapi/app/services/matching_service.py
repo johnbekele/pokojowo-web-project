@@ -99,6 +99,10 @@ class MatchingService:
         me = str(user.id)
         excluded: Set = set()
 
+        # Blocks are always excluded, both directions
+        from app.core.blocking import blocked_ids_for
+        excluded |= await blocked_ids_for(user)
+
         if not include_passed:
             async for p in Pass.find({"passerId": me}):
                 excluded.add(p.passed_user_id)
