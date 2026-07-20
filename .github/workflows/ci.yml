@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    name: Backend tests (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokojowo-fastapi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pokojowo-fastapi/requirements*.txt
+      - name: Install libmagic
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libmagic1
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      - name: Run tests
+        run: pytest -q
+      - name: Import smoke test
+        env:
+          DEBUG: "True"
+          MONGODB_URL: mongodb://localhost:27017
+        run: python -c "import main"
+
+  web-build:
+    name: Web build (vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokojowo-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pokojowo-frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+
+  mobile-typecheck:
+    name: Mobile typecheck (tsc)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokojowo-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pokojowo-mobile/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck (3 pre-existing errors are the accepted baseline)
+        run: |
+          set +e
+          npx tsc --noEmit 2>&1 | tee tsc.log
+          COUNT=$(grep -cE "error TS" tsc.log || true)
+          echo "tsc errors: $COUNT (baseline: 3)"
+          if [ "$COUNT" -gt 3 ]; then
+            echo "::error::tsc error count ($COUNT) exceeds the accepted baseline of 3"
+            exit 1
+          fi
