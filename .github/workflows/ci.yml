@@ -27,6 +27,8 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
       - name: Run tests
+        env:
+          DEBUG: "True"  # dev-mode SECRET_KEY fallback; tests need no real secret
         run: pytest -q
       - name: Import smoke test
         env:
