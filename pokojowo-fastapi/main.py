@@ -115,6 +115,29 @@ async def health_check():
     return {"status": "healthy", "version": settings.APP_VERSION}
 
 
+@app.get("/health/details")
+async def health_details():
+    """Health check with dependency connectivity (no auth).
+
+    Always answers HTTP 200 so load balancers can read the body;
+    `status` flips to "degraded" when a dependency is down.
+    """
+    from app.core.database import db
+
+    database = "error"
+    try:
+        await db.client.admin.command("ping")
+        database = "connected"
+    except Exception:
+        pass
+
+    return {
+        "status": "healthy" if database == "connected" else "degraded",
+        "database": database,
+        "version": settings.APP_VERSION,
+    }
+
+
 # Debug endpoint to check CORS configuration
 @app.get("/debug/cors")
 async def debug_cors():
