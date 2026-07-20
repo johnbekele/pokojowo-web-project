@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 import socketio
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from app.core.config import settings
@@ -18,6 +19,9 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+# Process start time, captured at import so /health/details can report uptime
+_STARTED_AT = datetime.utcnow()
 
 # Create FastAPI app
 app = FastAPI(
@@ -135,6 +139,7 @@ async def health_details():
         "status": "healthy" if database == "connected" else "degraded",
         "database": database,
         "version": settings.APP_VERSION,
+        "uptime_seconds": int((datetime.utcnow() - _STARTED_AT).total_seconds()),
     }
 
 
