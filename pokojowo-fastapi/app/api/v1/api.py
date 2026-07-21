@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, users, listings, messages, chat, upload, profile, matching, admin, favorites, likes, listing_interactions, notifications, verification
+from app.api.v1.endpoints import auth, users, listings, messages, chat, upload, profile, matching, admin, favorites, likes, listing_interactions, notifications, verification, saved_searches
 
 api_router = APIRouter()
 
@@ -17,3 +17,4 @@ api_router.include_router(likes.router, prefix="/likes", tags=["Likes"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(verification.router, prefix="/verification", tags=["Verification"])
+api_router.include_router(saved_searches.router, prefix="/saved-searches", tags=["saved-searches"])
