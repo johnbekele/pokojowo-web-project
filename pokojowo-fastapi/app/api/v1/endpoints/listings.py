@@ -104,6 +104,11 @@ async def create_listing(
 
     await listing.insert()
 
+    # Fire-and-forget: notify users whose saved search matches this listing.
+    import asyncio
+    from app.services import saved_search_service
+    asyncio.create_task(saved_search_service.notify_matching_saved_searches(listing))
+
     return {
         "message": "Listing created successfully",
         "listing_id": str(listing.id)
@@ -372,6 +377,11 @@ async def import_scraped_listing(
     )
 
     await listing.insert()
+
+    # Fire-and-forget: notify users whose saved search matches this listing.
+    import asyncio
+    from app.services import saved_search_service
+    asyncio.create_task(saved_search_service.notify_matching_saved_searches(listing))
 
     return {
         "message": "Scraped listing imported successfully",

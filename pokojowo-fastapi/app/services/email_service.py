@@ -336,6 +336,85 @@ class EmailService:
 
         return await self.send_email(to_email, subject, html_content, text_content)
 
+    async def send_saved_search_match_notification(
+        self,
+        to_email: str,
+        search_name: str,
+        listing_address: str,
+        url: str
+    ) -> bool:
+        """
+        Notify a user that a new listing matches one of their saved searches.
+
+        Args:
+            to_email: User's email address
+            search_name: Name of the saved search that matched
+            listing_address: Address of the new matching listing
+            url: Link back to the saved search on /discover
+
+        Returns:
+            bool: True if email was sent successfully (no-ops when SMTP unset)
+        """
+        subject = f"New listing matches your saved search \"{search_name}\""
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>New Saved-Search Match</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 28px;">New Listing Found!</h1>
+            </div>
+            <div style="background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px;">
+                <p style="font-size: 16px;">Hi there,</p>
+
+                <p style="font-size: 16px; margin-bottom: 20px;">A new listing just went up that matches your saved search <strong>{search_name}</strong>.</p>
+
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0;">
+                    <p style="font-size: 18px; font-weight: 600; margin: 0;">{listing_address}</p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{url}"
+                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                              color: white;
+                              padding: 14px 30px;
+                              text-decoration: none;
+                              border-radius: 8px;
+                              font-weight: 600;
+                              font-size: 16px;
+                              display: inline-block;">
+                        View Matching Listings
+                    </a>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+
+                <p style="font-size: 12px; color: #999; text-align: center;">
+                    You're receiving this because you enabled notifications for a saved search.
+                    <a href="{self.frontend_url}/settings" style="color: #667eea;">Manage preferences</a>
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+
+        text_content = f"""
+        Hi there,
+
+        A new listing just went up that matches your saved search "{search_name}".
+
+        {listing_address}
+
+        View matching listings: {url}
+        """
+
+        return await self.send_email(to_email, subject, html_content, text_content)
+
     async def send_new_message_notification(
         self,
         to_email: str,

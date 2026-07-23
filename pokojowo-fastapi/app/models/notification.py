@@ -14,6 +14,7 @@ class NotificationTypeEnum(str, Enum):
     NEW_LIKE = "new_like"
     MUTUAL_MATCH = "mutual_match"
     NEW_MESSAGE = "new_message"
+    SAVED_SEARCH_MATCH = "saved_search_match"
     SYSTEM = "system"
 
 
