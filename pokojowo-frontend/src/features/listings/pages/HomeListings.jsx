@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -10,6 +10,7 @@ import {
   Bed,
   Users,
   ArrowUpRight,
+  Bookmark,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -32,10 +33,12 @@ import {
   MediaFrame,
 } from "@/components/shared/editorial";
 import SearchFilters from "../components/SearchFilters";
+import SaveSearchDialog from "../components/SaveSearchDialog";
 import InterestedUsersPreview from "../components/InterestedUsersPreview";
 import ListingLikeButton from "../components/ListingLikeButton";
-import api from "@/lib/api";
+import api, { normalizeError } from "@/lib/api";
 import { formatCurrency, cn } from "@/lib/utils";
+import { useToast } from "@/hooks/useToast";
 import useListingInteractionStore from "@/stores/listingInteractionStore";
 import useAuthStore from "@/stores/authStore";
 
@@ -55,6 +58,46 @@ const DEFAULT_FILTERS = {
   offeredBy: null,
 };
 
+const MAX_PRICE = 10000;
+const MAX_SIZE = 200;
+
+// True when the user has set anything worth saving — mirrors the active-count
+// logic in SearchFilters, plus the free-text search box.
+function hasActiveFilters(filters, search) {
+  return (
+    !!search ||
+    filters.minPrice > 0 ||
+    filters.maxPrice < MAX_PRICE ||
+    filters.minSize > 0 ||
+    filters.maxSize < MAX_SIZE ||
+    filters.roomTypes?.length > 0 ||
+    filters.buildingTypes?.length > 0 ||
+    filters.rentFor?.length > 0 ||
+    !!filters.maxTenants ||
+    !!filters.city ||
+    filters.districts?.length > 0 ||
+    !!filters.offeredBy
+  );
+}
+
+// Map a saved-search API response back into the DEFAULT_FILTERS shape so it can
+// be applied to local filter state.
+function savedSearchToFilters(s) {
+  return {
+    minPrice: s.minPrice ?? 0,
+    maxPrice: s.maxPrice ?? MAX_PRICE,
+    minSize: s.minSize ?? 0,
+    maxSize: s.maxSize ?? MAX_SIZE,
+    roomTypes: s.roomTypes || [],
+    buildingTypes: s.buildingTypes || [],
+    rentFor: s.rentFor || [],
+    maxTenants: s.maxTenants ?? null,
+    city: s.city || '',
+    districts: s.districts || [],
+    offeredBy: s.offeredBy ?? null,
+  };
+}
+
 // Each chip displays a localized label but searches with the canonical English
 // query so it matches addresses already stored in the database.
 const CITY_CHIPS = [
@@ -68,12 +111,49 @@ const CITY_CHIPS = [
 
 export default function HomeListings() {
   const { t } = useTranslation("listings");
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } =
     useListingInteractionStore();
+
+  // Apply a saved search from ?savedSearch=<id> once per id (deep-link target
+  // for notifications and the profile "Run" button). 404 → toast + strip param.
+  const appliedSavedSearch = useRef(null);
+  useEffect(() => {
+    const id = searchParams.get("savedSearch");
+    if (!id || appliedSavedSearch.current === id) return;
+    appliedSavedSearch.current = id;
+    (async () => {
+      try {
+        const { data } = await api.get(`/saved-searches/${id}`);
+        setFilters(savedSearchToFilters(data));
+        setSearchQuery(data.search || "");
+      } catch (error) {
+        const { status } = normalizeError(error);
+        toast({
+          title:
+            status === 404
+              ? t("savedSearches.applyNotFound", "That saved search no longer exists")
+              : t("savedSearches.applyFailed", "Could not load that saved search"),
+          variant: "destructive",
+        });
+        setSearchParams(
+          (prev) => {
+            const next = new URLSearchParams(prev);
+            next.delete("savedSearch");
+            return next;
+          },
+          { replace: true },
+        );
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   useEffect(() => {
@@ -161,6 +241,18 @@ export default function HomeListings() {
               onFiltersChange={setFilters}
               onReset={() => setFilters(DEFAULT_FILTERS)}
             />
+            {user && hasActiveFilters(filters, searchQuery) && (
+              <Button
+                variant="outline"
+                className="gap-2 min-h-[44px]"
+                onClick={() => setShowSaveDialog(true)}
+              >
+                <Bookmark className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {t("savedSearches.button", "Save search")}
+                </span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -248,6 +340,13 @@ export default function HomeListings() {
           </div>
         )}
       </EditorialSection>
+
+      <SaveSearchDialog
+        open={showSaveDialog}
+        onOpenChange={setShowSaveDialog}
+        filters={filters}
+        search={searchQuery}
+      />
     </div>
   );
 }

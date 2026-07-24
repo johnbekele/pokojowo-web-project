@@ -206,5 +206,18 @@
       "notFound": "Address not found — click the map to place the pin.",
       "dragHint": "Click the map or drag the pin to the exact spot."
     }
+  },
+  "savedSearches": {
+    "button": "Save search",
+    "dialogTitle": "Save this search",
+    "dialogDescription": "Name your current filters so you can run them again later.",
+    "nameLabel": "Search name",
+    "namePlaceholder": "e.g. Warsaw under 2500",
+    "save": "Save search",
+    "cancel": "Cancel",
+    "saved": "Search saved",
+    "saveFailed": "Could not save search",
+    "applyNotFound": "That saved search no longer exists",
+    "applyFailed": "Could not load that saved search"
   }
 }
