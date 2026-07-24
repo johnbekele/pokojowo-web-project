@@ -212,5 +212,18 @@
       "notFound": "Nie znaleziono adresu — kliknij mapę, aby ustawić pinezkę.",
       "dragHint": "Kliknij mapę lub przeciągnij pinezkę w dokładne miejsce."
     }
+  },
+  "savedSearches": {
+    "button": "Zapisz wyszukiwanie",
+    "dialogTitle": "Zapisz to wyszukiwanie",
+    "dialogDescription": "Nazwij bieżące filtry, aby uruchomić je ponownie później.",
+    "nameLabel": "Nazwa wyszukiwania",
+    "namePlaceholder": "np. Warszawa poniżej 2500",
+    "save": "Zapisz wyszukiwanie",
+    "cancel": "Anuluj",
+    "saved": "Wyszukiwanie zapisane",
+    "saveFailed": "Nie udało się zapisać wyszukiwania",
+    "applyNotFound": "To zapisane wyszukiwanie już nie istnieje",
+    "applyFailed": "Nie udało się wczytać tego zapisanego wyszukiwania"
   }
 }
