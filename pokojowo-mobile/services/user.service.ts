@@ -79,6 +79,11 @@ export const userService = {
   updateMe: (data: UserUpdateData) =>
     api.put<{ message: string }>('/users/me', data),
 
+  // Store the device's Expo push token on the user. Backend may ignore the
+  // field until a dedicated endpoint exists; failures are handled by callers.
+  updatePushToken: (expoPushToken: string) =>
+    api.put<{ message: string }>('/users/me', { expoPushToken }),
+
   updateRole: (role: 'tenant' | 'landlord') =>
     api.put<RoleUpdateResponse>('/users/me/role', { role }),
 
