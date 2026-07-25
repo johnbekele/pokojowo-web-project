@@ -1,25 +1,22 @@
 import { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Search, SlidersHorizontal } from 'lucide-react-native';
+import { Search, SlidersHorizontal, Home as HomeIcon } from 'lucide-react-native';
 
 import { useListings } from '@/hooks/listings/useListings';
 import ListingCard from '@/components/feature/listings/ListingCard';
+import ListingCardSkeleton from '@/components/feature/listings/ListingCardSkeleton';
 import SearchFiltersModal from '@/components/feature/listings/SearchFiltersModal';
+import NotificationBell from '@/components/shared/NotificationBell';
+import { EmptyState } from '@/components/ui';
 import type { ListingFilters } from '@/types/listing.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 export default function HomeScreen() {
   const { t } = useTranslation('listings');
+  const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<ListingFilters>({});
@@ -29,112 +26,90 @@ export default function HomeScreen() {
     search: searchQuery,
   });
 
-  const handleApplyFilters = (newFilters: ListingFilters) => {
-    setFilters(newFilters);
-  };
+  const activeFilterCount = Object.keys(filters).filter((key) => {
+    const value = filters[key as keyof ListingFilters];
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== undefined && value !== null;
+  }).length;
 
-  const handleResetFilters = () => {
-    setFilters({});
-  };
-
-  const activeFilterCount = Object.keys(filters).filter(
-    (key) => {
-      const value = filters[key as keyof ListingFilters];
-      if (Array.isArray(value)) return value.length > 0;
-      return value !== undefined && value !== null;
-    }
-  ).length;
-
-  const onRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
-  const hasListings = listings && listings.length > 0;
+  const onRefresh = useCallback(() => refetch(), [refetch]);
+  const hasListings = !!listings && listings.length > 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       {/* Header */}
-      <View className="px-4 py-3 border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">
-          {t('title', 'Discover')}
-        </Text>
-        <Text className="text-gray-500">
-          {t('subtitle', 'Find your perfect room')}
-        </Text>
+      <View className="px-4 py-3 flex-row items-center justify-between">
+        <View>
+          <Text className="text-2xl font-bold text-text">{t('title', 'Discover')}</Text>
+          <Text className="text-muted">{t('subtitle', 'Find your perfect room')}</Text>
+        </View>
+        <NotificationBell />
       </View>
 
-      {/* Search bar */}
-      <View className="px-4 pt-4 pb-2">
-        <View className="flex-row items-center gap-3 mb-4">
-          <View className="flex-1 flex-row items-center bg-gray-100 rounded-lg px-4 py-3">
-            <Search size={20} color={COLORS.gray[400]} />
+      {/* Search + filter */}
+      <View className="px-4 pt-1 pb-2">
+        <View className="flex-row items-center gap-3 mb-3">
+          <View className="flex-1 flex-row items-center bg-surface rounded-xl px-4 py-3">
+            <Search size={20} color={colors.muted} />
             <TextInput
-              className="flex-1 ml-3 text-base"
+              className="flex-1 ml-3 text-base text-text"
               placeholder={t('search.placeholder', 'Search locations...')}
+              placeholderTextColor={colors.muted}
               value={searchQuery}
               onChangeText={setSearchQuery}
+              returnKeyType="search"
             />
           </View>
           <TouchableOpacity
-            className="bg-gray-100 p-3 rounded-lg relative"
+            className="bg-surface p-3 rounded-xl relative"
             onPress={() => setShowFilters(true)}
           >
-            <SlidersHorizontal size={20} color={COLORS.gray[600]} />
+            <SlidersHorizontal size={20} color={colors.text} />
             {activeFilterCount > 0 && (
-              <View className="absolute -top-1 -right-1 bg-primary-600 rounded-full w-5 h-5 items-center justify-center">
-                <Text className="text-white text-xs font-bold">{activeFilterCount}</Text>
+              <View className="absolute -top-1 -right-1 bg-brand rounded-full w-5 h-5 items-center justify-center">
+                <Text className="text-brand-fg text-xs font-bold">{activeFilterCount}</Text>
               </View>
             )}
           </TouchableOpacity>
         </View>
-
-        {/* Results count */}
-        <Text className="text-gray-500 mb-2">
-          {t('results.count', '{{count}} listings found', {
-            count: listings?.length || 0,
-          })}
-        </Text>
+        {!isLoading && (
+          <Text className="text-muted mb-1">
+            {t('results.count', '{{count}} listings found', { count: listings?.length || 0 })}
+          </Text>
+        )}
       </View>
 
       {/* Content */}
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={onRefresh}
-            tintColor={COLORS.primary[600]}
-          />
-        }
-      >
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color={COLORS.primary[600]} />
-          </View>
-        ) : hasListings ? (
-          listings.map((listing, index) => (
-            <ListingCard key={listing.id || listing._id || `listing-${index}`} listing={listing} />
-          ))
-        ) : (
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-gray-400 text-lg mb-2">
-              {t('empty.title', 'No listings found')}
-            </Text>
-            <Text className="text-gray-400">
-              {t('empty.subtitle', 'Try adjusting your search or filters')}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+      {isLoading ? (
+        <View className="pt-1">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ListingCardSkeleton key={i} />
+          ))}
+        </View>
+      ) : hasListings ? (
+        <FlashList
+          data={listings}
+          keyExtractor={(item, index) => item.id || item._id || `listing-${index}`}
+          renderItem={({ item }) => <ListingCard listing={item} />}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor={colors.brand} />
+          }
+        />
+      ) : (
+        <EmptyState
+          icon={<HomeIcon size={48} color={colors.muted} />}
+          title={t('empty.title', 'No listings found')}
+          description={t('empty.subtitle', 'Try adjusting your search or filters')}
+        />
+      )}
 
-      {/* Filters Modal */}
       <SearchFiltersModal
         visible={showFilters}
         onClose={() => setShowFilters(false)}
         filters={filters}
-        onApply={handleApplyFilters}
-        onReset={handleResetFilters}
+        onApply={setFilters}
+        onReset={() => setFilters({})}
       />
     </SafeAreaView>
   );

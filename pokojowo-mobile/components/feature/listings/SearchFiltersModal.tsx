@@ -7,7 +7,7 @@ import { X, SlidersHorizontal } from 'lucide-react-native';
 import { Button } from '@/components/ui';
 import FilterChip from '@/components/ui/FilterChip';
 import type { ListingFilters } from '@/types/listing.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 import { CITIES, districtsForCity } from '@/lib/districts';
 
 const OFFERED_BY_OPTIONS = [
@@ -60,6 +60,7 @@ export default function SearchFiltersModal({
   onReset,
 }: SearchFiltersModalProps) {
   const { t } = useTranslation('listings');
+  const { colors } = useTheme();
   const [localFilters, setLocalFilters] = useState<ListingFilters>(filters);
 
   useEffect(() => {
@@ -109,24 +110,24 @@ export default function SearchFiltersModal({
 
   return (
     <RNModal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-bg">
         {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
+        <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
           <View className="flex-row items-center gap-2">
-            <SlidersHorizontal size={20} color={COLORS.primary[600]} />
-            <Text className="text-xl font-bold text-gray-900">
+            <SlidersHorizontal size={20} color={colors.brand} />
+            <Text className="text-xl font-bold text-text">
               {t('filters.title', 'Filters')}
             </Text>
           </View>
           <TouchableOpacity onPress={onClose} className="p-1">
-            <X size={24} color={COLORS.gray[500]} />
+            <X size={24} color={colors.muted} />
           </TouchableOpacity>
         </View>
 
         <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
           {/* Neighbourhood */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.neighbourhood', 'Neighbourhood')}
             </Text>
             <View className="flex-row flex-wrap gap-2 mb-2">
@@ -161,7 +162,7 @@ export default function SearchFiltersModal({
 
           {/* Offered By */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.offeredBy', 'Offered by')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -188,15 +189,16 @@ export default function SearchFiltersModal({
 
           {/* Price Range */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.price', 'Price Range')} (PLN/month)
             </Text>
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Min</Text>
+                <Text className="text-xs text-muted mb-1">Min</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-3 py-3 text-center text-base"
+                  className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
+                  placeholderTextColor={colors.muted}
                   placeholder="0"
                   value={localFilters.min_price?.toString() || ''}
                   onChangeText={(text) =>
@@ -207,12 +209,13 @@ export default function SearchFiltersModal({
                   }
                 />
               </View>
-              <Text className="text-gray-400 mt-5">—</Text>
+              <Text className="text-muted mt-5">—</Text>
               <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Max</Text>
+                <Text className="text-xs text-muted mb-1">Max</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-3 py-3 text-center text-base"
+                  className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
+                  placeholderTextColor={colors.muted}
                   placeholder="10000"
                   value={localFilters.max_price?.toString() || ''}
                   onChangeText={(text) =>
@@ -228,15 +231,16 @@ export default function SearchFiltersModal({
 
           {/* Size Range */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.size', 'Room Size')} (m²)
             </Text>
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Min</Text>
+                <Text className="text-xs text-muted mb-1">Min</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-3 py-3 text-center text-base"
+                  className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
+                  placeholderTextColor={colors.muted}
                   placeholder="0"
                   value={localFilters.min_size?.toString() || ''}
                   onChangeText={(text) =>
@@ -247,12 +251,13 @@ export default function SearchFiltersModal({
                   }
                 />
               </View>
-              <Text className="text-gray-400 mt-5">—</Text>
+              <Text className="text-muted mt-5">—</Text>
               <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Max</Text>
+                <Text className="text-xs text-muted mb-1">Max</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-3 py-3 text-center text-base"
+                  className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
+                  placeholderTextColor={colors.muted}
                   placeholder="200"
                   value={localFilters.max_size?.toString() || ''}
                   onChangeText={(text) =>
@@ -268,7 +273,7 @@ export default function SearchFiltersModal({
 
           {/* Room Type */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.roomType', 'Room Type')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -286,7 +291,7 @@ export default function SearchFiltersModal({
 
           {/* Building Type */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.buildingType', 'Building Type')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -304,7 +309,7 @@ export default function SearchFiltersModal({
 
           {/* Suitable For */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.rentFor', 'Suitable For')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -322,7 +327,7 @@ export default function SearchFiltersModal({
 
           {/* Max Tenants */}
           <View className="mb-6">
-            <Text className="text-base font-semibold text-gray-900 mb-3">
+            <Text className="text-base font-semibold text-text mb-3">
               {t('filters.maxTenants', 'Max Tenants')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -345,7 +350,7 @@ export default function SearchFiltersModal({
         </ScrollView>
 
         {/* Footer */}
-        <View className="flex-row gap-3 p-4 border-t border-gray-100">
+        <View className="flex-row gap-3 p-4 border-t border-border">
           <Button
             variant="outline"
             className="flex-1"
