@@ -1,4 +1,8 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface Toast {
   id: number;
@@ -24,9 +28,9 @@ interface UIState {
   isGlobalLoading: boolean;
   setGlobalLoading: (loading: boolean) => void;
 
-  // Theme
-  theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
+  // Theme (persisted)
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
 
   // Bottom sheet state (for mobile)
@@ -44,56 +48,66 @@ interface UIState {
   setIsOnline: (online: boolean) => void;
 }
 
-const useUIStore = create<UIState>((set) => ({
-  // Modal state
-  activeModal: null,
-  modalData: null,
-  openModal: (modalId, data = null) => set({ activeModal: modalId, modalData: data }),
-  closeModal: () => set({ activeModal: null, modalData: null }),
+const useUIStore = create<UIState>()(
+  persist(
+    (set) => ({
+      // Modal state
+      activeModal: null,
+      modalData: null,
+      openModal: (modalId, data = null) => set({ activeModal: modalId, modalData: data }),
+      closeModal: () => set({ activeModal: null, modalData: null }),
 
-  // Toast notifications
-  toasts: [],
-  addToast: (toast) =>
-    set((state) => ({
-      toasts: [
-        ...state.toasts,
-        {
-          id: Date.now(),
-          duration: 3000,
-          ...toast,
-        },
-      ],
-    })),
-  removeToast: (id) =>
-    set((state) => ({
-      toasts: state.toasts.filter((t) => t.id !== id),
-    })),
+      // Toast notifications
+      toasts: [],
+      addToast: (toast) =>
+        set((state) => ({
+          toasts: [
+            ...state.toasts,
+            {
+              id: Date.now(),
+              duration: 3000,
+              ...toast,
+            },
+          ],
+        })),
+      removeToast: (id) =>
+        set((state) => ({
+          toasts: state.toasts.filter((t) => t.id !== id),
+        })),
 
-  // Loading overlay
-  isGlobalLoading: false,
-  setGlobalLoading: (loading) => set({ isGlobalLoading: loading }),
+      // Loading overlay
+      isGlobalLoading: false,
+      setGlobalLoading: (loading) => set({ isGlobalLoading: loading }),
 
-  // Theme
-  theme: 'light',
-  setTheme: (theme) => set({ theme }),
-  toggleTheme: () =>
-    set((state) => ({
-      theme: state.theme === 'light' ? 'dark' : 'light',
-    })),
+      // Theme
+      theme: 'system',
+      setTheme: (theme) => set({ theme }),
+      toggleTheme: () =>
+        set((state) => ({
+          theme: state.theme === 'dark' ? 'light' : 'dark',
+        })),
 
-  // Bottom sheet state
-  activeSheet: null,
-  sheetData: null,
-  openSheet: (sheetId, data = null) => set({ activeSheet: sheetId, sheetData: data }),
-  closeSheet: () => set({ activeSheet: null, sheetData: null }),
+      // Bottom sheet state
+      activeSheet: null,
+      sheetData: null,
+      openSheet: (sheetId, data = null) => set({ activeSheet: sheetId, sheetData: data }),
+      closeSheet: () => set({ activeSheet: null, sheetData: null }),
 
-  // Keyboard state
-  keyboardVisible: false,
-  setKeyboardVisible: (visible) => set({ keyboardVisible: visible }),
+      // Keyboard state
+      keyboardVisible: false,
+      setKeyboardVisible: (visible) => set({ keyboardVisible: visible }),
 
-  // Network state
-  isOnline: true,
-  setIsOnline: (online) => set({ isOnline: online }),
-}));
+      // Network state
+      isOnline: true,
+      setIsOnline: (online) => set({ isOnline: online }),
+    }),
+    {
+      name: 'pokojowo-ui',
+      storage: createJSONStorage(() => AsyncStorage),
+      // Only persist the user's theme preference.
+      partialize: (state) => ({ theme: state.theme }),
+    }
+  )
+);
 
 export default useUIStore;

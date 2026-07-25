@@ -61,5 +61,17 @@ export {
 } from './biometrics';
 export type { BiometricType } from './biometrics';
 
+// Theme / design tokens
+export {
+  palette,
+  themes,
+  lightColors,
+  darkColors,
+  typography,
+  spacing,
+  radius,
+} from './theme';
+export type { ThemeColors, ColorScheme } from './theme';
+
 // Constants
 export * from './constants';

@@ -11,11 +11,22 @@ import * as SplashScreen from 'expo-splash-screen';
 import { queryClient } from '@/lib/queryClient';
 import i18n from '@/lib/i18n';
 import useAuthStore from '@/stores/authStore';
+import ThemeProvider from '@/components/shared/ThemeProvider';
+import useTheme from '@/hooks/useTheme';
 
 import '../global.css';
 
 // Keep splash screen visible while loading
 SplashScreen.preventAutoHideAsync();
+
+function LoadingScreen() {
+  const { colors } = useTheme();
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+      <ActivityIndicator size="large" color={colors.brand} />
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
@@ -45,21 +56,15 @@ export default function RootLayout() {
     return () => clearTimeout(timeout);
   }, [initialize]);
 
-  if (!isReady) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
-        <ActivityIndicator size="large" color="#0d9488" />
-      </View>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <SafeAreaProvider>
-            <StatusBar style="auto" />
-            <Slot />
+            <ThemeProvider>
+              <StatusBar style="auto" />
+              {isReady ? <Slot /> : <LoadingScreen />}
+            </ThemeProvider>
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </I18nextProvider>
