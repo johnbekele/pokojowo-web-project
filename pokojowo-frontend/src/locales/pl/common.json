@@ -76,7 +76,8 @@
     "markAllRead": "Oznacz jako przeczytane",
     "clear": "Wyczyść",
     "empty": "Brak powiadomień",
-    "newMessage": "Nowa wiadomość"
+    "newMessage": "Nowa wiadomość",
+    "savedSearchMatch": "Nowe ogłoszenie pasuje do Twojego wyszukiwania"
   },
   "time": {
     "justNow": "Przed chwilą",

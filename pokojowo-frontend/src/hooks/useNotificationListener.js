@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getSocket, connectSocket } from '@/lib/socket';
 import { useToast } from '@/hooks/useToast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,6 +11,7 @@ import useAuthStore from '@/stores/authStore';
  * Should be used in the main App component
  */
 export function useNotificationListener() {
+  const { t } = useTranslation('common');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setMutualMatchData, fetchStats } = useLikesStore();
@@ -70,10 +72,18 @@ export function useNotificationListener() {
         fetchStats();
         break;
 
+      case 'saved_search_match':
+        toast({
+          title: t('notifications.savedSearchMatch', 'New listing matches your search'),
+          description: data.savedSearchName || data.message,
+          variant: 'default',
+        });
+        break;
+
       default:
         console.log('Unknown notification type:', data.type);
     }
-  }, [toast, queryClient, setMutualMatchData, fetchStats]);
+  }, [t, toast, queryClient, setMutualMatchData, fetchStats]);
 
   const handleUserStatus = useCallback((data) => {
     console.log('USER STATUS update:', data);

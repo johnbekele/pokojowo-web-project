@@ -169,5 +169,20 @@
     "checkFailed": "Nieprawidłowy kod",
     "rateLimited": "Zbyt wiele prób",
     "rateLimitedHint": "Spróbuj ponownie za około {{minutes}} minut."
+  },
+  "savedSearches": {
+    "title": "Zapisane wyszukiwania",
+    "subtitle": "Uruchom wyszukiwanie ponownie i otrzymuj powiadomienia o nowych pasujących ogłoszeniach.",
+    "empty": "Brak zapisanych wyszukiwań.",
+    "emptyCta": "Przeglądaj ogłoszenia",
+    "allListings": "Wszystkie ogłoszenia",
+    "notifications": "Powiadomienia",
+    "run": "Uruchom wyszukiwanie",
+    "delete": "Usuń",
+    "cancel": "Anuluj",
+    "deleteConfirm": "Usunąć „{{name}}”? Tej operacji nie można cofnąć.",
+    "deleted": "Zapisane wyszukiwanie usunięte",
+    "deleteFailed": "Nie udało się usunąć wyszukiwania",
+    "updateFailed": "Nie udało się zaktualizować wyszukiwania"
   }
 }

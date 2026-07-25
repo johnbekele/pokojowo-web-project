@@ -169,5 +169,20 @@
     "checkFailed": "Incorrect code",
     "rateLimited": "Too many attempts",
     "rateLimitedHint": "Try again in about {{minutes}} minutes."
+  },
+  "savedSearches": {
+    "title": "Saved searches",
+    "subtitle": "Rerun a search any time and get notified when new listings match.",
+    "empty": "No saved searches yet.",
+    "emptyCta": "Browse listings",
+    "allListings": "All listings",
+    "notifications": "Notifications",
+    "run": "Run search",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleted": "Saved search deleted",
+    "deleteFailed": "Could not delete the search",
+    "updateFailed": "Could not update the search"
   }
 }
