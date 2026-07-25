@@ -9,7 +9,6 @@ import {
   FlatList,
   Share,
   Linking,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -36,7 +35,9 @@ import { useListing } from '@/hooks/listings/useListings';
 import { useSaveListing, useUnsaveListing, useIsListingSaved } from '@/hooks/favorites/useFavorites';
 import { useTrackView } from '@/hooks/listingInteractions/useListingInteractions';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { COLORS, IMAGE_BASE_URL } from '@/lib/constants';
+import { IMAGE_BASE_URL } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
+import useUIStore from '@/stores/uiStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -57,6 +58,8 @@ export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t, i18n } = useTranslation('listings');
+  const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -114,16 +117,21 @@ export default function ListingDetailScreen() {
       if (canOpen) {
         await Linking.openURL(phoneUrl);
       } else {
-        Alert.alert(
-          t('detail.callError', 'Cannot make call'),
-          t('detail.callErrorMessage', 'Unable to open phone app. Phone: {{phone}}', { phone: cleanPhone })
-        );
+        showToast({
+          type: 'error',
+          message: t('detail.callErrorMessage', 'Unable to open phone app. Phone: {{phone}}', {
+            phone: cleanPhone,
+          }),
+        });
       }
     } else {
-      Alert.alert(
-        t('detail.noPhone', 'Phone not available'),
-        t('detail.noPhoneMessage', 'The owner has not provided a phone number. Try sending a message instead.')
-      );
+      showToast({
+        type: 'info',
+        message: t(
+          'detail.noPhoneMessage',
+          'The owner has not provided a phone number. Try sending a message instead.'
+        ),
+      });
     }
   };
 
@@ -133,17 +141,17 @@ export default function ListingDetailScreen() {
       if (canOpen) {
         await Linking.openURL(listing.sourceUrl);
       } else {
-        Alert.alert(
-          t('detail.linkError', 'Cannot open link'),
-          t('detail.linkErrorMessage', 'Unable to open the original listing.')
-        );
+        showToast({
+          type: 'error',
+          message: t('detail.linkErrorMessage', 'Unable to open the original listing.'),
+        });
       }
     }
   };
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-bg">
         <LoadingSpinner fullScreen />
       </SafeAreaView>
     );
@@ -151,8 +159,8 @@ export default function ListingDetailScreen() {
 
   if (error || !listing) {
     return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center">
-        <Text className="text-gray-500">Listing not found</Text>
+      <SafeAreaView className="flex-1 bg-bg items-center justify-center">
+        <Text className="text-muted">Listing not found</Text>
         <Button onPress={() => router.back()} variant="ghost" className="mt-4">
           Go Back
         </Button>
@@ -180,7 +188,7 @@ export default function ListingDetailScreen() {
   const amenities = listing.amenities || [];
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Image Gallery */}
         <View className="relative">
@@ -209,7 +217,7 @@ export default function ListingDetailScreen() {
             onPress={() => router.back()}
             className="absolute top-4 left-4 bg-white/90 rounded-full p-2"
           >
-            <ArrowLeft size={24} color={COLORS.gray[700]} />
+            <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
 
           {/* Action buttons */}
@@ -220,12 +228,12 @@ export default function ListingDetailScreen() {
             >
               <Heart
                 size={24}
-                color={isSaved ? COLORS.error : COLORS.gray[700]}
-                fill={isSaved ? COLORS.error : 'none'}
+                color={isSaved ? colors.danger : colors.text}
+                fill={isSaved ? colors.danger : 'none'}
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleShare} className="bg-white/90 rounded-full p-2">
-              <Share2 size={24} color={COLORS.gray[700]} />
+              <Share2 size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
 
@@ -248,9 +256,9 @@ export default function ListingDetailScreen() {
         <View className="p-4">
           {/* Price and type */}
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-2xl font-bold text-primary-600">
+            <Text className="text-2xl font-bold text-brand">
               {formatCurrency(listing.price)}
-              <Text className="text-base font-normal text-gray-500">/mo</Text>
+              <Text className="text-base font-normal text-muted">/mo</Text>
             </Text>
             <View className="flex-row items-center gap-2">
               {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
@@ -268,8 +276,8 @@ export default function ListingDetailScreen() {
 
           {/* Address */}
           <View className="flex-row items-center mb-4">
-            <MapPin size={18} color={COLORS.gray[500]} />
-            <Text className="text-gray-700 ml-2 flex-1">
+            <MapPin size={18} color={colors.muted} />
+            <Text className="text-text ml-2 flex-1">
               {[listing.district, listing.city].filter(Boolean).join(', ')}
               {(listing.district || listing.city) ? ' · ' : ''}
               {listing.address}
@@ -278,7 +286,7 @@ export default function ListingDetailScreen() {
 
           {/* Map */}
           {listing.locationGeo?.coordinates && (
-            <View className="mb-4 rounded-xl overflow-hidden border border-gray-100" style={{ height: 200 }}>
+            <View className="mb-4 rounded-xl overflow-hidden border border-border" style={{ height: 200 }}>
               <MapView
                 style={{ flex: 1 }}
                 initialRegion={{
@@ -306,22 +314,22 @@ export default function ListingDetailScreen() {
           <View className="flex-row flex-wrap gap-4 mb-6">
             {listing.size && (
               <View className="flex-row items-center">
-                <Maximize size={16} color={COLORS.gray[500]} />
-                <Text className="text-gray-600 ml-1.5">{listing.size} m²</Text>
+                <Maximize size={16} color={colors.muted} />
+                <Text className="text-muted ml-1.5">{listing.size} m²</Text>
               </View>
             )}
             {listing.max_tenants && (
               <View className="flex-row items-center">
-                <Users size={16} color={COLORS.gray[500]} />
-                <Text className="text-gray-600 ml-1.5">
+                <Users size={16} color={colors.muted} />
+                <Text className="text-muted ml-1.5">
                   Max {listing.max_tenants} {listing.max_tenants === 1 ? 'tenant' : 'tenants'}
                 </Text>
               </View>
             )}
             {listing.available_from && (
               <View className="flex-row items-center">
-                <Calendar size={16} color={COLORS.gray[500]} />
-                <Text className="text-gray-600 ml-1.5">
+                <Calendar size={16} color={colors.muted} />
+                <Text className="text-muted ml-1.5">
                   From {formatDate(listing.available_from)}
                 </Text>
               </View>
@@ -331,17 +339,17 @@ export default function ListingDetailScreen() {
           {/* Description */}
           {description && (
             <View className="mb-6">
-              <Text className="text-lg font-semibold text-gray-900 mb-2">
+              <Text className="text-lg font-semibold text-text mb-2">
                 {t('detail.description', 'Description')}
               </Text>
-              <Text className="text-gray-600 leading-6">{description}</Text>
+              <Text className="text-muted leading-6">{description}</Text>
             </View>
           )}
 
           {/* Amenities */}
           {amenities.length > 0 && (
             <View className="mb-6">
-              <Text className="text-lg font-semibold text-gray-900 mb-3">
+              <Text className="text-lg font-semibold text-text mb-3">
                 {t('detail.amenities', 'Amenities')}
               </Text>
               <View className="flex-row flex-wrap gap-2">
@@ -356,26 +364,26 @@ export default function ListingDetailScreen() {
 
           {/* Building info */}
           <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">
+            <Text className="text-lg font-semibold text-text mb-3">
               {t('detail.details', 'Details')}
             </Text>
             <Card variant="outlined" padding="md">
-              <View className="flex-row justify-between py-2 border-b border-gray-100">
-                <Text className="text-gray-500">Building Type</Text>
-                <Text className="text-gray-900 font-medium">
+              <View className="flex-row justify-between py-2 border-b border-border">
+                <Text className="text-muted">Building Type</Text>
+                <Text className="text-text font-medium">
                   {listing.building_type?.replace('_', ' ') || 'N/A'}
                 </Text>
               </View>
               {listing.floor && (
-                <View className="flex-row justify-between py-2 border-b border-gray-100">
-                  <Text className="text-gray-500">Floor</Text>
-                  <Text className="text-gray-900 font-medium">{listing.floor}</Text>
+                <View className="flex-row justify-between py-2 border-b border-border">
+                  <Text className="text-muted">Floor</Text>
+                  <Text className="text-text font-medium">{listing.floor}</Text>
                 </View>
               )}
               {listing.rent_for && (
                 <View className="flex-row justify-between py-2">
-                  <Text className="text-gray-500">Preferred Tenant</Text>
-                  <Text className="text-gray-900 font-medium">{listing.rent_for}</Text>
+                  <Text className="text-muted">Preferred Tenant</Text>
+                  <Text className="text-text font-medium">{listing.rent_for}</Text>
                 </View>
               )}
             </Card>
@@ -384,7 +392,7 @@ export default function ListingDetailScreen() {
           {/* Landlord */}
           {listing.owner && !isScraped && (
             <View className="mb-6">
-              <Text className="text-lg font-semibold text-gray-900 mb-3">
+              <Text className="text-lg font-semibold text-text mb-3">
                 {t('detail.landlord', 'Landlord')}
               </Text>
               <Card variant="outlined" padding="md">
@@ -395,7 +403,7 @@ export default function ListingDetailScreen() {
                     size="lg"
                   />
                   <View className="flex-1 ml-3">
-                    <Text className="text-base font-semibold text-gray-900">
+                    <Text className="text-base font-semibold text-text">
                       {listing.owner.firstname
                         ? `${listing.owner.firstname} ${listing.owner.lastname || ''}`.trim()
                         : listing.owner.username}
@@ -417,7 +425,7 @@ export default function ListingDetailScreen() {
 
           {/* Contact Information */}
           <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">
+            <Text className="text-lg font-semibold text-text mb-3">
               {t('detail.contactInfo', 'Contact Information')}
             </Text>
             <Card variant="outlined" padding="md">
@@ -425,25 +433,25 @@ export default function ListingDetailScreen() {
               {phoneNumber ? (
                 <TouchableOpacity
                   onPress={handleCall}
-                  className="flex-row items-center py-2 border-b border-gray-100"
+                  className="flex-row items-center py-2 border-b border-border"
                 >
                   <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center mr-3">
-                    <Phone size={20} color={COLORS.success} />
+                    <Phone size={20} color={colors.success} />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-500 text-sm">{t('detail.phoneNumber', 'Phone Number')}</Text>
-                    <Text className="text-gray-900 font-medium text-base">{phoneNumber}</Text>
+                    <Text className="text-muted text-sm">{t('detail.phoneNumber', 'Phone Number')}</Text>
+                    <Text className="text-text font-medium text-base">{phoneNumber}</Text>
                   </View>
-                  <Text className="text-primary-600 font-medium">{t('detail.tapToCall', 'Tap to call')}</Text>
+                  <Text className="text-brand font-medium">{t('detail.tapToCall', 'Tap to call')}</Text>
                 </TouchableOpacity>
               ) : (
-                <View className="flex-row items-center py-2 border-b border-gray-100">
-                  <View className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center mr-3">
-                    <Phone size={20} color={COLORS.gray[400]} />
+                <View className="flex-row items-center py-2 border-b border-border">
+                  <View className="w-10 h-10 rounded-full bg-surface items-center justify-center mr-3">
+                    <Phone size={20} color={colors.muted} />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-500 text-sm">{t('detail.phoneNumber', 'Phone Number')}</Text>
-                    <Text className="text-gray-400">{t('detail.notProvided', 'Not provided')}</Text>
+                    <Text className="text-muted text-sm">{t('detail.phoneNumber', 'Phone Number')}</Text>
+                    <Text className="text-muted">{t('detail.notProvided', 'Not provided')}</Text>
                   </View>
                 </View>
               )}
@@ -455,15 +463,15 @@ export default function ListingDetailScreen() {
                   className="flex-row items-center py-2 mt-2"
                 >
                   <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
-                    <ExternalLink size={20} color={COLORS.primary[600]} />
+                    <ExternalLink size={20} color={colors.brand} />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-500 text-sm">{t('detail.originalListing', 'Original Listing')}</Text>
-                    <Text className="text-primary-600 font-medium capitalize">
+                    <Text className="text-muted text-sm">{t('detail.originalListing', 'Original Listing')}</Text>
+                    <Text className="text-brand font-medium capitalize">
                       {sourceSite || t('detail.viewOnSource', 'View on source')}
                     </Text>
                   </View>
-                  <ExternalLink size={18} color={COLORS.primary[600]} />
+                  <ExternalLink size={18} color={colors.brand} />
                 </TouchableOpacity>
               )}
 
@@ -481,12 +489,12 @@ export default function ListingDetailScreen() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <View className="p-4 border-t border-gray-100 bg-white flex-row gap-3">
+      <View className="p-4 border-t border-border bg-bg flex-row gap-3">
         {phoneNumber && (
           <Button
             variant="outline"
             className="flex-1"
-            icon={<Phone size={18} color={COLORS.success} />}
+            icon={<Phone size={18} color={colors.success} />}
             onPress={handleCall}
           >
             {t('detail.call', 'Call')}
