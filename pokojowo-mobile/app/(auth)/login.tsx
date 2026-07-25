@@ -10,6 +10,7 @@ import { Button, Input } from '@/components/ui';
 import AuthScaffold from '@/components/feature/auth/AuthScaffold';
 import useAuthStore from '@/stores/authStore';
 import useTheme from '@/hooks/useTheme';
+import { getPostAuthRoute } from '@/lib/onboardingRoute';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -33,11 +34,9 @@ export default function LoginScreen() {
   });
 
   const onSubmit = async (data: LoginForm) => {
-    try {
-      await login(data.email, data.password);
-      router.replace('/(app)/(home)');
-    } catch {
-      // handled by store (error state)
+    const result = await login(data.email, data.password);
+    if (result.success) {
+      router.replace(getPostAuthRoute(result.user ?? null));
     }
   };
 

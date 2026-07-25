@@ -53,6 +53,10 @@ interface UIState {
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
 
+  // First-run welcome (persisted)
+  hasSeenWelcome: boolean;
+  setSeenWelcome: () => void;
+
   // Bottom sheet state (for mobile)
   activeSheet: string | null;
   sheetData: unknown;
@@ -120,6 +124,10 @@ const useUIStore = create<UIState>()(
           theme: state.theme === 'dark' ? 'light' : 'dark',
         })),
 
+      // First-run welcome
+      hasSeenWelcome: false,
+      setSeenWelcome: () => set({ hasSeenWelcome: true }),
+
       // Bottom sheet state
       activeSheet: null,
       sheetData: null,
@@ -137,8 +145,8 @@ const useUIStore = create<UIState>()(
     {
       name: 'pokojowo-ui',
       storage: createJSONStorage(() => AsyncStorage),
-      // Only persist the user's theme preference.
-      partialize: (state) => ({ theme: state.theme }),
+      // Persist the user's theme preference and first-run flag.
+      partialize: (state) => ({ theme: state.theme, hasSeenWelcome: state.hasSeenWelcome }),
     }
   )
 );

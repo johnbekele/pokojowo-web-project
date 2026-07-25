@@ -5,7 +5,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -22,12 +21,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
+  X,
 } from 'lucide-react-native';
 
 import { Button } from '@/components/ui';
 import { userService, TenantProfileData } from '@/services/user.service';
 import useAuthStore from '@/stores/authStore';
-import { COLORS } from '@/lib/constants';
+import useUIStore from '@/stores/uiStore';
+import useTheme from '@/hooks/useTheme';
+import { cn } from '@/lib/utils';
 import { SUPPORTED_LANGUAGES } from '@/lib/languages';
 
 // Latest valid birth date: exactly 18 years ago today
@@ -113,7 +115,10 @@ interface FormData {
 export default function TenantProfileCompletion() {
   const { t } = useTranslation('profile');
   const router = useRouter();
+  const { colors } = useTheme();
   const { user, fetchUser } = useAuthStore();
+  const showToast = useUIStore((s) => s.showToast);
+  const confirm = useUIStore((s) => s.confirm);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [dobError, setDobError] = useState('');
@@ -168,17 +173,19 @@ export default function TenantProfileCompletion() {
     mutationFn: (data: TenantProfileData) => userService.completeTenantProfile(data),
     onSuccess: async () => {
       await fetchUser();
-      Alert.alert(
-        t('completion.success.title', 'Profile Complete'),
-        t('completion.success.description', 'Your profile has been saved successfully.')
-      );
+      showToast({
+        type: 'success',
+        message: t('completion.success.description', 'Your profile has been saved successfully.'),
+      });
       router.replace('/(app)/(matches)');
     },
-    onError: (error: any) => {
-      Alert.alert(
-        t('completion.error.title', 'Error'),
-        error.response?.data?.detail || t('completion.error.description', 'Failed to save profile.')
-      );
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        message: detail || t('completion.error.description', 'Failed to save profile.'),
+      });
     },
   });
 
@@ -202,6 +209,25 @@ export default function TenantProfileCompletion() {
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  const handleExit = async () => {
+    const confirmed = await confirm({
+      title: t('completion.exit.title', 'Exit profile setup?'),
+      message: t(
+        'completion.exit.description',
+        'Your progress on this step will not be saved. You can finish your profile later.'
+      ),
+      confirmLabel: t('actions.exit', 'Exit'),
+      cancelLabel: t('actions.cancel', 'Cancel'),
+      destructive: true,
+    });
+    if (!confirmed) return;
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(app)/(matches)');
     }
   };
 
@@ -265,12 +291,12 @@ export default function TenantProfileCompletion() {
           className={`px-4 py-2.5 rounded-lg border ${
             selectedValue === option.value
               ? 'bg-primary-600 border-primary-600'
-              : 'bg-white border-gray-200'
+              : 'bg-card border-border'
           }`}
         >
           <Text
             className={`font-medium ${
-              selectedValue === option.value ? 'text-white' : 'text-gray-700'
+              selectedValue === option.value ? 'text-white' : 'text-text'
             }`}
           >
             {option.label}
@@ -288,17 +314,17 @@ export default function TenantProfileCompletion() {
     <TouchableOpacity
       onPress={onToggle}
       className={`flex-row items-center p-3 rounded-lg border ${
-        checked ? 'bg-primary-50 border-primary-300' : 'bg-white border-gray-200'
+        checked ? 'bg-primary-50 border-primary-300' : 'bg-card border-border'
       }`}
     >
       <View
         className={`w-5 h-5 rounded border-2 mr-3 items-center justify-center ${
-          checked ? 'bg-primary-600 border-primary-600' : 'border-gray-300'
+          checked ? 'bg-primary-600 border-primary-600' : 'border-border'
         }`}
       >
         {checked && <Check size={14} color="white" />}
       </View>
-      <Text className="text-gray-700 flex-1">{label}</Text>
+      <Text className="text-text flex-1">{label}</Text>
     </TouchableOpacity>
   );
 
@@ -309,18 +335,18 @@ export default function TenantProfileCompletion() {
           <View className="gap-4">
             <View className="flex-row gap-3">
               <View className="flex-1">
-                <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.firstName', 'First Name')}</Text>
+                <Text className="text-text font-medium mb-2">{t('basicInfo.firstName', 'First Name')}</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                   value={formData.firstname}
                   onChangeText={(text) => handleInputChange('firstname', text)}
                   placeholder="John"
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.lastName', 'Last Name')}</Text>
+                <Text className="text-text font-medium mb-2">{t('basicInfo.lastName', 'Last Name')}</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                   value={formData.lastname}
                   onChangeText={(text) => handleInputChange('lastname', text)}
                   placeholder="Doe"
@@ -329,9 +355,9 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.dateOfBirth', 'Date of birth')}</Text>
+              <Text className="text-text font-medium mb-2">{t('basicInfo.dateOfBirth', 'Date of birth')}</Text>
               <TextInput
-                className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                 value={formData.dateOfBirth}
                 onChangeText={(text) => {
                   handleInputChange('dateOfBirth', text);
@@ -344,21 +370,21 @@ export default function TenantProfileCompletion() {
               {dobError ? (
                 <Text className="text-red-500 text-xs mt-1">{dobError}</Text>
               ) : (
-                <Text className="text-gray-400 text-xs mt-1">
+                <Text className="text-muted text-xs mt-1">
                   {t('basicInfo.dateOfBirthHint', 'Your age updates automatically; others only see your age.')}
                 </Text>
               )}
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.gender', 'Gender')}</Text>
+              <Text className="text-text font-medium mb-2">{t('basicInfo.gender', 'Gender')}</Text>
               {renderSelectOption(GENDER_OPTIONS, formData.gender, (v) => handleInputChange('gender', v))}
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('basicInfo.bio', 'About Me')}</Text>
+              <Text className="text-text font-medium mb-2">{t('basicInfo.bio', 'About Me')}</Text>
               <TextInput
-                className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                 value={formData.bio}
                 onChangeText={(text) => handleInputChange('bio', text)}
                 placeholder={t('basicInfo.bioPlaceholder', 'Tell us about yourself...')}
@@ -375,9 +401,9 @@ export default function TenantProfileCompletion() {
         return (
           <View className="gap-4">
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('contact.phone', 'Phone Number')}</Text>
+              <Text className="text-text font-medium mb-2">{t('contact.phone', 'Phone Number')}</Text>
               <TextInput
-                className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                 value={formData.phone}
                 onChangeText={(text) => handleInputChange('phone', text)}
                 keyboardType="phone-pad"
@@ -386,9 +412,9 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('contact.location', 'City / Location')}</Text>
+              <Text className="text-text font-medium mb-2">{t('contact.location', 'City / Location')}</Text>
               <TextInput
-                className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                 value={formData.location}
                 onChangeText={(text) => handleInputChange('location', text)}
                 placeholder="e.g., Warsaw, Krakow"
@@ -402,9 +428,9 @@ export default function TenantProfileCompletion() {
           <View className="gap-4">
             <View className="flex-row gap-3">
               <View className="flex-1">
-                <Text className="text-gray-700 font-medium mb-2">{t('preferences.budgetMin', 'Min Budget')} (PLN)</Text>
+                <Text className="text-text font-medium mb-2">{t('preferences.budgetMin', 'Min Budget')} (PLN)</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                   value={formData.budgetMin}
                   onChangeText={(text) => handleInputChange('budgetMin', text)}
                   keyboardType="number-pad"
@@ -412,9 +438,9 @@ export default function TenantProfileCompletion() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-700 font-medium mb-2">{t('preferences.budgetMax', 'Max Budget')} (PLN)</Text>
+                <Text className="text-text font-medium mb-2">{t('preferences.budgetMax', 'Max Budget')} (PLN)</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                   value={formData.budgetMax}
                   onChangeText={(text) => handleInputChange('budgetMax', text)}
                   keyboardType="number-pad"
@@ -424,9 +450,9 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('preferences.location', 'Preferred Location')}</Text>
+              <Text className="text-text font-medium mb-2">{t('preferences.location', 'Preferred Location')}</Text>
               <TextInput
-                className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                 value={formData.preferredLocation}
                 onChangeText={(text) => handleInputChange('preferredLocation', text)}
                 placeholder="e.g., City center, Mokotow"
@@ -434,7 +460,7 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('preferences.leaseDuration', 'Lease Duration')}</Text>
+              <Text className="text-text font-medium mb-2">{t('preferences.leaseDuration', 'Lease Duration')}</Text>
               <View className="flex-row flex-wrap gap-2">
                 {['3', '6', '12', '24'].map((months) => (
                   <TouchableOpacity
@@ -443,12 +469,12 @@ export default function TenantProfileCompletion() {
                     className={`px-4 py-2.5 rounded-lg border ${
                       formData.leaseDuration === months
                         ? 'bg-primary-600 border-primary-600'
-                        : 'bg-white border-gray-200'
+                        : 'bg-card border-border'
                     }`}
                   >
                     <Text
                       className={`font-medium ${
-                        formData.leaseDuration === months ? 'text-white' : 'text-gray-700'
+                        formData.leaseDuration === months ? 'text-white' : 'text-text'
                       }`}
                     >
                       {months}{months === '24' ? '+' : ''} {t('preferences.months', 'months')}
@@ -464,32 +490,32 @@ export default function TenantProfileCompletion() {
         return (
           <View className="gap-5">
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('lifestyle.cleanliness.label', 'Cleanliness Level')}</Text>
+              <Text className="text-text font-medium mb-2">{t('lifestyle.cleanliness.label', 'Cleanliness Level')}</Text>
               {renderSelectOption(CLEANLINESS_OPTIONS, formData.cleanliness, (v) => handleInputChange('cleanliness', v))}
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('lifestyle.socialLevel.label', 'Social Level')}</Text>
+              <Text className="text-text font-medium mb-2">{t('lifestyle.socialLevel.label', 'Social Level')}</Text>
               {renderSelectOption(SOCIAL_OPTIONS, formData.socialLevel, (v) => handleInputChange('socialLevel', v))}
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('lifestyle.guests.label', 'Guest Frequency')}</Text>
+              <Text className="text-text font-medium mb-2">{t('lifestyle.guests.label', 'Guest Frequency')}</Text>
               {renderSelectOption(GUESTS_OPTIONS, formData.guestsFrequency, (v) => handleInputChange('guestsFrequency', v))}
             </View>
 
             <View className="mt-2">
-              <Text className="text-gray-700 font-semibold mb-1">{t('coOccupants.title', 'Who will live with you?')}</Text>
-              <Text className="text-gray-500 text-sm mb-3">{t('coOccupants.subtitle', 'Let flatmates know who is moving in with you.')}</Text>
+              <Text className="text-text font-semibold mb-1">{t('coOccupants.title', 'Who will live with you?')}</Text>
+              <Text className="text-muted text-sm mb-3">{t('coOccupants.subtitle', 'Let flatmates know who is moving in with you.')}</Text>
               <View className="gap-2">
                 {renderCheckboxOption(t('coOccupants.partner', "I'll move in with a partner"), formData.hasPartner, () => handleInputChange('hasPartner', !formData.hasPartner))}
                 {renderCheckboxOption(t('coOccupants.children', 'I have children living with me'), formData.hasChildren, () => handleInputChange('hasChildren', !formData.hasChildren))}
               </View>
               {formData.hasChildren && (
                 <View className="mt-3">
-                  <Text className="text-gray-700 font-medium mb-2">{t('coOccupants.childrenCount', 'How many children?')}</Text>
+                  <Text className="text-text font-medium mb-2">{t('coOccupants.childrenCount', 'How many children?')}</Text>
                   <TextInput
-                    className="border border-gray-200 rounded-lg px-4 py-3 text-base w-24"
+                    className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card w-24"
                     value={formData.childrenCount}
                     onChangeText={(text) => handleInputChange('childrenCount', text)}
                     keyboardType="number-pad"
@@ -501,8 +527,8 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View className="mt-2">
-              <Text className="text-gray-700 font-semibold mb-1">{t('dealBreakers.title', 'Deal Breakers')}</Text>
-              <Text className="text-gray-500 text-sm mb-3">{t('dealBreakers.subtitle', "What's absolutely not acceptable?")}</Text>
+              <Text className="text-text font-semibold mb-1">{t('dealBreakers.title', 'Deal Breakers')}</Text>
+              <Text className="text-muted text-sm mb-3">{t('dealBreakers.subtitle', "What's absolutely not acceptable?")}</Text>
               <View className="gap-2">
                 {renderCheckboxOption(t('dealBreakers.noSmokers', 'No smokers'), formData.noSmokers, () => handleInputChange('noSmokers', !formData.noSmokers))}
                 {renderCheckboxOption(t('dealBreakers.noPets', 'No pets'), formData.noPets, () => handleInputChange('noPets', !formData.noPets))}
@@ -520,7 +546,7 @@ export default function TenantProfileCompletion() {
         return (
           <View className="gap-4">
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('languages.select', 'Select languages you speak')}</Text>
+              <Text className="text-text font-medium mb-2">{t('languages.select', 'Select languages you speak')}</Text>
               <View className="flex-row flex-wrap gap-2">
                 {SUPPORTED_LANGUAGES.map((lang) => {
                   const isSelected = formData.languages.includes(lang);
@@ -535,10 +561,10 @@ export default function TenantProfileCompletion() {
                         }
                       }}
                       className={`px-4 py-2.5 rounded-lg border ${
-                        isSelected ? 'bg-primary-600 border-primary-600' : 'bg-white border-gray-200'
+                        isSelected ? 'bg-primary-600 border-primary-600' : 'bg-card border-border'
                       }`}
                     >
-                      <Text className={`font-medium ${isSelected ? 'text-white' : 'text-gray-700'}`}>
+                      <Text className={`font-medium ${isSelected ? 'text-white' : 'text-text'}`}>
                         {lang}
                       </Text>
                     </TouchableOpacity>
@@ -548,10 +574,10 @@ export default function TenantProfileCompletion() {
             </View>
 
             <View>
-              <Text className="text-gray-700 font-medium mb-2">{t('languages.other', 'Other language')}</Text>
+              <Text className="text-text font-medium mb-2">{t('languages.other', 'Other language')}</Text>
               <View className="flex-row gap-2">
                 <TextInput
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-3 text-base"
+                  className="flex-1 border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
                   value={customLanguage}
                   onChangeText={setCustomLanguage}
                   placeholder={t('languages.otherPlaceholder', 'e.g. Czech, Portuguese…')}
@@ -571,10 +597,10 @@ export default function TenantProfileCompletion() {
                     setCustomLanguage('');
                   }}
                   className={`px-4 rounded-lg border items-center justify-center ${
-                    customLanguage.trim() ? 'bg-primary-600 border-primary-600' : 'bg-gray-100 border-gray-200'
+                    customLanguage.trim() ? 'bg-primary-600 border-primary-600' : 'bg-surface border-border'
                   }`}
                 >
-                  <Text className={customLanguage.trim() ? 'text-white font-medium' : 'text-gray-400 font-medium'}>
+                  <Text className={customLanguage.trim() ? 'text-white font-medium' : 'text-muted font-medium'}>
                     {t('languages.add', 'Add')}
                   </Text>
                 </TouchableOpacity>
@@ -601,7 +627,7 @@ export default function TenantProfileCompletion() {
 
             {formData.languages.length > 0 && (
               <View>
-                <Text className="text-gray-700 font-medium mb-2">{t('languages.preferredLanguage', 'Preferred Language')}</Text>
+                <Text className="text-text font-medium mb-2">{t('languages.preferredLanguage', 'Preferred Language')}</Text>
                 <View className="flex-row flex-wrap gap-2">
                   {formData.languages.map((lang) => (
                     <TouchableOpacity
@@ -610,12 +636,12 @@ export default function TenantProfileCompletion() {
                       className={`px-4 py-2.5 rounded-lg border ${
                         formData.preferredLanguage === lang
                           ? 'bg-primary-600 border-primary-600'
-                          : 'bg-white border-gray-200'
+                          : 'bg-card border-border'
                       }`}
                     >
                       <Text
                         className={`font-medium ${
-                          formData.preferredLanguage === lang ? 'text-white' : 'text-gray-700'
+                          formData.preferredLanguage === lang ? 'text-white' : 'text-text'
                         }`}
                       >
                         {lang}
@@ -636,17 +662,25 @@ export default function TenantProfileCompletion() {
   const CurrentIcon = STEPS[currentStep].icon;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-bg">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         {/* Header */}
-        <View className="px-4 py-3 border-b border-gray-100">
-          <Text className="text-2xl font-bold text-gray-900 text-center">
+        <View className="px-4 py-3 border-b border-border">
+          <TouchableOpacity
+            onPress={handleExit}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityLabel={t('actions.exit', 'Exit')}
+            className="absolute right-3 top-3 z-10 w-9 h-9 rounded-full bg-surface items-center justify-center"
+          >
+            <X size={20} color={colors.muted} />
+          </TouchableOpacity>
+          <Text className="text-2xl font-bold text-text text-center">
             {t('completion.title', 'Complete Your Profile')}
           </Text>
-          <Text className="text-gray-500 text-center mt-1">
+          <Text className="text-muted text-center mt-1">
             {t('completion.subtitle', 'Help us find your perfect match')}
           </Text>
         </View>
@@ -654,12 +688,12 @@ export default function TenantProfileCompletion() {
         {/* Progress */}
         <View className="px-4 pt-4">
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-sm text-gray-600">
+            <Text className="text-sm text-muted">
               {t('completion.step', 'Step')} {currentStep + 1} {t('completion.of', 'of')} {STEPS.length}
             </Text>
             <Text className="text-sm font-semibold text-primary-600">{Math.round(progress)}%</Text>
           </View>
-          <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <View className="h-2 bg-surface rounded-full overflow-hidden">
             <View
               className="h-full bg-primary-600 rounded-full"
               style={{ width: `${progress}%` }}
@@ -683,13 +717,13 @@ export default function TenantProfileCompletion() {
                         ? 'bg-green-500'
                         : isCurrent
                         ? 'bg-primary-600'
-                        : 'bg-gray-200'
+                        : 'bg-surface'
                     }`}
                   >
                     {isCompleted ? (
                       <Check size={18} color="white" />
                     ) : (
-                      <StepIcon size={18} color={isCurrent ? 'white' : COLORS.gray[500]} />
+                      <StepIcon size={18} color={isCurrent ? 'white' : colors.muted} />
                     )}
                   </View>
                 </View>
@@ -704,7 +738,7 @@ export default function TenantProfileCompletion() {
             <View className="w-10 h-10 rounded-lg bg-primary-600 items-center justify-center">
               <CurrentIcon size={20} color="white" />
             </View>
-            <Text className="text-xl font-semibold text-gray-900">{STEPS[currentStep].title}</Text>
+            <Text className="text-xl font-semibold text-text">{STEPS[currentStep].title}</Text>
           </View>
 
           {renderStepContent()}
@@ -713,7 +747,7 @@ export default function TenantProfileCompletion() {
         </ScrollView>
 
         {/* Navigation */}
-        <View className="flex-row gap-3 p-4 border-t border-gray-100 bg-white">
+        <View className="flex-row gap-3 p-4 border-t border-border bg-bg">
           <Button
             variant="outline"
             className="flex-1"
@@ -721,8 +755,8 @@ export default function TenantProfileCompletion() {
             disabled={currentStep === 0}
           >
             <View className="flex-row items-center">
-              <ChevronLeft size={18} color={COLORS.gray[600]} />
-              <Text className="ml-1 text-gray-700">{t('actions.back', 'Back')}</Text>
+              <ChevronLeft size={18} color={colors.muted} />
+              <Text className="ml-1 text-text">{t('actions.back', 'Back')}</Text>
             </View>
           </Button>
           <Button

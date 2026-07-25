@@ -8,7 +8,8 @@ import { Search, Building2, Users } from 'lucide-react-native';
 import { Button } from '@/components/ui';
 import useAuthStore from '@/stores/authStore';
 import { useUpdateRole } from '@/hooks/auth/useAuth';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
+import { cn } from '@/lib/utils';
 
 type Role = 'Tenant' | 'Landlord' | 'Both';
 
@@ -42,6 +43,7 @@ const roleOptions: RoleOption[] = [
 
 export default function OnboardingRoleScreen() {
   const { t } = useTranslation('auth');
+  const { colors } = useTheme();
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const { user } = useAuthStore();
   const updateRoleMutation = useUpdateRole();
@@ -72,13 +74,13 @@ export default function OnboardingRoleScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-bg">
       <View className="flex-1 px-6 pt-12">
         {/* Header */}
-        <Text className="text-3xl font-bold text-gray-900 mb-2">
+        <Text className="text-3xl font-bold text-text mb-2">
           {t('selectRole.title', 'How will you use Pokojowo?')}
         </Text>
-        <Text className="text-gray-500 mb-8">
+        <Text className="text-muted mb-8">
           {t('selectRole.subtitle', 'You can change this later in settings')}
         </Text>
 
@@ -92,44 +94,36 @@ export default function OnboardingRoleScreen() {
               <TouchableOpacity
                 key={option.id}
                 onPress={() => setSelectedRole(option.id)}
-                className={`flex-row items-center p-4 rounded-xl border-2 ${
-                  isSelected
-                    ? 'border-primary-600 bg-primary-50'
-                    : 'border-gray-200 bg-white'
-                }`}
+                className={cn(
+                  'flex-row items-center p-4 rounded-xl border-2',
+                  isSelected ? 'border-brand bg-primary-50 dark:bg-primary-900' : 'border-border bg-card'
+                )}
               >
                 <View
-                  className={`w-14 h-14 rounded-full items-center justify-center ${
-                    isSelected ? 'bg-primary-600' : 'bg-gray-100'
-                  }`}
+                  className={cn(
+                    'w-14 h-14 rounded-full items-center justify-center',
+                    isSelected ? 'bg-brand' : 'bg-surface'
+                  )}
                 >
-                  <IconComponent
-                    size={28}
-                    color={isSelected ? 'white' : COLORS.gray[500]}
-                  />
+                  <IconComponent size={28} color={isSelected ? colors.brandFg : colors.muted} />
                 </View>
                 <View className="flex-1 ml-4">
                   <Text
-                    className={`text-lg font-semibold ${
-                      isSelected ? 'text-primary-600' : 'text-gray-900'
-                    }`}
+                    className={cn('text-lg font-semibold', isSelected ? 'text-brand' : 'text-text')}
                   >
                     {t(option.titleKey, getDefaultTitle(option.id))}
                   </Text>
-                  <Text className="text-gray-500 text-sm">
+                  <Text className="text-muted text-sm">
                     {t(option.descriptionKey, getDefaultDescription(option.id))}
                   </Text>
                 </View>
                 <View
-                  className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-                    isSelected
-                      ? 'border-primary-600 bg-primary-600'
-                      : 'border-gray-300'
-                  }`}
-                >
-                  {isSelected && (
-                    <View className="w-2 h-2 rounded-full bg-white" />
+                  className={cn(
+                    'w-6 h-6 rounded-full border-2 items-center justify-center',
+                    isSelected ? 'border-brand bg-brand' : 'border-border'
                   )}
+                >
+                  {isSelected && <View className="w-2 h-2 rounded-full bg-white" />}
                 </View>
               </TouchableOpacity>
             );
