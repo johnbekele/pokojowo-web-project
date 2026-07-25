@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import secrets
 import uuid
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -8,7 +9,7 @@ from typing import List, Optional, Tuple
 import aiofiles
 import magic
 from PIL import Image
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Depends
+from fastapi import APIRouter, UploadFile, File, Header, HTTPException, status, Depends
 
 from app.models.user import User
 from app.core.dependencies import get_current_user, require_verified
@@ -212,6 +213,35 @@ async def upload_multiple_listing_images(
         "message": f"Successfully uploaded {len(uploaded_files)} images",
         "files": uploaded_files
     }
+
+
+@router.post("/scraped", response_model=dict)
+async def upload_scraped_images(
+    files: List[UploadFile] = File(...),
+    x_scraper_key: Optional[str] = Header(None)
+):
+    """Re-host scraped listing images. Auth: shared X-Scraper-Key, same
+    model as POST /api/listings/import (fail closed when key unset)."""
+    if not settings.SCRAPER_API_KEY or not x_scraper_key or not secrets.compare_digest(
+        x_scraper_key, settings.SCRAPER_API_KEY
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Valid X-Scraper-Key header is required"
+        )
+
+    if len(files) > 10:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Maximum 10 images allowed"
+        )
+
+    uploaded = []
+    for file in files:
+        content, ext = await read_validated(file)
+        uploaded.append(await save_bytes(content, ext, LISTING_DIR))
+
+    return {"urls": uploaded}
 
 
 @router.delete("/photo/{filename}")

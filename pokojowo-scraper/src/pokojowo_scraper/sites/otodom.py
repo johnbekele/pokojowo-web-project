@@ -35,6 +35,8 @@ class OtodomAdapter:
     site = "otodom"
 
     def search_url(self, city: str, page: int) -> str:
+        if city not in CITY_PATHS:
+            raise ValueError(f"unsupported Otodom city: {city}")
         path = CITY_PATHS[city]
         return (
             f"https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/{path}"
