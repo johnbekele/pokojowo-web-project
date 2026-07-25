@@ -12,6 +12,8 @@ import { queryClient } from '@/lib/queryClient';
 import i18n from '@/lib/i18n';
 import useAuthStore from '@/stores/authStore';
 import ThemeProvider from '@/components/shared/ThemeProvider';
+import ToastHost from '@/components/shared/ToastHost';
+import ConfirmHost from '@/components/shared/ConfirmHost';
 import useTheme from '@/hooks/useTheme';
 
 import '../global.css';
@@ -64,6 +66,8 @@ export default function RootLayout() {
             <ThemeProvider>
               <StatusBar style="auto" />
               {isReady ? <Slot /> : <LoadingScreen />}
+              <ToastHost />
+              <ConfirmHost />
             </ThemeProvider>
           </SafeAreaProvider>
         </GestureHandlerRootView>
