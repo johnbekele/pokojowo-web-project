@@ -73,3 +73,32 @@ async def record_price_change(source_url: str, old: float, new: float) -> None:
         {"source_url": source_url},
         {"$push": {"price_history": {"from": old, "to": new, "at": utcnow()}}},
     )
+
+
+async def archive_stale(pending_days: int = 14, absent_runs: int = 5) -> dict:
+    """End-of-run maintenance: archive queue items nobody reviewed within
+    `pending_days`; mark seen listings inactive when absent from search
+    results for `absent_runs` consecutive runs (they were likely delisted)."""
+    from datetime import timedelta
+
+    cutoff = utcnow() - timedelta(days=pending_days)
+    archived = await db().pending.update_many(
+        {"status": {"$in": ["pending", "held"]}, "created_at": {"$lt": cutoff}},
+        {"$set": {"status": "archived", "archived_at": utcnow()}},
+    )
+
+    recent_run_ids = [
+        r["run_id"]
+        async for r in db().runs.find({}, {"run_id": 1})
+        .sort("started_at", -1)
+        .limit(absent_runs)
+    ]
+    inactive = 0
+    if len(recent_run_ids) == absent_runs:
+        result = await db().seen_listings.update_many(
+            {"last_seen_run": {"$nin": recent_run_ids}, "status": {"$ne": "inactive"}},
+            {"$set": {"status": "inactive", "inactive_at": utcnow()}},
+        )
+        inactive = result.modified_count
+
+    return {"archived": archived.modified_count, "marked_inactive": inactive}

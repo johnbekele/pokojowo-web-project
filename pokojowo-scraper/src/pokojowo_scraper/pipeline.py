@@ -21,6 +21,7 @@ from pokojowo_scraper.quality import score
 from pokojowo_scraper.schemas import ExtractedListing, RouteDecision, RunStats, fv
 from pokojowo_scraper.sites import ADAPTERS
 from pokojowo_scraper.store import (
+    archive_stale,
     db,
     ensure_indexes,
     is_seen,
@@ -80,8 +81,10 @@ async def run_all(
             )
 
     if not dry_run:
+        maintenance = await archive_stale()
         await db().runs.update_one(
-            {"run_id": run_id}, {"$set": {"finished_at": utcnow()}}
+            {"run_id": run_id},
+            {"$set": {"finished_at": utcnow(), "maintenance": maintenance}},
         )
     logger.info("run %s finished: %s", run_id, run_doc["per_site"])
     return run_doc
