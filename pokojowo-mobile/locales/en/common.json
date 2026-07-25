@@ -16,6 +16,12 @@
     "likes": "Likes",
     "settings": "Settings"
   },
+  "tabs": {
+    "home": "Home",
+    "flatmates": "Flatmates",
+    "chat": "Chat",
+    "profile": "Profile"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",

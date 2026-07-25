@@ -16,6 +16,12 @@
     "likes": "Polubienia",
     "settings": "Ustawienia"
   },
+  "tabs": {
+    "home": "Start",
+    "flatmates": "Współlokatorzy",
+    "chat": "Wiadomości",
+    "profile": "Profil"
+  },
   "actions": {
     "save": "Zapisz",
     "cancel": "Anuluj",
