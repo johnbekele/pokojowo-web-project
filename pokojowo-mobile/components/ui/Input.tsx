@@ -1,5 +1,8 @@
-import { View, TextInput, Text, TextInputProps } from 'react-native';
+import { useState } from 'react';
+import { View, TextInput, Text, TouchableOpacity, TextInputProps } from 'react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
+import useTheme from '@/hooks/useTheme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -18,13 +21,25 @@ export default function Input({
   rightIcon,
   containerClassName,
   className,
+  secureTextEntry,
   ...props
 }: InputProps) {
+  const { colors } = useTheme();
+  const [focused, setFocused] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  const isPassword = !!secureTextEntry;
+  const hideText = isPassword && !revealed;
+
+  const borderClass = error
+    ? 'border-danger'
+    : focused
+      ? 'border-brand'
+      : 'border-border';
+
   return (
     <View className={cn('mb-4', containerClassName)}>
-      {label && (
-        <Text className="text-gray-700 mb-2 font-medium">{label}</Text>
-      )}
+      {label && <Text className="text-text mb-2 font-medium">{label}</Text>}
       <View className="relative">
         {leftIcon && (
           <View className="absolute left-3 top-0 bottom-0 justify-center z-10">
@@ -33,27 +48,46 @@ export default function Input({
         )}
         <TextInput
           className={cn(
-            'border rounded-lg px-4 py-3 text-base text-gray-900',
-            error ? 'border-red-500' : 'border-gray-300',
+            'border rounded-lg px-4 py-3 text-base text-text bg-card',
+            borderClass,
             leftIcon && 'pl-10',
-            rightIcon && 'pr-10',
+            (rightIcon || isPassword) && 'pr-10',
             className
           )}
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor={colors.muted}
+          secureTextEntry={hideText}
+          onFocus={(e) => {
+            setFocused(true);
+            props.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            props.onBlur?.(e);
+          }}
           {...props}
         />
-        {rightIcon && (
-          <View className="absolute right-3 top-0 bottom-0 justify-center z-10">
-            {rightIcon}
-          </View>
+        {isPassword ? (
+          <TouchableOpacity
+            className="absolute right-3 top-0 bottom-0 justify-center z-10"
+            onPress={() => setRevealed((v) => !v)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            {revealed ? (
+              <EyeOff size={20} color={colors.muted} />
+            ) : (
+              <Eye size={20} color={colors.muted} />
+            )}
+          </TouchableOpacity>
+        ) : (
+          rightIcon && (
+            <View className="absolute right-3 top-0 bottom-0 justify-center z-10">
+              {rightIcon}
+            </View>
+          )
         )}
       </View>
-      {error && (
-        <Text className="text-red-500 text-sm mt-1">{error}</Text>
-      )}
-      {hint && !error && (
-        <Text className="text-gray-500 text-sm mt-1">{hint}</Text>
-      )}
+      {error && <Text className="text-danger text-sm mt-1">{error}</Text>}
+      {hint && !error && <Text className="text-muted text-sm mt-1">{hint}</Text>}
     </View>
   );
 }

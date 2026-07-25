@@ -1,7 +1,7 @@
 import { Modal as RNModal, View, TouchableOpacity, Text, Pressable } from 'react-native';
 import { X } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 interface ModalProps {
   visible: boolean;
@@ -29,6 +29,7 @@ export default function Modal({
   size = 'md',
   className,
 }: ModalProps) {
+  const { colors } = useTheme();
   return (
     <RNModal
       visible={visible}
@@ -43,7 +44,7 @@ export default function Modal({
       >
         <Pressable
           className={cn(
-            'bg-white rounded-2xl w-full overflow-hidden',
+            'bg-card rounded-2xl w-full overflow-hidden',
             sizeStyles[size],
             size === 'full' && 'rounded-none',
             className
@@ -52,8 +53,8 @@ export default function Modal({
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-100">
-              <Text className="text-lg font-semibold text-gray-900 flex-1">
+            <View className="flex-row items-center justify-between p-4 border-b border-border">
+              <Text className="text-lg font-semibold text-text flex-1">
                 {title}
               </Text>
               {showCloseButton && (
@@ -62,7 +63,7 @@ export default function Modal({
                   className="p-1 -mr-1 rounded-full"
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <X size={24} color={COLORS.gray[500]} />
+                  <X size={24} color={colors.muted} />
                 </TouchableOpacity>
               )}
             </View>
