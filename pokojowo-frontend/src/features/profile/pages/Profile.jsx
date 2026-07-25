@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import TrustLevelBadge from '@/components/shared/TrustLevelBadge';
 import PhoneVerificationCard from '../components/PhoneVerificationCard';
+import SavedSearchesCard from '../components/SavedSearchesCard';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
@@ -56,6 +57,8 @@ export default function Profile() {
       </Card>
 
       <PhoneVerificationCard />
+
+      <SavedSearchesCard />
 
       {/* Profile Completion */}
       {!isComplete && (

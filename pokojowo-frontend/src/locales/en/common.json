@@ -76,7 +76,8 @@
     "markAllRead": "Mark all read",
     "clear": "Clear",
     "empty": "No notifications yet",
-    "newMessage": "New message"
+    "newMessage": "New message",
+    "savedSearchMatch": "New listing matches your search"
   },
   "time": {
     "justNow": "Just now",

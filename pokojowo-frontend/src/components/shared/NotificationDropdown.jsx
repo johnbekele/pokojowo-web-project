@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bell, MessageSquare, ThumbsUp, Handshake, User, Loader2 } from 'lucide-react';
+import { Bell, MessageSquare, ThumbsUp, Handshake, User, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -41,6 +41,8 @@ export default function NotificationDropdown() {
         userName: n.data?.likerName || n.data?.matchedUserName,
         userPhoto: n.data?.likerPhoto || n.data?.matchedUserPhoto,
         chatId: n.data?.chatId,
+        savedSearchId: n.data?.savedSearchId,
+        savedSearchName: n.data?.savedSearchName,
         preview: n.data?.preview,
         message: n.message,
         createdAt: n.created_at,
@@ -114,6 +116,18 @@ export default function NotificationDropdown() {
           };
           break;
 
+        case 'saved_search_match':
+          newNotification = {
+            id: `search-${data.savedSearchId}-${Date.now()}`,
+            type: 'saved_search_match',
+            savedSearchId: data.savedSearchId,
+            savedSearchName: data.savedSearchName,
+            message: data.message,
+            createdAt: new Date().toISOString(),
+            read: false,
+          };
+          break;
+
         default:
           console.log('Unknown notification type:', data.type);
           return;
@@ -168,7 +182,7 @@ export default function NotificationDropdown() {
     );
 
     // Mark as read in API (don't wait for it)
-    if (notification.id && !notification.id.startsWith('msg-') && !notification.id.startsWith('like-') && !notification.id.startsWith('match-')) {
+    if (notification.id && !notification.id.startsWith('msg-') && !notification.id.startsWith('like-') && !notification.id.startsWith('match-') && !notification.id.startsWith('search-')) {
       api.post(`/notifications/${notification.id}/read`).catch(() => {});
     }
 
@@ -188,6 +202,12 @@ export default function NotificationDropdown() {
         }
         break;
 
+      case 'saved_search_match':
+        if (notification.savedSearchId) {
+          navigate(`/discover?savedSearch=${notification.savedSearchId}`);
+        }
+        break;
+
       default:
         break;
     }
@@ -204,6 +224,8 @@ export default function NotificationDropdown() {
         return ThumbsUp;
       case 'mutual_match':
         return Handshake;
+      case 'saved_search_match':
+        return Search;
       default:
         return Bell;
     }
@@ -218,6 +240,8 @@ export default function NotificationDropdown() {
         return t('notifications.newLike', 'Someone is interested!');
       case 'mutual_match':
         return t('notifications.mutualMatch', "You're connected!");
+      case 'saved_search_match':
+        return t('notifications.savedSearchMatch', 'New listing matches your search');
       default:
         return t('notifications.notification', 'Notification');
     }
@@ -232,6 +256,8 @@ export default function NotificationDropdown() {
         return notification.message || `${notification.userName} is interested in being your flatmate`;
       case 'mutual_match':
         return notification.message || `You and ${notification.userName} are both interested!`;
+      case 'saved_search_match':
+        return notification.savedSearchName || notification.message;
       default:
         return '';
     }
