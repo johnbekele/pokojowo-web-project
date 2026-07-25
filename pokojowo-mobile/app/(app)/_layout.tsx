@@ -3,9 +3,11 @@ import { View } from 'react-native';
 import useAuthStore from '@/stores/authStore';
 import VerifyEmailBanner from '@/components/shared/VerifyEmailBanner';
 import TabBar from '@/components/shared/TabBar';
+import useNotificationSocket from '@/hooks/notifications/useNotificationSocket';
 
 export default function AppLayout() {
   const { isAuthenticated } = useAuthStore();
+  useNotificationSocket();
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
