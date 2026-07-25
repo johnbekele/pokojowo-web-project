@@ -1,164 +1,88 @@
 /**
- * Scraper Admin API Service
+ * Scraper Admin API service — thin fetch wrapper, one function per endpoint.
+ * All React Query usage lives in src/hooks/; components never call these directly.
  */
 
-import axios from 'axios';
+const BASE = '/api/scraper';
 
-const API_BASE = '/api/scraper';
+export class ApiError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
 
-const api = axios.create({
-  baseURL: API_BASE,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+async function request(path, { method = 'GET', body, params } = {}) {
+  let url = BASE + path;
+  if (params) {
+    const qs = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== '') qs.append(key, value);
+    }
+    const s = qs.toString();
+    if (s) url += `?${s}`;
+  }
+  const res = await fetch(url, {
+    method,
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    let detail = res.statusText || `HTTP ${res.status}`;
+    try {
+      const data = await res.json();
+      detail = data.detail || data.message || detail;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new ApiError(res.status, detail);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
 
-export const scraperApi = {
-  // Health Check
-  healthCheck: async () => {
-    const response = await api.get('/health');
-    return response.data;
-  },
+// Health
+export const getHealth = () => request('/health');
 
-  // Jobs
-  getJobs: async ({ limit = 20, offset = 0, status, site } = {}) => {
-    const params = new URLSearchParams({ limit, offset });
-    if (status) params.append('status', status);
-    if (site) params.append('site', site);
-    const response = await api.get(`/jobs?${params}`);
-    return response.data;
-  },
+// Runs
+export const getRuns = ({ limit = 20, skip = 0 } = {}) =>
+  request('/runs', { params: { limit, skip } });
 
-  getJob: async (jobId) => {
-    const response = await api.get(`/jobs/${jobId}`);
-    return response.data;
-  },
+export const startRun = ({ site, city } = {}) =>
+  request('/runs', { method: 'POST', params: { site, city } });
 
-  createJob: async (jobData) => {
-    const response = await api.post('/jobs', jobData);
-    return response.data;
-  },
+// SSE log stream — consumers create their own EventSource from this URL.
+export const logStreamUrl = () => `${BASE}/logs/stream`;
 
-  cancelJob: async (jobId) => {
-    const response = await api.delete(`/jobs/${jobId}`);
-    return response.data;
-  },
+// Queue
+export const getQueue = ({ status, limit = 24, skip = 0 } = {}) =>
+  request('/queue', { params: { status, limit, skip } });
 
-  getJobLogs: async (jobId, limit = 100) => {
-    const response = await api.get(`/jobs/${jobId}/logs?limit=${limit}`);
-    return response.data;
-  },
+export const getQueueStats = () => request('/queue/stats');
 
-  // Returns EventSource for SSE streaming
-  streamJobLogs: (jobId) => {
-    return new EventSource(`${API_BASE}/jobs/${jobId}/stream`);
-  },
+export const updateListing = (id, edits) =>
+  request(`/queue/${id}`, { method: 'PUT', body: { edits } });
 
-  // Pending Listings
-  getPendingListings: async ({ limit = 20, offset = 0, status = 'pending', site, sortBy = 'created_at', sortOrder = 'desc' } = {}) => {
-    const params = new URLSearchParams({ limit, offset, status, sort_by: sortBy, sort_order: sortOrder });
-    if (site) params.append('site', site);
-    const response = await api.get(`/pending?${params}`);
-    return response.data;
-  },
+export const decideListing = (id, { action, reason }) =>
+  request(`/queue/${id}/decision`, {
+    method: 'POST',
+    body: reason ? { action, reason } : { action },
+  });
 
-  getPendingListing: async (listingId) => {
-    const response = await api.get(`/pending/${listingId}`);
-    return response.data;
-  },
+export const annotateListing = (id, { field, issue, comment, corrected_value }) =>
+  request(`/queue/${id}/annotate`, {
+    method: 'POST',
+    body: { field, issue, ...(comment ? { comment } : {}), ...(corrected_value ? { corrected_value } : {}) },
+  });
 
-  updatePendingListing: async (listingId, updates) => {
-    const response = await api.put(`/pending/${listingId}`, updates);
-    return response.data;
-  },
+// Annotations
+export const getAnnotations = ({ limit = 50, skip = 0 } = {}) =>
+  request('/annotations', { params: { limit, skip } });
 
-  searchPendingListings: async (query) => {
-    const response = await api.get(`/pending/search?q=${encodeURIComponent(query)}`);
-    return response.data;
-  },
+// Metrics
+export const getPrecisionMetrics = (days = 30) =>
+  request('/metrics/precision', { params: { days } });
 
-  getQueueStats: async () => {
-    const response = await api.get('/pending/queue-stats');
-    return response.data;
-  },
-
-  // Approval Actions
-  approveListing: async (listingId, reviewer = 'admin') => {
-    const response = await api.post(`/approval/${listingId}`, {
-      action: 'approve',
-      reviewer,
-    });
-    return response.data;
-  },
-
-  rejectListing: async (listingId, reason, reviewer = 'admin') => {
-    const response = await api.post(`/approval/${listingId}`, {
-      action: 'reject',
-      rejection_reason: reason,
-      reviewer,
-    });
-    return response.data;
-  },
-
-  bulkApprove: async (listingIds, reviewer = 'admin') => {
-    const response = await api.post('/approval/bulk', {
-      listing_ids: listingIds,
-      action: 'approve',
-      reviewer,
-    });
-    return response.data;
-  },
-
-  bulkReject: async (listingIds, reason, reviewer = 'admin') => {
-    const response = await api.post('/approval/bulk', {
-      listing_ids: listingIds,
-      action: 'reject',
-      rejection_reason: reason,
-      reviewer,
-    });
-    return response.data;
-  },
-
-  approveAllPending: async (limit = 100, reviewer = 'admin') => {
-    const response = await api.post(`/approval/approve-all-pending?limit=${limit}&reviewer=${reviewer}`);
-    return response.data;
-  },
-
-  getPublishingStatus: async () => {
-    const response = await api.get('/approval/publishing-status');
-    return response.data;
-  },
-
-  // Statistics
-  getOverviewStats: async () => {
-    const response = await api.get('/stats/overview');
-    return response.data;
-  },
-
-  getStatsBySite: async () => {
-    const response = await api.get('/stats/by-site');
-    return response.data;
-  },
-
-  getStatsByCity: async () => {
-    const response = await api.get('/stats/by-city');
-    return response.data;
-  },
-
-  getTimelineStats: async (days = 7) => {
-    const response = await api.get(`/stats/timeline?days=${days}`);
-    return response.data;
-  },
-
-  getQualityMetrics: async () => {
-    const response = await api.get('/stats/quality');
-    return response.data;
-  },
-
-  getRecentActivity: async (limit = 20) => {
-    const response = await api.get(`/stats/recent-activity?limit=${limit}`);
-    return response.data;
-  },
-};
-
-export default scraperApi;
+export const getQualityMetrics = (days = 30) =>
+  request('/metrics/quality', { params: { days } });

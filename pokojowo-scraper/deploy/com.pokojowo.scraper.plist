@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Install:
+       1. Edit WorkingDirectory + ProgramArguments paths below for your Mac.
+       2. cp deploy/com.pokojowo.scraper.plist ~/Library/LaunchAgents/
+       3. launchctl load ~/Library/LaunchAgents/com.pokojowo.scraper.plist
+       Test immediately: launchctl kickstart -k gui/$(id -u)/com.pokojowo.scraper
+       launchd (unlike cron) runs a missed schedule once after wake. -->
+  <key>Label</key>
+  <string>com.pokojowo.scraper</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/yohansbekele/pokojowo-web-project/pokojowo-scraper</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/yohansbekele/pokojowo-web-project/pokojowo-scraper/.venv-v2/bin/pokojowo-scraper</string>
+    <string>run</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>40</integer></dict>
+    <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>10</integer></dict>
+    <dict><key>Hour</key><integer>20</integer><key>Minute</key><integer>20</integer></dict>
+  </array>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/pokojowo-scraper.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/pokojowo-scraper.err.log</string>
+</dict>
+</plist>
