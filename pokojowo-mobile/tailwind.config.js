@@ -1,13 +1,17 @@
 /** @type {import('tailwindcss').Config} */
+const withOpacity = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
+
 module.exports = {
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Brand + neutral scales (scheme-independent)
         primary: {
           50: '#f0fdfa',
           100: '#ccfbf1',
@@ -34,9 +38,29 @@ module.exports = {
           900: '#701a75',
           950: '#4a044e',
         },
+        // Semantic tokens (resolve per light/dark via CSS vars in global.css)
+        bg: withOpacity('--color-bg'),
+        surface: withOpacity('--color-surface'),
+        card: withOpacity('--color-card'),
+        border: withOpacity('--color-border'),
+        text: withOpacity('--color-text'),
+        muted: withOpacity('--color-muted'),
+        brand: withOpacity('--color-brand'),
+        'brand-fg': withOpacity('--color-brand-fg'),
+        danger: withOpacity('--color-danger'),
+        success: withOpacity('--color-success'),
+        warning: withOpacity('--color-warning'),
+        info: withOpacity('--color-info'),
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        sm: '6px',
+        md: '10px',
+        lg: '14px',
+        xl: '20px',
+        '2xl': '28px',
       },
     },
   },

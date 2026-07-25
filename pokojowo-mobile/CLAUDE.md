@@ -158,6 +158,20 @@ t('settings.language')        // NOT nested object
 
 Keep translation values as strings, not nested objects, unless the code explicitly accesses nested keys.
 
+## Design System (tokens + dark mode)
+
+Source of truth: `lib/theme.ts` (palette, semantic light/dark tokens, typography/spacing/radius). Semantic tokens are wired to CSS variables in `global.css` and exposed as Tailwind classes in `tailwind.config.js`.
+
+- Prefer semantic NativeWind classNames so dark mode is automatic:
+  `bg-bg`, `bg-surface`, `bg-card`, `text-text`, `text-muted`, `border-border`,
+  `bg-brand`, `text-brand-fg`, plus `danger` / `success` / `warning` / `info`.
+- Only use raw hex via `useTheme().colors` where a className cannot apply
+  (react-native-maps markers, SVG fills, gradients, status bar).
+- Theme preference lives in `stores/uiStore.ts` (`theme: 'light' | 'dark' | 'system'`,
+  persisted) and is applied by `components/shared/ThemeProvider.tsx` via NativeWind's
+  `colorScheme.set()`. Read the active scheme with `hooks/useTheme.ts`.
+- Do NOT hardcode hex values in screens/components when a token exists.
+
 ## Commit Style
 
 Follow existing pattern:
