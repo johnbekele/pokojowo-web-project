@@ -36,12 +36,9 @@ import { useListing } from '@/hooks/listings/useListings';
 import { useSaveListing, useUnsaveListing, useIsListingSaved } from '@/hooks/favorites/useFavorites';
 import { useTrackView } from '@/hooks/listingInteractions/useListingInteractions';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { COLORS } from '@/lib/constants';
+import { COLORS, IMAGE_BASE_URL } from '@/lib/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Base URL for images (without /api)
-const IMAGE_BASE_URL = 'https://pokojowo-web-project.onrender.com';
 
 /**
  * Convert image URL to absolute URL if it's a relative path

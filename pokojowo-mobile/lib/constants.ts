@@ -6,6 +6,9 @@ export const API_BASE_URL =
   Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 export const SOCKET_URL =
   Constants.expoConfig?.extra?.socketUrl || 'http://localhost:3000';
+// Base URL for server-hosted images (uploads). Falls back to the socket host.
+export const IMAGE_BASE_URL =
+  Constants.expoConfig?.extra?.imageBaseUrl || SOCKET_URL;
 
 // App colors — derived from the design-system palette in lib/theme.ts (single
 // source of truth). Kept here for backwards-compatible imports.
