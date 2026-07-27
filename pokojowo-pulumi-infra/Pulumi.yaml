@@ -1,0 +1,6 @@
+name: pokojowo-infra
+description: Pokojowo infrastructure managed with Pulumi (self-managed S3 backend)
+runtime:
+  name: python
+  options:
+    virtualenv: venv

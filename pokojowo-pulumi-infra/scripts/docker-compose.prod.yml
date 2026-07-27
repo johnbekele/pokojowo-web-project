@@ -1,0 +1,35 @@
+# Production docker-compose deployed onto the EC2 host at /opt/pokojowo.
+# Values interpolated from ${...} come from /opt/pokojowo/.env on the host,
+# which the deploy script uploads alongside this file.
+
+services:
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: pokojowo-backend
+    restart: unless-stopped
+    ports:
+      # Bind FastAPI (uvicorn/gunicorn listens on ${PORT:-10000} inside)
+      # to host port 80 so the CloudFront origin can reach it.
+      - "80:10000"
+    environment:
+      - PORT=10000
+      - DEBUG=False
+    env_file:
+      - ./backend.env
+    volumes:
+      - pokojowo-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pokojowo-uploads:
+    name: pokojowo-uploads
