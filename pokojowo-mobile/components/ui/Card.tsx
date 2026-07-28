@@ -19,9 +19,9 @@ const paddingStyles = {
 };
 
 const variantStyles = {
-  default: 'bg-white',
-  outlined: 'bg-white border border-gray-200',
-  elevated: 'bg-white shadow-sm',
+  default: 'bg-card',
+  outlined: 'bg-card border border-border',
+  elevated: 'bg-card shadow-sm shadow-black/10',
 };
 
 export default function Card({
@@ -44,7 +44,7 @@ export default function Card({
       <TouchableOpacity
         onPress={onPress}
         className={baseClassName}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
         {...props}
       >
         {children}
@@ -87,5 +87,5 @@ Card.Footer = function CardFooter({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <View className={cn('mt-3 pt-3 border-t border-gray-100', className)}>{children}</View>;
+  return <View className={cn('mt-3 pt-3 border-t border-border', className)}>{children}</View>;
 };
