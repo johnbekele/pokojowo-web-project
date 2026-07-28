@@ -173,12 +173,19 @@ docker image prune -f
 REMOTE
 )
 
+# Build a proper JSON parameters payload and pass via file so multi-line
+# script newlines are preserved (using `commands=[...]` shorthand collapses
+# the script into one line where \n escapes are not expanded on the host).
+TMP_SSM_PARAMS="$(mktemp)"
+trap 'rm -f "${TMP_SSM_PARAMS}"' EXIT
+jq -n --arg script "${REMOTE_SCRIPT}" '{commands: [$script]}' > "${TMP_SSM_PARAMS}"
+
 CMD_ID="$(aws ssm send-command \
   --region "${AWS_REGION}" \
   --instance-ids "${EC2_INSTANCE_ID}" \
   --document-name "AWS-RunShellScript" \
   --comment "pokojowo deploy ${TAG}" \
-  --parameters commands="[$(printf '%s' "${REMOTE_SCRIPT}" | jq -Rs .)]" \
+  --parameters "file://${TMP_SSM_PARAMS}" \
   --query 'Command.CommandId' \
   --output text)"
 

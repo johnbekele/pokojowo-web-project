@@ -164,6 +164,41 @@ aws.s3.BucketServerSideEncryptionConfigurationV2(
     ],
 )
 
+# Allow the EC2 instance role to read/write the uploads bucket (used for both
+# deploy artifact staging and application uploads).
+uploads_arn = uploads.arn
+uploads_objects_arn = uploads.arn.apply(lambda a: f"{a}/*")
+
+aws.iam.RolePolicy(
+    f"{name}-ec2-uploads-access",
+    role=ec2_role.id,
+    policy=pulumi.Output.all(uploads_arn, uploads_objects_arn).apply(
+        lambda args: json.dumps(
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Sid": "ListUploadsBucket",
+                        "Effect": "Allow",
+                        "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+                        "Resource": args[0],
+                    },
+                    {
+                        "Sid": "RWUploadsObjects",
+                        "Effect": "Allow",
+                        "Action": [
+                            "s3:GetObject",
+                            "s3:PutObject",
+                            "s3:DeleteObject",
+                        ],
+                        "Resource": args[1],
+                    },
+                ],
+            }
+        )
+    ),
+)
+
 # ---------------------------------------------------------------------------
 # EC2 instance
 # ---------------------------------------------------------------------------
@@ -179,11 +214,19 @@ ami = aws.ec2.get_ami(
 user_data = r"""#!/bin/bash
 set -euxo pipefail
 dnf update -y
+
+# SSM Session Manager / RunCommand — required by the deploy script.
+# AL2023 ships the agent preinstalled, but a `dnf update` can leave it
+# stopped; install-or-noop and force enable+start so the instance always
+# registers with SSM.
+dnf install -y amazon-ssm-agent || true
+systemctl enable --now amazon-ssm-agent
+
+# Docker + compose
 dnf install -y docker
 systemctl enable --now docker
 usermod -aG docker ec2-user
 
-# Docker Compose plugin
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -fsSL \
   https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
