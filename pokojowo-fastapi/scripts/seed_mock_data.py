@@ -57,17 +57,28 @@ SEED = "frontend_mock"
 PASSWORD = "Test123!"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-IMAGE_BASE = "/images/promo"
+# Absolute, publicly hosted photos. These used to be "/images/promo/..." paths,
+# which only resolve against the Vite web frontend -- native clients hit the API
+# host and got 404s, so every card fell back to the same placeholder.
+UNSPLASH = "https://images.unsplash.com"
+_PORTRAIT = "w=600&h=600&fit=crop&crop=faces&auto=format"
+_ROOM = "w=1200&h=800&fit=crop&auto=format"
+
 ROOM_IMAGES = [
-    f"{IMAGE_BASE}/romm1.png",
-    f"{IMAGE_BASE}/modern-room.avif",
-    f"{IMAGE_BASE}/apartment-hotels.jpg",
-    f"{IMAGE_BASE}/apartment_411.webp",
+    f"{UNSPLASH}/photo-1522708323590-d24dbb6b0267?{_ROOM}",
+    f"{UNSPLASH}/photo-1560448204-e02f11c3d0e2?{_ROOM}",
+    f"{UNSPLASH}/photo-1502672260266-1c1ef2d93688?{_ROOM}",
+    f"{UNSPLASH}/photo-1493809842364-78817add7ffb?{_ROOM}",
 ]
-PROFILE_IMAGES = [
-    f"{IMAGE_BASE}/roomate1.webp",
-    f"{IMAGE_BASE}/Roommate-Finder.webp",
-]
+
+# One distinct portrait per mock user, roughly matching their age/gender.
+PROFILE_PHOTOS = {
+    "mock_landlord": f"{UNSPLASH}/photo-1573496359142-b8d87734a5a2?{_PORTRAIT}",
+    "mock_anna": f"{UNSPLASH}/photo-1494790108377-be9c29b29330?{_PORTRAIT}",
+    "mock_piotr": f"{UNSPLASH}/photo-1500648767791-00dcc994a43e?{_PORTRAIT}",
+    "mock_sofia": f"{UNSPLASH}/photo-1517841905240-472988babdf9?{_PORTRAIT}",
+    "mock_kamil": f"{UNSPLASH}/photo-1507003211169-0a1dd7228f2d?{_PORTRAIT}",
+}
 
 
 async def setup_database() -> AsyncIOMotorClient:
@@ -153,7 +164,7 @@ async def seed_users() -> dict[str, User]:
         "phone": "+48500111222",
         "location": "Warsaw",
         "languages": ["Polish", "English"],
-        "photo": PhotoModel(url=PROFILE_IMAGES[0]),
+        "photo": PhotoModel(url=PROFILE_PHOTOS["mock_landlord"]),
         "role": [RoleEnum.USER, RoleEnum.LANDLORD],
         "job": JobModel(industry=IndustryEnum.REAL_ESTATE, title="Property Manager"),
         "landlord_profile": LandlordProfileModel(
@@ -191,7 +202,7 @@ async def seed_users() -> dict[str, User]:
             "phone": "+48500111333",
             "location": "Warsaw",
             "languages": ["Polish", "English"],
-            "photo": PhotoModel(url=PROFILE_IMAGES[0]),
+            "photo": PhotoModel(url=PROFILE_PHOTOS["mock_anna"]),
             "role": [RoleEnum.USER, RoleEnum.TENANT],
             "job": JobModel(industry=IndustryEnum.DESIGN, title="UX Designer"),
             "tenant_profile": tenant_profile("Warsaw", 3200, ["design", "plants", "coffee", "yoga"]),
@@ -208,7 +219,7 @@ async def seed_users() -> dict[str, User]:
             "phone": "+48500111444",
             "location": "Warsaw",
             "languages": ["Polish", "English"],
-            "photo": PhotoModel(url=PROFILE_IMAGES[1]),
+            "photo": PhotoModel(url=PROFILE_PHOTOS["mock_piotr"]),
             "role": [RoleEnum.USER, RoleEnum.TENANT],
             "job": JobModel(industry=IndustryEnum.TECHNOLOGY, title="Frontend Engineer"),
             "tenant_profile": tenant_profile("Warsaw", 3500, ["cycling", "technology", "cooking", "board games"]),
@@ -225,7 +236,7 @@ async def seed_users() -> dict[str, User]:
             "phone": "+48500111555",
             "location": "Krakow",
             "languages": ["English", "Spanish", "Polish"],
-            "photo": PhotoModel(url=PROFILE_IMAGES[0]),
+            "photo": PhotoModel(url=PROFILE_PHOTOS["mock_sofia"]),
             "role": [RoleEnum.USER, RoleEnum.TENANT],
             "job": JobModel(industry=IndustryEnum.STUDENT, title="Student"),
             "tenant_profile": tenant_profile("Krakow", 2600, ["music", "languages", "travel", "study"], tidy=False),
@@ -242,7 +253,7 @@ async def seed_users() -> dict[str, User]:
             "phone": "+48500111666",
             "location": "Wroclaw",
             "languages": ["Polish", "English"],
-            "photo": PhotoModel(url=PROFILE_IMAGES[1]),
+            "photo": PhotoModel(url=PROFILE_PHOTOS["mock_kamil"]),
             "role": [RoleEnum.USER, RoleEnum.TENANT],
             "job": JobModel(industry=IndustryEnum.MARKETING, title="Marketing Specialist"),
             "tenant_profile": tenant_profile("Wroclaw", 2900, ["fitness", "marketing", "events", "movies"], tidy=False),

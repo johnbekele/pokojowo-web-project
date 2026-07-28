@@ -252,6 +252,10 @@ class MatchingService:
                 "data_completeness": breakdown.get("dataCompleteness"),
                 "phone_verified": bool(getattr(candidate, "phone_verified", False)),
                 "trust_level": _trust_level(candidate),
+                # What the candidate is actually like day to day. Clients used to
+                # get only scores, leaving profile screens with nothing to show
+                # beyond percentages.
+                "living_profile": self._build_living_profile(candidate),
             })
 
         results.sort(key=self._sort_key)
@@ -1506,6 +1510,30 @@ class MatchingService:
                 } if dr.work_hours else None
             }
         return None
+
+    def _build_living_profile(self, candidate: User) -> Dict:
+        """Assemble what a candidate is like to live with.
+
+        Reuses the same extractors the scorer runs on, so the profile a user
+        reads matches the data the algorithm actually reasoned about. Absent
+        sections come back empty/None rather than omitted, so clients can tell
+        "not provided" apart from a missing field.
+        """
+        tp = candidate.tenant_profile
+        prefs = tp.preferences if tp else None
+
+        return {
+            "interests": self._get_interests(candidate),
+            "personality": self._get_personality(candidate),
+            "flatmate_traits": self._get_flatmate_traits(candidate),
+            "lifestyle": self._get_lifestyle_prefs(candidate),
+            "budget": self._get_budget(candidate),
+            "daily_routine": self._get_daily_routine(candidate),
+            "lease_duration_months": prefs.lease_duration_months if prefs else None,
+            "preferred_location": prefs.location if prefs else None,
+            "has_partner": bool(tp.has_partner) if tp else False,
+            "has_children": bool(tp.has_children) if tp else False,
+        }
 
     def _calculate_range_overlap(
         self,
