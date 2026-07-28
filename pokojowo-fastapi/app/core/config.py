@@ -87,6 +87,13 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: Optional[str] = None
     GOOGLE_REDIRECT_URI: Optional[str] = None
 
+    # Apple Sign In
+    # TODO: set APPLE_CLIENT_ID to the iOS bundle id (e.g. "com.pokojowo.app").
+    # This is the audience the native identity token is validated against.
+    # Requires "Sign in with Apple" enabled on the App ID in the Apple Developer
+    # portal. No client secret is needed for verifying native identity tokens.
+    APPLE_CLIENT_ID: Optional[str] = None
+
     # Frontend URL for OAuth redirects
     FRONTEND_URL: str = "http://localhost:5173"
 

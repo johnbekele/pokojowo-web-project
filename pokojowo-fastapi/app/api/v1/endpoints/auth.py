@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query, Request, BackgroundTasks
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 from app.schemas.user_schema import (
     UserCreate, UserLogin, UserResponse, Token,
     PasswordReset, PasswordResetConfirm
@@ -367,8 +368,17 @@ async def google_auth(request: Request):
     """
     Initiate Google OAuth flow.
     Redirects user to Google's authorization page.
+
+    Native mobile clients pass `mobile_redirect` (a custom-scheme deep link,
+    e.g. `pokojowo://auth/callback`). We stash it in the session so the callback
+    can return the tokens to the app instead of the web frontend.
     """
     from app.services.google_oauth_service import google_oauth_service
+
+    mobile_redirect = request.query_params.get("mobile_redirect")
+    if mobile_redirect:
+        request.session["mobile_redirect"] = mobile_redirect
+
     return await google_oauth_service.get_authorization_url(request)
 
 
@@ -407,6 +417,13 @@ async def google_callback(request: Request):
             "hasRole": "true" if has_real_role else "false",
             "firstname": user.firstname or "",
         }
+
+        # Native mobile clients get the tokens back on their custom scheme.
+        mobile_redirect = request.session.pop("mobile_redirect", None)
+        if mobile_redirect:
+            separator = "&" if "?" in mobile_redirect else "?"
+            return RedirectResponse(url=f"{mobile_redirect}{separator}{urlencode(params)}")
+
         redirect_url = f"{frontend_url}/auth/callback?{urlencode(params)}"
 
         return RedirectResponse(url=redirect_url)
@@ -414,7 +431,58 @@ async def google_callback(request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        # Redirect to frontend with error
+        # Redirect to the mobile app if this flow started there, else the web app.
+        mobile_redirect = request.session.pop("mobile_redirect", None)
+        if mobile_redirect:
+            separator = "&" if "?" in mobile_redirect else "?"
+            return RedirectResponse(url=f"{mobile_redirect}{separator}{urlencode({'error': str(e)})}")
+
         frontend_url = settings.FRONTEND_URL or "http://localhost:5173"
         error_url = f"{frontend_url}/login?error={str(e)}"
         return RedirectResponse(url=error_url)
+
+
+# Apple Sign In (native mobile flow)
+class AppleSignInRequest(BaseModel):
+    identity_token: str
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+
+
+@router.post("/apple")
+async def apple_signin(body: AppleSignInRequest):
+    """
+    Native "Sign in with Apple" endpoint.
+
+    The mobile app performs the Apple auth locally and posts the resulting
+    identity token here. We verify it against Apple's public keys and return our
+    own JWTs (JSON, unlike the redirect-based Google web flow).
+    """
+    from app.services.apple_oauth_service import apple_oauth_service
+
+    result = await apple_oauth_service.authenticate(
+        identity_token=body.identity_token,
+        firstname=body.firstname,
+        lastname=body.lastname,
+    )
+
+    user = result["user"]
+    return {
+        "access_token": result["access_token"],
+        "refresh_token": result["refresh_token"],
+        "token_type": "bearer",
+        "is_new_user": result["is_new_user"],
+        "requiresProfileCompletion": result["requires_profile_completion"],
+        "user": {
+            "_id": str(user.id),
+            "username": user.username,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "role": [role.value for role in user.role],
+            "isVerified": user.is_verified,
+            "isProfileComplete": user.is_profile_complete,
+            "photo": user.photo.dict() if user.photo else None,
+            "location": user.location,
+        },
+    }
