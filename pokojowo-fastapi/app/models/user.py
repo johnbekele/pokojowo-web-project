@@ -283,6 +283,7 @@ class User(Document):
 
     # OAuth
     google_id: Optional[Indexed(str, unique=True, sparse=True)] = Field(None, alias="googleId")
+    apple_id: Optional[Indexed(str, unique=True, sparse=True)] = Field(None, alias="appleId")
 
     # Verification
     is_verified: bool = Field(False, alias="isVerified")
