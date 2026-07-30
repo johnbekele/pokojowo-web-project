@@ -2,7 +2,8 @@ import { io, Socket } from 'socket.io-client';
 import Constants from 'expo-constants';
 import { storage, STORAGE_KEYS } from './storage';
 
-const SOCKET_URL = Constants.expoConfig?.extra?.socketUrl || 'https://pokojowo-web-project.onrender.com';
+const SOCKET_URL =
+  Constants.expoConfig?.extra?.socketUrl || 'https://dh3iw703m1vvi.cloudfront.net';
 
 export let socket: Socket | null = null;
 

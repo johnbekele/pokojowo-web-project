@@ -3,12 +3,12 @@ import Constants from 'expo-constants';
 import { storage, STORAGE_KEYS } from './storage';
 
 const MAIN_API_URL =
-  Constants.expoConfig?.extra?.apiUrl || 'https://pokojowo-web-project.onrender.com/api';
+  Constants.expoConfig?.extra?.apiUrl || 'https://dh3iw703m1vvi.cloudfront.net/api';
 
 const CHAT_API_URL =
   Constants.expoConfig?.extra?.chatApiUrl ||
   Constants.expoConfig?.extra?.apiUrl ||
-  'https://pokojowo-web-project.onrender.com/api';
+  'https://dh3iw703m1vvi.cloudfront.net/api';
 
 const chatApi = axios.create({
   baseURL: CHAT_API_URL,

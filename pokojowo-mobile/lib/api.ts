@@ -4,7 +4,7 @@ import { storage, STORAGE_KEYS } from './storage';
 import { router } from 'expo-router';
 
 const API_BASE_URL =
-  Constants.expoConfig?.extra?.apiUrl || 'https://pokojowo-web-project.onrender.com/api';
+  Constants.expoConfig?.extra?.apiUrl || 'https://dh3iw703m1vvi.cloudfront.net/api';
 
 /**
  * Axios instance with interceptors for JWT authentication

@@ -5,7 +5,7 @@ import { storage, STORAGE_KEYS } from './storage';
 const CHAT_SOCKET_URL =
   Constants.expoConfig?.extra?.chatSocketUrl ||
   Constants.expoConfig?.extra?.socketUrl ||
-  'https://pokojowo-web-project.onrender.com';
+  'https://dh3iw703m1vvi.cloudfront.net';
 
 export let chatSocket: Socket | null = null;
 
