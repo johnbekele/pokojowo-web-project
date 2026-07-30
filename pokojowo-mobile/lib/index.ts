@@ -5,19 +5,25 @@ export { storage, STORAGE_KEYS } from './storage';
 export { default as api, normalizeError } from './api';
 export type { NormalizedError } from './api';
 
-// Socket
+// Socket (notifications)
 export {
   connectSocket,
   initSocket,
   getSocket,
   disconnectSocket,
-  joinRoom,
-  leaveRoom,
-  trackRoom,
-  untrackRoom,
-  sendMessage,
-  sendTyping,
 } from './socket';
+
+// Chat socket + API
+export {
+  connectChatSocket,
+  getChatSocket,
+  disconnectChatSocket,
+  joinChatRoom,
+  leaveChatRoom,
+  sendChatMessage,
+  sendChatTyping,
+} from './chatSocket';
+export { default as chatApi } from './chatApi';
 
 // Query Client
 export { queryClient } from './queryClient';

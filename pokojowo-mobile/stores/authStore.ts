@@ -7,6 +7,7 @@ import Constants from 'expo-constants';
 import api from '@/lib/api';
 import { storage, STORAGE_KEYS } from '@/lib/storage';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
+import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
 import type { User, RegisterData } from '@/types/user.types';
 
 // Complete any pending browser sessions
@@ -28,7 +29,8 @@ interface AuthState {
   clearAuth: () => Promise<void>;
   login: (email: string, password: string) => Promise<{ success: boolean; user?: User; error?: string }>;
   register: (userData: RegisterData) => Promise<{ success: boolean; data?: unknown; error?: string }>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<{ success: boolean; canceled?: boolean; error?: string; user?: User | null }>;
+  loginWithApple: () => Promise<{ success: boolean; canceled?: boolean; error?: string; user?: User | null }>;
   handleOAuthCallback: (token: string, refreshToken: string, userInfo?: User) => Promise<void>;
   fetchUser: () => Promise<User | null>;
   updateRole: (roles: string[]) => Promise<{ success: boolean; error?: string }>;
@@ -62,11 +64,13 @@ const useAuthStore = create<AuthState>()(
         set({ token, refreshToken, isAuthenticated: true });
         // Connect socket with the new token
         connectSocket(token);
+        connectChatSocket(token);
       },
 
       clearAuth: async () => {
         // Disconnect socket before clearing auth
         disconnectSocket();
+        disconnectChatSocket();
         await storage.removeItem(STORAGE_KEYS.TOKEN);
         await storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
         await storage.removeItem(STORAGE_KEYS.USER);
@@ -87,8 +91,11 @@ const useAuthStore = create<AuthState>()(
           const { access_token, refresh_token, user } = response.data;
 
           await get().setTokens(access_token, refresh_token);
-          set({ user, isLoading: false });
-          return { success: true, user };
+          // Older backend builds omit `user` from the login payload; without it
+          // the post-auth route resolver sends us straight back to login.
+          const resolvedUser = user ?? (await get().fetchUser());
+          set({ user: resolvedUser, isLoading: false });
+          return { success: true, user: resolvedUser };
         } catch (error: unknown) {
           const axiosError = error as { response?: { data?: { detail?: string } } };
           const message = axiosError.response?.data?.detail || 'Login failed';
@@ -112,27 +119,98 @@ const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Google OAuth - using Expo AuthSession
+      // Google OAuth - using Expo AuthSession + custom scheme deep link.
+      // The backend `/auth/google` accepts a `mobile_redirect` param and, on
+      // callback, redirects back to that custom scheme with the JWTs so the
+      // in-app browser can hand them to us.
       loginWithGoogle: async () => {
         try {
-          const result = await WebBrowser.openAuthSessionAsync(
-            `${API_URL}/auth/google`,
-            AuthSession.makeRedirectUri({ scheme: 'pokojowo' })
-          );
+          const redirectUri = AuthSession.makeRedirectUri({
+            scheme: 'pokojowo',
+            path: 'auth/callback',
+          });
+          const authUrl = `${API_URL}/auth/google?mobile_redirect=${encodeURIComponent(redirectUri)}`;
 
-          if (result.type === 'success' && result.url) {
-            // Parse the callback URL for tokens
-            const url = new URL(result.url);
-            const token = url.searchParams.get('token');
-            const refreshToken = url.searchParams.get('refreshToken');
+          const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 
-            if (token && refreshToken) {
-              await get().handleOAuthCallback(token, refreshToken);
-            }
+          if (result.type !== 'success' || !result.url) {
+            // dismiss/cancel — return cleanly without touching auth state.
+            return { success: false, canceled: true };
           }
+
+          const url = new URL(result.url);
+          const oauthError = url.searchParams.get('error');
+          if (oauthError) {
+            set({ error: oauthError });
+            return { success: false, error: oauthError };
+          }
+
+          const token = url.searchParams.get('token');
+          const refreshToken =
+            url.searchParams.get('refresh_token') || url.searchParams.get('refreshToken');
+
+          if (!token || !refreshToken) {
+            const message = 'Google sign-in did not return tokens';
+            set({ error: message });
+            return { success: false, error: message };
+          }
+
+          await get().handleOAuthCallback(token, refreshToken);
+          return { success: true, user: get().user };
         } catch (error) {
           console.error('Google OAuth error:', error);
-          set({ error: 'Google sign-in failed' });
+          const message = 'Google sign-in failed';
+          set({ error: message });
+          return { success: false, error: message };
+        }
+      },
+
+      // Apple Sign In - native flow. The identity token is verified server-side
+      // by POST /auth/apple, which mints our own JWTs. Apple only returns the
+      // user's name on the *first* authorization, so we forward it when present.
+      loginWithApple: async () => {
+        try {
+          const AppleAuthentication = await import('expo-apple-authentication');
+          const credential = await AppleAuthentication.signInAsync({
+            requestedScopes: [
+              AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+              AppleAuthentication.AppleAuthenticationScope.EMAIL,
+            ],
+          });
+
+          if (!credential.identityToken) {
+            const message = 'Apple sign-in did not return a token';
+            set({ error: message });
+            return { success: false, error: message };
+          }
+
+          const { data } = await api.post('/auth/apple', {
+            identity_token: credential.identityToken,
+            firstname: credential.fullName?.givenName ?? undefined,
+            lastname: credential.fullName?.familyName ?? undefined,
+          });
+
+          const token = data.access_token as string;
+          const refreshToken = data.refresh_token as string;
+          if (!token || !refreshToken) {
+            const message = 'Apple sign-in did not return tokens';
+            set({ error: message });
+            return { success: false, error: message };
+          }
+
+          await get().handleOAuthCallback(token, refreshToken);
+          return { success: true, user: get().user };
+        } catch (error: unknown) {
+          // User dismissed the native sheet.
+          if ((error as { code?: string })?.code === 'ERR_REQUEST_CANCELED') {
+            return { success: false, canceled: true };
+          }
+          const axiosError = error as { response?: { data?: { detail?: string } } };
+          const message =
+            axiosError.response?.data?.detail || 'Apple sign-in failed';
+          console.error('Apple OAuth error:', error);
+          set({ error: message });
+          return { success: false, error: message };
         }
       },
 
@@ -160,6 +238,7 @@ const useAuthStore = create<AuthState>()(
           set({ user: response.data, isAuthenticated: true, isLoading: false });
           // Ensure socket is connected when user is fetched
           connectSocket(token);
+        connectChatSocket(token);
           return response.data;
         } catch {
           await get().clearAuth();

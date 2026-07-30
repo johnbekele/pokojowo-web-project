@@ -4,8 +4,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Send, Loader2 } from 'lucide-react';
-import api from '@/lib/api';
-import { getSocket, connectSocket, trackRoom, untrackRoom } from '@/lib/socket';
+import chatApi from '@/lib/chatApi';
+import {
+  getChatSocket,
+  connectChatSocket,
+  trackChatRoom,
+  untrackChatRoom,
+} from '@/lib/chatSocket';
 import useAuthStore from '@/stores/authStore';
 import MessageBubble from '../components/MessageBubble';
 import ReplyPreview from '../components/ReplyPreview';
@@ -29,10 +34,10 @@ export default function ChatRoom() {
     queryKey: ['chat', chatId || userId],
     queryFn: async () => {
       if (chatId) {
-        const res = await api.get(`/chat/${chatId}`);
+        const res = await chatApi.get(`/chat/${chatId}`);
         return res.data;
       } else if (userId) {
-        const res = await api.get(`/chat/with/${userId}`);
+        const res = await chatApi.get(`/chat/with/${userId}`);
         return res.data;
       }
       throw new Error('No chat or user ID');
@@ -47,7 +52,7 @@ export default function ChatRoom() {
     queryKey: ['messages', roomId],
     queryFn: async () => {
       console.log('FETCHING MESSAGES FROM DB for room:', roomId);
-      const res = await api.get(`/messages/room/${roomId}`);
+      const res = await chatApi.get(`/messages/room/${roomId}`);
       console.log('MESSAGES FROM DB:', res.data);
       return res.data || [];
     },
@@ -80,7 +85,7 @@ export default function ChatRoom() {
       socket.emit('delete_message', { messageId });
     } else {
       // Fallback to REST API
-      api.delete(`/messages/${messageId}`).then(() => {
+      chatApi.delete(`/messages/${messageId}`).then(() => {
         // Update local cache
         queryClient.setQueryData(['messages', roomId], (old = []) =>
           old.map((m) =>
@@ -99,7 +104,7 @@ export default function ChatRoom() {
   useEffect(() => {
     if (!roomId) return;
 
-    const socket = getSocket() || connectSocket();
+    const socket = getChatSocket() || connectChatSocket();
     if (!socket) return;
     socketRef.current = socket;
 
@@ -166,7 +171,7 @@ export default function ChatRoom() {
     };
 
     // Track this room for auto-rejoin on reconnect
-    trackRoom(roomId);
+    trackChatRoom(roomId);
 
     socket.on('new_message', handleNewMessage);
     socket.on('message_deleted', handleMessageDeleted);
@@ -188,7 +193,7 @@ export default function ChatRoom() {
       socket.off('delete_success', handleDeleteSuccess);
       socket.off('error', handleError);
       socket.off('connect', joinRoom);
-      untrackRoom(roomId);
+      untrackChatRoom(roomId);
       if (socket.connected) {
         socket.emit('leave_chat', { chatId: roomId });
       }
@@ -243,7 +248,7 @@ export default function ChatRoom() {
     } else {
       // Fallback to REST API
       try {
-        const res = await api.post('/messages/', {
+        const res = await chatApi.post('/messages/', {
           roomId: roomId,
           content,
           replyTo: replyToId || null,
