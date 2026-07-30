@@ -33,6 +33,7 @@ export default function Modal({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const isFull = size === 'full';
+
   return (
     <RNModal
       visible={visible}
