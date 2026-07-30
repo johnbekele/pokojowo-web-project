@@ -8,7 +8,12 @@
     "inactive": "Nieaktywne",
     "inquiries": "Zapytania",
     "views": "Wyświetlenia",
+    "likes": "Polubienia",
     "thisMonth": "W tym miesiącu"
+  },
+  "status": {
+    "active": "Aktywne",
+    "inactive": "Nieaktywne"
   },
   "quickActions": "Szybkie akcje",
   "actions": {
@@ -50,7 +55,11 @@
     },
     "photos": "Zdjęcia",
     "photosHint": "Dodaj minimum 3 zdjęcia nieruchomości",
+    "addPhoto": "Dodaj",
     "addPhotos": "Dodaj zdjęcia",
+    "permissionMessage": "Przyznaj dostęp do galerii zdjęć",
+    "imageError": "Nie udało się przesłać zdjęć",
+    "verifyRequired": "Zweryfikuj adres e-mail, aby publikować ogłoszenia.",
     "maxPhotos": "Maksymalnie {{max}} zdjęć",
     "titleLabel": "Tytuł ogłoszenia",
     "titlePlaceholder": "np. Przytulny pokój w centrum",
@@ -121,6 +130,10 @@
     "title": "Edytuj ogłoszenie",
     "submit": "Zapisz zmiany",
     "submitting": "Zapisywanie...",
+    "loading": "Ładowanie ogłoszenia...",
+    "notFound": "Nie znaleziono ogłoszenia",
+    "notFoundDescription": "To ogłoszenie może być już niedostępne",
+    "goBack": "Wróć",
     "successTitle": "Zmiany zapisane",
     "successMessage": "Twoje ogłoszenie zostało zaktualizowane.",
     "errorTitle": "Błąd",

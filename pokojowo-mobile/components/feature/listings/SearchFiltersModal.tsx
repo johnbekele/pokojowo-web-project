@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Modal as RNModal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { X, SlidersHorizontal } from 'lucide-react-native';
 import { Button } from '@/components/ui';
+import KeyboardAwareScrollView from '@/components/shared/KeyboardAwareScrollView';
 import FilterChip from '@/components/ui/FilterChip';
 import type { ListingFilters } from '@/types/listing.types';
 import useTheme from '@/hooks/useTheme';
@@ -124,7 +125,7 @@ export default function SearchFiltersModal({
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+        <KeyboardAwareScrollView bottomSpacing={24}>
           {/* Neighbourhood */}
           <View className="mb-6">
             <Text className="text-base font-semibold text-text mb-3">
@@ -347,7 +348,7 @@ export default function SearchFiltersModal({
               ))}
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         {/* Footer */}
         <View className="flex-row gap-3 p-4 border-t border-border">

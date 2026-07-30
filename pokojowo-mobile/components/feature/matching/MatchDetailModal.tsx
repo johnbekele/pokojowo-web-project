@@ -18,7 +18,9 @@ import { Modal, Button, Badge, Avatar } from '@/components/ui';
 import { matchingService } from '@/services';
 import type { MatchResult } from '@/types/matching.types';
 import { translateExplanation } from '@/lib/explanations';
-import { COLORS } from '@/lib/constants';
+import { getAvatarUrl } from '@/lib/image';
+import { palette } from '@/lib/theme';
+import useTheme from '@/hooks/useTheme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -44,10 +46,10 @@ const BREAKDOWN_LABELS: Record<string, string> = {
 
 // Get score color
 function getScoreColor(score: number) {
-  if (score >= 85) return COLORS.success;
-  if (score >= 70) return COLORS.primary[600];
-  if (score >= 55) return COLORS.warning;
-  return COLORS.gray[400];
+  if (score >= 85) return palette.status.success;
+  if (score >= 70) return palette.primary[600];
+  if (score >= 55) return palette.status.warning;
+  return palette.gray[400];
 }
 
 function getScoreBgClass(score: number) {
@@ -65,6 +67,8 @@ export default function MatchDetailModal({
   onPass,
   onMessage,
 }: MatchDetailModalProps) {
+  const { colors } = useTheme();
+  const { t } = useTranslation('matching');
   // Fetch detailed match data
   const { data: detailData, isLoading } = useQuery({
     queryKey: ['match', match?.user_id],
@@ -94,7 +98,6 @@ export default function MatchDetailModal({
 
   const compatibility_score = userData.compatibility_score || 0;
   const score_breakdown = userData.score_breakdown;
-  const { t } = useTranslation('matching');
   const rawExplanations = (userData as any).explanations || [];
   const shared_interests = (userData as any).shared_interests || [];
   const shared_languages = (userData as any).shared_languages || [];
@@ -102,9 +105,7 @@ export default function MatchDetailModal({
   const score = Math.round(compatibility_score);
 
   // Get photo URL
-  const photoUrl = typeof photo === 'string'
-    ? photo
-    : (photo as { url?: string })?.url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
+  const photoUrl = getAvatarUrl(photo as string | { url?: string } | undefined, user_id || username);
 
   // Group explanations by impact
   const explanations = {
@@ -128,19 +129,19 @@ export default function MatchDetailModal({
   return (
     <Modal visible={visible} onClose={onClose} size="full" showCloseButton={false}>
       {/* Header with close button */}
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
+      <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
         <TouchableOpacity onPress={onClose} className="p-2 -ml-2">
-          <ChevronLeft size={24} color={COLORS.gray[700]} />
+          <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text className="text-lg font-semibold text-gray-900">Profile</Text>
+        <Text className="text-lg font-semibold text-text">Profile</Text>
         <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 bg-white" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 bg-bg" showsVerticalScrollIndicator={false}>
         {isLoading ? (
           <View className="flex-1 items-center justify-center py-20">
-            <ActivityIndicator size="large" color={COLORS.primary[600]} />
-            <Text className="text-gray-500 mt-4">Loading profile...</Text>
+            <ActivityIndicator size="large" color={colors.brand} />
+            <Text className="text-muted mt-4">Loading profile...</Text>
           </View>
         ) : (
           <View className="pb-32">
@@ -163,11 +164,11 @@ export default function MatchDetailModal({
 
               {/* Info */}
               <View className="flex-1">
-                <Text className="text-2xl font-bold text-gray-900">
+                <Text className="text-2xl font-bold text-text">
                   {firstname} {lastname}
                 </Text>
                 {username && (
-                  <Text className="text-gray-500">@{username}</Text>
+                  <Text className="text-muted">@{username}</Text>
                 )}
 
                 <View className="flex-row flex-wrap gap-2 mt-2">
@@ -175,9 +176,9 @@ export default function MatchDetailModal({
                     <Badge variant="default">{age} years old</Badge>
                   )}
                   {location && (
-                    <View className="flex-row items-center bg-gray-100 rounded-full px-2.5 py-1">
-                      <MapPin size={12} color={COLORS.gray[500]} />
-                      <Text className="text-gray-600 text-xs ml-1">{location}</Text>
+                    <View className="flex-row items-center bg-surface rounded-full px-2.5 py-1">
+                      <MapPin size={12} color={colors.muted} />
+                      <Text className="text-muted text-xs ml-1">{location}</Text>
                     </View>
                   )}
                 </View>
@@ -199,10 +200,10 @@ export default function MatchDetailModal({
             {/* Bio */}
             {bio && (
               <View className="px-4 mb-4">
-                <Text className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                <Text className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
                   About
                 </Text>
-                <Text className="text-gray-700 leading-6">{bio}</Text>
+                <Text className="text-text leading-6">{bio}</Text>
               </View>
             )}
 
@@ -210,24 +211,24 @@ export default function MatchDetailModal({
             {job?.title && (
               <View className="px-4 mb-4">
                 <View className="flex-row items-center gap-2">
-                  <Briefcase size={16} color={COLORS.gray[500]} />
-                  <Text className="text-gray-700">{job.title}</Text>
+                  <Briefcase size={16} color={colors.muted} />
+                  <Text className="text-text">{job.title}</Text>
                   {job.industry && (
-                    <Text className="text-gray-500">• {job.industry}</Text>
+                    <Text className="text-muted">• {job.industry}</Text>
                   )}
                 </View>
               </View>
             )}
 
             {/* Divider */}
-            <View className="h-2 bg-gray-100 my-2" />
+            <View className="h-2 bg-surface my-2" />
 
             {/* Compatibility Breakdown */}
             {breakdownItems.length > 0 && (
               <View className="px-4 py-4">
                 <View className="flex-row items-center gap-2 mb-4">
-                  <Users size={18} color={COLORS.gray[700]} />
-                  <Text className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+                  <Users size={18} color={colors.text} />
+                  <Text className="text-sm font-semibold text-muted uppercase tracking-wide">
                     Flatmate Compatibility
                   </Text>
                 </View>
@@ -235,7 +236,7 @@ export default function MatchDetailModal({
                   {breakdownItems.map(({ key, label, value }) => (
                     <View key={key} className="mb-3">
                       <View className="flex-row justify-between mb-1">
-                        <Text className="text-gray-600">{label}</Text>
+                        <Text className="text-muted">{label}</Text>
                         <Text
                           className="font-semibold"
                           style={{ color: getScoreColor(value) }}
@@ -243,7 +244,7 @@ export default function MatchDetailModal({
                           {value}%
                         </Text>
                       </View>
-                      <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <View className="h-2 bg-surface rounded-full overflow-hidden">
                         <View
                           className={`h-full rounded-full ${getScoreBgClass(value)}`}
                           style={{ width: `${value}%` }}
@@ -258,25 +259,25 @@ export default function MatchDetailModal({
             {/* Why You Match */}
             {(explanations.positive.length > 0 || explanations.neutral.length > 0 || explanations.negative.length > 0) && (
               <View className="px-4 py-4">
-                <Text className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                <Text className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                   Why You Match
                 </Text>
                 <View className="space-y-2">
                   {explanations.positive.map((exp: any, i: number) => (
                     <View key={i} className="flex-row items-start gap-2 bg-green-50 rounded-lg p-3">
-                      <Check size={16} color={COLORS.success} className="mt-0.5" />
+                      <Check size={16} color={colors.success} className="mt-0.5" />
                       <Text className="flex-1 text-green-700 text-sm">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                   {explanations.neutral.map((exp: any, i: number) => (
-                    <View key={i} className="flex-row items-start gap-2 bg-gray-100 rounded-lg p-3">
-                      <Minus size={16} color={COLORS.gray[500]} className="mt-0.5" />
-                      <Text className="flex-1 text-gray-600 text-sm">{translateExplanation(t, exp)}</Text>
+                    <View key={i} className="flex-row items-start gap-2 bg-surface rounded-lg p-3">
+                      <Minus size={16} color={colors.muted} className="mt-0.5" />
+                      <Text className="flex-1 text-muted text-sm">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                   {explanations.negative.map((exp: any, i: number) => (
                     <View key={i} className="flex-row items-start gap-2 bg-yellow-50 rounded-lg p-3">
-                      <X size={16} color={COLORS.warning} className="mt-0.5" />
+                      <X size={16} color={colors.warning} className="mt-0.5" />
                       <Text className="flex-1 text-yellow-700 text-sm">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
@@ -287,7 +288,7 @@ export default function MatchDetailModal({
             {/* Shared Interests */}
             {shared_interests.length > 0 && (
               <View className="px-4 py-4">
-                <Text className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                <Text className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                   Shared Interests
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
@@ -302,8 +303,8 @@ export default function MatchDetailModal({
             {shared_languages.length > 0 && (
               <View className="px-4 py-4">
                 <View className="flex-row items-center gap-2 mb-3">
-                  <Globe2 size={16} color={COLORS.gray[500]} />
-                  <Text className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+                  <Globe2 size={16} color={colors.muted} />
+                  <Text className="text-sm font-semibold text-muted uppercase tracking-wide">
                     Shared Languages
                   </Text>
                 </View>
@@ -319,13 +320,13 @@ export default function MatchDetailModal({
       </ScrollView>
 
       {/* Fixed Action Buttons */}
-      <View className="absolute bottom-0 left-0 right-0 p-4 pb-8 bg-white border-t border-gray-100">
+      <View className="absolute bottom-0 left-0 right-0 p-4 pb-8 bg-bg border-t border-border">
         <View className="flex-row gap-2">
           <Button
             onPress={() => { onPass?.(); onClose(); }}
             variant="outline"
             className="flex-1"
-            icon={<X size={18} color={COLORS.gray[600]} />}
+            icon={<X size={18} color={colors.muted} />}
           >
             Skip
           </Button>
@@ -333,7 +334,6 @@ export default function MatchDetailModal({
             onPress={() => { onLike?.(); onClose(); }}
             variant="primary"
             className="flex-1"
-            style={{ backgroundColor: '#14b8a6' }}
             icon={<Heart size={18} color="white" />}
           >
             Interested
@@ -343,7 +343,7 @@ export default function MatchDetailModal({
               onPress={onMessage}
               variant="outline"
               className="flex-1"
-              icon={<MessageSquare size={18} color={COLORS.gray[600]} />}
+              icon={<MessageSquare size={18} color={colors.muted} />}
             >
               Chat
             </Button>

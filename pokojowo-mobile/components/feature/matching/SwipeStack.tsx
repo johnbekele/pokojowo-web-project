@@ -14,7 +14,7 @@ import SwipeCard from './SwipeCard';
 import { Button } from '@/components/ui';
 import { usePassUser, useUndoPass, useUnlikeUser } from '@/hooks/likes/useLikes';
 import type { MatchResult } from '@/types/matching.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -37,6 +37,7 @@ export default function SwipeStack({
   onRefresh,
 }: SwipeStackProps) {
   const { t } = useTranslation('matching');
+  const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastSwipe, setLastSwipe] = useState<{
     direction: SwipeDirection;
@@ -161,10 +162,10 @@ export default function SwipeStack({
   if (visibleMatches.length === 0) {
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-xl font-semibold text-gray-900 mb-2">
+        <Text className="text-xl font-semibold text-text mb-2">
           {t('swipe.noMoreMatches', 'No more matches')}
         </Text>
-        <Text className="text-gray-500 text-center mb-6">
+        <Text className="text-muted text-center mb-6">
           {t('swipe.checkBackLater', 'Check back later for new potential flatmates')}
         </Text>
         <View className="flex-row gap-4">
@@ -172,7 +173,7 @@ export default function SwipeStack({
             <Button
               variant="outline"
               onPress={handleUndo}
-              icon={<Undo2 size={18} color={COLORS.gray[600]} />}
+              icon={<Undo2 size={18} color={colors.muted} />}
             >
               {t('swipe.undo', 'Undo')}
             </Button>
@@ -286,24 +287,24 @@ export default function SwipeStack({
         {canUndo && (
           <TouchableOpacity
             onPress={handleUndo}
-            className="w-12 h-12 rounded-full border-2 border-amber-400 items-center justify-center bg-white"
+            className="w-12 h-12 rounded-full border-2 border-amber-400 items-center justify-center bg-card"
           >
-            <Undo2 size={20} color={COLORS.warning} />
+            <Undo2 size={20} color={colors.warning} />
           </TouchableOpacity>
         )}
 
         {/* Pass button */}
         <TouchableOpacity
           onPress={swipeLeft}
-          className="w-16 h-16 rounded-full border-2 border-gray-300 items-center justify-center bg-white"
+          className="w-16 h-16 rounded-full border-2 border-border items-center justify-center bg-card"
         >
-          <X size={28} color={COLORS.error} />
+          <X size={28} color={colors.danger} />
         </TouchableOpacity>
 
         {/* Like button */}
         <TouchableOpacity
           onPress={swipeRight}
-          className="w-20 h-20 rounded-full bg-primary-600 items-center justify-center"
+          className="w-20 h-20 rounded-full bg-brand items-center justify-center"
         >
           <Heart size={32} color="white" fill="white" />
         </TouchableOpacity>

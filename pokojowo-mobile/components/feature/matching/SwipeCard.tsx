@@ -4,7 +4,8 @@ import { MapPin, Heart } from 'lucide-react-native';
 
 import { Badge } from '@/components/ui';
 import type { MatchResult } from '@/types/matching.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
+import { getAvatarUrl } from '@/lib/image';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
@@ -16,15 +17,17 @@ interface SwipeCardProps {
 
 export default function SwipeCard({ match, style }: SwipeCardProps) {
   const { user, compatibility_score, matched_preferences } = match;
+  const { colors } = useTheme();
 
   // Safety check for undefined user
   if (!user) {
     return null;
   }
 
-  const photoUrl = typeof user.photo === 'string'
-    ? user.photo
-    : (user.photo as { url?: string } | undefined)?.url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
+  const photoUrl = getAvatarUrl(
+    user.photo as string | { url?: string } | undefined,
+    match.user_id || user.id || user.username
+  );
 
   return (
     <View
@@ -34,7 +37,7 @@ export default function SwipeCard({ match, style }: SwipeCardProps) {
           height: 500,
           borderRadius: 20,
           overflow: 'hidden',
-          backgroundColor: 'white',
+          backgroundColor: colors.card,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
@@ -65,8 +68,8 @@ export default function SwipeCard({ match, style }: SwipeCardProps) {
 
       {/* Compatibility badge */}
       <View className="absolute top-4 right-4 bg-white/90 rounded-full px-3 py-1.5 flex-row items-center">
-        <Heart size={16} color={COLORS.primary[600]} fill={COLORS.primary[600]} />
-        <Text className="text-primary-600 font-bold ml-1">
+        <Heart size={16} color={colors.brand} fill={colors.brand} />
+        <Text className="text-brand font-bold ml-1">
           {Math.round(compatibility_score)}%
         </Text>
       </View>
@@ -75,25 +78,25 @@ export default function SwipeCard({ match, style }: SwipeCardProps) {
       <View className="flex-1 p-4">
         {/* Name and age */}
         <View className="flex-row items-center mb-2">
-          <Text className="text-2xl font-bold text-gray-900">
+          <Text className="text-2xl font-bold text-text">
             {user.firstname || user.username}
           </Text>
           {user.age && (
-            <Text className="text-xl text-gray-500 ml-2">{user.age}</Text>
+            <Text className="text-xl text-muted ml-2">{user.age}</Text>
           )}
         </View>
 
         {/* Location */}
         {user.location && (
           <View className="flex-row items-center mb-3">
-            <MapPin size={16} color={COLORS.gray[500]} />
-            <Text className="text-gray-500 ml-1">{user.location}</Text>
+            <MapPin size={16} color={colors.muted} />
+            <Text className="text-muted ml-1">{user.location}</Text>
           </View>
         )}
 
         {/* Bio */}
         {user.bio && (
-          <Text className="text-gray-600 mb-3" numberOfLines={2}>
+          <Text className="text-muted mb-3" numberOfLines={2}>
             {user.bio}
           </Text>
         )}

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Dimensions,
   FlatList,
-  Share,
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,6 +30,7 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 
 import { Button, Badge, Avatar, LoadingSpinner, Card } from '@/components/ui';
+import ShareSheet from '@/components/shared/ShareSheet';
 import { useListing } from '@/hooks/listings/useListings';
 import { useSaveListing, useUnsaveListing, useIsListingSaved } from '@/hooks/favorites/useFavorites';
 import { useTrackView } from '@/hooks/listingInteractions/useListingInteractions';
@@ -62,6 +62,7 @@ export default function ListingDetailScreen() {
   const showToast = useUIStore((s) => s.showToast);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [shareVisible, setShareVisible] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const { data: listing, isLoading, error } = useListing(id);
@@ -91,16 +92,14 @@ export default function ListingDetailScreen() {
     }
   };
 
-  const handleShare = async () => {
+  const shareUrl = `https://pokojowo.com/listing/${id}`;
+  const shareMessage = listing
+    ? `Check out this listing: ${listing.address} - ${formatCurrency(listing.price)}/mo`
+    : '';
+
+  const handleShare = () => {
     if (!listing) return;
-    try {
-      await Share.share({
-        title: listing.address,
-        message: `Check out this listing: ${listing.address} - ${formatCurrency(listing.price)}/mo\n\nhttps://pokojowo.com/listing/${id}`,
-      });
-    } catch (error) {
-      console.error('Share failed:', error);
-    }
+    setShareVisible(true);
   };
 
   const handleCall = async () => {
@@ -520,6 +519,14 @@ export default function ListingDetailScreen() {
           </Button>
         )}
       </View>
+
+      <ShareSheet
+        visible={shareVisible}
+        onClose={() => setShareVisible(false)}
+        url={shareUrl}
+        message={shareMessage}
+        title={listing.address}
+      />
     </SafeAreaView>
   );
 }

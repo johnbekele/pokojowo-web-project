@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft } from 'lucide-react-native';
 import useTheme from '@/hooks/useTheme';
+import { PokojowoMark } from '@/components/shared/brand';
 
 interface AuthScaffoldProps {
   title?: string;
@@ -43,7 +45,21 @@ export default function AuthScaffold({
         >
           <View className="px-6 py-8">
             {showBrand && (
-              <Text className="text-3xl font-extrabold text-brand text-center mb-6">Pokojowo</Text>
+              <View className="items-center mb-6">
+                <LinearGradient
+                  colors={[colors.brand, colors.brand]}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 20,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <PokojowoMark size={44} color={colors.brandFg} accent="rgba(255,255,255,0.35)" />
+                </LinearGradient>
+                <Text className="text-2xl font-extrabold text-brand text-center mt-3">Pokojowo</Text>
+              </View>
             )}
             {title && <Text className="text-2xl font-bold text-text mb-1">{title}</Text>}
             {subtitle && <Text className="text-muted mb-6">{subtitle}</Text>}

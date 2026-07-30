@@ -22,6 +22,16 @@
     "chat": "Chat",
     "profile": "Profile"
   },
+  "share": {
+    "title": "Share",
+    "email": "Email",
+    "sms": "Messages",
+    "copyLink": "Copy link",
+    "more": "More",
+    "copied": "Link copied to clipboard",
+    "appNotInstalled": "That app is not installed",
+    "failed": "Could not share"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -142,17 +152,19 @@
     "about": "About"
   },
   "welcome": {
+    "getStarted": "Get started",
+    "haveAccount": "I already have an account",
     "slide1": {
       "title": "Find Your Perfect Flatmate",
-      "description": "Our smart matching finds compatible roommates based on your lifestyle and preferences"
+      "description": "Smart matching pairs you with compatible roommates based on your lifestyle, habits and budget."
     },
     "slide2": {
       "title": "Discover Great Rooms",
-      "description": "Browse verified listings and find the perfect place to call home"
+      "description": "Browse verified listings with photos, prices and locations to find a place you'll love."
     },
     "slide3": {
       "title": "Connect & Chat",
-      "description": "Chat with matches and landlords to find your ideal living situation"
+      "description": "Message matches and landlords in real time to lock in your ideal living situation."
     }
   }
 }

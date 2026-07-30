@@ -10,6 +10,7 @@ import { User, Mail, Lock } from 'lucide-react-native';
 import { Button, Input } from '@/components/ui';
 import AuthScaffold from '@/components/feature/auth/AuthScaffold';
 import AuthStatusView from '@/components/feature/auth/AuthStatusView';
+import SocialAuthButtons from '@/components/feature/auth/SocialAuthButtons';
 import useAuthStore from '@/stores/authStore';
 import useTheme from '@/hooks/useTheme';
 
@@ -155,6 +156,14 @@ export default function SignupScreen() {
       <Button onPress={handleSubmit(onSubmit)} loading={isLoading} fullWidth className="mt-2">
         {t('signup.submit', 'Create Account')}
       </Button>
+
+      <View className="flex-row items-center my-6">
+        <View className="flex-1 h-px bg-border" />
+        <Text className="mx-4 text-muted">{t('login.or', 'or')}</Text>
+        <View className="flex-1 h-px bg-border" />
+      </View>
+
+      <SocialAuthButtons />
 
       <View className="flex-row justify-center mt-6">
         <Text className="text-muted">{t('signup.hasAccount', 'Already have an account? ')}</Text>

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Modal as RNModal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { X, SlidersHorizontal } from 'lucide-react-native';
 import Slider from '@react-native-community/slider';
 import { Button } from '@/components/ui';
+import KeyboardAwareScrollView from '@/components/shared/KeyboardAwareScrollView';
 import type { MatchingFilters } from '@/types/matching.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 interface MatchFiltersModalProps {
   visible: boolean;
@@ -25,6 +26,7 @@ export default function MatchFiltersModal({
   onReset,
 }: MatchFiltersModalProps) {
   const { t } = useTranslation('matching');
+  const { colors } = useTheme();
   const [localFilters, setLocalFilters] = useState<MatchingFilters>(filters);
 
   useEffect(() => {
@@ -55,38 +57,38 @@ export default function MatchFiltersModal({
 
   return (
     <RNModal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-bg">
         {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
+        <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
           <View className="flex-row items-center gap-2">
-            <SlidersHorizontal size={20} color={COLORS.primary[600]} />
-            <Text className="text-xl font-bold text-gray-900">
+            <SlidersHorizontal size={20} color={colors.brand} />
+            <Text className="text-xl font-bold text-text">
               {t('filters.title', 'Match Filters')}
             </Text>
           </View>
           <TouchableOpacity onPress={onClose} className="p-1">
-            <X size={24} color={COLORS.gray[500]} />
+            <X size={24} color={colors.muted} />
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+        <KeyboardAwareScrollView bottomSpacing={24}>
           {/* Minimum Compatibility Score */}
           <View className="mb-8">
-            <Text className="text-base font-semibold text-gray-900 mb-2">
+            <Text className="text-base font-semibold text-text mb-2">
               {t('filters.minScore', 'Minimum Compatibility Score')}
             </Text>
-            <Text className="text-sm text-gray-500 mb-4">
+            <Text className="text-sm text-muted mb-4">
               {t('filters.minScoreDescription', 'Only show matches with at least this compatibility score')}
             </Text>
 
             <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-gray-600">0%</Text>
-              <View className="bg-primary-100 px-4 py-2 rounded-full">
-                <Text className="text-primary-700 font-bold text-lg">
+              <Text className="text-muted">0%</Text>
+              <View className="bg-brand/10 px-4 py-2 rounded-full">
+                <Text className="text-brand font-bold text-lg">
                   {localFilters.minScore || 0}%
                 </Text>
               </View>
-              <Text className="text-gray-600">100%</Text>
+              <Text className="text-muted">100%</Text>
             </View>
 
             <Slider
@@ -98,9 +100,9 @@ export default function MatchFiltersModal({
               onValueChange={(value) =>
                 setLocalFilters((prev) => ({ ...prev, minScore: value }))
               }
-              minimumTrackTintColor={COLORS.primary[600]}
-              maximumTrackTintColor={COLORS.gray[200]}
-              thumbTintColor={COLORS.primary[600]}
+              minimumTrackTintColor={colors.brand}
+              maximumTrackTintColor={colors.border}
+              thumbTintColor={colors.brand}
             />
 
             {/* Quick score buttons */}
@@ -111,13 +113,13 @@ export default function MatchFiltersModal({
                   onPress={() => setLocalFilters((prev) => ({ ...prev, minScore: score }))}
                   className={`px-4 py-2 rounded-lg ${
                     localFilters.minScore === score
-                      ? 'bg-primary-600'
-                      : 'bg-gray-100'
+                      ? 'bg-brand'
+                      : 'bg-surface'
                   }`}
                 >
                   <Text
                     className={`font-medium ${
-                      localFilters.minScore === score ? 'text-white' : 'text-gray-700'
+                      localFilters.minScore === score ? 'text-brand-fg' : 'text-text'
                     }`}
                   >
                     {score === 0 ? t('filters.anyScore', 'Any') : `${score}%+`}
@@ -129,16 +131,17 @@ export default function MatchFiltersModal({
 
           {/* Location */}
           <View className="mb-8">
-            <Text className="text-base font-semibold text-gray-900 mb-2">
+            <Text className="text-base font-semibold text-text mb-2">
               {t('filters.location', 'Location')}
             </Text>
-            <Text className="text-sm text-gray-500 mb-4">
+            <Text className="text-sm text-muted mb-4">
               {t('filters.locationDescription', 'Filter matches by preferred location')}
             </Text>
 
             <TextInput
-              className="border border-gray-200 rounded-lg px-4 py-3 text-base"
+              className="border border-border rounded-lg px-4 py-3 text-base text-text"
               placeholder={t('filters.locationPlaceholder', 'e.g., Warsaw, Krakow...')}
+              placeholderTextColor={colors.muted}
               value={localFilters.location || ''}
               onChangeText={(text) =>
                 setLocalFilters((prev) => ({
@@ -151,7 +154,7 @@ export default function MatchFiltersModal({
 
           {/* Results limit */}
           <View className="mb-8">
-            <Text className="text-base font-semibold text-gray-900 mb-2">
+            <Text className="text-base font-semibold text-text mb-2">
               {t('filters.resultsLimit', 'Results per page')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -161,13 +164,13 @@ export default function MatchFiltersModal({
                   onPress={() => setLocalFilters((prev) => ({ ...prev, limit }))}
                   className={`px-4 py-2 rounded-lg ${
                     localFilters.limit === limit
-                      ? 'bg-primary-600'
-                      : 'bg-gray-100'
+                      ? 'bg-brand'
+                      : 'bg-surface'
                   }`}
                 >
                   <Text
                     className={`font-medium ${
-                      localFilters.limit === limit ? 'text-white' : 'text-gray-700'
+                      localFilters.limit === limit ? 'text-brand-fg' : 'text-text'
                     }`}
                   >
                     {limit}
@@ -176,10 +179,10 @@ export default function MatchFiltersModal({
               ))}
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         {/* Footer */}
-        <View className="flex-row gap-3 p-4 border-t border-gray-100">
+        <View className="flex-row gap-3 p-4 border-t border-border">
           <Button
             variant="outline"
             className="flex-1"

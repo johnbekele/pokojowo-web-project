@@ -8,6 +8,7 @@ import { Mail, Lock } from 'lucide-react-native';
 
 import { Button, Input } from '@/components/ui';
 import AuthScaffold from '@/components/feature/auth/AuthScaffold';
+import SocialAuthButtons from '@/components/feature/auth/SocialAuthButtons';
 import useAuthStore from '@/stores/authStore';
 import useTheme from '@/hooks/useTheme';
 import { getPostAuthRoute } from '@/lib/onboardingRoute';
@@ -106,9 +107,7 @@ export default function LoginScreen() {
         <View className="flex-1 h-px bg-border" />
       </View>
 
-      <Button variant="outline" fullWidth onPress={() => { /* wired in #93 */ }}>
-        {t('login.google', 'Continue with Google')}
-      </Button>
+      <SocialAuthButtons />
 
       <View className="flex-row justify-center mt-6">
         <Text className="text-muted">{t('login.noAccount', "Don't have an account? ")}</Text>

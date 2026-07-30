@@ -1,4 +1,5 @@
 import { Modal as RNModal, View, TouchableOpacity, Text, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
 import useTheme from '@/hooks/useTheme';
@@ -30,6 +31,8 @@ export default function Modal({
   className,
 }: ModalProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const isFull = size === 'full';
   return (
     <RNModal
       visible={visible}
@@ -39,16 +42,23 @@ export default function Modal({
       statusBarTranslucent
     >
       <Pressable
-        className="flex-1 bg-black/50 justify-center items-center p-4"
+        className={cn(
+          'flex-1 bg-black/50',
+          // A full-size sheet owns the whole screen, so centring it inside
+          // padding would leave its content with no room to lay out.
+          isFull ? '' : 'justify-center items-center p-4'
+        )}
         onPress={onClose}
       >
         <Pressable
           className={cn(
             'bg-card rounded-2xl w-full overflow-hidden',
             sizeStyles[size],
-            size === 'full' && 'rounded-none',
+            isFull && 'rounded-none flex-1',
             className
           )}
+          // statusBarTranslucent means a full sheet draws under the notch/home bar.
+          style={isFull ? { paddingTop: insets.top, paddingBottom: insets.bottom } : undefined}
           onPress={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -70,7 +80,7 @@ export default function Modal({
           )}
 
           {/* Content */}
-          <View className="p-4">{children}</View>
+          <View className={cn(isFull ? 'flex-1' : 'p-4')}>{children}</View>
         </Pressable>
       </Pressable>
     </RNModal>

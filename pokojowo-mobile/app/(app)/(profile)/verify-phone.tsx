@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Phone, ShieldCheck } from 'lucide-react-native';
 
 import { Button } from '@/components/ui';
+import KeyboardAwareScrollView from '@/components/shared/KeyboardAwareScrollView';
 import useAuthStore from '@/stores/authStore';
 import api from '@/lib/api';
 import { COLORS } from '@/lib/constants';
@@ -73,7 +74,10 @@ export default function VerifyPhoneScreen() {
         </Text>
       </View>
 
-      <View className="flex-1 px-4 pt-8 gap-4">
+      <KeyboardAwareScrollView
+        contentPadding={16}
+        contentContainerStyle={{ paddingTop: 32, gap: 16 }}
+      >
         {phoneVerified ? (
           <View className="items-center gap-3 pt-12">
             <ShieldCheck size={48} color="#22c55e" />
@@ -122,7 +126,7 @@ export default function VerifyPhoneScreen() {
             </Button>
           </>
         )}
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
