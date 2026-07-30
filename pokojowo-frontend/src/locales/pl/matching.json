@@ -282,5 +282,11 @@
       "noneYours": "Nie podałeś/aś zainteresowań w profilu",
       "noneTheirs": "Kandydat nie podał zainteresowań"
     }
+  },
+  "map": {
+    "someone": "Współlokator",
+    "compatibility": "{{score}}% zgodności",
+    "wantsToLiveIn": "Szuka w: {{area}}",
+    "budget": "Budżet do {{amount}}"
   }
 }

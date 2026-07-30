@@ -5,6 +5,14 @@ from app.models.listing import Listing
 from app.models.user import User
 from app.core.dependencies import get_current_user, require_verified
 from app.core.config import settings
+from app.core.geo import (
+    CLUSTER_ZOOM_THRESHOLD,
+    GeoPrecision,
+    bbox_clause,
+    cluster_cell_size,
+    coords_from_geo,
+    parse_bbox,
+)
 from app.core.locations import CITY_DISTRICTS, canonical_city, districts_for_city
 from typing import List, Optional
 from datetime import datetime
@@ -46,6 +54,9 @@ class ScrapedListingImport(BaseModel):
     district: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    # exact | street | district | city — the scraper knows whether the site
+    # embedded coordinates or it geocoded them itself. Defaults to exact.
+    geoPrecision: Optional[str] = None
     # owner | agency | unknown (scraper maps Prywatne/Firmowe etc.)
     offeredBy: Optional[str] = None
 
@@ -59,6 +70,7 @@ def listing_to_dict(listing: Listing) -> dict:
         "city": listing.city,
         "district": listing.district,
         "locationGeo": listing.location_geo,
+        "geoPrecision": listing.geo_precision,
         "price": listing.price,
         "size": listing.size,
         "maxTenants": listing.max_tenants,
@@ -102,6 +114,11 @@ async def create_listing(
         **listing_data.dict(by_alias=True)
     )
 
+    # Coordinates the client sent came from a dropped pin, so they outrank
+    # anything we could geocode from the address text.
+    if listing.location_geo:
+        listing.geo_precision = GeoPrecision.EXACT.value
+
     await listing.insert()
 
     # Fire-and-forget: notify users whose saved search matches this listing.
@@ -109,37 +126,43 @@ async def create_listing(
     from app.services import saved_search_service
     asyncio.create_task(saved_search_service.notify_matching_saved_searches(listing))
 
+    # Also fire-and-forget: geocoding is rate-limited to 1 req/s, far too slow
+    # to hold a create request open. The pin appears a moment later.
+    if not listing.location_geo:
+        from app.services.geo_enrichment import resolve_listing_geo_by_id
+        asyncio.create_task(resolve_listing_geo_by_id(str(listing.id)))
+
     return {
         "message": "Listing created successfully",
         "listing_id": str(listing.id)
     }
 
 
-@router.get("", response_model=List[dict])
-@router.get("/", response_model=List[dict])
-async def get_listings(
-    skip: int = 0,
-    limit: int = 20,
+def build_listing_query(
     search: Optional[str] = None,
-    sort: Optional[str] = "newest",
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     min_size: Optional[float] = None,
     max_size: Optional[float] = None,
-    room_type: Optional[List[str]] = Query(None),
-    building_type: Optional[List[str]] = Query(None),
-    rent_for: Optional[List[str]] = Query(None),
+    room_type: Optional[List[str]] = None,
+    building_type: Optional[List[str]] = None,
+    rent_for: Optional[List[str]] = None,
     max_tenants: Optional[int] = None,
     city: Optional[str] = None,
-    district: Optional[List[str]] = Query(None),
-    offered_by: Optional[str] = None
-):
-    """Get all listings with optional filtering, search, and sorting.
+    district: Optional[List[str]] = None,
+    offered_by: Optional[str] = None,
+    bbox: Optional[str] = None,
+) -> dict:
+    """Build the Mongo query for a listing search.
 
-    room_type, building_type, rent_for and district accept repeated
-    params and match listings containing ANY of the given values.
-    The district filter also matches the district name inside the legacy
-    free-text address, so pre-migration listings still surface.
+    Shared by the list view and the map view so the two can never disagree
+    about what a given set of filters means. Keys are the stored camelCase
+    aliases (see the note at the top of this file).
+
+    room_type, building_type, rent_for and district match listings containing
+    ANY of the given values. The district filter also matches the district name
+    inside the legacy free-text address, so pre-migration listings still
+    surface.
 
     offered_by is deliberately asymmetric: 'owner' excludes only
     agency-tagged listings (untagged legacy listings stay visible),
@@ -214,18 +237,214 @@ async def get_listings(
     elif offered_by == "agency":
         query["offeredBy"] = "agency"
 
-    # Determine sort order
-    sort_field = "-createdAt"  # Default: newest first
-    if sort == "price_asc":
-        sort_field = "+price"
-    elif sort == "price_desc":
-        sort_field = "-price"
-    elif sort == "oldest":
-        sort_field = "+createdAt"
+    # Restrict to the visible map area. Implicitly drops listings without
+    # coordinates, which is what a map view wants.
+    if bbox:
+        query.update(bbox_clause(parse_bbox(bbox)))
 
-    listings = await Listing.find(query).sort(sort_field).skip(skip).limit(limit).to_list()
+    return query
+
+
+def listing_sort_field(sort: Optional[str]) -> str:
+    if sort == "price_asc":
+        return "+price"
+    if sort == "price_desc":
+        return "-price"
+    if sort == "oldest":
+        return "+createdAt"
+    return "-createdAt"  # Default: newest first
+
+
+@router.get("", response_model=List[dict])
+@router.get("/", response_model=List[dict])
+async def get_listings(
+    skip: int = 0,
+    limit: int = 20,
+    search: Optional[str] = None,
+    sort: Optional[str] = "newest",
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    min_size: Optional[float] = None,
+    max_size: Optional[float] = None,
+    room_type: Optional[List[str]] = Query(None),
+    building_type: Optional[List[str]] = Query(None),
+    rent_for: Optional[List[str]] = Query(None),
+    max_tenants: Optional[int] = None,
+    city: Optional[str] = None,
+    district: Optional[List[str]] = Query(None),
+    offered_by: Optional[str] = None,
+    bbox: Optional[str] = Query(
+        None,
+        description="Restrict to 'swLng,swLat,neLng,neLat'. Keeps the map "
+                    "view's side list in sync with the visible area.",
+    ),
+):
+    """Get all listings with optional filtering, search, and sorting.
+
+    See build_listing_query for how each filter is interpreted.
+    """
+    query = build_listing_query(
+        search=search,
+        min_price=min_price,
+        max_price=max_price,
+        min_size=min_size,
+        max_size=max_size,
+        room_type=room_type,
+        building_type=building_type,
+        rent_for=rent_for,
+        max_tenants=max_tenants,
+        city=city,
+        district=district,
+        offered_by=offered_by,
+        bbox=bbox,
+    )
+
+    listings = (
+        await Listing.find(query)
+        .sort(listing_sort_field(sort))
+        .skip(skip)
+        .limit(limit)
+        .to_list()
+    )
 
     return [listing_to_dict(listing) for listing in listings]
+
+
+# A map view can legitimately cover thousands of listings; cap the pin payload
+# and tell the client it is looking at a partial picture.
+MAP_PIN_LIMIT = 400
+MAP_CLUSTER_LIMIT = 300
+
+
+@router.get("/map", response_model=dict)
+async def get_listings_map(
+    bbox: str = Query(..., description="Visible area as 'swLng,swLat,neLng,neLat'"),
+    zoom: int = Query(12, ge=0, le=22, description="Current map zoom level"),
+    search: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    min_size: Optional[float] = None,
+    max_size: Optional[float] = None,
+    room_type: Optional[List[str]] = Query(None),
+    building_type: Optional[List[str]] = Query(None),
+    rent_for: Optional[List[str]] = Query(None),
+    max_tenants: Optional[int] = None,
+    city: Optional[str] = None,
+    district: Optional[List[str]] = Query(None),
+    offered_by: Optional[str] = None,
+):
+    """Listings inside the visible map area, as pins or cluster bubbles.
+
+    Zoomed out (below CLUSTER_ZOOM_THRESHOLD) individual pins would be
+    thousands of overlapping dots, so the response is grid-aggregated counts
+    instead. Zoomed in it returns lean pins — enough to draw a price bubble
+    and a preview card, not the full listing.
+
+    Accepts the same filters as GET /listings/ so the map and list agree.
+    """
+    query = build_listing_query(
+        search=search,
+        min_price=min_price,
+        max_price=max_price,
+        min_size=min_size,
+        max_size=max_size,
+        room_type=room_type,
+        building_type=building_type,
+        rent_for=rent_for,
+        max_tenants=max_tenants,
+        city=city,
+        district=district,
+        offered_by=offered_by,
+        bbox=bbox,
+    )
+
+    collection = Listing.get_motor_collection()
+
+    if zoom < CLUSTER_ZOOM_THRESHOLD:
+        cell = cluster_cell_size(zoom)
+        pipeline = [
+            {"$match": query},
+            {
+                "$group": {
+                    "_id": {
+                        "x": {"$floor": {"$divide": [
+                            {"$arrayElemAt": ["$locationGeo.coordinates", 0]}, cell,
+                        ]}},
+                        "y": {"$floor": {"$divide": [
+                            {"$arrayElemAt": ["$locationGeo.coordinates", 1]}, cell,
+                        ]}},
+                    },
+                    "count": {"$sum": 1},
+                    # Average position keeps the bubble over the listings it
+                    # represents rather than at an empty cell centre.
+                    "lng": {"$avg": {"$arrayElemAt": ["$locationGeo.coordinates", 0]}},
+                    "lat": {"$avg": {"$arrayElemAt": ["$locationGeo.coordinates", 1]}},
+                    "minPrice": {"$min": "$price"},
+                }
+            },
+            {"$sort": {"count": -1}},
+            {"$limit": MAP_CLUSTER_LIMIT},
+        ]
+
+        clusters = []
+        total = 0
+        async for row in collection.aggregate(pipeline):
+            if row.get("lat") is None or row.get("lng") is None:
+                continue
+            total += row["count"]
+            clusters.append({
+                "id": f"{row['_id']['x']}:{row['_id']['y']}",
+                "lat": row["lat"],
+                "lng": row["lng"],
+                "count": row["count"],
+                "minPrice": row.get("minPrice"),
+            })
+
+        return {
+            "mode": "clusters",
+            "zoom": zoom,
+            "clusters": clusters,
+            "pins": [],
+            "total": total,
+            "truncated": len(clusters) >= MAP_CLUSTER_LIMIT,
+        }
+
+    total = await collection.count_documents(query)
+    listings = (
+        await Listing.find(query)
+        .sort("-createdAt")
+        .limit(MAP_PIN_LIMIT)
+        .to_list()
+    )
+
+    pins = []
+    for listing in listings:
+        coords = coords_from_geo(listing.location_geo)
+        if not coords:
+            continue
+        lng, lat = coords
+        pins.append({
+            "id": str(listing.id),
+            "lat": lat,
+            "lng": lng,
+            "price": listing.price,
+            "size": listing.size,
+            "roomType": listing.room_type.value if listing.room_type else None,
+            "district": listing.district,
+            "city": listing.city,
+            "address": listing.address,
+            # A pin popup shows one thumbnail; the rest is dead weight here.
+            "image": listing.images[0] if listing.images else None,
+        })
+
+    return {
+        "mode": "pins",
+        "zoom": zoom,
+        "clusters": [],
+        "pins": pins,
+        "total": total,
+        "truncated": total > len(pins),
+    }
 
 
 @router.get("/meta/districts", response_model=dict)
@@ -338,11 +557,16 @@ async def import_scraped_listing(
             pass
 
     location_geo = None
+    geo_precision = None
     if listing_data.latitude is not None and listing_data.longitude is not None:
         location_geo = {
             "type": "Point",
             "coordinates": [listing_data.longitude, listing_data.latitude]
         }
+        try:
+            geo_precision = GeoPrecision(listing_data.geoPrecision or "exact").value
+        except ValueError:
+            geo_precision = GeoPrecision.EXACT.value
 
     try:
         offered_by = OfferedByEnum(listing_data.offeredBy or "unknown")
@@ -356,6 +580,7 @@ async def import_scraped_listing(
         city=canonical_city(listing_data.city) if listing_data.city else None,
         district=listing_data.district,
         location_geo=location_geo,
+        geo_precision=geo_precision,
         price=listing_data.price,
         size=listing_data.size,
         max_tenants=listing_data.maxTenants,
@@ -382,6 +607,12 @@ async def import_scraped_listing(
     import asyncio
     from app.services import saved_search_service
     asyncio.create_task(saved_search_service.notify_matching_saved_searches(listing))
+
+    # Some source sites don't embed coordinates; resolve them from the address
+    # so imported listings still appear on the map.
+    if not listing.location_geo:
+        from app.services.geo_enrichment import resolve_listing_geo_by_id
+        asyncio.create_task(resolve_listing_geo_by_id(str(listing.id)))
 
     return {
         "message": "Scraped listing imported successfully",
@@ -460,8 +691,22 @@ async def update_listing(
     for field, value in update_data.items():
         setattr(listing, field, value)
 
+    if "locationGeo" in update_data and update_data["locationGeo"]:
+        # Landlord moved the pin — that's authoritative.
+        listing.geo_precision = GeoPrecision.EXACT.value
+    elif {"address", "city", "district"} & set(update_data):
+        # The place changed but no pin came with it; re-resolve in the
+        # background rather than leaving the old coordinates in place.
+        listing.location_geo = None
+        listing.geo_precision = None
+
     listing.updated_at = datetime.utcnow()
     await listing.save()
+
+    if not listing.location_geo:
+        import asyncio
+        from app.services.geo_enrichment import resolve_listing_geo_by_id
+        asyncio.create_task(resolve_listing_geo_by_id(str(listing.id)))
 
     return {"message": "Listing updated successfully"}
 

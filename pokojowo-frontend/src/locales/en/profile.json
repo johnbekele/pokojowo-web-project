@@ -48,7 +48,11 @@
     "budget": "Monthly Budget",
     "budgetMin": "Min Budget",
     "budgetMax": "Max Budget",
-    "location": "Preferred Location",
+    "location": "Where do you want to live?",
+    "selectCity": "Select a city",
+    "districts": "Preferred areas",
+    "otherCity": "Somewhere else",
+    "otherCityPlaceholder": "e.g., Katowice",
     "leaseDuration": "Lease Duration",
     "months": "months",
     "moveInDate": "Move-in Date"

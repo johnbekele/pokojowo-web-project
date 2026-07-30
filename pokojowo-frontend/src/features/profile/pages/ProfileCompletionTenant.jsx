@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import PreferredAreaPicker from '@/components/shared/PreferredAreaPicker';
 import { useToast } from '@/hooks/useToast';
 import api from '@/lib/api';
 import useAuthStore from '@/stores/authStore';
@@ -69,6 +70,7 @@ export default function ProfileCompletionTenant() {
     budgetMin: '',
     budgetMax: '',
     preferredLocation: '',
+    preferredDistricts: [],
     leaseDuration: '12',
     cleanliness: '',
     socialLevel: '',
@@ -104,6 +106,7 @@ export default function ProfileCompletionTenant() {
           budgetMin: user.tenantProfile.preferences?.budget?.min || '',
           budgetMax: user.tenantProfile.preferences?.budget?.max || '',
           preferredLocation: user.tenantProfile.preferences?.location || '',
+          preferredDistricts: user.tenantProfile.preferences?.districts || [],
           leaseDuration: user.tenantProfile.preferences?.leaseDurationMonths || '12',
           cleanliness: user.tenantProfile.flatmateTraits?.cleanliness || '',
           socialLevel: user.tenantProfile.flatmateTraits?.socialLevel || '',
@@ -211,6 +214,7 @@ export default function ProfileCompletionTenant() {
             max: formData.budgetMax ? parseInt(formData.budgetMax) : null,
           },
           location: formData.preferredLocation || null,
+          districts: formData.preferredDistricts,
           leaseDuration: parseInt(formData.leaseDuration),
         },
         flatmateTraits: {
@@ -453,16 +457,17 @@ export default function ProfileCompletionTenant() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="preferredLocation" className="text-sm font-medium">{t('preferences.location')}</Label>
-                  <Input
-                    id="preferredLocation"
-                    placeholder="e.g., City center, Mokotow"
-                    value={formData.preferredLocation}
-                    onChange={(e) => handleInputChange('preferredLocation', e.target.value)}
-                    className="h-11"
-                  />
-                </div>
+                <PreferredAreaPicker
+                  city={formData.preferredLocation}
+                  districts={formData.preferredDistricts}
+                  onChange={({ city, districts }) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      preferredLocation: city,
+                      preferredDistricts: districts,
+                    }))
+                  }
+                />
                 <div className="space-y-2">
                   <Label htmlFor="leaseDuration" className="text-sm font-medium">{t('preferences.leaseDuration')}</Label>
                   <Select

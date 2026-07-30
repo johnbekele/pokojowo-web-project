@@ -2,8 +2,9 @@ import { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Search, SlidersHorizontal, Home as HomeIcon } from 'lucide-react-native';
+import { Search, SlidersHorizontal, Home as HomeIcon, Map as MapIcon } from 'lucide-react-native';
 
 import { useListings } from '@/hooks/listings/useListings';
 import ListingCard from '@/components/feature/listings/ListingCard';
@@ -17,6 +18,7 @@ import useTheme from '@/hooks/useTheme';
 export default function HomeScreen() {
   const { t } = useTranslation('listings');
   const { colors } = useTheme();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<ListingFilters>({});
@@ -70,6 +72,19 @@ export default function HomeScreen() {
                 <Text className="text-brand-fg text-xs font-bold">{activeFilterCount}</Text>
               </View>
             )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-surface p-3 rounded-xl"
+            // Filters travel as a param so the map opens on the same search.
+            onPress={() => {
+              const query = encodeURIComponent(
+                JSON.stringify({ ...filters, search: searchQuery || undefined }),
+              );
+              router.push(`/(app)/(home)/map?filters=${query}`);
+            }}
+            accessibilityLabel={t('map.showMap', 'Show map')}
+          >
+            <MapIcon size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
         {!isLoading && (

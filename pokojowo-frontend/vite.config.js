@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5173,
+    port: 3000,
     allowedHosts: [
       'localhost',
       '.localhost',
@@ -26,9 +26,11 @@ export default defineConfig({
         target: 'http://localhost:8001',
         changeOrigin: true,
       },
-      // App backend - uses remote server (no local backend)
+      // App backend - remote by default; set VITE_DEV_API_PROXY to a local
+      // API (e.g. http://localhost:8000) when working on unreleased endpoints.
       '/api': {
-        target: 'https://pokojowo-web-project.onrender.com',
+        target:
+          process.env.VITE_DEV_API_PROXY || 'https://pokojowo-web-project.onrender.com',
         changeOrigin: true,
         secure: true,
       },

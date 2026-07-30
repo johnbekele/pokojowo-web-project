@@ -7,3 +7,5 @@ export { default as chatService } from './chat.service';
 export { default as favoritesService } from './favorites.service';
 export { default as listingInteractionService } from './listingInteraction.service';
 export { default as notificationService } from './notification.service';
+export { default as profileService } from './profile.service';
+export { default as mapService } from './map.service';

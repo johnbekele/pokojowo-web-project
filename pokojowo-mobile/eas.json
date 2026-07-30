@@ -6,6 +6,7 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "environment": "development",
       "ios": {
         "simulator": true
       },
@@ -17,13 +18,18 @@
     },
     "preview": {
       "distribution": "internal",
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.pokojowo.com/api",
-        "EXPO_PUBLIC_SOCKET_URL": "https://api.pokojowo.com",
-        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://api.pokojowo.com"
+        "EXPO_PUBLIC_API_URL": "https://pokojowo-web-project.onrender.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://pokojowo-web-project.onrender.com",
+        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://pokojowo-web-project.onrender.com"
       }
     },
     "production": {
+      "environment": "production",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.pokojowo.com/api",
         "EXPO_PUBLIC_SOCKET_URL": "https://api.pokojowo.com",

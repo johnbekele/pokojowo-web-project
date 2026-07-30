@@ -9,7 +9,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
-  newArchEnabled: false,
+  newArchEnabled: true,
   splash: {
     image: './assets/splash-icon.png',
     resizeMode: 'contain',
@@ -19,6 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.pokojowo.app',
+    usesAppleSignIn: true,
     infoPlist: {
       NSCameraUsageDescription: 'Used to take profile photos and listing images',
       NSPhotoLibraryUsageDescription: 'Used to select profile photos and listing images',
@@ -34,6 +35,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: 'com.pokojowo.app',
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
+    // Without this key react-native-maps renders a blank grey grid on Android.
+    config: {
+      googleMaps: {
+        apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+      },
+    },
     permissions: [
       'android.permission.CAMERA',
       'android.permission.READ_EXTERNAL_STORAGE',
@@ -71,15 +78,30 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         faceIDPermission: 'Allow Pokojowo to use Face ID for secure login',
       },
     ],
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'Allow Pokojowo to center the map on rooms near you',
+      },
+    ],
     'expo-localization',
     'expo-web-browser',
+    'expo-apple-authentication',
   ],
   experiments: {
     typedRoutes: true,
   },
   extra: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL || 'https://pokojowo-web-project.onrender.com/api',
+    chatApiUrl:
+      process.env.EXPO_PUBLIC_CHAT_API_URL ||
+      process.env.EXPO_PUBLIC_API_URL ||
+      'https://pokojowo-web-project.onrender.com/api',
     socketUrl: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://pokojowo-web-project.onrender.com',
+    chatSocketUrl:
+      process.env.EXPO_PUBLIC_CHAT_SOCKET_URL ||
+      process.env.EXPO_PUBLIC_SOCKET_URL ||
+      'https://pokojowo-web-project.onrender.com',
     imageBaseUrl:
       process.env.EXPO_PUBLIC_IMAGE_BASE_URL ||
       process.env.EXPO_PUBLIC_SOCKET_URL ||

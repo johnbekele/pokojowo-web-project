@@ -25,6 +25,8 @@ import {
 } from 'lucide-react-native';
 
 import { Button } from '@/components/ui';
+import { PreferredAreaPicker } from '@/components/feature/profile';
+import { usePreferredArea } from '@/hooks/user/usePreferredArea';
 import { userService, TenantProfileData } from '@/services/user.service';
 import useAuthStore from '@/stores/authStore';
 import useUIStore from '@/stores/uiStore';
@@ -94,6 +96,7 @@ interface FormData {
   budgetMin: string;
   budgetMax: string;
   preferredLocation: string;
+  preferredDistricts: string[];
   leaseDuration: string;
   cleanliness: string;
   socialLevel: string;
@@ -134,6 +137,7 @@ export default function TenantProfileCompletion() {
     budgetMin: '',
     budgetMax: '',
     preferredLocation: '',
+    preferredDistricts: [],
     leaseDuration: '12',
     cleanliness: '',
     socialLevel: '',
@@ -152,6 +156,8 @@ export default function TenantProfileCompletion() {
     preferredLanguage: '',
   });
 
+  const { data: preferredArea } = usePreferredArea();
+
   useEffect(() => {
     if (user) {
       setFormData((prev) => ({
@@ -168,6 +174,20 @@ export default function TenantProfileCompletion() {
       }));
     }
   }, [user]);
+
+  // Someone revisiting onboarding shouldn't have to re-pick an area they
+  // already chose; GET /users/me doesn't carry tenantProfile, hence the
+  // separate fetch.
+  useEffect(() => {
+    if (!preferredArea) return;
+    setFormData((prev) => ({
+      ...prev,
+      preferredLocation: prev.preferredLocation || preferredArea.location || '',
+      preferredDistricts: prev.preferredDistricts.length
+        ? prev.preferredDistricts
+        : preferredArea.districts,
+    }));
+  }, [preferredArea]);
 
   const saveMutation = useMutation({
     mutationFn: (data: TenantProfileData) => userService.completeTenantProfile(data),
@@ -249,6 +269,7 @@ export default function TenantProfileCompletion() {
             max: formData.budgetMax ? parseInt(formData.budgetMax) : null,
           },
           location: formData.preferredLocation || null,
+          districts: formData.preferredDistricts,
           leaseDuration: parseInt(formData.leaseDuration),
         },
         flatmateTraits: {
@@ -449,15 +470,17 @@ export default function TenantProfileCompletion() {
               </View>
             </View>
 
-            <View>
-              <Text className="text-text font-medium mb-2">{t('preferences.location', 'Preferred Location')}</Text>
-              <TextInput
-                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                value={formData.preferredLocation}
-                onChangeText={(text) => handleInputChange('preferredLocation', text)}
-                placeholder="e.g., City center, Mokotow"
-              />
-            </View>
+            <PreferredAreaPicker
+              city={formData.preferredLocation}
+              districts={formData.preferredDistricts}
+              onChange={({ city, districts }) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  preferredLocation: city,
+                  preferredDistricts: districts,
+                }));
+              }}
+            />
 
             <View>
               <Text className="text-text font-medium mb-2">{t('preferences.leaseDuration', 'Lease Duration')}</Text>

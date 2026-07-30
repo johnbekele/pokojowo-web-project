@@ -219,5 +219,34 @@
     "saveFailed": "Could not save search",
     "applyNotFound": "That saved search no longer exists",
     "applyFailed": "Could not load that saved search"
+  },
+  "view": {
+    "list": "List",
+    "map": "Map"
+  },
+  "map": {
+    "searchNear": "Search near an address…",
+    "go": "Go",
+    "useMyLocation": "Use my location",
+    "locationDenied": "Location permission denied",
+    "locationUnsupported": "Your browser cannot share your location",
+    "addressNotFound": "Couldn't find that address",
+    "addressNotFoundHint": "Try adding the city, e.g. \"Plac Bankowy, Warszawa\".",
+    "addressLookupFailed": "Address lookup failed",
+    "zoomForPins": "Zoom in to see individual rooms",
+    "listingCount_one": "{{count}} room in view",
+    "listingCount_other": "{{count}} rooms in view",
+    "listingCount": "{{count}} rooms in view",
+    "flatmateCount_one": "{{count}} flatmate looking here",
+    "flatmateCount_other": "{{count}} flatmates looking here",
+    "flatmateCount": "{{count}} flatmates looking here",
+    "flatmatesNeedProfile": "Complete your tenant profile to see who else is looking here.",
+    "emptyArea": "No rooms in this area yet — try panning or zooming out.",
+    "truncated": "Showing some of the rooms here — zoom in for the rest.",
+    "layers": {
+      "flats": "Flats",
+      "flatmates": "Flatmates",
+      "both": "Both"
+    }
   }
 }

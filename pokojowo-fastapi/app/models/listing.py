@@ -49,6 +49,11 @@ class Listing(Document):
     district: Optional[str] = None
     # GeoJSON Point: {"type": "Point", "coordinates": [lng, lat]}
     location_geo: Optional[dict] = Field(None, alias="locationGeo")
+    # How exact locationGeo is — see app.core.geo.GeoPrecision. Stored as a
+    # plain string so a value from an older scraper build can't fail loading.
+    # "exact" means the coordinates came from the source or a dropped pin and
+    # must never be replaced by a geocoded approximation.
+    geo_precision: Optional[str] = Field(None, alias="geoPrecision")
     price: float
     size: float
     max_tenants: int = Field(..., alias="maxTenants")

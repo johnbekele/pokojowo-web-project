@@ -89,6 +89,7 @@
   },
   "card": {
     "perMonth": "/mies.",
+    "month": "mies.",
     "available": "Dostępny",
     "availableFrom": "Dostępny od {{date}}",
     "viewDetails": "Zobacz szczegóły",
@@ -180,5 +181,29 @@
     "agency": "Agencja",
     "idVerifiedHost": "Gospodarz zweryfikowany (ID)",
     "verifiedHost": "Zweryfikowany gospodarz"
+  },
+  "map": {
+    "title": "Szukaj na mapie",
+    "showMap": "Pokaż mapę",
+    "showList": "Pokaż listę",
+    "useMyLocation": "Użyj mojej lokalizacji",
+    "locationDenied": "Brak zgody na dostęp do lokalizacji",
+    "locationFailed": "Nie udało się ustalić Twojej lokalizacji",
+    "zoomForPins": "Przybliż, aby zobaczyć pojedyncze pokoje",
+    "listingCount": "{{count}} pokoi w tym obszarze",
+    "listingCount_one": "1 pokój w tym obszarze",
+    "listingCount_few": "{{count}} pokoje w tym obszarze",
+    "listingCount_many": "{{count}} pokoi w tym obszarze",
+    "flatmateCount": "{{count}} osób szuka tutaj",
+    "flatmateCount_one": "1 osoba szuka tutaj",
+    "flatmateCount_few": "{{count}} osoby szukają tutaj",
+    "flatmateCount_many": "{{count}} osób szuka tutaj",
+    "flatmatesNeedProfile": "Uzupełnij profil najemcy, aby zobaczyć, kto jeszcze szuka w tej okolicy.",
+    "dismissPin": "Zamknij",
+    "layers": {
+      "flats": "Pokoje",
+      "flatmates": "Współlokatorzy",
+      "both": "Oba"
+    }
   }
 }

@@ -9,6 +9,28 @@ from datetime import datetime
 router = APIRouter()
 
 
+def needs_preference_geocode(user: User) -> bool:
+    """True when the tenant's preferred area has text but no coordinates yet."""
+    prefs = user.tenant_profile.preferences if user.tenant_profile else None
+    if not prefs:
+        return False
+    if not prefs.location and not prefs.districts:
+        return False
+    return not prefs.location_geo
+
+
+def schedule_preference_geocode(background_tasks: BackgroundTasks, user: User):
+    """Resolve the preferred area to a point after the response is sent.
+
+    Geocoding is rate-limited to 1 request/second, so it must never block a
+    profile save. The flatmate map pin appears on the next refresh.
+    """
+    if not needs_preference_geocode(user):
+        return
+    from app.services.geo_enrichment import resolve_preference_geo_by_id
+    background_tasks.add_task(resolve_preference_geo_by_id, str(user.id))
+
+
 @router.get("/", response_model=dict)
 async def get_profile(current_user: User = Depends(get_current_user)):
     """Get current user's complete profile"""
@@ -50,6 +72,7 @@ async def get_profile(current_user: User = Depends(get_current_user)):
 @router.put("/", response_model=dict)
 async def update_profile(
     profile_data: dict,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user)
 ):
     """Update user profile"""
@@ -89,7 +112,56 @@ async def update_profile(
     from app.services.trust_service import recompute_trust_score
     await recompute_trust_score(current_user)
 
+    schedule_preference_geocode(background_tasks, current_user)
+
     return {"message": "Profile updated successfully"}
+
+
+@router.put("/preferred-area", response_model=dict)
+async def update_preferred_area(
+    area_data: dict,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user)
+):
+    """Update only where the tenant wants to live.
+
+    Exists as its own endpoint because PUT /profile/ assigns a raw dict over
+    the whole tenantProfile, which would silently drop flatmate traits and
+    deal-breakers. Body: {"location": "Warszawa", "districts": ["Mokotów"]}.
+    """
+    from app.models.user import TenantProfileModel, PreferencesModel
+
+    location = (area_data.get("location") or "").strip() or None
+    districts = [
+        d.strip() for d in (area_data.get("districts") or []) if isinstance(d, str) and d.strip()
+    ]
+
+    if current_user.tenant_profile is None:
+        current_user.tenant_profile = TenantProfileModel()
+    if current_user.tenant_profile.preferences is None:
+        current_user.tenant_profile.preferences = PreferencesModel()
+
+    prefs = current_user.tenant_profile.preferences
+    area_changed = prefs.location != location or list(prefs.districts or []) != districts
+
+    prefs.location = location
+    prefs.districts = districts
+    if area_changed:
+        # Stale coordinates would put them on the map in the wrong place.
+        prefs.location_geo = None
+        prefs.geo_precision = None
+
+    current_user.updated_at = datetime.utcnow()
+    await current_user.save()
+    matching_cache.clear()
+
+    schedule_preference_geocode(background_tasks, current_user)
+
+    return {
+        "message": "Preferred area updated",
+        "location": prefs.location,
+        "districts": prefs.districts,
+    }
 
 
 @router.put("/photo", response_model=dict)
@@ -155,6 +227,7 @@ async def get_completion_status(current_user: User = Depends(get_current_user)):
 @router.put("/completion", response_model=dict)
 async def update_profile_completion(
     completion_data: dict,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user)
 ):
     """Update profile completion step"""
@@ -193,6 +266,8 @@ async def update_profile_completion(
 
     from app.services.trust_service import recompute_trust_score
     await recompute_trust_score(current_user)
+
+    schedule_preference_geocode(background_tasks, current_user)
 
     return {
         "message": "Profile completion updated",
@@ -274,14 +349,33 @@ async def complete_tenant_profile(
         prefs_data = tenant_data.get("preferences", {})
         budget_data = prefs_data.get("budget", {})
 
+        preferred_location = prefs_data.get("location")
+        preferred_districts = [
+            d.strip() for d in (prefs_data.get("districts") or []) if d and d.strip()
+        ]
+
         preferences = PreferencesModel(
-            location=prefs_data.get("location"),
+            location=preferred_location,
+            districts=preferred_districts,
             budget=BudgetModel(
                 min=budget_data.get("min") or prefs_data.get("budgetMin"),
                 max=budget_data.get("max") or prefs_data.get("budgetMax")
             ) if budget_data or prefs_data.get("budgetMin") else None,
             lease_duration_months=prefs_data.get("leaseDuration", 12)
         )
+
+        # Preferences are rebuilt from scratch here, which would throw away the
+        # coordinates we geocoded earlier. Carry them over while the area is
+        # unchanged; otherwise leave them empty so the background task re-resolves.
+        old_prefs = current_user.tenant_profile.preferences if current_user.tenant_profile else None
+        if (
+            old_prefs
+            and old_prefs.location_geo
+            and old_prefs.location == preferred_location
+            and list(old_prefs.districts or []) == preferred_districts
+        ):
+            preferences.location_geo = old_prefs.location_geo
+            preferences.geo_precision = old_prefs.geo_precision
 
         # Get flatmate traits
         traits_data = tenant_data.get("flatmateTraits", {})
@@ -386,6 +480,8 @@ async def complete_tenant_profile(
             notification_service.notify_users_about_new_profile,
             current_user
         )
+
+    schedule_preference_geocode(background_tasks, current_user)
 
     return {
         "message": "Tenant profile updated successfully",
