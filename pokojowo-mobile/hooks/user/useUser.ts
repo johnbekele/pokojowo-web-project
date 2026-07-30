@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService } from '@/services';
-import type { UserUpdateData } from '@/services/user.service';
+import { userService, profileService } from '@/services';
+import type { UserUpdateData, ReportReason } from '@/services/user.service';
 import { AUTH_KEYS } from '../auth/useAuth';
 
 export const USER_KEYS = {
@@ -44,5 +44,59 @@ export function useUpdateProfile() {
 export function useDeleteAccount() {
   return useMutation({
     mutationFn: () => userService.deleteAccount(),
+  });
+}
+
+/**
+ * Uploads a locally-picked image and then persists the returned hosted URL on
+ * the current user's profile. Resolves with the new photo URL.
+ */
+export function useUploadProfilePhoto() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (uri: string) => {
+      const uploadRes = await profileService.uploadPhoto(uri);
+      const url = uploadRes.data.url;
+      await profileService.setPhoto(url);
+      return url;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUTH_KEYS.user });
+    },
+  });
+}
+
+export function useReportUser() {
+  return useMutation({
+    mutationFn: ({
+      userId,
+      reason,
+      details,
+    }: {
+      userId: string;
+      reason: ReportReason;
+      details?: string;
+    }) => userService.reportUser(userId, reason, details),
+  });
+}
+
+export function useBlockUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => userService.blockUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUTH_KEYS.user });
+    },
+  });
+}
+
+export function useUnblockUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => userService.unblockUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUTH_KEYS.user });
+    },
   });
 }

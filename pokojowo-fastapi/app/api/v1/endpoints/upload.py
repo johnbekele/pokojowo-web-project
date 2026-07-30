@@ -1,12 +1,9 @@
 import io
-import os
 import re
 import secrets
 import uuid
-from pathlib import Path
 from typing import List, Optional, Tuple
 
-import aiofiles
 import magic
 from PIL import Image
 from fastapi import APIRouter, UploadFile, File, Header, HTTPException, status, Depends
@@ -14,23 +11,18 @@ from fastapi import APIRouter, UploadFile, File, Header, HTTPException, status, 
 from app.models.user import User
 from app.core.dependencies import get_current_user, require_verified
 from app.core.config import settings
+from app.core import s3
 
 router = APIRouter()
 
-# Public uploads: served statically via the /uploads mount in main.py.
-UPLOAD_BASE_DIR = Path("uploads")
-PHOTO_DIR = UPLOAD_BASE_DIR / "photo"
-LISTING_DIR = UPLOAD_BASE_DIR / "listing"
-
-# Private uploads: verification documents etc. MUST live outside
-# uploads/ — StaticFiles serves every subdirectory of its mount, so a
-# private dir under uploads/ would be world-readable. Files here are
-# only reachable via authenticated endpoints.
-PRIVATE_BASE_DIR = Path("private_uploads")
-VERIFICATION_DIR = PRIVATE_BASE_DIR / "verification"
-
-for directory in [UPLOAD_BASE_DIR, PHOTO_DIR, LISTING_DIR, PRIVATE_BASE_DIR, VERIFICATION_DIR]:
-    directory.mkdir(parents=True, exist_ok=True)
+# Object key prefixes inside the S3 uploads bucket. The `uploads/` prefix
+# is world-readable via CloudFront (OAC + BucketPolicy). Everything under
+# `private_uploads/` is intentionally NOT covered by the CloudFront cache
+# behavior, so it's reachable only via presigned URLs handed out by
+# authenticated endpoints (see verification.py).
+PHOTO_PREFIX = "uploads/photo"
+LISTING_PREFIX = "uploads/listing"
+VERIFICATION_PREFIX = "private_uploads/verification"
 
 # Generated filenames are always uuid4.ext
 SAFE_FILENAME_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]{1,5}$")
@@ -45,6 +37,17 @@ IMAGE_MIME_BY_EXT = {
 
 # Extra types allowed for private verification documents only
 DOCUMENT_MIME_BY_EXT = {**IMAGE_MIME_BY_EXT, "pdf": {"application/pdf"}}
+
+# The exact Content-Type we send to S3 for each stored extension. Picked
+# from the allow-list above so it can't be forged from the client.
+CONTENT_TYPE_BY_EXT = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "gif": "image/gif",
+    "webp": "image/webp",
+    "pdf": "application/pdf",
+}
 
 
 def _extension(filename: Optional[str]) -> str:
@@ -99,27 +102,29 @@ async def read_validated(file: UploadFile, allow_pdf: bool = False) -> Tuple[byt
     return content, ext
 
 
-async def save_bytes(content: bytes, ext: str, destination: Path) -> str:
-    """Persist validated bytes under a generated uuid filename.
-    Returns the path string (relative, with leading slash)."""
+async def save_public(content: bytes, ext: str, prefix: str) -> str:
+    """Store validated bytes under `s3://<bucket>/{prefix}/{uuid}.{ext}`
+    and return the client-facing URL string (`/{prefix}/{uuid}.{ext}`).
+
+    The returned URL is what gets persisted in Mongo. It stays a leading-
+    slash relative path so existing DB rows minted before the S3 cutover
+    keep working — CloudFront routes `/uploads/*` to the S3 origin.
+    """
     filename = f"{uuid.uuid4()}.{ext}"
-    file_path = destination / filename
-
-    async with aiofiles.open(file_path, "wb") as out_file:
-        await out_file.write(content)
-
-    return f"/{file_path}"
+    key = f"{prefix}/{filename}"
+    await s3.put_object(key, content, CONTENT_TYPE_BY_EXT[ext])
+    return f"/{key}"
 
 
 async def save_private_verification_file(file: UploadFile) -> str:
-    """Save a verification document to private (non-served) storage.
-    Returns the stored path for DB records; never exposed as a URL."""
+    """Save a verification document to the private prefix of the S3
+    bucket. Returns the S3 key for DB records — NOT a URL. Callers hand
+    out short-lived presigned GETs at retrieval time."""
     content, ext = await read_validated(file, allow_pdf=True)
     filename = f"{uuid.uuid4()}.{ext}"
-    file_path = VERIFICATION_DIR / filename
-    async with aiofiles.open(file_path, "wb") as out_file:
-        await out_file.write(content)
-    return str(file_path)
+    key = f"{VERIFICATION_PREFIX}/{filename}"
+    await s3.put_object(key, content, CONTENT_TYPE_BY_EXT[ext])
+    return key
 
 
 def _record_upload(user: User, path: str) -> None:
@@ -138,7 +143,7 @@ async def upload_photo(
 ):
     """Upload user photo"""
     content, ext = await read_validated(file)
-    file_path = await save_bytes(content, ext, PHOTO_DIR)
+    file_path = await save_public(content, ext, PHOTO_PREFIX)
 
     _record_upload(current_user, file_path)
     await current_user.save()
@@ -166,7 +171,7 @@ async def upload_listing_image(
         )
 
     content, ext = await read_validated(file)
-    file_path = await save_bytes(content, ext, LISTING_DIR)
+    file_path = await save_public(content, ext, LISTING_PREFIX)
 
     _record_upload(current_user, file_path)
     await current_user.save()
@@ -200,7 +205,7 @@ async def upload_multiple_listing_images(
 
     for file in files:
         content, ext = await read_validated(file)
-        file_path = await save_bytes(content, ext, LISTING_DIR)
+        file_path = await save_public(content, ext, LISTING_PREFIX)
         _record_upload(current_user, file_path)
         uploaded_files.append({
             "url": file_path,
@@ -239,7 +244,7 @@ async def upload_scraped_images(
     uploaded = []
     for file in files:
         content, ext = await read_validated(file)
-        uploaded.append(await save_bytes(content, ext, LISTING_DIR))
+        uploaded.append(await save_public(content, ext, LISTING_PREFIX))
 
     return {"urls": uploaded}
 
@@ -256,11 +261,13 @@ async def delete_photo(
             detail="Invalid filename"
         )
 
-    file_path = PHOTO_DIR / filename
-    stored_path = f"/{file_path}"
+    # DB rows store `/uploads/photo/{filename}` — map back to the S3 key.
+    stored_path = f"/{PHOTO_PREFIX}/{filename}"
+    key = f"{PHOTO_PREFIX}/{filename}"
 
     # Ownership: the file must be one this user uploaded, or their
-    # current profile photo.
+    # current profile photo. This check has to happen BEFORE any S3
+    # side-effect — don't let an attacker enumerate deletable objects.
     details = current_user.other_details or {}
     owned = stored_path in details.get("uploaded_files", [])
     if not owned and current_user.photo and current_user.photo.url == stored_path:
@@ -271,14 +278,8 @@ async def delete_photo(
             detail="You can only delete your own photos"
         )
 
-    if not file_path.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="File not found"
-        )
-
     try:
-        os.remove(file_path)
+        await s3.delete_object(key)
         if stored_path in details.get("uploaded_files", []):
             details["uploaded_files"].remove(stored_path)
             current_user.other_details = details
