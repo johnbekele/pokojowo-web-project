@@ -22,10 +22,13 @@ React Native mobile app for Pokojowo - a flatmate/roommate matching platform for
 
 ## Backend
 
-**Production URL:** `https://pokojowo-web-project.onrender.com`
+**Production URL:** `https://dh3iw703m1vvi.cloudfront.net` (CloudFront in front of the AWS backend)
 
 - REST API: `/api/*`
 - WebSocket: Same URL for Socket.IO
+- Chat service: `/api/chat/*`, `/api/messages/*` and `/chat-socket.io` on the same
+  host, routed by CloudFront to the chat container
+- Images: `/uploads/*`, served from S3 by the same distribution
 
 Configured in:
 - `lib/api.ts` - Axios instance

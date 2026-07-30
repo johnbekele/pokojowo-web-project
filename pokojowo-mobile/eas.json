@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 10.0.0"
+    "version": ">= 10.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -23,9 +24,9 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://pokojowo-web-project.onrender.com/api",
-        "EXPO_PUBLIC_SOCKET_URL": "https://pokojowo-web-project.onrender.com",
-        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://pokojowo-web-project.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://dh3iw703m1vvi.cloudfront.net/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://dh3iw703m1vvi.cloudfront.net",
+        "EXPO_PUBLIC_IMAGE_BASE_URL": "https://dh3iw703m1vvi.cloudfront.net"
       }
     },
     "production": {

@@ -1,5 +1,10 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
+// CloudFront in front of the AWS backend. One host serves everything: /api and
+// /socket.io reach the monolith, /api/chat, /api/messages and /chat-socket.io
+// reach the chat service, and /uploads comes straight from S3.
+const BACKEND_URL = 'https://dh3iw703m1vvi.cloudfront.net';
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Pokojowo',
@@ -92,20 +97,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   extra: {
-    apiUrl: process.env.EXPO_PUBLIC_API_URL || 'https://pokojowo-web-project.onrender.com/api',
+    apiUrl: process.env.EXPO_PUBLIC_API_URL || `${BACKEND_URL}/api`,
     chatApiUrl:
       process.env.EXPO_PUBLIC_CHAT_API_URL ||
       process.env.EXPO_PUBLIC_API_URL ||
-      'https://pokojowo-web-project.onrender.com/api',
-    socketUrl: process.env.EXPO_PUBLIC_SOCKET_URL || 'https://pokojowo-web-project.onrender.com',
+      `${BACKEND_URL}/api`,
+    socketUrl: process.env.EXPO_PUBLIC_SOCKET_URL || BACKEND_URL,
     chatSocketUrl:
-      process.env.EXPO_PUBLIC_CHAT_SOCKET_URL ||
-      process.env.EXPO_PUBLIC_SOCKET_URL ||
-      'https://pokojowo-web-project.onrender.com',
+      process.env.EXPO_PUBLIC_CHAT_SOCKET_URL || process.env.EXPO_PUBLIC_SOCKET_URL || BACKEND_URL,
     imageBaseUrl:
-      process.env.EXPO_PUBLIC_IMAGE_BASE_URL ||
-      process.env.EXPO_PUBLIC_SOCKET_URL ||
-      'https://pokojowo-web-project.onrender.com',
+      process.env.EXPO_PUBLIC_IMAGE_BASE_URL || process.env.EXPO_PUBLIC_SOCKET_URL || BACKEND_URL,
     googleClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
     eas: {
       projectId: process.env.EAS_PROJECT_ID || 'your-project-id',
