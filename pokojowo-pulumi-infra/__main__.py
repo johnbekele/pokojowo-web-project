@@ -47,6 +47,13 @@ sg = aws.ec2.SecurityGroup(
             "protocol": "tcp",
             "prefix_list_ids": [cloudfront_pl.id],
         },
+        {
+            "description": "Chat service HTTP from CloudFront origin-facing prefix list",
+            "from_port": 81,
+            "to_port": 81,
+            "protocol": "tcp",
+            "prefix_list_ids": [cloudfront_pl.id],
+        },
     ],
     egress=[
         {
@@ -118,6 +125,15 @@ backend_repo = aws.ecr.Repository(
     tags={"Name": f"{name}-backend"},
 )
 
+chat_repo = aws.ecr.Repository(
+    f"{name}-chat",
+    name=f"{name}-chat",
+    image_tag_mutability="MUTABLE",
+    image_scanning_configuration={"scan_on_push": True},
+    force_delete=True,
+    tags={"Name": f"{name}-chat"},
+)
+
 # Keep only the 10 newest images to avoid unbounded storage cost
 aws.ecr.LifecyclePolicy(
     f"{name}-backend-lifecycle",
@@ -140,8 +156,36 @@ aws.ecr.LifecyclePolicy(
     ),
 )
 
+aws.ecr.LifecyclePolicy(
+    f"{name}-chat-lifecycle",
+    repository=chat_repo.name,
+    policy=json.dumps(
+        {
+            "rules": [
+                {
+                    "rulePriority": 1,
+                    "description": "Retain the 10 most recent images",
+                    "selection": {
+                        "tagStatus": "any",
+                        "countType": "imageCountMoreThan",
+                        "countNumber": 10,
+                    },
+                    "action": {"type": "expire"},
+                }
+            ]
+        }
+    ),
+)
+
 # ---------------------------------------------------------------------------
 # S3 bucket for uploads / static assets
+#
+# Layout inside the bucket:
+#   uploads/photo/*, uploads/listing/*  — publicly served through CloudFront
+#                                        via OAC (the /uploads/* cache behavior
+#                                        added further below).
+#   private_uploads/verification/*      — never served by CloudFront; the backend
+#                                        hands out short-lived presigned GETs.
 # ---------------------------------------------------------------------------
 uploads = aws.s3.BucketV2(f"{name}-uploads")
 
@@ -272,9 +316,21 @@ eip = aws.ec2.Eip(
 # ---------------------------------------------------------------------------
 # AWS-managed policies:
 #   CachingDisabled     4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+#   CachingOptimized    658327ea-f89d-4fab-a63d-7e88639e58f6
 #   AllViewer           216adef6-5c7f-47e4-b989-5492eafa07d3
 CACHE_POLICY_DISABLED = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+CACHE_POLICY_OPTIMIZED = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 ORIGIN_REQ_POLICY_ALL_VIEWER = "216adef6-5c7f-47e4-b989-5492eafa07d3"
+
+# Origin Access Control lets CloudFront sign SigV4 requests to a private S3
+# bucket. Replaces the legacy Origin Access Identity.
+uploads_oac = aws.cloudfront.OriginAccessControl(
+    f"{name}-uploads-oac",
+    description=f"OAC for {name}-uploads",
+    origin_access_control_origin_type="s3",
+    signing_behavior="always",
+    signing_protocol="sigv4",
+)
 
 distribution = aws.cloudfront.Distribution(
     f"{name}-cf",
@@ -297,6 +353,30 @@ distribution = aws.cloudfront.Distribution(
                 "origin_keepalive_timeout": 30,
             },
         },
+        {
+            "origin_id": "ec2-chat-origin",
+            "domain_name": eip.public_dns,
+            "custom_origin_config": {
+                "http_port": 81,
+                "https_port": 443,
+                "origin_protocol_policy": "http-only",
+                "origin_ssl_protocols": ["TLSv1.2"],
+                "origin_read_timeout": 60,
+                "origin_keepalive_timeout": 30,
+            },
+        },
+        {
+            # S3 uploads bucket — only /uploads/* is routed here (see the
+            # ordered_cache_behaviors below). Never exposes the
+            # private_uploads/ prefix because the bucket policy scopes
+            # GetObject to uploads/*.
+            "origin_id": "s3-uploads",
+            "domain_name": uploads.bucket_regional_domain_name,
+            "origin_access_control_id": uploads_oac.id,
+            # Empty custom_origin_config means CloudFront treats this as an
+            # S3 origin. OAC replaces the deprecated s3_origin_config /
+            # origin_access_identity flow.
+        },
     ],
     default_cache_behavior={
         "target_origin_id": "ec2-origin",
@@ -307,6 +387,50 @@ distribution = aws.cloudfront.Distribution(
         "cache_policy_id": CACHE_POLICY_DISABLED,
         "origin_request_policy_id": ORIGIN_REQ_POLICY_ALL_VIEWER,
     },
+    ordered_cache_behaviors=[
+        {
+            "path_pattern": "/api/chat/*",
+            "target_origin_id": "ec2-chat-origin",
+            "viewer_protocol_policy": "redirect-to-https",
+            "allowed_methods": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+            "cached_methods": ["GET", "HEAD"],
+            "compress": True,
+            "cache_policy_id": CACHE_POLICY_DISABLED,
+            "origin_request_policy_id": ORIGIN_REQ_POLICY_ALL_VIEWER,
+        },
+        {
+            "path_pattern": "/api/messages/*",
+            "target_origin_id": "ec2-chat-origin",
+            "viewer_protocol_policy": "redirect-to-https",
+            "allowed_methods": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+            "cached_methods": ["GET", "HEAD"],
+            "compress": True,
+            "cache_policy_id": CACHE_POLICY_DISABLED,
+            "origin_request_policy_id": ORIGIN_REQ_POLICY_ALL_VIEWER,
+        },
+        {
+            "path_pattern": "/chat-socket.io/*",
+            "target_origin_id": "ec2-chat-origin",
+            "viewer_protocol_policy": "redirect-to-https",
+            "allowed_methods": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+            "cached_methods": ["GET", "HEAD"],
+            "compress": True,
+            "cache_policy_id": CACHE_POLICY_DISABLED,
+            "origin_request_policy_id": ORIGIN_REQ_POLICY_ALL_VIEWER,
+        },
+        {
+            # Public uploads (user photos, listing photos, scraper re-hosts)
+            # are served straight from S3. UUID filenames + immutable
+            # Cache-Control set by the backend mean CachingOptimized is safe.
+            "path_pattern": "/uploads/*",
+            "target_origin_id": "s3-uploads",
+            "viewer_protocol_policy": "redirect-to-https",
+            "allowed_methods": ["GET", "HEAD", "OPTIONS"],
+            "cached_methods": ["GET", "HEAD"],
+            "compress": True,
+            "cache_policy_id": CACHE_POLICY_OPTIMIZED,
+        },
+    ],
     restrictions={
         "geo_restriction": {"restriction_type": "none"},
     },
@@ -314,6 +438,33 @@ distribution = aws.cloudfront.Distribution(
         "cloudfront_default_certificate": True,
     },
     tags={"Name": f"{name}-cf"},
+)
+
+# Grant CloudFront (this distribution only) read on uploads/* — the
+# private_uploads/ prefix is deliberately excluded so the backend remains
+# the only way to reach verification documents (via presigned GETs).
+aws.s3.BucketPolicy(
+    f"{name}-uploads-cf-policy",
+    bucket=uploads.id,
+    policy=pulumi.Output.all(uploads.arn, distribution.arn).apply(
+        lambda args: json.dumps(
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Sid": "AllowCloudFrontServicePrincipalReadPublicUploads",
+                        "Effect": "Allow",
+                        "Principal": {"Service": "cloudfront.amazonaws.com"},
+                        "Action": "s3:GetObject",
+                        "Resource": f"{args[0]}/uploads/*",
+                        "Condition": {
+                            "StringEquals": {"AWS:SourceArn": args[1]},
+                        },
+                    }
+                ],
+            }
+        )
+    ),
 )
 
 # ---------------------------------------------------------------------------
@@ -324,6 +475,10 @@ pulumi.export("ec2_public_dns", eip.public_dns)
 pulumi.export("ec2_instance_id", instance.id)
 pulumi.export("cloudfront_domain", distribution.domain_name)
 pulumi.export("cloudfront_url", distribution.domain_name.apply(lambda d: f"https://{d}"))
+pulumi.export("cloudfront_distribution_arn", distribution.arn)
 pulumi.export("uploads_bucket", uploads.bucket)
+pulumi.export("uploads_bucket_arn", uploads.arn)
 pulumi.export("backend_ecr_repo", backend_repo.repository_url)
 pulumi.export("backend_ecr_name", backend_repo.name)
+pulumi.export("chat_ecr_repo", chat_repo.repository_url)
+pulumi.export("chat_ecr_name", chat_repo.name)

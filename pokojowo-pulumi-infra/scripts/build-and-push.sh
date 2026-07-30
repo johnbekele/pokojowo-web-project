@@ -25,7 +25,10 @@ REPO_ROOT="$(cd "${INFRA_DIR}/.." && pwd)"
 
 BACKEND_CONTEXT="${BACKEND_CONTEXT:-${REPO_ROOT}/pokojowo-fastapi}"
 BACKEND_DOCKERFILE="${BACKEND_DOCKERFILE:-${BACKEND_CONTEXT}/Dockerfile}"
+CHAT_CONTEXT="${CHAT_CONTEXT:-${REPO_ROOT}/pokojowo-chat}"
+CHAT_DOCKERFILE="${CHAT_DOCKERFILE:-${CHAT_CONTEXT}/Dockerfile}"
 BACKEND_ENV_FILE="${BACKEND_ENV_FILE:-${BACKEND_CONTEXT}/.env.production}"
+CHAT_ENV_FILE="${CHAT_ENV_FILE:-${CHAT_CONTEXT}/.env.production}"
 COMPOSE_FILE="${SCRIPT_DIR}/docker-compose.prod.yml"
 
 # ---------------------------------------------------------------------------
@@ -49,6 +52,7 @@ log "reading pulumi stack outputs..."
 pushd "${INFRA_DIR}" >/dev/null
 
 ECR_REPO_URL="$(pulumi stack output backend_ecr_repo)"
+CHAT_ECR_REPO_URL="$(pulumi stack output chat_ecr_repo)"
 EC2_INSTANCE_ID="$(pulumi stack output ec2_instance_id)"
 CLOUDFRONT_URL="$(pulumi stack output cloudfront_url)"
 UPLOADS_BUCKET="$(pulumi stack output uploads_bucket)"
@@ -56,6 +60,7 @@ UPLOADS_BUCKET="$(pulumi stack output uploads_bucket)"
 popd >/dev/null
 
 [[ -n "${ECR_REPO_URL}" ]] || die "backend_ecr_repo output is empty — run 'pulumi up' first"
+[[ -n "${CHAT_ECR_REPO_URL}" ]] || die "chat_ecr_repo output is empty — run 'pulumi up' first"
 [[ -n "${EC2_INSTANCE_ID}" ]] || die "ec2_instance_id output is empty"
 
 AWS_REGION="${AWS_REGION:-us-east-1}"
@@ -78,8 +83,11 @@ fi
 
 IMAGE_URI="${ECR_REPO_URL}:${TAG}"
 IMAGE_URI_LATEST="${ECR_REPO_URL}:latest"
+CHAT_IMAGE_URI="${CHAT_ECR_REPO_URL}:${TAG}"
+CHAT_IMAGE_URI_LATEST="${CHAT_ECR_REPO_URL}:latest"
 
 log "target repo:    ${ECR_REPO_URL}"
+log "chat repo:      ${CHAT_ECR_REPO_URL}"
 log "target tag:     ${TAG}"
 log "ec2 instance:   ${EC2_INSTANCE_ID}"
 log "cloudfront:     ${CLOUDFRONT_URL}"
@@ -109,6 +117,21 @@ log "pushed:"
 log "  - ${IMAGE_URI}"
 log "  - ${IMAGE_URI_LATEST}"
 
+[[ -f "${CHAT_DOCKERFILE}" ]] || die "missing Dockerfile at ${CHAT_DOCKERFILE}"
+
+log "building chat image (linux/amd64) from ${CHAT_CONTEXT}..."
+docker buildx build \
+  --platform linux/amd64 \
+  --file "${CHAT_DOCKERFILE}" \
+  --tag "${CHAT_IMAGE_URI}" \
+  --tag "${CHAT_IMAGE_URI_LATEST}" \
+  --push \
+  "${CHAT_CONTEXT}"
+
+log "pushed:"
+log "  - ${CHAT_IMAGE_URI}"
+log "  - ${CHAT_IMAGE_URI_LATEST}"
+
 if [[ "${SKIP_DEPLOY:-0}" == "1" ]]; then
   log "SKIP_DEPLOY=1 — stopping before EC2 rollout"
   log ""
@@ -126,6 +149,7 @@ fi
 STAGE_PREFIX="deploy/$(date -u +%Y%m%dT%H%M%SZ)-${TAG}"
 S3_COMPOSE="s3://${UPLOADS_BUCKET}/${STAGE_PREFIX}/docker-compose.prod.yml"
 S3_BACKEND_ENV="s3://${UPLOADS_BUCKET}/${STAGE_PREFIX}/backend.env"
+S3_CHAT_ENV="s3://${UPLOADS_BUCKET}/${STAGE_PREFIX}/chat.env"
 S3_HOST_ENV="s3://${UPLOADS_BUCKET}/${STAGE_PREFIX}/.env"
 
 log "staging deploy artifacts to s3://${UPLOADS_BUCKET}/${STAGE_PREFIX}/ ..."
@@ -143,10 +167,22 @@ else
   rm -f "${TMP_EMPTY_ENV}"
 fi
 
+if [[ -f "${CHAT_ENV_FILE}" ]]; then
+  aws s3 cp "${CHAT_ENV_FILE}" "${S3_CHAT_ENV}" --region "${AWS_REGION}" >/dev/null
+  log "uploaded chat env from ${CHAT_ENV_FILE}"
+else
+  log "no ${CHAT_ENV_FILE} found — writing empty chat.env"
+  TMP_EMPTY_CHAT_ENV="$(mktemp)"
+  : > "${TMP_EMPTY_CHAT_ENV}"
+  aws s3 cp "${TMP_EMPTY_CHAT_ENV}" "${S3_CHAT_ENV}" --region "${AWS_REGION}" >/dev/null
+  rm -f "${TMP_EMPTY_CHAT_ENV}"
+fi
+
 # .env consumed by `docker compose` for ${BACKEND_IMAGE} substitution
 TMP_HOST_ENV="$(mktemp)"
 cat > "${TMP_HOST_ENV}" <<EOF
 BACKEND_IMAGE=${IMAGE_URI}
+CHAT_IMAGE=${CHAT_IMAGE_URI}
 EOF
 aws s3 cp "${TMP_HOST_ENV}" "${S3_HOST_ENV}" --region "${AWS_REGION}" >/dev/null
 rm -f "${TMP_HOST_ENV}"
@@ -162,6 +198,7 @@ cd /opt/pokojowo
 
 aws s3 cp ${S3_COMPOSE} ./docker-compose.prod.yml
 aws s3 cp ${S3_BACKEND_ENV} ./backend.env
+aws s3 cp ${S3_CHAT_ENV} ./chat.env
 aws s3 cp ${S3_HOST_ENV} ./.env
 
 aws ecr get-login-password --region ${AWS_REGION} \

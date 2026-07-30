@@ -14,10 +14,13 @@ services:
     environment:
       - PORT=10000
       - DEBUG=False
+      - CHAT_SERVICE_URL=http://chat:10002
     env_file:
+      # AWS_REGION and S3_UPLOADS_BUCKET must be present in backend.env.
+      # AWS credentials come from the EC2 instance profile via IMDSv2 —
+      # never bake keys into the image or env.
       - ./backend.env
-    volumes:
-      - pokojowo-uploads:/app/uploads
+    # Uploads now go to S3; no local volume required.
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
       interval: 30s
@@ -30,6 +33,31 @@ services:
         max-size: "10m"
         max-file: "3"
 
-volumes:
-  pokojowo-uploads:
-    name: pokojowo-uploads
+  chat:
+    image: ${CHAT_IMAGE}
+    container_name: pokojowo-chat
+    restart: unless-stopped
+    ports:
+      # Chat service on host port 81 for CloudFront chat origin.
+      - "81:10002"
+    environment:
+      - PORT=10002
+      - DEBUG=False
+      - DATABASE_NAME=pokojowo_chat
+      - MAIN_API_URL=http://backend:10000
+    env_file:
+      - ./chat.env
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
