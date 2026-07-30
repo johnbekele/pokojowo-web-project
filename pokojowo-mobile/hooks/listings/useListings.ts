@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listingService } from '@/services';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { listingService, listingInteractionService } from '@/services';
 import type { ListingFilters, CreateListingData } from '@/types/listing.types';
 
 export function useListings(filters?: ListingFilters) {
@@ -61,4 +61,41 @@ export function useDeleteListing() {
       queryClient.invalidateQueries({ queryKey: ['my-listings'] });
     },
   });
+}
+
+export function useUploadListingImages() {
+  return useMutation({
+    mutationFn: (uris: string[]) =>
+      listingService.uploadImages(uris).then((res) => res.data.files.map((f) => f.url)),
+  });
+}
+
+/**
+ * Aggregates per-listing interaction stats (views/likes/inquiries) across the
+ * given listing ids using parallel queries, so the landlord dashboard can show
+ * real totals instead of zeros.
+ */
+export function useLandlordStats(listingIds: string[]) {
+  const results = useQueries({
+    queries: listingIds.map((id) => ({
+      queryKey: ['listing-stats', id],
+      queryFn: () => listingInteractionService.getListingStats(id).then((res) => res.data),
+      staleTime: 60 * 1000,
+    })),
+  });
+
+  const isLoading = results.some((r) => r.isLoading);
+  const totals = results.reduce(
+    (acc, r) => {
+      if (r.data) {
+        acc.views += r.data.total_views || 0;
+        acc.likes += r.data.total_likes || 0;
+        acc.inquiries += r.data.total_inquiries || 0;
+      }
+      return acc;
+    },
+    { views: 0, likes: 0, inquiries: 0 }
+  );
+
+  return { totals, isLoading };
 }

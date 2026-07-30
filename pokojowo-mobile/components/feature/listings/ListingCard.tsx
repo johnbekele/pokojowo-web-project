@@ -1,14 +1,14 @@
-import { View, Text, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Users, Maximize } from 'lucide-react-native';
 
 import type { Listing } from '@/types/listing.types';
 import { formatCurrency } from '@/lib/utils';
-import { COLORS } from '@/lib/constants';
-
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = width - 32;
+import { getImageUrl } from '@/lib/image';
+import useTheme from '@/hooks/useTheme';
+import ListingLikeButton from './ListingLikeButton';
 
 interface ListingCardProps {
   listing: Listing;
@@ -16,100 +16,82 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing }: ListingCardProps) {
   const { t, i18n } = useTranslation('listings');
+  const { colors } = useTheme();
 
   const description =
-    listing.description?.[i18n.language as 'en' | 'pl'] ||
-    listing.description?.en ||
-    '';
-
-  const imageUrl =
-    listing.images?.[0] ||
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400';
-
-  // Use id or _id (MongoDB returns _id)
-  const listingId = listing.id || listing._id;
+    listing.description?.[i18n.language as 'en' | 'pl'] || listing.description?.en || '';
+  const imageUrl = getImageUrl(listing.images?.[0]);
+  const listingId = listing.id || listing._id || '';
 
   return (
     <Link href={`/(app)/(home)/listing/${listingId}`} asChild>
       <TouchableOpacity
-        className="bg-white rounded-xl shadow-sm mx-4 mb-4 overflow-hidden"
-        style={{ width: CARD_WIDTH }}
+        className="bg-card border border-border rounded-2xl mx-4 mb-4 overflow-hidden"
         activeOpacity={0.9}
       >
-        {/* Image */}
         <View className="relative">
           <Image
             source={{ uri: imageUrl }}
-            className="w-full h-48"
-            resizeMode="cover"
+            style={{ width: '100%', height: 192 }}
+            contentFit="cover"
+            transition={200}
           />
-          {/* Price badge */}
-          <View className="absolute bottom-3 left-3 bg-white/95 px-3 py-1.5 rounded-lg">
-            <Text className="text-primary-600 font-bold text-lg">
+          <View className="absolute bottom-3 left-3 bg-black/60 px-3 py-1.5 rounded-lg">
+            <Text className="text-white font-bold text-lg">
               {formatCurrency(listing.price)}
-              <Text className="text-gray-500 font-normal text-sm">/mo</Text>
+              <Text className="text-white/80 font-normal text-sm">/mo</Text>
             </Text>
           </View>
-          {/* Room type badge */}
+
+          <View className="absolute top-3 right-3">
+            <ListingLikeButton
+              listingId={listingId}
+              size={22}
+              className="bg-black/40 rounded-full p-2"
+            />
+          </View>
+
           {listing.room_type && (
-            <View className="absolute top-3 right-3 bg-primary-600 px-2.5 py-1 rounded-full">
-              <Text className="text-white text-xs font-medium">
-                {listing.room_type}
-              </Text>
-            </View>
-          )}
-          {/* Offered-by badge */}
-          {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
-            <View className="absolute top-3 left-3 bg-white/95 px-2.5 py-1 rounded-full">
-              <Text className="text-gray-700 text-xs font-medium">
-                {listing.offeredBy === 'owner'
-                  ? t('card.privateOwner', 'Private owner')
-                  : t('card.agency', 'Agency')}
-              </Text>
+            <View className="absolute top-3 left-3 bg-brand px-2.5 py-1 rounded-full">
+              <Text className="text-brand-fg text-xs font-medium">{listing.room_type}</Text>
             </View>
           )}
         </View>
 
-        {/* Content */}
         <View className="p-4">
-          {/* Address */}
           <View className="flex-row items-center mb-2">
-            <MapPin size={16} color={COLORS.gray[500]} />
-            <Text className="text-gray-900 font-semibold ml-1.5 flex-1" numberOfLines={1}>
+            <MapPin size={16} color={colors.muted} />
+            <Text className="text-text font-semibold ml-1.5 flex-1" numberOfLines={1}>
               {[listing.district, listing.city].filter(Boolean).join(', ') || listing.address}
             </Text>
           </View>
 
-          {/* Description */}
-          {description && (
-            <Text className="text-gray-500 text-sm mb-3" numberOfLines={2}>
+          {description ? (
+            <Text className="text-muted text-sm mb-3" numberOfLines={2}>
               {description}
             </Text>
-          )}
+          ) : null}
 
-          {/* Meta info */}
           <View className="flex-row items-center gap-4">
-            {listing.size && (
+            {listing.size ? (
               <View className="flex-row items-center">
-                <Maximize size={14} color={COLORS.gray[400]} />
-                <Text className="text-gray-500 text-sm ml-1">
-                  {listing.size} m²
-                </Text>
+                <Maximize size={14} color={colors.muted} />
+                <Text className="text-muted text-sm ml-1">{listing.size} m²</Text>
               </View>
-            )}
-            {listing.max_tenants && (
+            ) : null}
+            {listing.max_tenants ? (
               <View className="flex-row items-center">
-                <Users size={14} color={COLORS.gray[400]} />
-                <Text className="text-gray-500 text-sm ml-1">
+                <Users size={14} color={colors.muted} />
+                <Text className="text-muted text-sm ml-1">
                   {t('card.maxTenants', 'Max {{count}}', { count: listing.max_tenants })}
                 </Text>
               </View>
-            )}
-            {listing.building_type && (
-              <Text className="text-gray-400 text-sm">
+            ) : null}
+            {listing.building_type ? (
+              <Text className="text-muted text-sm">
                 {listing.building_type.replace('_', ' ')}
               </Text>
-            )}
+            ) : null}
           </View>
         </View>
       </TouchableOpacity>

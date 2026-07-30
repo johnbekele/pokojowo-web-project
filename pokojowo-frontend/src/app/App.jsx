@@ -4,6 +4,7 @@ import AppRouter from './router';
 import useAuthStore from '@/stores/authStore';
 import { useNotificationListener } from '@/hooks/useNotificationListener';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
+import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
 
 /**
  * Main application component
@@ -22,6 +23,7 @@ function AppContent() {
   useEffect(() => {
     if (isAuthenticated && token) {
       connectSocket(token);
+      connectChatSocket(token);
     }
     return () => {
       // Cleanup on unmount only if logging out

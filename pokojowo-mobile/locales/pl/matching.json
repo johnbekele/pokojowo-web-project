@@ -54,7 +54,13 @@
     "overallMatch": "Ogólna zgodność",
     "about": "O mnie",
     "thingsToConsider": "Kwestie do rozważenia",
-    "unknown": "Nieznany"
+    "unknown": "Nieznany",
+    "livingStyle": "Jacy są na co dzień",
+    "whyYouMatch": "Dlaczego pasujecie",
+    "livingDetails": "Szczegóły mieszkania",
+    "interests": "Zainteresowania",
+    "seeAllDetails": "Zobacz wszystkie szczegóły",
+    "showLess": "Pokaż mniej"
   },
   "empty": {
     "title": "Brak dopasowań",
@@ -87,6 +93,10 @@
   "dashboard": {
     "welcome": "Witaj, {{name}}!",
     "overview": "Twoja aktywność dopasowań",
+    "likesReceived": "polubień",
+    "matches": "dopasowań",
+    "pending": "oczekujących",
+    "saved": "zapisanych",
     "pleaseLogin": "Zaloguj się",
     "loginRequired": "Musisz być zalogowany, aby zobaczyć panel.",
     "completeProfile": "Uzupełnij profil",
@@ -268,5 +278,98 @@
       "noneYours": "Nie podałeś/aś zainteresowań w profilu",
       "noneTheirs": "Kandydat nie podał zainteresowań"
     }
+  },
+  "living": {
+    "labels": {
+      "cleanliness": "Czystość",
+      "socialLevel": "Towarzyskość",
+      "guests": "Goście",
+      "noise": "Tolerancja hałasu",
+      "cooking": "Gotowanie",
+      "smoking": "Palenie",
+      "pets": "Zwierzęta",
+      "okWithSmoking": "Akceptuje palenie",
+      "budget": "Budżet",
+      "lease": "Długość najmu",
+      "preferredLocation": "Szuka w",
+      "sharedSpaces": "Chętnie dzieli",
+      "wakeUp": "Wstaje",
+      "sleepTime": "Kładzie się spać",
+      "household": "Gospodarstwo domowe"
+    },
+    "cleanliness": {
+      "very_clean": "Bardzo czysty",
+      "clean": "Czysty",
+      "moderate": "Umiarkowanie porządny",
+      "relaxed": "Swobodny wobec bałaganu",
+      "messy": "Bałaganiarz"
+    },
+    "socialLevel": {
+      "very_social": "Bardzo towarzyski",
+      "social": "Towarzyski",
+      "moderate": "Umiarkowanie towarzyski",
+      "quiet": "Trzyma się na uboczu",
+      "very_quiet": "Bardzo prywatny"
+    },
+    "guests": {
+      "often": "Często zaprasza gości",
+      "sometimes": "Czasem zaprasza gości",
+      "rarely": "Rzadko zaprasza gości",
+      "never": "Nie zaprasza gości"
+    },
+    "noise": {
+      "very_tolerant": "Bardzo toleruje hałas",
+      "tolerant": "Toleruje hałas",
+      "moderate": "Umiarkowany wobec hałasu",
+      "sensitive": "Wrażliwy na hałas",
+      "very_sensitive": "Bardzo wrażliwy na hałas"
+    },
+    "cooking": {
+      "daily": "Gotuje codziennie",
+      "often": "Często gotuje",
+      "sometimes": "Czasem gotuje",
+      "rarely": "Rzadko gotuje",
+      "never": "Nie gotuje"
+    },
+    "personality": {
+      "introvert": "Introwertyk",
+      "extrovert": "Ekstrawertyk",
+      "night_owl": "Nocny marek",
+      "early_bird": "Ranny ptaszek",
+      "neat": "Porządny",
+      "messy": "Bałaganiarz",
+      "quiet": "Cichy",
+      "talkative": "Rozmowny"
+    },
+    "lifestyle": {
+      "smoker": "Pali",
+      "nonSmoker": "Nie pali",
+      "hasPets": "Ma zwierzęta",
+      "noPets": "Bez zwierząt",
+      "okWithPets": "Lubi zwierzęta"
+    },
+    "sharedSpaces": {
+      "kitchen": "Kuchnia",
+      "bathroom": "Łazienka",
+      "living_room": "Salon",
+      "balcony": "Balkon"
+    },
+    "household": {
+      "partner": "Wprowadza się z partnerem",
+      "children": "Ma dzieci"
+    },
+    "budget": {
+      "upTo": "Do {{amount}}"
+    },
+    "lease": {
+      "months": "{{count}} mies."
+    }
+  },
+  "map": {
+    "someone": "Współlokator",
+    "compatibility": "{{score}}% zgodności",
+    "wantsToLiveIn": "Szuka w: {{area}}",
+    "budget": "Budżet do {{amount}}",
+    "dismissPin": "Zamknij"
   }
 }

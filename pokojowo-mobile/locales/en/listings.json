@@ -88,6 +88,7 @@
   },
   "card": {
     "perMonth": "/month",
+    "month": "mo",
     "available": "Available",
     "availableFrom": "Available from {{date}}",
     "viewDetails": "View Details",
@@ -176,5 +177,27 @@
     "agency": "Agency",
     "idVerifiedHost": "ID Verified host",
     "verifiedHost": "Verified host"
+  },
+  "map": {
+    "title": "Map search",
+    "showMap": "Show map",
+    "showList": "Show list",
+    "useMyLocation": "Use my location",
+    "locationDenied": "Location permission denied",
+    "locationFailed": "Could not get your location",
+    "zoomForPins": "Zoom in to see individual rooms",
+    "listingCount": "{{count}} rooms in view",
+    "listingCount_one": "1 room in view",
+    "listingCount_other": "{{count}} rooms in view",
+    "flatmateCount": "{{count}} flatmates looking here",
+    "flatmateCount_one": "1 flatmate looking here",
+    "flatmateCount_other": "{{count}} flatmates looking here",
+    "flatmatesNeedProfile": "Complete your tenant profile to see who else is looking here.",
+    "dismissPin": "Close",
+    "layers": {
+      "flats": "Flats",
+      "flatmates": "Flatmates",
+      "both": "Both"
+    }
   }
 }

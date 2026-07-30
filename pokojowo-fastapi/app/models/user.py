@@ -134,7 +134,15 @@ class BudgetModel(BaseModel):
 
 
 class PreferencesModel(BaseModel):
+    # Where the tenant wants to live. Free text for legacy profiles; newer
+    # clients send a canonical city name plus `districts`.
     location: Optional[str] = None
+    districts: List[str] = []
+    # Geocoded centre of the preferred area, so matches can be drawn on the
+    # map. GeoJSON Point [lng, lat] — see app.core.geo. This is an area the
+    # tenant is searching in, never their home address.
+    location_geo: Optional[dict] = Field(None, alias="locationGeo")
+    geo_precision: Optional[str] = Field(None, alias="geoPrecision")
     gender: Optional[GenderEnum] = None
     age_range: Optional[List[int]] = Field(None, alias="ageRange")
     country: Optional[str] = None

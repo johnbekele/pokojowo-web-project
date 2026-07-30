@@ -12,6 +12,20 @@ interface Toast {
   duration?: number;
 }
 
+export interface ConfirmOptions {
+  title?: string;
+  message?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  destructive?: boolean;
+}
+
+interface ConfirmState {
+  visible: boolean;
+  options: ConfirmOptions;
+  resolve?: (value: boolean) => void;
+}
+
 interface UIState {
   // Modal state
   activeModal: string | null;
@@ -22,7 +36,13 @@ interface UIState {
   // Toast notifications
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
+  showToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: number) => void;
+
+  // Confirm / alert dialog
+  confirmState: ConfirmState;
+  confirm: (options: ConfirmOptions) => Promise<boolean>;
+  resolveConfirm: (value: boolean) => void;
 
   // Loading overlay
   isGlobalLoading: boolean;
@@ -32,6 +52,10 @@ interface UIState {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
+
+  // First-run welcome (persisted)
+  hasSeenWelcome: boolean;
+  setSeenWelcome: () => void;
 
   // Bottom sheet state (for mobile)
   activeSheet: string | null;
@@ -50,7 +74,7 @@ interface UIState {
 
 const useUIStore = create<UIState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Modal state
       activeModal: null,
       modalData: null,
@@ -64,16 +88,29 @@ const useUIStore = create<UIState>()(
           toasts: [
             ...state.toasts,
             {
-              id: Date.now(),
+              id: Date.now() + Math.floor(Math.random() * 1000),
               duration: 3000,
               ...toast,
             },
-          ],
+          ].slice(-2), // cap visible toasts at 2
         })),
+      showToast: (toast) => get().addToast(toast),
       removeToast: (id) =>
         set((state) => ({
           toasts: state.toasts.filter((t) => t.id !== id),
         })),
+
+      // Confirm / alert dialog
+      confirmState: { visible: false, options: {} },
+      confirm: (options) =>
+        new Promise<boolean>((resolve) => {
+          set({ confirmState: { visible: true, options, resolve } });
+        }),
+      resolveConfirm: (value) => {
+        const { confirmState } = get();
+        confirmState.resolve?.(value);
+        set({ confirmState: { visible: false, options: {} } });
+      },
 
       // Loading overlay
       isGlobalLoading: false,
@@ -86,6 +123,10 @@ const useUIStore = create<UIState>()(
         set((state) => ({
           theme: state.theme === 'dark' ? 'light' : 'dark',
         })),
+
+      // First-run welcome
+      hasSeenWelcome: false,
+      setSeenWelcome: () => set({ hasSeenWelcome: true }),
 
       // Bottom sheet state
       activeSheet: null,
@@ -104,8 +145,8 @@ const useUIStore = create<UIState>()(
     {
       name: 'pokojowo-ui',
       storage: createJSONStorage(() => AsyncStorage),
-      // Only persist the user's theme preference.
-      partialize: (state) => ({ theme: state.theme }),
+      // Persist the user's theme preference and first-run flag.
+      partialize: (state) => ({ theme: state.theme, hasSeenWelcome: state.hasSeenWelcome }),
     }
   )
 );

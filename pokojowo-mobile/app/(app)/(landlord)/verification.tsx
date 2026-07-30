@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,8 @@ import { ArrowLeft, BadgeCheck, Clock, Upload, XCircle } from 'lucide-react-nati
 
 import { Button } from '@/components/ui';
 import api from '@/lib/api';
-import { COLORS } from '@/lib/constants';
+import useUIStore from '@/stores/uiStore';
+import useTheme from '@/hooks/useTheme';
 
 const DOC_TYPES = ['id_card', 'ownership_deed', 'utility_bill', 'business_registration'] as const;
 
@@ -22,6 +23,8 @@ const STATUS_ICONS: Record<string, React.ReactElement> = {
 export default function LandlordVerificationScreen() {
   const { t } = useTranslation('profile');
   const router = useRouter();
+  const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
   const queryClient = useQueryClient();
   const [docType, setDocType] = useState<(typeof DOC_TYPES)[number]>('id_card');
 
@@ -44,14 +47,14 @@ export default function LandlordVerificationScreen() {
       })).data;
     },
     onSuccess: () => {
-      Alert.alert(t('verification.submitted', 'Document submitted for review'));
+      showToast({ type: 'success', message: t('verification.submitted', 'Document submitted for review') });
       queryClient.invalidateQueries({ queryKey: ['landlord', 'verification-status'] });
     },
     onError: (error: any) => {
-      Alert.alert(
-        t('verification.uploadFailed', 'Upload failed'),
-        error?.response?.data?.detail || ''
-      );
+      showToast({
+        type: 'error',
+        message: error?.response?.data?.detail || t('verification.uploadFailed', 'Upload failed'),
+      });
     },
   });
 
@@ -68,12 +71,12 @@ export default function LandlordVerificationScreen() {
   const documents = status?.documents || [];
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
+    <SafeAreaView className="flex-1 bg-bg">
+      <View className="flex-row items-center px-4 py-3 border-b border-border">
         <TouchableOpacity onPress={() => router.back()} className="p-1 mr-2">
-          <ArrowLeft size={22} color={COLORS.gray[600]} />
+          <ArrowLeft size={22} color={colors.muted} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">
+        <Text className="text-xl font-bold text-text">
           {status?.isVerifiedLandlord
             ? t('verification.verifiedTitle', 'ID Verified landlord')
             : t('verification.title', 'Landlord verification')}
@@ -81,7 +84,7 @@ export default function LandlordVerificationScreen() {
       </View>
 
       <ScrollView className="flex-1 px-4 pt-6" contentContainerStyle={{ paddingBottom: 40 }}>
-        <Text className="text-gray-500 mb-5">
+        <Text className="text-muted mb-5">
           {t('verification.subtitle', 'Upload an ID and proof of ownership. An admin reviews your documents; verified landlords get a distinct badge on their listings.')}
         </Text>
 
@@ -90,10 +93,10 @@ export default function LandlordVerificationScreen() {
             {documents.map((doc: any) => (
               <View key={doc.id} className="flex-row items-center gap-2">
                 {STATUS_ICONS[doc.status]}
-                <Text className="font-medium text-gray-800">
+                <Text className="font-medium text-text">
                   {t(`verification.docTypes.${doc.type}`, { defaultValue: doc.type })}
                 </Text>
-                <Text className="text-gray-500 text-sm flex-1">
+                <Text className="text-muted text-sm flex-1">
                   — {t(`verification.status.${doc.status}`, { defaultValue: doc.status })}
                   {doc.status === 'rejected' && doc.rejectionReason ? `: ${doc.rejectionReason}` : ''}
                 </Text>
@@ -104,7 +107,7 @@ export default function LandlordVerificationScreen() {
 
         {!status?.isVerifiedLandlord && (
           <>
-            <Text className="text-gray-700 font-medium mb-2">
+            <Text className="text-text font-medium mb-2">
               {t('verification.selectType', 'Document type')}
             </Text>
             <View className="flex-row flex-wrap gap-2 mb-5">
@@ -113,10 +116,10 @@ export default function LandlordVerificationScreen() {
                   key={type}
                   onPress={() => setDocType(type)}
                   className={`px-4 py-2.5 rounded-lg border ${
-                    docType === type ? 'bg-primary-600 border-primary-600' : 'bg-white border-gray-200'
+                    docType === type ? 'bg-brand border-brand' : 'bg-card border-border'
                   }`}
                 >
-                  <Text className={docType === type ? 'text-white font-medium' : 'text-gray-700'}>
+                  <Text className={docType === type ? 'text-white font-medium' : 'text-text'}>
                     {t(`verification.docTypes.${type}`, { defaultValue: type })}
                   </Text>
                 </TouchableOpacity>

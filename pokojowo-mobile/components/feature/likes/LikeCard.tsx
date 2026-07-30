@@ -22,7 +22,9 @@ export default function LikeCard({ like, match, type, onLikeBack }: LikeCardProp
   const { mutate: likeUser, isPending: isLiking } = useLikeUser();
 
   const user = like?.user || match?.user;
-  const userId = type === 'received' ? like?.liker_id : (like?.liked_user_id || match?.user_id);
+  const matchedUserId =
+    match?.matched_user_id || match?.user_id || (match?.user as { id?: string } | undefined)?.id;
+  const userId = type === 'received' ? like?.liker_id : (like?.liked_user_id || matchedUserId);
   const compatibilityScore = like?.compatibility_score || match?.compatibility_score;
   const timestamp = like?.created_at || match?.matched_at;
   const isPending = like?.status === 'pending';

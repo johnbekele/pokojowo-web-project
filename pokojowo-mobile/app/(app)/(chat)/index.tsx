@@ -8,11 +8,12 @@ import { ChatListItem } from '@/components/feature/chat';
 import { LoadingSpinner, EmptyState } from '@/components/ui';
 import { useChats } from '@/hooks/chat/useChat';
 import type { ChatListItem as ChatListItemType } from '@/types/chat.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 export default function ChatListScreen() {
   const { t } = useTranslation('chat');
   const router = useRouter();
+  const { colors } = useTheme();
 
   const { data: chats, isLoading, isRefetching, refetch } = useChats();
 
@@ -29,17 +30,17 @@ export default function ChatListScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
         <LoadingSpinner fullScreen text={t('loading', 'Loading conversations...')} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       {/* Header */}
-      <View className="px-4 py-3 border-b border-gray-100">
-        <Text className="text-2xl font-bold text-gray-900">
+      <View className="px-4 py-3 border-b border-border">
+        <Text className="text-2xl font-bold text-text">
           {t('title', 'Messages')}
         </Text>
       </View>
@@ -51,19 +52,19 @@ export default function ChatListScreen() {
           renderItem={renderItem}
           keyExtractor={(item, index) => item._id || `chat-${index}`}
           ItemSeparatorComponent={() => (
-            <View className="h-px bg-gray-100 ml-20" />
+            <View className="h-px bg-border ml-20" />
           )}
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor={COLORS.primary[600]}
+              tintColor={colors.brand}
             />
           }
         />
       ) : (
         <EmptyState
-          icon={<MessageSquare size={48} color={COLORS.gray[400]} />}
+          icon={<MessageSquare size={48} color={colors.muted} />}
           title={t('empty.title', 'No conversations yet')}
           description={t('empty.description', 'Start chatting by matching with flatmates')}
           action={{

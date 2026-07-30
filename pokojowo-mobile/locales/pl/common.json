@@ -16,6 +16,22 @@
     "likes": "Polubienia",
     "settings": "Ustawienia"
   },
+  "tabs": {
+    "home": "Start",
+    "flatmates": "Współlokatorzy",
+    "chat": "Wiadomości",
+    "profile": "Profil"
+  },
+  "share": {
+    "title": "Udostępnij",
+    "email": "E-mail",
+    "sms": "Wiadomości",
+    "copyLink": "Kopiuj link",
+    "more": "Więcej",
+    "copied": "Link skopiowany do schowka",
+    "appNotInstalled": "Ta aplikacja nie jest zainstalowana",
+    "failed": "Nie udało się udostępnić"
+  },
   "actions": {
     "save": "Zapisz",
     "cancel": "Anuluj",
@@ -81,9 +97,15 @@
     "markAllRead": "Oznacz jako przeczytane",
     "clear": "Wyczyść wszystko",
     "empty": "Brak powiadomień",
+    "emptyDescription": "Polubienia, dopasowania i wiadomości pojawią się tutaj",
+    "loadError": "Nie udało się załadować powiadomień",
+    "delete": "Usuń",
     "newMessage": "Nowa wiadomość",
     "newMatch": "Nowe dopasowanie",
-    "newLike": "Ktoś Cię polubił",
+    "newLike": "Ktoś jest zainteresowany!",
+    "mutualMatch": "Macie połączenie!",
+    "savedSearchMatch": "Nowe ogłoszenie pasuje do wyszukiwania",
+    "system": "Powiadomienie",
     "settings": "Ustawienia powiadomień",
     "push": "Powiadomienia push",
     "email": "Powiadomienia e-mail"
@@ -134,17 +156,19 @@
     "about": "O aplikacji"
   },
   "welcome": {
+    "getStarted": "Zaczynajmy",
+    "haveAccount": "Mam już konto",
     "slide1": {
       "title": "Znajdź Idealnego Współlokatora",
-      "description": "Nasz algorytm dopasowuje współlokatorów na podstawie Twojego stylu życia i preferencji"
+      "description": "Inteligentne dopasowanie łączy Cię ze zgodnymi współlokatorami na podstawie stylu życia, nawyków i budżetu."
     },
     "slide2": {
       "title": "Odkryj Świetne Pokoje",
-      "description": "Przeglądaj zweryfikowane ogłoszenia i znajdź idealne miejsce do życia"
+      "description": "Przeglądaj zweryfikowane ogłoszenia ze zdjęciami, cenami i lokalizacjami, aby znaleźć wymarzone miejsce."
     },
     "slide3": {
       "title": "Połącz się i Rozmawiaj",
-      "description": "Czatuj z dopasowaniami i właścicielami, aby znaleźć idealną sytuację mieszkaniową"
+      "description": "Pisz z dopasowaniami i właścicielami w czasie rzeczywistym, aby znaleźć idealne mieszkanie."
     }
   }
 }

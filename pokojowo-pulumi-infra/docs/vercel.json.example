@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/chat/:path*",
+      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/api/chat/:path*"
+    },
+    {
+      "source": "/api/messages/:path*",
+      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/api/messages/:path*"
+    },
+    {
+      "source": "/chat-socket.io/:path*",
+      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/chat-socket.io/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/api/:path*"
+    }
+  ]
+}

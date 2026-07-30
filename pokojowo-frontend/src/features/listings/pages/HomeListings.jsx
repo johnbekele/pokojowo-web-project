@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import {
   Search,
   MapPin,
+  Map as MapIcon,
+  List,
   Home,
   Bed,
   Users,
@@ -33,10 +35,12 @@ import {
   MediaFrame,
 } from "@/components/shared/editorial";
 import SearchFilters from "../components/SearchFilters";
+import MapSearchView from "../components/MapSearchView";
 import SaveSearchDialog from "../components/SaveSearchDialog";
 import InterestedUsersPreview from "../components/InterestedUsersPreview";
 import ListingLikeButton from "../components/ListingLikeButton";
 import api, { normalizeError } from "@/lib/api";
+import { listingParams, MAX_PRICE, MAX_SIZE } from "@/lib/listingQuery";
 import { formatCurrency, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/useToast";
 import useListingInteractionStore from "@/stores/listingInteractionStore";
@@ -57,9 +61,6 @@ const DEFAULT_FILTERS = {
   districts: [],
   offeredBy: null,
 };
-
-const MAX_PRICE = 10000;
-const MAX_SIZE = 200;
 
 // True when the user has set anything worth saving — mirrors the active-count
 // logic in SearchFilters, plus the free-text search box.
@@ -118,6 +119,21 @@ export default function HomeListings() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
+
+  // View lives in the URL so a map search can be shared or reloaded, and so
+  // filters/sort/saved searches stay shared between both views.
+  const isMapView = searchParams.get("view") === "map";
+  const setView = (view) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (view === "map") next.set("view", "map");
+        else next.delete("view");
+        return next;
+      },
+      { replace: true },
+    );
+  };
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } =
     useListingInteractionStore();
 
@@ -164,23 +180,12 @@ export default function HomeListings() {
   const { data: rawListings, isLoading, error, refetch } = useQuery({
     queryKey: ["listings", debouncedSearch, sortBy, filters],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (debouncedSearch) params.append("search", debouncedSearch);
-      params.append("sort", sortBy);
-      if (filters.minPrice > 0) params.append("min_price", filters.minPrice);
-      if (filters.maxPrice < 10000) params.append("max_price", filters.maxPrice);
-      if (filters.minSize > 0) params.append("min_size", filters.minSize);
-      if (filters.maxSize < 200) params.append("max_size", filters.maxSize);
-      filters.roomTypes?.forEach((v) => params.append("room_type", v));
-      filters.buildingTypes?.forEach((v) => params.append("building_type", v));
-      filters.rentFor?.forEach((v) => params.append("rent_for", v));
-      if (filters.maxTenants) params.append("max_tenants", filters.maxTenants);
-      if (filters.city) params.append("city", filters.city);
-      filters.districts?.forEach((v) => params.append("district", v));
-      if (filters.offeredBy) params.append("offered_by", filters.offeredBy);
+      const params = listingParams({ search: debouncedSearch, sort: sortBy, filters });
       const response = await api.get(`/listings/?${params.toString()}`);
       return response.data;
     },
+    // Map view fetches its own area-scoped results.
+    enabled: !isMapView,
   });
 
   const listings = useMemo(() => {
@@ -226,6 +231,34 @@ export default function HomeListings() {
             />
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <div className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface-canvas p-1">
+              <button
+                type="button"
+                onClick={() => setView("list")}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                  !isMapView
+                    ? "bg-foreground text-background"
+                    : "text-foreground/70 hover:text-foreground",
+                )}
+              >
+                <List className="h-3.5 w-3.5" />
+                {t("view.list", "List")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("map")}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                  isMapView
+                    ? "bg-foreground text-background"
+                    : "text-foreground/70 hover:text-foreground",
+                )}
+              >
+                <MapIcon className="h-3.5 w-3.5" />
+                {t("view.map", "Map")}
+              </button>
+            </div>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="h-11 min-w-[170px] rounded-full border-border/70 bg-surface-canvas px-5 text-sm">
                 <SelectValue placeholder={t("search.sort")} />
@@ -279,6 +312,35 @@ export default function HomeListings() {
         </div>
       </EditorialSection>
 
+      {isMapView ? (
+        <EditorialSection>
+          <MapSearchView search={debouncedSearch} sort={sortBy} filters={filters} />
+        </EditorialSection>
+      ) : (
+        <ListingsGrid
+          isLoading={isLoading}
+          error={error}
+          listings={listings}
+          refetch={refetch}
+          getInterestedUsers={getInterestedUsers}
+        />
+      )}
+
+      <SaveSearchDialog
+        open={showSaveDialog}
+        onOpenChange={setShowSaveDialog}
+        filters={filters}
+        search={searchQuery}
+      />
+    </div>
+  );
+}
+
+function ListingsGrid({ isLoading, error, listings, refetch, getInterestedUsers }) {
+  const { t } = useTranslation("listings");
+
+  return (
+    <>
       <EditorialRule
         label={
           isLoading
@@ -340,14 +402,7 @@ export default function HomeListings() {
           </div>
         )}
       </EditorialSection>
-
-      <SaveSearchDialog
-        open={showSaveDialog}
-        onOpenChange={setShowSaveDialog}
-        filters={filters}
-        search={searchQuery}
-      />
-    </div>
+    </>
   );
 }
 

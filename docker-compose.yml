@@ -7,12 +7,14 @@ services:
       dockerfile: Dockerfile.dev
     container_name: pokojowo-backend
     ports:
-      - "3000:3000"
+      - "8000:8000"
     environment:
       - DEBUG=True
-      - CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:5175,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:5175,http://frontend:5173
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000
+      - INTERNAL_API_KEY=dev-internal-key
+      - CHAT_SERVICE_URL=http://chat:8002
     env_file:
-      - ./pokojowo-fastapi/.env
+      - ./pokojowo-fastapi/.env.local
     volumes:
       # Mount source code for hot reload
       - ./pokojowo-fastapi:/app
@@ -24,7 +26,40 @@ services:
       - pokojowo-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Chat Microservice
+  chat:
+    build:
+      context: ./pokojowo-chat
+      dockerfile: Dockerfile.dev
+    container_name: pokojowo-chat
+    ports:
+      - "8002:8002"
+    environment:
+      - DEBUG=True
+      - PORT=8002
+      - DATABASE_NAME=pokojowo_chat
+      - MAIN_API_URL=http://backend:8000
+      - INTERNAL_API_KEY=dev-internal-key
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000
+    env_file:
+      - ./pokojowo-fastapi/.env.local
+    volumes:
+      - ./pokojowo-chat:/app
+      - /app/__pycache__
+    networks:
+      - pokojowo-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,12 +72,14 @@ services:
       dockerfile: Dockerfile
     container_name: pokojowo-frontend
     ports:
-      - "5175:5173"
+      - "3000:3000"
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://localhost:3000
-      - VITE_API_BASE_URL=http://localhost:3000/api
-      - VITE_SOCKET_URL=http://localhost:3000
+      - VITE_API_URL=http://localhost:8000/api
+      - VITE_API_BASE_URL=http://localhost:8000/api
+      - VITE_SOCKET_URL=http://localhost:8000
+      - VITE_CHAT_API_URL=http://localhost:8002/api
+      - VITE_CHAT_SOCKET_URL=http://localhost:8002
     env_file:
       - ./pokojowo-frontend/.env.development
     volumes:
@@ -54,6 +91,8 @@ services:
       - pokojowo-network
     depends_on:
       backend:
+        condition: service_healthy
+      chat:
         condition: service_healthy
     restart: unless-stopped
     stdin_open: true

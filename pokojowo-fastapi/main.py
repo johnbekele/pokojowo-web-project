@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 import socketio
 import logging
 from datetime import datetime
-from pathlib import Path
 
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
@@ -50,10 +48,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files (uploads)
-uploads_dir = Path("uploads")
-uploads_dir.mkdir(exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+# NOTE: /uploads/* is no longer served by FastAPI. Public uploads live in
+# S3 (`{bucket}/uploads/...`) and are served by CloudFront's ordered cache
+# behavior for `/uploads/*` — see pokojowo-pulumi-infra/__main__.py.
 
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -90,8 +87,6 @@ async def root():
             "users": f"{settings.API_V1_STR}/users",
             "listings": f"{settings.API_V1_STR}/listings",
             "profile": f"{settings.API_V1_STR}/profile",
-            "messages": f"{settings.API_V1_STR}/messages",
-            "chat": f"{settings.API_V1_STR}/chat",
             "upload": f"{settings.API_V1_STR}/upload",
             "matching": f"{settings.API_V1_STR}/matching",
             "admin": f"{settings.API_V1_STR}/admin",

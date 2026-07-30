@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query, Background
 from typing import Optional, List
 from app.models.user import User, RoleEnum
 from app.core.dependencies import get_current_user, require_verified
+from app.core.geo import coords_from_geo, parse_bbox, point_in_bbox, scatter_point
 from app.services.matching_service import matching_service
 from app.services import matching_cache
 from app.services.notification_service import notification_service
@@ -167,6 +168,90 @@ async def get_matches(
     )
 
     return results
+
+
+@router.get("/map", response_model=dict)
+async def get_matches_map(
+    bbox: str = Query(..., description="Visible area as 'swLng,swLat,neLng,neLat'"),
+    min_score: float = Query(
+        0, ge=0, le=100, alias="minScore", description="Minimum compatibility score"
+    ),
+    limit: int = Query(200, ge=1, le=500, description="Maximum pins to return"),
+    current_user: User = Depends(require_verified)
+):
+    """Flatmates whose preferred area falls inside the visible map region.
+
+    Each pin marks where someone *wants* to live, not where they live now — it
+    comes from their search preferences, geocoded to the centre of that city or
+    district. Because many tenants pick the same district, pins are scattered
+    deterministically within a few hundred metres so they don't stack into one
+    unclickable dot.
+
+    Reads the same cached scored matches as the swipe deck, so it adds no
+    scoring work — and, like the deck, covers your top matches rather than
+    every tenant on the platform.
+    """
+    if not current_user.has_role(RoleEnum.TENANT) and not current_user.has_role(RoleEnum.USER):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only tenants can access matching"
+        )
+
+    if not current_user.is_profile_complete:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please complete your profile before viewing matches"
+        )
+
+    box = parse_bbox(bbox)
+    results = await get_scored_matches(current_user)
+
+    pins = []
+    with_area = 0
+    for match in results["matches"]:
+        if match["compatibility_score"] < min_score:
+            continue
+
+        living = match.get("living_profile") or {}
+        coords = coords_from_geo(living.get("preferred_location_geo"))
+        if not coords:
+            continue
+
+        with_area += 1
+        lng, lat = scatter_point(coords[0], coords[1], seed=match["user_id"])
+        if not point_in_bbox(box, lng, lat):
+            continue
+
+        budget = living.get("budget") or {}
+        pins.append({
+            "userId": match["user_id"],
+            "lat": lat,
+            "lng": lng,
+            "score": match["compatibility_score"],
+            "tier": match.get("match_tier"),
+            "photo": match.get("photo"),
+            "firstname": match.get("firstname"),
+            "age": match.get("age"),
+            "preferredLocation": living.get("preferred_location"),
+            "preferredDistricts": living.get("preferred_districts") or [],
+            "budget": {
+                "min": budget.get("min"),
+                "max": budget.get("max"),
+                "currency": budget.get("currency"),
+            } if budget else None,
+        })
+
+    pins.sort(key=lambda p: -p["score"])
+
+    return {
+        "pins": pins[:limit],
+        "total": min(len(pins), limit),
+        # How many of your matches have set a preferred area at all — lets the
+        # client explain an empty map ("no matches have shared an area yet")
+        # instead of implying nobody is looking here.
+        "totalWithArea": with_area,
+        "totalMatches": len(results["matches"]),
+    }
 
 
 @router.get("/user/{user_id}", response_model=dict)

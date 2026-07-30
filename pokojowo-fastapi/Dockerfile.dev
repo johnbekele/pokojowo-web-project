@@ -14,7 +14,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
+    libmagic1 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# Install corporate (Zscaler / Thomson Reuters) root+intermediate CAs into the
+# system trust store so outbound HTTPS through the TLS-inspecting proxy verifies.
+COPY certs/corporate-ca.crt /usr/local/share/ca-certificates/corporate-ca.crt
+RUN update-ca-certificates
 
 # Copy requirements
 COPY requirements.txt .
@@ -23,6 +30,14 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
+# httpx/requests use certifi's bundle, not the system store, so append the
+# corporate root CA there as well.
+RUN cat /usr/local/share/ca-certificates/corporate-ca.crt >> "$(python -c 'import certifi; print(certifi.where())')"
+
+# Point Python's default SSL context and requests at the system bundle too.
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
+    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
 # Copy application code
 COPY . .
 
@@ -30,7 +45,7 @@ COPY . .
 RUN mkdir -p uploads/photo uploads/listing
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8000
 
 # Run with reload for development
-CMD ["uvicorn", "main:socket_app", "--host", "0.0.0.0", "--port", "3000", "--reload"]
+CMD ["uvicorn", "main:socket_app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

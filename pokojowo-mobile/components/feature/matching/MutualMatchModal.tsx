@@ -4,7 +4,7 @@ import { Heart, MessageSquare } from 'lucide-react-native';
 
 import { Modal, Button, Avatar } from '@/components/ui';
 import type { User } from '@/types/user.types';
-import { COLORS } from '@/lib/constants';
+import { palette } from '@/lib/theme';
 
 interface MutualMatchModalProps {
   visible: boolean;
@@ -56,15 +56,15 @@ export default function MutualMatchModal({
         {/* Celebration animation */}
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
           <View className="relative mb-6">
-            <View className="w-24 h-24 rounded-full bg-primary-600 items-center justify-center">
+            <View className="w-24 h-24 rounded-full bg-brand items-center justify-center">
               <Heart size={48} color="white" fill="white" />
             </View>
             {/* Floating hearts */}
             <View className="absolute -top-2 -right-2">
-              <Heart size={24} color={COLORS.primary[400]} fill={COLORS.primary[400]} />
+              <Heart size={24} color={palette.primary[400]} fill={palette.primary[400]} />
             </View>
             <View className="absolute -bottom-1 -left-3">
-              <Heart size={20} color={COLORS.primary[300]} fill={COLORS.primary[300]} />
+              <Heart size={20} color={palette.primary[300]} fill={palette.primary[300]} />
             </View>
           </View>
         </Animated.View>
@@ -72,14 +72,14 @@ export default function MutualMatchModal({
         {/* Title */}
         <Animated.Text
           style={{ opacity: fadeAnim }}
-          className="text-2xl font-bold text-gray-900 mb-2"
+          className="text-2xl font-bold text-text mb-2"
         >
           It's a Match!
         </Animated.Text>
 
         <Animated.Text
           style={{ opacity: fadeAnim }}
-          className="text-gray-500 text-center mb-6"
+          className="text-muted text-center mb-6"
         >
           You and {user.firstname || user.username} liked each other
         </Animated.Text>
@@ -91,7 +91,7 @@ export default function MutualMatchModal({
             name={user.firstname || user.username || ''}
             size="xl"
           />
-          <Text className="text-center mt-2 text-lg font-semibold text-gray-900">
+          <Text className="text-center mt-2 text-lg font-semibold text-text">
             {user.firstname || user.username}
           </Text>
         </Animated.View>

@@ -282,5 +282,11 @@
       "noneYours": "No interests specified in your profile",
       "noneTheirs": "They have no interests listed"
     }
+  },
+  "map": {
+    "someone": "A flatmate",
+    "compatibility": "{{score}}% match",
+    "wantsToLiveIn": "Looking in {{area}}",
+    "budget": "Budget up to {{amount}}"
   }
 }

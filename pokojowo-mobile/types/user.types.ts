@@ -14,8 +14,11 @@ export interface User {
   trustScore?: number;
   trustLevel?: 'unverified' | 'verified' | 'id_verified';
   isVerified?: boolean;
+  /** Server-computed from the tenant profile; gates matching features. */
+  isProfileComplete?: boolean;
   gender?: 'male' | 'female' | 'other';
   bio?: string;
+  job?: UserJob;
   languages?: string[];
   preferred_language?: string;
   role?: string[];
@@ -29,6 +32,11 @@ export interface User {
   is_online?: boolean;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface UserJob {
+  industry?: string | null;
+  title?: string | null;
 }
 
 export interface TenantProfile {

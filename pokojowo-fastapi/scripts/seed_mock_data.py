@@ -21,11 +21,9 @@ from beanie import init_beanie
 from passlib.context import CryptContext
 
 from app.core.config import settings
-from app.models.chat import Chat
 from app.models.like import Like, LikeStatusEnum
 from app.models.listing import BuildingTypeEnum, Listing, RentForEnum, RoomTypeEnum
 from app.models.listing_interaction import ListingInteraction
-from app.models.message import Message
 from app.models.mutual_match import MatchStatusEnum, MutualMatch
 from app.models.notification import Notification
 from app.models.saved_match import SavedMatch
@@ -88,8 +86,6 @@ async def setup_database() -> AsyncIOMotorClient:
         document_models=[
             User,
             Listing,
-            Message,
-            Chat,
             SavedMatch,
             Like,
             MutualMatch,
@@ -269,7 +265,9 @@ async def seed_listings(owner: User) -> list[Listing]:
 
     listings_data = [
         {
-            "address": "Mokotow, Warsaw - bright room near metro",
+            "address": "Racławicka 99, Warszawa",
+            "city": "Warszawa",
+            "district": "Mokotów",
             "price": 2450,
             "size": 18,
             "max_tenants": 1,
@@ -285,7 +283,9 @@ async def seed_listings(owner: User) -> list[Listing]:
             "close_to": ["Metro Raclawicka", "SGH", "Pole Mokotowskie"],
         },
         {
-            "address": "Praga Polnoc, Warsaw - loft style room",
+            "address": "Ząbkowska 21, Warszawa",
+            "city": "Warszawa",
+            "district": "Praga-Północ",
             "price": 2100,
             "size": 22,
             "max_tenants": 1,
@@ -301,7 +301,9 @@ async def seed_listings(owner: User) -> list[Listing]:
             "close_to": ["Dworzec Wilenski", "Praga Koneser", "Tram stop"],
         },
         {
-            "address": "Kazimierz, Krakow - cozy student room",
+            "address": "Józefa 12, Kraków",
+            "city": "Kraków",
+            "district": "Stare Miasto",
             "price": 1850,
             "size": 15,
             "max_tenants": 1,
@@ -317,7 +319,9 @@ async def seed_listings(owner: User) -> list[Listing]:
             "close_to": ["Kazimierz", "UJ", "Vistula boulevards"],
         },
         {
-            "address": "Nadodrze, Wroclaw - calm room with balcony",
+            "address": "Jedności Narodowej 80, Wrocław",
+            "city": "Wrocław",
+            "district": "Śródmieście",
             "price": 1950,
             "size": 17,
             "max_tenants": 1,

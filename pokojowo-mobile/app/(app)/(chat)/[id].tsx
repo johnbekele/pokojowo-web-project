@@ -13,19 +13,34 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Send, X } from 'lucide-react-native';
 
+import { useQueryClient } from '@tanstack/react-query';
+
 import { MessageBubble } from '@/components/feature/chat';
 import { Avatar, LoadingSpinner } from '@/components/ui';
-import { useChat, useMessages, useSendMessage, useDeleteMessage } from '@/hooks/chat/useChat';
+import {
+  useChat,
+  useMessages,
+  useSendMessage,
+  useDeleteMessage,
+  CHAT_KEYS,
+} from '@/hooks/chat/useChat';
 import useAuthStore from '@/stores/authStore';
-import { getSocket, connectSocket } from '@/lib/socket';
+import {
+  getChatSocket,
+  connectChatSocket,
+  joinChatRoom,
+  leaveChatRoom,
+} from '@/lib/chatSocket';
 import type { Message } from '@/types/chat.types';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 export default function ChatRoomScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation('chat');
+  const { colors } = useTheme();
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const [messageText, setMessageText] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -43,62 +58,86 @@ export default function ChatRoomScreen() {
   const otherUser = chat?.otherUser;
   const currentUserId = user?.id;
 
-  // Socket connection for real-time
+  // Real-time: join the chat room and subscribe to socket events. Event names
+  // and payload shapes are aligned with the backend (see app/core/socket.py):
+  // new_message/typing/message_deleted all key off `chatId`.
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket?.connected) {
-      connectSocket(useAuthStore.getState().token || '');
-    }
+    if (!id) return;
+    let cancelled = false;
 
-    if (socket && id) {
-      socket.emit('join_room', id);
+    const handleNewMessage = ({ chatId }: { chatId: string; message: Message }) => {
+      if (chatId === id) {
+        refetch();
+        queryClient.invalidateQueries({ queryKey: CHAT_KEYS.list });
+      }
+    };
+    const handleTyping = ({ chatId, userId }: { chatId: string; userId: string }) => {
+      if (chatId === id && userId !== currentUserId) {
+        setOtherUserTyping(true);
+        setTimeout(() => setOtherUserTyping(false), 3000);
+      }
+    };
+    const handleDeleted = ({ chatId }: { chatId: string }) => {
+      if (chatId === id) refetch();
+    };
 
-      socket.on('new_message', (message: Message) => {
-        if (message.roomId === id) {
-          refetch();
-        }
-      });
+    const setup = async () => {
+      let socket = getChatSocket();
+      if (!socket?.connected) {
+        socket = await connectChatSocket(useAuthStore.getState().token || '');
+      }
+      if (cancelled || !socket) return;
 
-      socket.on('typing', ({ roomId, userId }: { roomId: string; userId: string }) => {
-        if (roomId === id && userId !== currentUserId) {
-          setOtherUserTyping(true);
-          setTimeout(() => setOtherUserTyping(false), 3000);
-        }
-      });
+      joinChatRoom(id);
+      socket.on('new_message', handleNewMessage);
+      socket.on('typing', handleTyping);
+      socket.on('message_deleted', handleDeleted);
+    };
+    setup();
 
-      socket.on('message_deleted', ({ roomId }: { roomId: string }) => {
-        if (roomId === id) {
-          refetch();
-        }
-      });
-
-      return () => {
-        socket.emit('leave_room', id);
-        socket.off('new_message');
-        socket.off('typing');
-        socket.off('message_deleted');
-      };
-    }
-  }, [id, currentUserId, refetch]);
+    return () => {
+      cancelled = true;
+      const socket = getChatSocket();
+      leaveChatRoom(id);
+      socket?.off('new_message', handleNewMessage);
+      socket?.off('typing', handleTyping);
+      socket?.off('message_deleted', handleDeleted);
+    };
+  }, [id, currentUserId, refetch, queryClient]);
 
   const handleSendMessage = useCallback(() => {
-    if (!messageText.trim() || isSending) return;
+    const content = messageText.trim();
+    if (!content || isSending) return;
 
-    sendMessage(
-      {
-        room_id: id,
-        content: messageText.trim(),
-        reply_to: replyingTo?._id,
-      },
-      {
-        onSuccess: () => {
-          setMessageText('');
-          setReplyingTo(null);
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        },
-      }
-    );
-  }, [messageText, id, replyingTo, isSending, sendMessage]);
+    const socket = getChatSocket();
+    const resetInput = () => {
+      setMessageText('');
+      setReplyingTo(null);
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    };
+
+    if (socket?.connected) {
+      // Socket send persists on the server AND broadcasts to both participants
+      // in real-time (the REST endpoint does not emit socket events).
+      socket.emit('send_message', {
+        chatId: id,
+        content,
+        replyTo: replyingTo?._id,
+      });
+      resetInput();
+    } else {
+      // Offline fallback: persist via REST, then refresh.
+      sendMessage(
+        { room_id: id, content, reply_to: replyingTo?._id },
+        {
+          onSuccess: () => {
+            resetInput();
+            refetch();
+          },
+        }
+      );
+    }
+  }, [messageText, id, replyingTo, isSending, sendMessage, refetch]);
 
   const handleDeleteMessage = useCallback(
     (messageId: string) => {
@@ -111,10 +150,10 @@ export default function ChatRoomScreen() {
     (text: string) => {
       setMessageText(text);
 
-      const socket = getSocket();
-      if (socket && !isTyping) {
+      const socket = getChatSocket();
+      if (socket?.connected && !isTyping) {
         setIsTyping(true);
-        socket.emit('typing', { roomId: id, userId: currentUserId });
+        socket.emit('typing', { chatId: id, isTyping: true });
       }
 
       if (typingTimeoutRef.current) {
@@ -123,9 +162,10 @@ export default function ChatRoomScreen() {
 
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
+        getChatSocket()?.emit('typing', { chatId: id, isTyping: false });
       }, 2000);
     },
-    [id, currentUserId, isTyping]
+    [id, isTyping]
   );
 
   const renderMessage = ({ item }: { item: Message }) => (
@@ -139,7 +179,7 @@ export default function ChatRoomScreen() {
 
   if (isChatLoading || isMessagesLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-bg">
         <LoadingSpinner fullScreen />
       </SafeAreaView>
     );
@@ -150,16 +190,16 @@ export default function ChatRoomScreen() {
     : 'Chat';
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         {/* Header */}
-        <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
+        <View className="flex-row items-center px-4 py-3 border-b border-border">
           <TouchableOpacity onPress={() => router.back()} className="mr-3">
-            <ArrowLeft size={24} color={COLORS.gray[700]} />
+            <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
 
           <Avatar
@@ -171,11 +211,11 @@ export default function ChatRoomScreen() {
           />
 
           <View className="ml-3 flex-1">
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-base font-semibold text-text">
               {displayName}
             </Text>
             {otherUserTyping ? (
-              <Text className="text-sm text-primary-600">Typing...</Text>
+              <Text className="text-sm text-brand">Typing...</Text>
             ) : otherUser?.isOnline ? (
               <Text className="text-sm text-green-600">Online</Text>
             ) : null}
@@ -193,7 +233,7 @@ export default function ChatRoomScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center">
-              <Text className="text-gray-400">
+              <Text className="text-muted">
                 {t('room.empty', 'No messages yet. Say hello!')}
               </Text>
             </View>
@@ -202,24 +242,25 @@ export default function ChatRoomScreen() {
 
         {/* Reply preview */}
         {replyingTo && (
-          <View className="flex-row items-center px-4 py-2 bg-gray-50 border-t border-gray-100">
+          <View className="flex-row items-center px-4 py-2 bg-surface border-t border-border">
             <View className="flex-1 border-l-2 border-primary-500 pl-3">
-              <Text className="text-xs text-gray-500">Replying to</Text>
-              <Text className="text-sm text-gray-700" numberOfLines={1}>
+              <Text className="text-xs text-muted">Replying to</Text>
+              <Text className="text-sm text-text" numberOfLines={1}>
                 {replyingTo.content}
               </Text>
             </View>
             <TouchableOpacity onPress={() => setReplyingTo(null)} className="ml-2 p-1">
-              <X size={20} color={COLORS.gray[500]} />
+              <X size={20} color={colors.muted} />
             </TouchableOpacity>
           </View>
         )}
 
         {/* Input */}
-        <View className="flex-row items-end px-4 py-3 border-t border-gray-100 bg-white">
+        <View className="flex-row items-end px-4 py-3 border-t border-border bg-bg">
           <TextInput
-            className="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-base max-h-24"
+            className="flex-1 bg-surface rounded-2xl text-text px-4 py-3 text-base max-h-24"
             placeholder={t('room.placeholder', 'Type a message...')}
+            placeholderTextColor={colors.muted}
             value={messageText}
             onChangeText={handleTyping}
             multiline
@@ -229,12 +270,12 @@ export default function ChatRoomScreen() {
             onPress={handleSendMessage}
             disabled={!messageText.trim() || isSending}
             className={`ml-2 w-12 h-12 rounded-full items-center justify-center ${
-              messageText.trim() ? 'bg-primary-600' : 'bg-gray-200'
+              messageText.trim() ? 'bg-brand' : 'bg-surface'
             }`}
           >
             <Send
               size={20}
-              color={messageText.trim() ? 'white' : COLORS.gray[400]}
+              color={messageText.trim() ? colors.brandFg : colors.muted}
             />
           </TouchableOpacity>
         </View>

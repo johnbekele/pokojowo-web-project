@@ -76,6 +76,12 @@ class Settings(BaseSettings):
     # to use POST /api/listings/import
     SCRAPER_API_KEY: Optional[str] = None
 
+    # Shared secret for chat microservice internal API calls (X-Internal-Key header)
+    INTERNAL_API_KEY: Optional[str] = None
+
+    # Chat microservice URL (used by admin stats)
+    CHAT_SERVICE_URL: str = "http://localhost:8002"
+
     # Twilio Verify (phone verification). When unset, a dev fallback
     # logs the OTP to the server log instead of sending SMS.
     TWILIO_ACCOUNT_SID: Optional[str] = None
@@ -117,6 +123,41 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return []
+
+    # S3-backed uploads. In prod the backend must have valid AWS credentials
+    # (EC2 instance profile) and S3_UPLOADS_BUCKET must be set to the Pulumi
+    # `uploads_bucket` output. When DEBUG=True and the bucket is unset the
+    # app boots without S3 so `pytest` / local dev don't require AWS.
+    AWS_REGION: str = "us-east-1"
+    S3_UPLOADS_BUCKET: Optional[str] = None
+    # Optional — e.g. "https://d1234abcd.cloudfront.net". When set, clients
+    # can turn the relative URLs the API returns (`/uploads/...`) into
+    # absolute URLs without going through the API's origin. Not required
+    # because the same CloudFront distribution already fronts both /api/*
+    # and /uploads/* so relative URLs continue to work.
+    PUBLIC_CDN_BASE_URL: Optional[str] = None
+    # Seconds a private (verification doc) presigned GET stays valid.
+    PRIVATE_URL_TTL_SECONDS: int = 300
+
+    @field_validator('S3_UPLOADS_BUCKET', mode='after')
+    @classmethod
+    def require_bucket_in_prod(cls, v):
+        import os
+        debug = os.getenv('DEBUG', '').lower() in ('1', 'true', 'yes')
+        if not v and not debug:
+            raise ValueError(
+                "S3_UPLOADS_BUCKET must be set when DEBUG is off. It should "
+                "match the Pulumi `uploads_bucket` output."
+            )
+        return v
+
+    # Nominatim forward geocoding (map pins for listings and preferred areas).
+    # The public instance caps us at 1 req/s and requires a contactable
+    # User-Agent; point NOMINATIM_URL at a self-hosted instance to lift that.
+    NOMINATIM_URL: str = "https://nominatim.openstreetmap.org"
+    NOMINATIM_USER_AGENT: str = "pokojowo-api/1.0 (contact@pokojowo.pl)"
+    NOMINATIM_COUNTRY_CODES: str = "pl"
+    NOMINATIM_TIMEOUT_SECONDS: int = 20
 
     # Google AI (accepts both GOOGLE_AI_API_KEY and GOOGLE_GENAI_API_KEY)
     GOOGLE_AI_API_KEY: Optional[str] = None

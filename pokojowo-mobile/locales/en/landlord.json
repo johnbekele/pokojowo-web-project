@@ -8,7 +8,12 @@
     "inactive": "Inactive",
     "inquiries": "Inquiries",
     "views": "Views",
+    "likes": "Likes",
     "thisMonth": "This month"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "quickActions": "Quick Actions",
   "actions": {
@@ -50,7 +55,11 @@
     },
     "photos": "Photos",
     "photosHint": "Add at least 3 photos of your property",
+    "addPhoto": "Add",
     "addPhotos": "Add Photos",
+    "permissionMessage": "Please grant camera roll permissions",
+    "imageError": "Failed to upload images",
+    "verifyRequired": "Verify your email to publish listings.",
     "maxPhotos": "Maximum {{max}} photos",
     "titleLabel": "Listing Title",
     "titlePlaceholder": "e.g., Cozy room in city center",
@@ -121,6 +130,10 @@
     "title": "Edit Listing",
     "submit": "Save Changes",
     "submitting": "Saving...",
+    "loading": "Loading listing...",
+    "notFound": "Listing not found",
+    "notFoundDescription": "This listing may no longer be available",
+    "goBack": "Go Back",
     "successTitle": "Changes Saved",
     "successMessage": "Your listing has been updated.",
     "errorTitle": "Error",

@@ -6,6 +6,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from app.models.user import User, RoleEnum
+from app.core.config import settings
 from app.core.dependencies import get_current_user, require_role
 from app.models.notification import NotificationTypeEnum
 from app.services.notification_service import notification_service
@@ -218,14 +219,23 @@ async def get_system_stats(
         )
 
     from app.models.listing import Listing
-    from app.models.chat import Chat
-    from app.models.message import Message
+    import httpx
 
     # Get counts
     total_users = await User.count()
     total_listings = await Listing.count()
-    total_chats = await Chat.count()
-    total_messages = await Message.count()
+
+    total_chats = 0
+    total_messages = 0
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(f"{settings.CHAT_SERVICE_URL}/health/stats")
+            if resp.status_code == 200:
+                chat_stats = resp.json()
+                total_chats = chat_stats.get("total_chats", 0)
+                total_messages = chat_stats.get("total_messages", 0)
+    except Exception:
+        pass
 
     # Get users by role
     tenants = await User.find({"role": RoleEnum.TENANT}).count()

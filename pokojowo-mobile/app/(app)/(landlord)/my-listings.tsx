@@ -1,50 +1,40 @@
-import { View, Text, RefreshControl, Alert, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, RefreshControl, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Home, ArrowLeft, Edit, Trash2 } from 'lucide-react-native';
 
-import { Button, Card, Badge, LoadingSpinner, EmptyState } from '@/components/ui';
+import { Card, Badge, LoadingSpinner, EmptyState } from '@/components/ui';
 import { useMyListings, useDeleteListing } from '@/hooks/listings/useListings';
 import type { Listing } from '@/types/listing.types';
 import { formatCurrency } from '@/lib/utils';
-import { COLORS } from '@/lib/constants';
+import useUIStore from '@/stores/uiStore';
+import useTheme from '@/hooks/useTheme';
 
 export default function MyListingsScreen() {
   const { t } = useTranslation('landlord');
   const router = useRouter();
+  const { colors } = useTheme();
+  const confirm = useUIStore((s) => s.confirm);
+  const showToast = useUIStore((s) => s.showToast);
 
   const { data: listings, isLoading, isRefetching, refetch } = useMyListings();
-  const { mutate: deleteListing, isPending: isDeleting } = useDeleteListing();
+  const { mutate: deleteListing } = useDeleteListing();
 
-  const handleDeleteListing = (listingId: string, address: string) => {
-    Alert.alert(
-      t('delete.title', 'Delete Listing'),
-      t('delete.message', `Are you sure you want to delete "${address}"?`),
-      [
-        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-        {
-          text: t('common.delete', 'Delete'),
-          style: 'destructive',
-          onPress: () => {
-            deleteListing(listingId, {
-              onSuccess: () => {
-                Alert.alert(
-                  t('delete.successTitle', 'Deleted'),
-                  t('delete.successMessage', 'Listing deleted successfully')
-                );
-              },
-              onError: () => {
-                Alert.alert(
-                  t('delete.errorTitle', 'Error'),
-                  t('delete.errorMessage', 'Failed to delete listing')
-                );
-              },
-            });
-          },
-        },
-      ]
-    );
+  const handleDeleteListing = async (listingId: string, address: string) => {
+    const ok = await confirm({
+      title: t('delete.title', 'Delete Listing'),
+      message: t('delete.message', 'Are you sure you want to delete "{{address}}"?', { address }),
+      confirmLabel: t('delete.confirm', 'Delete'),
+      destructive: true,
+    });
+    if (!ok) return;
+    deleteListing(listingId, {
+      onSuccess: () =>
+        showToast({ type: 'success', message: t('delete.successMessage', 'Listing deleted successfully') }),
+      onError: () =>
+        showToast({ type: 'error', message: t('delete.errorMessage', 'Failed to delete listing') }),
+    });
   };
 
   const renderItem = ({ item }: { item: Listing }) => {
@@ -68,19 +58,19 @@ export default function MyListingsScreen() {
               </Badge>
             )}
           </View>
-          <Text className="text-base font-semibold text-gray-900" numberOfLines={2}>
+          <Text className="text-base font-semibold text-text" numberOfLines={2}>
             {item.address}
           </Text>
-          <Text className="text-primary-600 font-bold text-lg mt-1">
+          <Text className="text-brand font-bold text-lg mt-1">
             {formatCurrency(item.price)}
-            <Text className="text-sm font-normal text-gray-500">/mo</Text>
+            <Text className="text-sm font-normal text-muted">/mo</Text>
           </Text>
           <View className="flex-row items-center gap-4 mt-2">
             {item.size && (
-              <Text className="text-sm text-gray-500">{item.size} m²</Text>
+              <Text className="text-sm text-muted">{item.size} m²</Text>
             )}
             {item.max_tenants && (
-              <Text className="text-sm text-gray-500">
+              <Text className="text-sm text-muted">
                 Max {item.max_tenants} tenants
               </Text>
             )}
@@ -91,15 +81,15 @@ export default function MyListingsScreen() {
         <View className="flex-col gap-2">
           <TouchableOpacity
             onPress={() => router.push(`/(app)/(landlord)/edit-listing/${itemId}`)}
-            className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
+            className="w-10 h-10 rounded-full bg-surface items-center justify-center"
           >
-            <Edit size={18} color={COLORS.gray[600]} />
+            <Edit size={18} color={colors.muted} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleDeleteListing(itemId!, item.address)}
-            className="w-10 h-10 rounded-full bg-red-50 items-center justify-center"
+            className="w-10 h-10 rounded-full bg-danger/10 items-center justify-center"
           >
-            <Trash2 size={18} color={COLORS.error} />
+            <Trash2 size={18} color={colors.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -108,27 +98,27 @@ export default function MyListingsScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-surface">
         <LoadingSpinner fullScreen text={t('loading', 'Loading listings...')} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-surface" edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-100 bg-white">
+      <View className="flex-row items-center px-4 py-3 border-b border-border bg-bg">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <ArrowLeft size={24} color={COLORS.gray[700]} />
+          <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900 flex-1">
+        <Text className="text-xl font-bold text-text flex-1">
           {t('myListings.title', 'My Listings')}
         </Text>
         <TouchableOpacity
           onPress={() => router.push('/(app)/(landlord)/create-listing')}
-          className="bg-primary-600 rounded-full p-2"
+          className="bg-brand rounded-full p-2"
         >
-          <Plus size={20} color="white" />
+          <Plus size={20} color={colors.brandFg} />
         </TouchableOpacity>
       </View>
 
@@ -143,13 +133,13 @@ export default function MyListingsScreen() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor={COLORS.primary[600]}
+              tintColor={colors.brand}
             />
           }
         />
       ) : (
         <EmptyState
-          icon={<Home size={48} color={COLORS.gray[400]} />}
+          icon={<Home size={48} color={colors.muted} />}
           title={t('myListings.empty.title', 'No listings yet')}
           description={t(
             'myListings.empty.description',

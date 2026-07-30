@@ -225,5 +225,36 @@
     "saveFailed": "Nie udało się zapisać wyszukiwania",
     "applyNotFound": "To zapisane wyszukiwanie już nie istnieje",
     "applyFailed": "Nie udało się wczytać tego zapisanego wyszukiwania"
+  },
+  "view": {
+    "list": "Lista",
+    "map": "Mapa"
+  },
+  "map": {
+    "searchNear": "Szukaj w okolicy adresu…",
+    "go": "Szukaj",
+    "useMyLocation": "Użyj mojej lokalizacji",
+    "locationDenied": "Brak zgody na dostęp do lokalizacji",
+    "locationUnsupported": "Twoja przeglądarka nie może udostępnić lokalizacji",
+    "addressNotFound": "Nie znaleziono takiego adresu",
+    "addressNotFoundHint": "Dodaj miasto, np. „Plac Bankowy, Warszawa”.",
+    "addressLookupFailed": "Nie udało się wyszukać adresu",
+    "zoomForPins": "Przybliż, aby zobaczyć pojedyncze pokoje",
+    "listingCount_one": "{{count}} pokój w tym obszarze",
+    "listingCount_few": "{{count}} pokoje w tym obszarze",
+    "listingCount_many": "{{count}} pokoi w tym obszarze",
+    "listingCount": "{{count}} pokoi w tym obszarze",
+    "flatmateCount_one": "{{count}} osoba szuka tutaj",
+    "flatmateCount_few": "{{count}} osoby szukają tutaj",
+    "flatmateCount_many": "{{count}} osób szuka tutaj",
+    "flatmateCount": "{{count}} osób szuka tutaj",
+    "flatmatesNeedProfile": "Uzupełnij profil najemcy, aby zobaczyć, kto jeszcze szuka w tej okolicy.",
+    "emptyArea": "Brak pokoi w tym obszarze — przesuń mapę lub oddal widok.",
+    "truncated": "Pokazujemy część pokoi z tego obszaru — przybliż, aby zobaczyć pozostałe.",
+    "layers": {
+      "flats": "Pokoje",
+      "flatmates": "Współlokatorzy",
+      "both": "Oba"
+    }
   }
 }

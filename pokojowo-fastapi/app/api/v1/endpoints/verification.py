@@ -1,11 +1,11 @@
 """Verification endpoints: phone (SMS OTP) and landlord documents."""
 import uuid
 from datetime import datetime
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 
+from app.core import s3
 from app.core.dependencies import get_current_user, require_role, require_verified
 from app.core.rate_limit import check_rate_limit
 from app.models.user import (
@@ -133,8 +133,13 @@ async def get_verification_document_file(
     doc_id: str,
     current_user: User = Depends(get_current_user),
 ):
-    """Serve a verification document. Owner or Admin only — these files
-    live outside the public uploads/ tree by design."""
+    """Return a short-lived presigned S3 URL for a verification document.
+    Owner or Admin only — these files live under the bucket's
+    `private_uploads/` prefix which CloudFront cannot reach.
+
+    Response is a 302 redirect to the presigned URL so browsers / native
+    image viewers just work; the URL expires in PRIVATE_URL_TTL_SECONDS.
+    """
     is_admin = RoleEnum.ADMIN in current_user.role
 
     if is_admin:
@@ -156,8 +161,11 @@ async def get_verification_document_file(
     if not doc or not doc.file_path:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    path = Path(doc.file_path)
-    if not path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File missing")
-
-    return FileResponse(path)
+    # DB stores an S3 key (e.g. `private_uploads/verification/{uuid}.pdf`)
+    # after the S3 cutover. Legacy rows from before the cutover held a
+    # filesystem path like `private_uploads/verification/{uuid}.pdf` —
+    # same shape, so `s3.generate_presigned_get` works on both once the
+    # one-time sync has copied the file to the bucket.
+    key = doc.file_path.lstrip("/")
+    presigned = await s3.generate_presigned_get(key)
+    return RedirectResponse(url=presigned, status_code=status.HTTP_302_FOUND)

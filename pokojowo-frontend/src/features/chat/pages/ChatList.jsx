@@ -16,9 +16,9 @@ import {
   LuxuryPanel,
   TrustBadge,
 } from '@/components/shared/editorial';
-import api from '@/lib/api';
+import chatApi from '@/lib/chatApi';
 import { cn, formatRelativeTime } from '@/lib/utils';
-import { getSocket, connectSocket } from '@/lib/socket';
+import { getChatSocket, connectChatSocket } from '@/lib/chatSocket';
 
 export default function ChatList() {
   const { t } = useTranslation('chat');
@@ -26,7 +26,7 @@ export default function ChatList() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const socket = getSocket() || connectSocket();
+    const socket = getChatSocket() || connectChatSocket();
     if (!socket) return;
 
     const handleNewMessage = () => {
@@ -35,24 +35,17 @@ export default function ChatList() {
     const handleUserStatus = () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
-    const handleNotification = (data) => {
-      if (data.type === 'new_message') {
-        queryClient.invalidateQueries({ queryKey: ['chats'] });
-      }
-    };
     const handleConnect = () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
     socket.on('new_message', handleNewMessage);
     socket.on('user_status', handleUserStatus);
-    socket.on('notification', handleNotification);
     socket.on('connect', handleConnect);
 
     return () => {
       socket.off('new_message', handleNewMessage);
       socket.off('user_status', handleUserStatus);
-      socket.off('notification', handleNotification);
       socket.off('connect', handleConnect);
     };
   }, [queryClient]);
@@ -60,7 +53,7 @@ export default function ChatList() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['chats'],
     queryFn: async () => {
-      const response = await api.get('/chat/');
+      const response = await chatApi.get('/chat/');
       return response.data;
     },
   });

@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import type { User } from '@/types/user.types';
+import type { User, NotificationPreferences } from '@/types/user.types';
 
 export interface UserUpdateData {
   firstname?: string;
@@ -11,7 +11,16 @@ export interface UserUpdateData {
   dateOfBirth?: string; // ISO date, e.g. 1995-04-23
   gender?: string;
   bio?: string;
+  notification_preferences?: Partial<NotificationPreferences>;
 }
+
+export type ReportReason =
+  | 'spam'
+  | 'scam'
+  | 'harassment'
+  | 'fake_profile'
+  | 'inappropriate_content'
+  | 'other';
 
 export interface TenantProfileData {
   firstname: string;
@@ -31,6 +40,8 @@ export interface TenantProfileData {
         max: number | null;
       };
       location: string | null;
+      /** Preferred districts within `location`; drives the flatmate map pin. */
+      districts?: string[];
       leaseDuration: number;
     };
     flatmateTraits: {
@@ -79,6 +90,11 @@ export const userService = {
   updateMe: (data: UserUpdateData) =>
     api.put<{ message: string }>('/users/me', data),
 
+  // Store the device's Expo push token on the user. Backend may ignore the
+  // field until a dedicated endpoint exists; failures are handled by callers.
+  updatePushToken: (expoPushToken: string) =>
+    api.put<{ message: string }>('/users/me', { expoPushToken }),
+
   updateRole: (role: 'tenant' | 'landlord') =>
     api.put<RoleUpdateResponse>('/users/me/role', { role }),
 
@@ -96,6 +112,16 @@ export const userService = {
 
   getUsers: (params?: { skip?: number; limit?: number; role?: string }) =>
     api.get<User[]>('/users/', { params }),
+
+  // Moderation actions on other users
+  reportUser: (userId: string, reason: ReportReason, details?: string) =>
+    api.post<{ message: string }>(`/users/${userId}/report`, { reason, details }),
+
+  blockUser: (userId: string) =>
+    api.post<{ message: string; blocked_users: string[] }>(`/users/${userId}/block`),
+
+  unblockUser: (userId: string) =>
+    api.delete<{ message: string }>(`/users/${userId}/block`),
 };
 
 export default userService;

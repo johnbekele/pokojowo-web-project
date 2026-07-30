@@ -1,0 +1,26 @@
+---
+description: Git and GitHub identity to use for this project
+alwaysApply: true
+---
+
+# Git / GitHub Identity
+
+For ALL git and GitHub work in this repository, use only this identity:
+
+- GitHub account / profile: **`johnbekele`** (owner of `johnbekele/pokojowo-web-project`).
+  - Authenticate pushes/PRs via the `gh` CLI account `johnbekele`.
+  - If a push is denied for another account (e.g. a keyring credential like
+    `Johnbekele6130893`), run `gh auth setup-git` so git uses the `johnbekele` token.
+- Commit email: **`yohansdemisie@gmail.com`**
+
+## Enforcement
+
+- Never push, open PRs, or attribute commits under any other GitHub account.
+- Ensure the repo-local git config matches before committing:
+
+```bash
+git config user.name "johnbekele"
+git config user.email "yohansdemisie@gmail.com"
+```
+
+- Do NOT change the global git config; only set it repo-locally for this project.

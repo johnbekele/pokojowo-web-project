@@ -18,7 +18,7 @@ export default function ChatListItem({ chat, onPress }: ChatListItemProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center px-4 py-3 bg-white active:bg-gray-50"
+      className="flex-row items-center px-4 py-3 bg-bg active:bg-surface"
       activeOpacity={0.7}
     >
       {/* Avatar */}
@@ -33,11 +33,11 @@ export default function ChatListItem({ chat, onPress }: ChatListItemProps) {
       {/* Content */}
       <View className="flex-1 ml-3">
         <View className="flex-row items-center justify-between mb-0.5">
-          <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+          <Text className="text-base font-semibold text-text" numberOfLines={1}>
             {displayName}
           </Text>
           {lastMessage?.createdAt && (
-            <Text className="text-xs text-gray-400">
+            <Text className="text-xs text-muted">
               {formatRelativeTime(lastMessage.createdAt)}
             </Text>
           )}
@@ -45,15 +45,15 @@ export default function ChatListItem({ chat, onPress }: ChatListItemProps) {
 
         <View className="flex-row items-center">
           <Text
-            className="flex-1 text-gray-500 text-sm"
+            className="flex-1 text-muted text-sm"
             numberOfLines={1}
           >
             {lastMessage?.content || 'No messages yet'}
           </Text>
 
           {unreadCount && unreadCount > 0 && (
-            <View className="bg-primary-600 rounded-full min-w-[20px] h-5 items-center justify-center px-1.5 ml-2">
-              <Text className="text-white text-xs font-bold">
+            <View className="bg-brand rounded-full min-w-[20px] h-5 items-center justify-center px-1.5 ml-2">
+              <Text className="text-brand-fg text-xs font-bold">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Text>
             </View>

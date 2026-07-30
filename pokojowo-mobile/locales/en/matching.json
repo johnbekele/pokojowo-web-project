@@ -54,7 +54,13 @@
     "overallMatch": "Overall Match",
     "about": "About",
     "thingsToConsider": "Things to consider",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "livingStyle": "What they’re like",
+    "whyYouMatch": "Why you match",
+    "livingDetails": "Living details",
+    "interests": "Interests",
+    "seeAllDetails": "See all details",
+    "showLess": "Show less"
   },
   "empty": {
     "title": "No matches yet",
@@ -87,6 +93,10 @@
   "dashboard": {
     "welcome": "Welcome back, {{name}}!",
     "overview": "Here's an overview of your matching activity",
+    "likesReceived": "likes",
+    "matches": "matches",
+    "pending": "pending",
+    "saved": "saved",
     "pleaseLogin": "Please log in",
     "loginRequired": "You need to be logged in to view your dashboard.",
     "completeProfile": "Complete Your Profile",
@@ -268,5 +278,98 @@
       "noneYours": "No interests specified in your profile",
       "noneTheirs": "They have no interests listed"
     }
+  },
+  "living": {
+    "labels": {
+      "cleanliness": "Cleanliness",
+      "socialLevel": "Social level",
+      "guests": "Guests",
+      "noise": "Noise tolerance",
+      "cooking": "Cooking",
+      "smoking": "Smoking",
+      "pets": "Pets",
+      "okWithSmoking": "OK with smoking",
+      "budget": "Budget",
+      "lease": "Lease length",
+      "preferredLocation": "Looking in",
+      "sharedSpaces": "Happy to share",
+      "wakeUp": "Wakes up",
+      "sleepTime": "Sleeps",
+      "household": "Household"
+    },
+    "cleanliness": {
+      "very_clean": "Very clean",
+      "clean": "Clean",
+      "moderate": "Moderately tidy",
+      "relaxed": "Relaxed about mess",
+      "messy": "Messy"
+    },
+    "socialLevel": {
+      "very_social": "Very social",
+      "social": "Social",
+      "moderate": "Moderately social",
+      "quiet": "Keeps to themselves",
+      "very_quiet": "Very private"
+    },
+    "guests": {
+      "often": "Often has guests",
+      "sometimes": "Sometimes has guests",
+      "rarely": "Rarely has guests",
+      "never": "Never has guests"
+    },
+    "noise": {
+      "very_tolerant": "Very noise tolerant",
+      "tolerant": "Noise tolerant",
+      "moderate": "Moderate about noise",
+      "sensitive": "Noise sensitive",
+      "very_sensitive": "Very noise sensitive"
+    },
+    "cooking": {
+      "daily": "Cooks daily",
+      "often": "Cooks often",
+      "sometimes": "Cooks sometimes",
+      "rarely": "Rarely cooks",
+      "never": "Never cooks"
+    },
+    "personality": {
+      "introvert": "Introvert",
+      "extrovert": "Extrovert",
+      "night_owl": "Night owl",
+      "early_bird": "Early bird",
+      "neat": "Neat",
+      "messy": "Messy",
+      "quiet": "Quiet",
+      "talkative": "Talkative"
+    },
+    "lifestyle": {
+      "smoker": "Smoker",
+      "nonSmoker": "Non-smoker",
+      "hasPets": "Has pets",
+      "noPets": "No pets",
+      "okWithPets": "Pet-friendly"
+    },
+    "sharedSpaces": {
+      "kitchen": "Kitchen",
+      "bathroom": "Bathroom",
+      "living_room": "Living room",
+      "balcony": "Balcony"
+    },
+    "household": {
+      "partner": "Moving in with a partner",
+      "children": "Has children"
+    },
+    "budget": {
+      "upTo": "Up to {{amount}}"
+    },
+    "lease": {
+      "months": "{{count}} months"
+    }
+  },
+  "map": {
+    "someone": "A flatmate",
+    "compatibility": "{{score}}% match",
+    "wantsToLiveIn": "Looking in {{area}}",
+    "budget": "Budget up to {{amount}}",
+    "dismissPin": "Close"
   }
 }

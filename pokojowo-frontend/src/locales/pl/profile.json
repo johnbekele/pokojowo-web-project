@@ -48,7 +48,11 @@
     "budget": "Miesięczny budżet",
     "budgetMin": "Min budżet",
     "budgetMax": "Max budżet",
-    "location": "Preferowana lokalizacja",
+    "location": "Gdzie chcesz mieszkać?",
+    "selectCity": "Wybierz miasto",
+    "districts": "Preferowane dzielnice",
+    "otherCity": "Inne miasto",
+    "otherCityPlaceholder": "np. Katowice",
     "leaseDuration": "Okres najmu",
     "months": "miesięcy",
     "moveInDate": "Data wprowadzenia"

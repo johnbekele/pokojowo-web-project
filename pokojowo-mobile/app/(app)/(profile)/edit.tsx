@@ -1,11 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
-  Image,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -14,12 +12,17 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import * as ImagePicker from 'expo-image-picker';
-import { ArrowLeft, Camera, User } from 'lucide-react-native';
+import { ArrowLeft, Camera } from 'lucide-react-native';
 
 import { Button, Input, Avatar } from '@/components/ui';
-import { useUpdateProfile } from '@/hooks/user/useUser';
+import KeyboardAwareScrollView from '@/components/shared/KeyboardAwareScrollView';
+import { PreferredAreaPicker } from '@/components/feature/profile';
+import { useUpdateProfile, useUploadProfilePhoto } from '@/hooks/user/useUser';
+import { usePreferredArea, useUpdatePreferredArea } from '@/hooks/user/usePreferredArea';
 import useAuthStore from '@/stores/authStore';
-import { COLORS } from '@/lib/constants';
+import useUIStore from '@/stores/uiStore';
+import useTheme from '@/hooks/useTheme';
+import { getImageUrl } from '@/lib/image';
 
 // Latest valid birth date: exactly 18 years ago today
 const maxDateOfBirth = (): string => {
@@ -48,10 +51,26 @@ type ProfileForm = z.infer<typeof profileSchema>;
 export default function EditProfileScreen() {
   const { t } = useTranslation('profile');
   const router = useRouter();
+  const { colors } = useTheme();
   const { user, updateUser } = useAuthStore();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: uploadPhoto, isPending: isUploading } = useUploadProfilePhoto();
+  const showToast = useUIStore((s) => s.showToast);
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+
+  // Preferred area lives on the tenant profile and saves through its own
+  // endpoint, so it isn't part of the react-hook-form schema above.
+  const isTenant = !user?.role?.includes('Landlord');
+  const { data: savedArea } = usePreferredArea();
+  const { mutateAsync: savePreferredArea } = useUpdatePreferredArea();
+  const [area, setArea] = useState({ city: '', districts: [] as string[] });
+
+  useEffect(() => {
+    if (savedArea) {
+      setArea({ city: savedArea.location || '', districts: savedArea.districts });
+    }
+  }, [savedArea]);
 
   const {
     control,
@@ -72,10 +91,10 @@ export default function EditProfileScreen() {
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        t('edit.permissionTitle', 'Permission required'),
-        t('edit.permissionMessage', 'Please grant camera roll permissions')
-      );
+      showToast({
+        type: 'warning',
+        message: t('edit.permissionMessage', 'Please grant camera roll permissions'),
+      });
       return;
     }
 
@@ -86,13 +105,51 @@ export default function EditProfileScreen() {
       quality: 0.8,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      // TODO: Upload to server
-    }
+    if (result.canceled || !result.assets[0]) return;
+
+    const localUri = result.assets[0].uri;
+    // Optimistic preview while the upload runs.
+    setPhotoUri(localUri);
+
+    uploadPhoto(localUri, {
+      onSuccess: (url) => {
+        updateUser({ photo: { url } });
+        showToast({
+          type: 'success',
+          message: t('edit.photoUpdated', 'Photo updated'),
+        });
+      },
+      onError: () => {
+        setPhotoUri(null);
+        showToast({
+          type: 'error',
+          message: t('edit.photoError', 'Failed to upload photo'),
+        });
+      },
+    });
   };
 
-  const onSubmit = (data: ProfileForm) => {
+  const areaChanged =
+    !!savedArea &&
+    (area.city !== (savedArea.location || '') ||
+      area.districts.join('|') !== savedArea.districts.join('|'));
+
+  const onSubmit = async (data: ProfileForm) => {
+    if (isTenant && areaChanged) {
+      try {
+        await savePreferredArea({
+          location: area.city || null,
+          districts: area.districts,
+        });
+      } catch {
+        showToast({
+          type: 'error',
+          message: t('edit.areaError', 'Could not save your preferred area'),
+        });
+        return;
+      }
+    }
+
     updateProfile(
       {
         firstname: data.firstname,
@@ -112,58 +169,62 @@ export default function EditProfileScreen() {
             dateOfBirth: data.dateOfBirth || undefined,
             bio: data.bio,
           });
-          Alert.alert(
-            t('edit.successTitle', 'Success'),
-            t('edit.successMessage', 'Profile updated successfully'),
-            [{ text: 'OK', onPress: () => router.back() }]
-          );
+          showToast({
+            type: 'success',
+            message: t('edit.successMessage', 'Profile updated successfully'),
+          });
+          router.back();
         },
         onError: () => {
-          Alert.alert(
-            t('edit.errorTitle', 'Error'),
-            t('edit.errorMessage', 'Failed to update profile')
-          );
+          showToast({
+            type: 'error',
+            message: t('edit.errorMessage', 'Failed to update profile'),
+          });
         },
       }
     );
   };
 
   const currentPhotoUrl =
-    photoUri ||
-    (typeof user?.photo === 'string' ? user.photo : (user?.photo as { url?: string })?.url);
+    photoUri || (user?.photo ? getImageUrl(user.photo) : null);
+  const displayName =
+    [user?.firstname, user?.lastname].filter(Boolean).join(' ') ||
+    user?.username ||
+    'User';
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
+      <View className="flex-row items-center px-4 py-3 border-b border-border">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <ArrowLeft size={24} color={COLORS.gray[700]} />
+          <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900 flex-1">
+        <Text className="text-xl font-bold text-text flex-1">
           {t('edit.title', 'Edit Profile')}
         </Text>
       </View>
 
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+      <KeyboardAwareScrollView>
         {/* Photo */}
         <View className="items-center mb-8">
-          <TouchableOpacity onPress={handlePickImage} className="relative">
-            {currentPhotoUrl ? (
-              <Image
-                source={{ uri: currentPhotoUrl }}
-                className="w-28 h-28 rounded-full"
-              />
-            ) : (
-              <View className="w-28 h-28 rounded-full bg-gray-200 items-center justify-center">
-                <User size={48} color={COLORS.gray[400]} />
-              </View>
-            )}
-            <View className="absolute bottom-0 right-0 bg-primary-600 rounded-full p-2">
-              <Camera size={18} color="white" />
+          <TouchableOpacity
+            onPress={handlePickImage}
+            disabled={isUploading}
+            className="relative"
+          >
+            <Avatar source={currentPhotoUrl} name={displayName} size="xl" />
+            <View className="absolute bottom-0 right-0 bg-brand rounded-full p-2">
+              {isUploading ? (
+                <ActivityIndicator size="small" color={colors.brandFg} />
+              ) : (
+                <Camera size={18} color={colors.brandFg} />
+              )}
             </View>
           </TouchableOpacity>
-          <Text className="text-gray-500 mt-2">
-            {t('edit.changePhoto', 'Tap to change photo')}
+          <Text className="text-muted mt-2">
+            {isUploading
+              ? t('edit.uploading', 'Uploading…')
+              : t('edit.changePhoto', 'Tap to change photo')}
           </Text>
         </View>
 
@@ -263,6 +324,16 @@ export default function EditProfileScreen() {
           )}
         />
 
+        {isTenant && (
+          <View className="mt-2 mb-4">
+            <PreferredAreaPicker
+              city={area.city}
+              districts={area.districts}
+              onChange={setArea}
+            />
+          </View>
+        )}
+
         {/* Save button */}
         <Button
           onPress={handleSubmit(onSubmit)}
@@ -272,7 +343,7 @@ export default function EditProfileScreen() {
         >
           {t('edit.save', 'Save Changes')}
         </Button>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

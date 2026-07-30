@@ -1,5 +1,35 @@
 {
   "title": "Profile",
+  "logoutConfirm": "Are you sure you want to log out?",
+  "trust": {
+    "verified": "Verified",
+    "idVerified": "ID Verified",
+    "score": "Trust {{score}}"
+  },
+  "report": {
+    "action": "Report user",
+    "title": "Report user",
+    "subtitle": "Why are you reporting this user?",
+    "success": "Report submitted. Our team will review it.",
+    "error": "Failed to submit report",
+    "reasons": {
+      "spam": "Spam",
+      "scam": "Scam or fraud",
+      "harassment": "Harassment",
+      "fake_profile": "Fake profile",
+      "inappropriate_content": "Inappropriate content",
+      "other": "Other"
+    }
+  },
+  "block": {
+    "action": "Block user",
+    "title": "Block user",
+    "confirm": "They will no longer be able to message you or see you in matches.",
+    "blocked": "User blocked",
+    "unblock": "Unblock user",
+    "unblocked": "User unblocked",
+    "error": "Something went wrong"
+  },
   "menu": {
     "editProfile": "Edit Profile",
     "landlordDashboard": "Landlord Dashboard",
@@ -25,6 +55,10 @@
     "error": {
       "title": "Error",
       "description": "Failed to save profile. Please try again."
+    },
+    "exit": {
+      "title": "Exit profile setup?",
+      "description": "Your progress on this step will not be saved. You can finish your profile later."
     }
   },
   "basicInfo": {
@@ -59,7 +93,10 @@
     "budget": "Monthly Budget",
     "budgetMin": "Min Budget",
     "budgetMax": "Max Budget",
-    "location": "Preferred Location",
+    "location": "Where do you want to live?",
+    "districts": "Preferred areas",
+    "otherCity": "Somewhere else",
+    "otherCityPlaceholder": "e.g., Katowice",
     "leaseDuration": "Lease Duration",
     "months": "months",
     "moveInDate": "Move-in Date"
@@ -160,7 +197,10 @@
     "next": "Next",
     "back": "Back",
     "skip": "Skip for now",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "exit": "Exit",
+    "more": "More options"
   },
   "edit": {
     "title": "Edit Profile",
@@ -171,6 +211,9 @@
     "age": "Age",
     "bio": "About Me",
     "changePhoto": "Tap to change photo",
+    "uploading": "Uploading…",
+    "photoUpdated": "Photo updated",
+    "photoError": "Failed to upload photo",
     "save": "Save Changes",
     "permissionTitle": "Permission required",
     "permissionMessage": "Please grant camera roll permissions",
@@ -178,10 +221,12 @@
     "successMessage": "Profile updated successfully",
     "errorTitle": "Error",
     "errorMessage": "Failed to update profile",
-    "dateOfBirth": "Date of birth"
+    "dateOfBirth": "Date of birth",
+    "areaError": "Could not save your preferred area"
   },
   "favorites": {
     "title": "Saved Matches",
+    "savedAt": "Saved {{time}}",
     "loading": "Loading saved matches...",
     "empty": {
       "title": "No saved matches yet",
@@ -191,10 +236,19 @@
   },
   "settings": {
     "title": "Settings",
+    "appearance": "Appearance",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
     "general": "General",
     "language": "Language",
     "selectLanguage": "Select your preferred language",
-    "notifications": "Notifications",
+    "notifications": "Push Notifications",
+    "notificationsSubtitle": "Matches, messages and listing interest",
+    "security": "Security",
+    "biometric": "Biometric unlock",
+    "biometricSubtitle": "Require Face ID / fingerprint to open the app",
+    "biometricError": "Could not verify biometrics",
     "privacy": "Privacy",
     "privacyPolicy": "Privacy Policy",
     "terms": "Terms of Service",
@@ -204,7 +258,9 @@
     "deleteAccount": "Delete Account",
     "deleteConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
     "error": "Error",
-    "deleteError": "Failed to delete account"
+    "deleteError": "Failed to delete account",
+    "saveError": "Failed to save settings",
+    "linkError": "Unable to open link"
   },
   "validation": {
     "mustBe18": "You must be at least 18 years old (format: YYYY-MM-DD)."

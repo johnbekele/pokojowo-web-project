@@ -1531,6 +1531,10 @@ class MatchingService:
             "daily_routine": self._get_daily_routine(candidate),
             "lease_duration_months": prefs.lease_duration_months if prefs else None,
             "preferred_location": prefs.location if prefs else None,
+            "preferred_districts": list(prefs.districts or []) if prefs else [],
+            # Geocoded centre of the area they're searching in — this is what
+            # places them on the flatmate map. GeoJSON Point [lng, lat].
+            "preferred_location_geo": prefs.location_geo if prefs else None,
             "has_partner": bool(tp.has_partner) if tp else False,
             "has_children": bool(tp.has_children) if tp else False,
         }

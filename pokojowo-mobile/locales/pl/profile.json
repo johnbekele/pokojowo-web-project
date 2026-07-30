@@ -1,5 +1,35 @@
 {
   "title": "Profil",
+  "logoutConfirm": "Czy na pewno chcesz się wylogować?",
+  "trust": {
+    "verified": "Zweryfikowany",
+    "idVerified": "Zweryfikowany (ID)",
+    "score": "Zaufanie {{score}}"
+  },
+  "report": {
+    "action": "Zgłoś użytkownika",
+    "title": "Zgłoś użytkownika",
+    "subtitle": "Dlaczego zgłaszasz tego użytkownika?",
+    "success": "Zgłoszenie wysłane. Nasz zespół je sprawdzi.",
+    "error": "Nie udało się wysłać zgłoszenia",
+    "reasons": {
+      "spam": "Spam",
+      "scam": "Oszustwo",
+      "harassment": "Nękanie",
+      "fake_profile": "Fałszywy profil",
+      "inappropriate_content": "Nieodpowiednie treści",
+      "other": "Inne"
+    }
+  },
+  "block": {
+    "action": "Zablokuj użytkownika",
+    "title": "Zablokuj użytkownika",
+    "confirm": "Nie będzie mógł do Ciebie pisać ani widzieć Cię w dopasowaniach.",
+    "blocked": "Użytkownik zablokowany",
+    "unblock": "Odblokuj użytkownika",
+    "unblocked": "Użytkownik odblokowany",
+    "error": "Coś poszło nie tak"
+  },
   "menu": {
     "editProfile": "Edytuj profil",
     "landlordDashboard": "Panel właściciela",
@@ -25,6 +55,10 @@
     "error": {
       "title": "Błąd",
       "description": "Nie udało się zapisać profilu. Spróbuj ponownie."
+    },
+    "exit": {
+      "title": "Zakończyć uzupełnianie profilu?",
+      "description": "Postęp na tym kroku nie zostanie zapisany. Możesz dokończyć profil później."
     }
   },
   "basicInfo": {
@@ -59,7 +93,10 @@
     "budget": "Budżet miesięczny",
     "budgetMin": "Od",
     "budgetMax": "Do",
-    "location": "Preferowana lokalizacja",
+    "location": "Gdzie chcesz mieszkać?",
+    "districts": "Preferowane dzielnice",
+    "otherCity": "Inne miasto",
+    "otherCityPlaceholder": "np. Katowice",
     "leaseDuration": "Okres wynajmu",
     "months": "miesięcy",
     "moveInDate": "Data wprowadzenia"
@@ -160,7 +197,10 @@
     "next": "Dalej",
     "back": "Wstecz",
     "skip": "Pomiń",
-    "saving": "Zapisywanie..."
+    "saving": "Zapisywanie...",
+    "cancel": "Anuluj",
+    "exit": "Zakończ",
+    "more": "Więcej opcji"
   },
   "edit": {
     "title": "Edytuj profil",
@@ -171,6 +211,9 @@
     "age": "Wiek",
     "bio": "O mnie",
     "changePhoto": "Dotknij, aby zmienić zdjęcie",
+    "uploading": "Przesyłanie…",
+    "photoUpdated": "Zdjęcie zaktualizowane",
+    "photoError": "Nie udało się przesłać zdjęcia",
     "save": "Zapisz zmiany",
     "permissionTitle": "Wymagane uprawnienia",
     "permissionMessage": "Proszę przyznać dostęp do zdjęć",
@@ -178,10 +221,12 @@
     "successMessage": "Profil został zaktualizowany",
     "errorTitle": "Błąd",
     "errorMessage": "Nie udało się zaktualizować profilu",
-    "dateOfBirth": "Data urodzenia"
+    "dateOfBirth": "Data urodzenia",
+    "areaError": "Nie udało się zapisać preferowanej okolicy"
   },
   "favorites": {
     "title": "Zapisane profile",
+    "savedAt": "Zapisano {{time}}",
     "loading": "Ładowanie zapisanych profili...",
     "empty": {
       "title": "Brak zapisanych profili",
@@ -191,10 +236,19 @@
   },
   "settings": {
     "title": "Ustawienia",
+    "appearance": "Wygląd",
+    "themeLight": "Jasny",
+    "themeDark": "Ciemny",
+    "themeSystem": "Systemowy",
     "general": "Ogólne",
     "language": "Język",
     "selectLanguage": "Wybierz preferowany język",
-    "notifications": "Powiadomienia",
+    "notifications": "Powiadomienia push",
+    "notificationsSubtitle": "Dopasowania, wiadomości i zainteresowanie ogłoszeniami",
+    "security": "Bezpieczeństwo",
+    "biometric": "Odblokowanie biometryczne",
+    "biometricSubtitle": "Wymagaj Face ID / odcisku palca przy otwieraniu aplikacji",
+    "biometricError": "Nie udało się zweryfikować biometrii",
     "privacy": "Prywatność",
     "privacyPolicy": "Polityka prywatności",
     "terms": "Regulamin",
@@ -204,7 +258,9 @@
     "deleteAccount": "Usuń konto",
     "deleteConfirm": "Czy na pewno chcesz usunąć swoje konto? Tej operacji nie można cofnąć.",
     "error": "Błąd",
-    "deleteError": "Nie udało się usunąć konta"
+    "deleteError": "Nie udało się usunąć konta",
+    "saveError": "Nie udało się zapisać ustawień",
+    "linkError": "Nie można otworzyć linku"
   },
   "validation": {
     "mustBe18": "Musisz mieć co najmniej 18 lat (format: RRRR-MM-DD)."

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/api';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
+import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
 
 // API URL for regular requests
 const API_URL = import.meta.env.VITE_API_URL;
@@ -42,11 +43,13 @@ const useAuthStore = create(
         set({ token, refreshToken, isAuthenticated: true });
         // Connect socket with the new token
         connectSocket(token);
+        connectChatSocket(token);
       },
 
       clearAuth: () => {
         // Disconnect socket before clearing auth
         disconnectSocket();
+        disconnectChatSocket();
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         set({
@@ -120,6 +123,7 @@ const useAuthStore = create(
           set({ user: response.data, isAuthenticated: true, isLoading: false });
           // Ensure socket is connected when user is fetched (e.g., page reload)
           connectSocket(token);
+        connectChatSocket(token);
           return response.data;
         } catch (error) {
           get().clearAuth();

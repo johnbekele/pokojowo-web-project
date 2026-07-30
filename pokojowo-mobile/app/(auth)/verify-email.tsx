@@ -3,16 +3,16 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, XCircle, AlertCircle } from 'lucide-react-native';
 
-import { Button } from '@/components/ui';
+import AuthStatusView from '@/components/feature/auth/AuthStatusView';
 import { useVerifyEmail } from '@/hooks/auth/useAuth';
-import { COLORS } from '@/lib/constants';
+import useTheme from '@/hooks/useTheme';
 
 type VerificationStatus = 'loading' | 'success' | 'error' | 'invalid';
 
 export default function VerifyEmailScreen() {
   const { t } = useTranslation('auth');
+  const { colors } = useTheme();
   const { token } = useLocalSearchParams<{ token?: string }>();
   const [status, setStatus] = useState<VerificationStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -24,61 +24,27 @@ export default function VerifyEmailScreen() {
         setStatus('invalid');
         return;
       }
-
       try {
         await verifyEmailMutation.mutateAsync(token);
         setStatus('success');
-      } catch (error: any) {
+      } catch (error) {
         setStatus('error');
-        setErrorMessage(
-          error.response?.data?.detail ||
-            t('verifyEmail.error.failed', 'Email verification failed')
-        );
+        const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail;
+        setErrorMessage(detail || t('verifyEmail.error.failed', 'Email verification failed'));
       }
     };
-
     verify();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Invalid or missing token
-  if (status === 'invalid') {
-    return (
-      <SafeAreaView className="flex-1 bg-white">
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="w-20 h-20 rounded-full bg-amber-100 items-center justify-center mb-6">
-            <AlertCircle size={48} color={COLORS.warning} />
-          </View>
-          <Text className="text-2xl font-bold text-gray-900 text-center mb-2">
-            {t('verifyEmail.invalid.title', 'Invalid Link')}
-          </Text>
-          <Text className="text-gray-500 text-center mb-8">
-            {t(
-              'verifyEmail.invalid.message',
-              'This verification link is invalid or has expired.'
-            )}
-          </Text>
-          <Button
-            variant="primary"
-            onPress={() => router.replace('/(auth)/login')}
-            fullWidth
-          >
-            {t('verifyEmail.backToLogin', 'Go to Login')}
-          </Button>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Loading state
   if (status === 'loading') {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-bg">
         <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-3xl font-bold text-primary-600 text-center mb-8">
-            Pokojowo
-          </Text>
-          <ActivityIndicator size="large" color={COLORS.primary[600]} />
-          <Text className="text-gray-500 text-center mt-4">
+          <Text className="text-3xl font-extrabold text-brand text-center mb-8">Pokojowo</Text>
+          <ActivityIndicator size="large" color={colors.brand} />
+          <Text className="text-muted text-center mt-4">
             {t('verifyEmail.verifying', 'Verifying your email...')}
           </Text>
         </View>
@@ -86,68 +52,50 @@ export default function VerifyEmailScreen() {
     );
   }
 
-  // Success state
-  if (status === 'success') {
+  if (status === 'invalid') {
     return (
-      <SafeAreaView className="flex-1 bg-white">
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="w-20 h-20 rounded-full bg-green-100 items-center justify-center mb-6">
-            <CheckCircle size={48} color={COLORS.success} />
-          </View>
-          <Text className="text-2xl font-bold text-gray-900 text-center mb-2">
-            {t('verifyEmail.success.title', 'Email Verified!')}
-          </Text>
-          <Text className="text-gray-500 text-center mb-8">
-            {t(
-              'verifyEmail.success.message',
-              'Your email has been verified successfully. You can now log in to your account.'
-            )}
-          </Text>
-          <Button
-            variant="primary"
-            onPress={() => router.replace('/(auth)/login')}
-            fullWidth
-          >
-            {t('verifyEmail.continueToLogin', 'Continue to Login')}
-          </Button>
-        </View>
-      </SafeAreaView>
+      <AuthStatusView
+        tone="warning"
+        title={t('verifyEmail.invalid.title', 'Invalid Link')}
+        message={t('verifyEmail.invalid.message', 'This verification link is invalid or has expired.')}
+        primaryAction={{
+          label: t('verifyEmail.backToLogin', 'Go to Login'),
+          onPress: () => router.replace('/(auth)/login'),
+        }}
+      />
     );
   }
 
-  // Error state
+  if (status === 'success') {
+    return (
+      <AuthStatusView
+        tone="success"
+        title={t('verifyEmail.success.title', 'Email Verified!')}
+        message={t(
+          'verifyEmail.success.message',
+          'Your email has been verified successfully. You can now log in to your account.'
+        )}
+        primaryAction={{
+          label: t('verifyEmail.continueToLogin', 'Continue to Login'),
+          onPress: () => router.replace('/(auth)/login'),
+        }}
+      />
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 items-center justify-center px-6">
-        <View className="w-20 h-20 rounded-full bg-red-100 items-center justify-center mb-6">
-          <XCircle size={48} color={COLORS.error} />
-        </View>
-        <Text className="text-2xl font-bold text-gray-900 text-center mb-2">
-          {t('verifyEmail.error.title', 'Verification Failed')}
-        </Text>
-        <Text className="text-gray-500 text-center mb-8">
-          {errorMessage ||
-            t(
-              'verifyEmail.error.message',
-              'We could not verify your email. The link may have expired.'
-            )}
-        </Text>
-        <Button
-          variant="primary"
-          onPress={() => router.replace('/(auth)/login')}
-          fullWidth
-          className="mb-3"
-        >
-          {t('verifyEmail.backToLogin', 'Go to Login')}
-        </Button>
-        <Button
-          variant="outline"
-          onPress={() => router.replace('/(auth)/signup')}
-          fullWidth
-        >
-          {t('verifyEmail.tryAgain', 'Sign Up Again')}
-        </Button>
-      </View>
-    </SafeAreaView>
+    <AuthStatusView
+      tone="error"
+      title={t('verifyEmail.error.title', 'Verification Failed')}
+      message={errorMessage || t('verifyEmail.error.message', 'We could not verify your email. The link may have expired.')}
+      primaryAction={{
+        label: t('verifyEmail.backToLogin', 'Go to Login'),
+        onPress: () => router.replace('/(auth)/login'),
+      }}
+      secondaryAction={{
+        label: t('verifyEmail.tryAgain', 'Sign Up Again'),
+        onPress: () => router.replace('/(auth)/signup'),
+      }}
+    />
   );
 }

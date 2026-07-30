@@ -90,27 +90,31 @@ export function handleNotificationResponse(
 ): void {
   const data = response.notification.request.content.data;
 
-  if (data) {
-    switch (data.type) {
-      case 'chat':
-        if (data.chatId) {
-          router.push(`/(app)/(chat)/${data.chatId}`);
-        }
-        break;
-      case 'match':
-        if (data.userId) {
-          router.push(`/(app)/(matches)/${data.userId}`);
-        }
-        break;
-      case 'listing':
-        if (data.listingId) {
-          router.push(`/(app)/(home)/listing/${data.listingId}`);
-        }
-        break;
-      default:
-        // Navigate to notifications or home
-        router.push('/(app)/(profile)/');
-    }
+  if (!data) return;
+
+  const chatId = (data.chatId ?? data.chat_id) as string | undefined;
+  const userId = (data.userId ?? data.likerId ?? data.matchedUserId) as string | undefined;
+  const listingId = (data.listingId ?? data.listing_id) as string | undefined;
+
+  switch (data.type) {
+    case 'chat':
+    case 'new_message':
+      if (chatId) router.push(`/(app)/(chat)/${chatId}`);
+      break;
+    case 'match':
+    case 'new_like':
+    case 'mutual_match':
+      if (userId) router.push(`/(app)/(matches)/profile/${userId}`);
+      else router.push('/(app)/(matches)');
+      break;
+    case 'listing':
+      if (listingId) router.push(`/(app)/(home)/listing/${listingId}`);
+      break;
+    case 'saved_search_match':
+      router.push('/(app)/(home)');
+      break;
+    default:
+      router.push('/(app)/(profile)/notifications');
   }
 }
 

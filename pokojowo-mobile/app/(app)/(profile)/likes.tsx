@@ -186,7 +186,11 @@ export default function LikesScreen() {
         return (
           <View className="px-4 gap-3">
             {mutualMatches.map((match) => (
-              <LikeCard key={match._id} match={match} type="mutual" />
+              <LikeCard
+                key={match.id || match._id || match.matched_user_id}
+                match={match}
+                type="mutual"
+              />
             ))}
           </View>
         );
