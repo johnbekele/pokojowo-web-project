@@ -4,6 +4,10 @@
 .env
 .env.*
 !.env.example
+# Per-service env files named by docker-compose.prod.yml; on the host these hold
+# live secrets, and they match none of the patterns above.
+backend.env
+chat.env
 
 # TLS material
 pokojowo-fastapi/certs/
