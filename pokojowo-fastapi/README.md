@@ -206,18 +206,14 @@ Connect to Socket.IO server at: `ws://localhost:3000/socket.io`
 
 ### Events
 
+This service handles presence and notifications only. Chat events moved to the
+`pokojowo-chat` service and are documented there.
+
 **Client to Server:**
-- `join_room` - Join a chat room
-- `leave_room` - Leave a chat room
-- `send_message` - Send a message
-- `typing` - Typing indicator
+- none — authenticate by passing `{ token: <access token> }` in the connect handshake
 
 **Server to Client:**
-- `connection` - Connection established
-- `joined_room` - Joined room confirmation
-- `left_room` - Left room confirmation
-- `new_message` - New message received
-- `user_typing` - User typing notification
+- `connection` - Connection established, with an `authenticated` flag
 - `notification` - General notifications
 
 ## Testing
