@@ -85,8 +85,6 @@ export default function AppRouter() {
             <Route path="/chat" element={<ChatList />} />
             <Route path="/chat/:chatId" element={<ChatRoom />} />
             <Route path="/chat/with/:userId" element={<ChatRoom />} />
-            {/* Landlord routes */}
-            <Route path="/landlord/dashboard" element={<LandlordDashboard />} />
             <Route
               path="/admin/verification"
               element={
@@ -95,12 +93,21 @@ export default function AppRouter() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/landlord/listings" element={<MyListings />} />
+
+            {/* Landlord routes. Convenience only: the API is what actually
+                enforces this, but a tenant landing here got a dashboard
+                rendering against the wrong account rather than a redirect. */}
+            <Route element={<ProtectedRoute requiredRole="Landlord" />}>
+              <Route path="/landlord/dashboard" element={<LandlordDashboard />} />
+              <Route path="/landlord/listings" element={<MyListings />} />
+            </Route>
           </Route>
 
           {/* Landlord routes without layout */}
-          <Route path="/landlord/listings/new" element={<CreateListing />} />
-          <Route path="/landlord/listings/:id/edit" element={<CreateListing />} />
+          <Route element={<ProtectedRoute requiredRole="Landlord" />}>
+            <Route path="/landlord/listings/new" element={<CreateListing />} />
+            <Route path="/landlord/listings/:id/edit" element={<CreateListing />} />
+          </Route>
 
         </Route>
       </Routes>

@@ -51,13 +51,22 @@ export default function ProtectedRoute({ children, requiredRole, skipProfileChec
     }
   }
 
-  // Check for required role if specified
-  if (requiredRole && user?.role) {
-    const hasRole = user.role.some(r => r.toLowerCase() === requiredRole.toLowerCase());
-    if (!hasRole) {
-      return <Navigate to="/" replace />;
+  // Check for required role if specified. A user with no role array must fail
+  // this rather than skip it, which is what the previous `&& user?.role` did.
+  if (requiredRole) {
+    const roles = (user?.role || []).map((r) => r.toLowerCase());
+    if (!roles.includes(requiredRole.toLowerCase())) {
+      // Somewhere they can actually use, and it does not confirm this route
+      // exists. Always a route the user's own role grants, so it cannot loop.
+      return <Navigate to={homeForRoles(roles)} replace />;
     }
   }
 
   return children || <Outlet />;
+}
+
+function homeForRoles(roles) {
+  if (roles.includes('landlord')) return '/landlord/dashboard';
+  if (roles.includes('tenant')) return '/likes';
+  return '/';
 }
