@@ -6,7 +6,6 @@ import socketio
 from app.core.config import settings
 from app.core.security import decode_token
 from app.models.chat import Chat
-from app.models.message import Message
 from app.services import chat_service, user_client
 
 logger = logging.getLogger(__name__)
@@ -182,7 +181,8 @@ async def send_message(sid, data):
 async def load_messages(sid, data):
     chat_id = data.get("chatId") or data.get("room")
     skip = data.get("skip", 0)
-    limit = data.get("limit", 50)
+    limit = data.get("limit", chat_service.DEFAULT_PAGE_SIZE)
+    before = data.get("before")
 
     if not chat_id:
         await sio.emit("error", {"message": "Chat ID required"}, room=sid)
@@ -198,13 +198,10 @@ async def load_messages(sid, data):
         await sio.emit("error", {"message": "Chat not found or access denied"}, room=sid)
         return
 
-    messages = await Message.find({"roomId": chat_id}).sort("createdAt").skip(skip).limit(limit).to_list()
-    messages_list = [await chat_service.format_message_with_reply(msg) for msg in messages]
-    await sio.emit(
-        "message_history",
-        {"chatId": chat_id, "messages": messages_list, "hasMore": len(messages) == limit},
-        room=sid,
+    page = await chat_service.load_message_page(
+        room_id=chat_id, limit=limit, before=before, skip=skip
     )
+    await sio.emit("message_history", {"chatId": chat_id, **page}, room=sid)
 
 
 @sio.event

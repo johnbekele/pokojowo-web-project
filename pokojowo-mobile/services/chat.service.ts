@@ -3,6 +3,7 @@ import type {
   Chat,
   ChatListItem,
   Message,
+  MessagePage,
   CreateChatData,
   CreateMessageData,
 } from '@/types/chat.types';
@@ -28,9 +29,13 @@ export const chatService = {
   deleteChat: (chatId: string) =>
     chatApi.delete(`/chat/${chatId}`),
 
-  // Get messages for a chat room
-  getMessages: (roomId: string, params?: { skip?: number; limit?: number }) =>
-    chatApi.get<Message[]>(`/messages/room/${roomId}`, { params }),
+  // Newest page of a room's messages. Pass `before` (a message ID) to page
+  // back through older ones. The array shape is the pre-envelope API, still
+  // accepted here because the app and the API deploy independently.
+  getMessages: (
+    roomId: string,
+    params?: { limit?: number; before?: string; skip?: number }
+  ) => chatApi.get<MessagePage | Message[]>(`/messages/room/${roomId}`, { params }),
 
   // Send a message
   sendMessage: (data: CreateMessageData) =>

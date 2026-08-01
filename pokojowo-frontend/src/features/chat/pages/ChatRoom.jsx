@@ -51,10 +51,10 @@ export default function ChatRoom() {
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
     queryKey: ['messages', roomId],
     queryFn: async () => {
-      console.log('FETCHING MESSAGES FROM DB for room:', roomId);
       const res = await chatApi.get(`/messages/room/${roomId}`);
-      console.log('MESSAGES FROM DB:', res.data);
-      return res.data || [];
+      // Newest page, oldest-first. The bare array is the pre-envelope API,
+      // still accepted because Vercel and the API deploy independently.
+      return Array.isArray(res.data) ? res.data : res.data?.messages ?? [];
     },
     enabled: !!roomId,
     staleTime: 0,

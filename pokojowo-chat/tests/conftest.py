@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from app.api.v1.endpoints import messages as messages_endpoint
 from app.services import chat_service
 
 
@@ -20,6 +21,58 @@ def run(coro):
     return asyncio.run(coro)
 
 
+def _matches(doc, query: dict) -> bool:
+    """Evaluate the small subset of Mongo query syntax the service uses."""
+    for key, condition in query.items():
+        if key == "$or":
+            if not any(_matches(doc, clause) for clause in condition):
+                return False
+            continue
+
+        value = getattr(doc, _FIELD_ATTRS.get(key, key))
+        if isinstance(condition, dict):
+            for operator, operand in condition.items():
+                if operator == "$lt" and not value < operand:
+                    return False
+                if operator == "$gt" and not value > operand:
+                    return False
+                if operator == "$ne" and value == operand:
+                    return False
+        elif value != condition:
+            return False
+    return True
+
+
+_FIELD_ATTRS = {"roomId": "room_id", "createdAt": "created_at", "_id": "id", "isDeleted": "is_deleted"}
+
+
+class FakeQuery:
+    """The slice of Beanie's query builder the service calls."""
+
+    def __init__(self, docs):
+        self._docs = list(docs)
+
+    def sort(self, *keys):
+        # Applied right-to-left so the leftmost key is the primary ordering.
+        for key in reversed(keys):
+            descending = key.startswith("-")
+            name = key.lstrip("-")
+            attr = _FIELD_ATTRS.get(name, name)
+            self._docs.sort(key=lambda d: getattr(d, attr), reverse=descending)
+        return self
+
+    def skip(self, n):
+        self._docs = self._docs[n:]
+        return self
+
+    def limit(self, n):
+        self._docs = self._docs[:n]
+        return self
+
+    async def to_list(self):
+        return list(self._docs)
+
+
 class FakeMessage:
     """Stand-in for the Message document, backed by a class-level registry."""
 
@@ -28,7 +81,9 @@ class FakeMessage:
 
     def __init__(self, content, sender, room_id, reply_to=None, created_at=None, is_deleted=False):
         type(self)._seq += 1
-        self.id = f"m{type(self)._seq}"
+        # Zero padded so lexicographic order matches insertion order, which the
+        # _id tie-break in keyset paging relies on.
+        self.id = f"m{type(self)._seq:05d}"
         self.content = content
         self.sender = sender
         self.room_id = room_id
@@ -48,6 +103,10 @@ class FakeMessage:
     @classmethod
     async def get(cls, message_id):
         return cls.store.get(message_id)
+
+    @classmethod
+    def find(cls, query):
+        return FakeQuery(doc for doc in cls.store.values() if _matches(doc, query))
 
 
 class FakeChat:
@@ -97,6 +156,9 @@ def fake_documents(monkeypatch, blocked_pairs):
 
     monkeypatch.setattr(chat_service, "Message", FakeMessage)
     monkeypatch.setattr(chat_service, "Chat", FakeChat)
+    # The endpoint module holds its own references for its own auth checks.
+    monkeypatch.setattr(messages_endpoint, "Chat", FakeChat)
+    monkeypatch.setattr(messages_endpoint, "Message", FakeMessage)
     monkeypatch.setattr(
         chat_service,
         "user_client",
