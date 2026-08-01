@@ -12,17 +12,35 @@ router = APIRouter()
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_chat(chat_data: ChatCreate, current_user: TokenUser = Depends(require_verified)):
-    if current_user.id not in chat_data.participants:
-        chat_data.participants.append(current_user.id)
+    participants = list(dict.fromkeys([*chat_data.participants, current_user.id]))
 
-    for pid in chat_data.participants:
-        if pid == current_user.id:
-            continue
+    # PRODUCT_CONTEXT.md specifies one-to-one messaging, and every enrichment
+    # path picks a single counterpart, so a third participant would be invisible
+    # to the other two rather than raising. Group chats need their own model.
+    if len(participants) != 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A chat must have exactly two participants",
+        )
+
+    others = [pid for pid in participants if pid != current_user.id]
+
+    # Without this a chat can be created against a deleted or made-up ID,
+    # leaving a conversation whose counterpart renders as null and which no
+    # user-facing action can remove.
+    profiles = await user_client.get_users_batch(others)
+    if any(pid not in profiles for pid in others):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Participant not found",
+        )
+
+    for pid in others:
         if await user_client.is_blocked_between(current_user.id, pid):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You cannot chat with this user")
 
     existing_chat = await Chat.find_one({
-        "participants": {"$all": chat_data.participants, "$size": len(chat_data.participants)}
+        "participants": {"$all": participants, "$size": len(participants)}
     })
     if existing_chat:
         return {
@@ -35,7 +53,7 @@ async def create_chat(chat_data: ChatCreate, current_user: TokenUser = Depends(r
             "updatedAt": existing_chat.updated_at,
         }
 
-    chat = chat_service.new_chat_document(chat_data.participants)
+    chat = chat_service.new_chat_document(participants)
     await chat.insert()
     return {
         "message": "Chat created successfully",
@@ -98,7 +116,12 @@ async def delete_chat(chat_id: str, current_user: TokenUser = Depends(get_curren
 
 
 @router.get("/with/{user_id}", response_model=dict)
-async def get_chat_with_user(user_id: str, current_user: TokenUser = Depends(get_current_user)):
+async def get_chat_with_user(user_id: str, current_user: TokenUser = Depends(require_verified)):
+    """Get or create the one-to-one chat with a user.
+
+    Verified-only, matching POST / and the socket send path; this route creates
+    chats too, so exempting it would leave that gate bypassable.
+    """
     profiles = await user_client.get_users_batch([user_id])
     profile = profiles.get(user_id)
     if not profile:

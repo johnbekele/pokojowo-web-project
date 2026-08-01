@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from app.api.v1.endpoints import chat as chat_endpoint
 from app.api.v1.endpoints import messages as messages_endpoint
 from app.services import chat_service
 
@@ -140,6 +141,17 @@ class FakeChat:
     async def get(cls, chat_id):
         return cls.store.get(chat_id)
 
+    @classmethod
+    async def find_one(cls, query):
+        """Supports the participant match used to find an existing chat."""
+        wanted = query.get("participants", {})
+        members = set(wanted.get("$all", []))
+        size = wanted.get("$size")
+        for chat in cls.store.values():
+            if set(chat.participants) >= members and (size is None or len(chat.participants) == size):
+                return chat
+        return None
+
 
 @pytest.fixture(autouse=True)
 def _reset_stores():
@@ -158,30 +170,36 @@ def blocked_pairs():
     return set()
 
 
+@pytest.fixture
+def known_users():
+    """Mutable set of user IDs the main service would resolve a profile for."""
+    return {"alice", "bob", "carol"}
+
+
 @pytest.fixture(autouse=True)
-def fake_documents(monkeypatch, blocked_pairs):
+def fake_documents(monkeypatch, blocked_pairs, known_users):
     """Point the service module at the in-memory documents and a stub user API."""
 
     async def is_blocked_between(a, b):
         return (a, b) in blocked_pairs or (b, a) in blocked_pairs
 
-    monkeypatch.setattr(chat_service, "Message", FakeMessage)
-    monkeypatch.setattr(chat_service, "Chat", FakeChat)
-    # The endpoint module holds its own references for its own auth checks.
-    monkeypatch.setattr(messages_endpoint, "Chat", FakeChat)
-    monkeypatch.setattr(messages_endpoint, "Message", FakeMessage)
-    monkeypatch.setattr(
-        chat_service,
-        "user_client",
-        SimpleNamespace(
-            is_blocked_between=is_blocked_between,
-            get_users_batch=lambda ids: _empty_profiles(ids),
-        ),
+    async def get_users_batch(ids):
+        return {uid: {"id": uid, "firstname": uid.title()} for uid in ids if uid in known_users}
+
+    stub_users = SimpleNamespace(
+        is_blocked_between=is_blocked_between,
+        get_users_batch=get_users_batch,
     )
 
-
-async def _empty_profiles(ids):
-    return {}
+    monkeypatch.setattr(chat_service, "Message", FakeMessage)
+    monkeypatch.setattr(chat_service, "Chat", FakeChat)
+    monkeypatch.setattr(chat_service, "user_client", stub_users)
+    # The endpoint modules hold their own references for their own checks.
+    monkeypatch.setattr(messages_endpoint, "Chat", FakeChat)
+    monkeypatch.setattr(messages_endpoint, "Message", FakeMessage)
+    monkeypatch.setattr(chat_endpoint, "Chat", FakeChat)
+    monkeypatch.setattr(chat_endpoint, "Message", FakeMessage)
+    monkeypatch.setattr(chat_endpoint, "user_client", stub_users)
 
 
 @pytest.fixture
