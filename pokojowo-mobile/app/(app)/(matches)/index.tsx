@@ -15,6 +15,7 @@ import {
 import { LoadingSpinner, EmptyState } from '@/components/ui';
 import { useMatches, useRefreshMatches } from '@/hooks/matching/useMatching';
 import { useLikeUser } from '@/hooks/likes/useLikes';
+import { useOpenChatWithUser } from '@/hooks/chat/useOpenChatWithUser';
 import type { MatchResult, MatchingFilters } from '@/types/matching.types';
 import useTheme from '@/hooks/useTheme';
 import useUIStore from '@/stores/uiStore';
@@ -35,6 +36,7 @@ export default function MatchesScreen() {
   const { data: matchingData, isLoading, error } = useMatches(filters);
   const { mutate: refreshMatches, isPending: isRefreshing } = useRefreshMatches();
   const { mutate: likeUser } = useLikeUser();
+  const { openChat } = useOpenChatWithUser();
 
   const activeFilterCount = [
     filters.location,
@@ -85,10 +87,10 @@ export default function MatchesScreen() {
 
   const handleMessageFromModal = useCallback(() => {
     if (selectedMatch) {
-      router.push(`/(app)/(chat)/${selectedMatch.user_id}`);
+      openChat(selectedMatch.user_id);
       setShowDetailModal(false);
     }
-  }, [selectedMatch, router]);
+  }, [selectedMatch, openChat]);
 
   const handleSendMessage = useCallback(() => {
     if (mutualMatchUser) {
@@ -96,11 +98,11 @@ export default function MatchesScreen() {
         ? mutualMatchUser.id
         : (mutualMatchUser as { _id?: string })._id;
       if (userId) {
-        router.push(`/(app)/(chat)/${userId}`);
+        openChat(userId);
       }
       setShowMutualModal(false);
     }
-  }, [mutualMatchUser, router]);
+  }, [mutualMatchUser, openChat]);
 
   if (isLoading) {
     return (

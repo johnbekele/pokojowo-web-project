@@ -1,10 +1,11 @@
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { MapPin, MessageSquare, Handshake } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, Badge, Button } from '@/components/ui';
 import { useLikeUser } from '@/hooks/likes/useLikes';
+import { useOpenChatWithUser } from '@/hooks/chat/useOpenChatWithUser';
 import type { Like, MutualMatch } from '@/types/matching.types';
 import type { User } from '@/types/user.types';
 import { COLORS } from '@/lib/constants';
@@ -20,6 +21,7 @@ export default function LikeCard({ like, match, type, onLikeBack }: LikeCardProp
   const { t } = useTranslation('matching');
   const router = useRouter();
   const { mutate: likeUser, isPending: isLiking } = useLikeUser();
+  const { openChat, isOpeningChat } = useOpenChatWithUser();
 
   const user = like?.user || match?.user;
   const matchedUserId =
@@ -49,7 +51,7 @@ export default function LikeCard({ like, match, type, onLikeBack }: LikeCardProp
   };
 
   const handleChat = () => {
-    router.push(`/(app)/(chat)/${userId}`);
+    openChat(userId);
   };
 
   const getTimeText = () => {
@@ -139,9 +141,16 @@ export default function LikeCard({ like, match, type, onLikeBack }: LikeCardProp
         {isMutual && (
           <TouchableOpacity
             onPress={handleChat}
-            className="bg-primary-500 rounded-lg py-2.5 px-4 flex-row items-center justify-center"
+            disabled={isOpeningChat}
+            className={`bg-primary-500 rounded-lg py-2.5 px-4 flex-row items-center justify-center ${
+              isOpeningChat ? 'opacity-60' : ''
+            }`}
           >
-            <MessageSquare size={16} color="white" />
+            {isOpeningChat ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <MessageSquare size={16} color="white" />
+            )}
             <Text className="text-white font-medium ml-2">
               {t('card.chat', 'Chat')}
             </Text>
