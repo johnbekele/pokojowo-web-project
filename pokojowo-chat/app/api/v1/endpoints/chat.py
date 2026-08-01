@@ -35,7 +35,7 @@ async def create_chat(chat_data: ChatCreate, current_user: TokenUser = Depends(r
             "updatedAt": existing_chat.updated_at,
         }
 
-    chat = Chat(participants=chat_data.participants, messages=[], last_message=None)
+    chat = chat_service.new_chat_document(chat_data.participants)
     await chat.insert()
     return {
         "message": "Chat created successfully",
@@ -66,6 +66,19 @@ async def get_chat_by_id(chat_id: str, current_user: TokenUser = Depends(get_cur
     if current_user.id not in chat.participants:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a participant in this chat")
     return await chat_service.enrich_chat_detail(chat, current_user.id)
+
+
+@router.post("/{chat_id}/read", response_model=dict)
+async def mark_chat_read(chat_id: str, current_user: TokenUser = Depends(get_current_user)):
+    """Clear the caller's unread count for this chat."""
+    chat = await Chat.get(chat_id)
+    if not chat:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found")
+    if current_user.id not in chat.participants:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a participant in this chat")
+
+    read_at = await chat_service.mark_chat_read(chat, current_user.id)
+    return {"chatId": chat_id, "readAt": read_at.isoformat(), "unreadCount": 0}
 
 
 @router.delete("/{chat_id}")
@@ -101,7 +114,7 @@ async def get_chat_with_user(user_id: str, current_user: TokenUser = Depends(get
     if chat:
         return await chat_service.enrich_chat_detail(chat, current_user.id)
 
-    new_chat = Chat(participants=participants, messages=[], last_message=None)
+    new_chat = chat_service.new_chat_document(participants)
     await new_chat.insert()
     return {
         "_id": str(new_chat.id),
@@ -110,5 +123,6 @@ async def get_chat_with_user(user_id: str, current_user: TokenUser = Depends(get
         "otherUser": other_user,
         "messages": new_chat.messages,
         "lastMessage": new_chat.last_message,
+        "unreadCount": 0,
         "updatedAt": new_chat.updated_at.isoformat() if new_chat.updated_at else None,
     }

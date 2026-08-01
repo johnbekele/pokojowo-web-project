@@ -24,6 +24,7 @@ import {
   useDeleteMessage,
   CHAT_KEYS,
 } from '@/hooks/chat/useChat';
+import { useMarkChatRead } from '@/hooks/chat/useMarkChatRead';
 import useAuthStore from '@/stores/authStore';
 import {
   getChatSocket,
@@ -54,6 +55,7 @@ export default function ChatRoomScreen() {
   const { data: messages, isLoading: isMessagesLoading, refetch } = useMessages(id);
   const { mutate: sendMessage, isPending: isSending } = useSendMessage();
   const { mutate: deleteMessage } = useDeleteMessage();
+  const { mutate: markRead } = useMarkChatRead();
 
   const otherUser = chat?.otherUser;
   const currentUserId = user?.id;
@@ -68,6 +70,8 @@ export default function ChatRoomScreen() {
     const handleNewMessage = ({ chatId }: { chatId: string; message: Message }) => {
       if (chatId === id) {
         refetch();
+        // Arriving while the conversation is on screen counts as read.
+        markRead(id);
         queryClient.invalidateQueries({ queryKey: CHAT_KEYS.list });
       }
     };
@@ -103,7 +107,11 @@ export default function ChatRoomScreen() {
       socket?.off('typing', handleTyping);
       socket?.off('message_deleted', handleDeleted);
     };
-  }, [id, currentUserId, refetch, queryClient]);
+  }, [id, currentUserId, refetch, queryClient, markRead]);
+
+  useEffect(() => {
+    if (id) markRead(id);
+  }, [id, markRead]);
 
   const handleSendMessage = useCallback(() => {
     const content = messageText.trim();

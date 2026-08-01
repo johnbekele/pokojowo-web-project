@@ -30,6 +30,65 @@ async def format_other_user(profile: Optional[dict]) -> Optional[dict]:
     }
 
 
+def new_chat_document(participants: list[str]) -> Chat:
+    """A fresh chat with every participant's read cursor started at now.
+
+    Seeding at creation is what makes the first message that arrives count as
+    unread, rather than being swallowed by an absent-cursor default.
+    """
+    now = datetime.utcnow()
+    return Chat(
+        participants=participants,
+        messages=[],
+        last_message=None,
+        last_read={pid: now for pid in participants},
+    )
+
+
+async def ensure_read_cursor(chat: Chat, user_id: str) -> bool:
+    """Give a participant a starting cursor if they have none.
+
+    Chats that predate read tracking would otherwise report their whole history
+    as unread the first time a client asks. Returns whether it wrote.
+    """
+    if user_id in chat.last_read:
+        return False
+    chat.last_read[user_id] = datetime.utcnow()
+    await chat.save()
+    return True
+
+
+async def unread_count_for(chat: Chat, user_id: str) -> int:
+    """Messages from someone else, since this user last read the chat."""
+    cursor = chat.last_read.get(user_id)
+    if cursor is None:
+        return 0
+    return await Message.find(
+        {
+            "roomId": str(chat.id),
+            "createdAt": {"$gt": cursor},
+            "sender": {"$ne": user_id},
+            "isDeleted": {"$ne": True},
+        }
+    ).count()
+
+
+async def mark_chat_read(chat: Chat, user_id: str) -> datetime:
+    """Advance the caller's read cursor and tell the other participants."""
+    read_at = datetime.utcnow()
+    chat.last_read[user_id] = read_at
+    await chat.save()
+
+    from app.core.socket import emit_to_participants
+
+    await emit_to_participants(
+        "chat_read",
+        {"chatId": str(chat.id), "userId": user_id, "readAt": read_at.isoformat()},
+        chat.participants,
+    )
+    return read_at
+
+
 async def enrich_chat_list_item(chat: Chat, current_user_id: str) -> dict:
     other_user_id = next((p for p in chat.participants if p != current_user_id), None)
     profiles = await user_client.get_users_batch([other_user_id] if other_user_id else [])
@@ -46,12 +105,15 @@ async def enrich_chat_list_item(chat: Chat, current_user_id: str) -> dict:
                 "createdAt": last_msg.created_at.isoformat() if last_msg.created_at else None,
             }
 
+    await ensure_read_cursor(chat, current_user_id)
+
     return {
         "_id": str(chat.id),
         "id": str(chat.id),
         "participants": chat.participants,
         "otherUser": other_user,
         "lastMessage": last_message_data,
+        "unreadCount": await unread_count_for(chat, current_user_id),
         "updatedAt": chat.updated_at.isoformat() if chat.updated_at else None,
     }
 
@@ -61,6 +123,8 @@ async def enrich_chat_detail(chat: Chat, current_user_id: str) -> dict:
     profiles = await user_client.get_users_batch([other_user_id] if other_user_id else [])
     other_user = await format_other_user(profiles.get(other_user_id) if other_user_id else None)
 
+    await ensure_read_cursor(chat, current_user_id)
+
     return {
         "_id": str(chat.id),
         "id": str(chat.id),
@@ -68,6 +132,7 @@ async def enrich_chat_detail(chat: Chat, current_user_id: str) -> dict:
         "otherUser": other_user,
         "messages": chat.messages,
         "lastMessage": chat.last_message,
+        "unreadCount": await unread_count_for(chat, current_user_id),
         "updatedAt": chat.updated_at.isoformat() if chat.updated_at else None,
     }
 

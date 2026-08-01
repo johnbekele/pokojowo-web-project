@@ -72,6 +72,9 @@ class FakeQuery:
     async def to_list(self):
         return list(self._docs)
 
+    async def count(self):
+        return len(self._docs)
+
 
 class FakeMessage:
     """Stand-in for the Message document, backed by a class-level registry."""
@@ -110,17 +113,24 @@ class FakeMessage:
 
 
 class FakeChat:
-    """Stand-in for the Chat document."""
+    """Stand-in for the Chat document; mirrors the real keyword signature."""
 
     store: dict = {}
+    _seq = 0
 
-    def __init__(self, chat_id, participants):
-        self.id = chat_id
+    def __init__(self, participants, messages=None, last_message=None, last_read=None, id=None):
+        type(self)._seq += 1
+        self.id = id or f"c{type(self)._seq:05d}"
         self.participants = list(participants)
-        self.messages = []
-        self.last_message = None
+        self.messages = list(messages or [])
+        self.last_message = last_message
+        self.last_read = dict(last_read or {})
         self.updated_at = None
         self.save_count = 0
+
+    async def insert(self):
+        type(self).store[self.id] = self
+        return self
 
     async def save(self):
         self.save_count += 1
@@ -136,6 +146,7 @@ def _reset_stores():
     FakeMessage.store.clear()
     FakeMessage._seq = 0
     FakeChat.store.clear()
+    FakeChat._seq = 0
     yield
     FakeMessage.store.clear()
     FakeChat.store.clear()
@@ -189,8 +200,11 @@ def emitted(monkeypatch):
 
 @pytest.fixture
 def chat():
-    """A two-participant chat registered in the fake store."""
-    made = FakeChat("c1", ["alice", "bob"])
+    """A two-participant chat registered in the fake store.
+
+    No read cursors, matching a chat created before read tracking existed.
+    """
+    made = FakeChat(participants=["alice", "bob"], id="c1")
     FakeChat.store["c1"] = made
     return made
 
