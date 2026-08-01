@@ -29,6 +29,12 @@ export const chatService = {
   deleteChat: (chatId: string) =>
     chatApi.delete(`/chat/${chatId}`),
 
+  // Clear this chat's unread count for the current user
+  markChatRead: (chatId: string) =>
+    chatApi.post<{ chatId: string; readAt: string; unreadCount: number }>(
+      `/chat/${chatId}/read`
+    ),
+
   // Newest page of a room's messages. Pass `before` (a message ID) to page
   // back through older ones. The array shape is the pre-envelope API, still
   // accepted here because the app and the API deploy independently.

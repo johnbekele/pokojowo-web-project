@@ -60,6 +60,20 @@ export default function ChatRoom() {
     staleTime: 0,
   });
 
+  // Clear this conversation's unread badge in the chat list. Idempotent, so it
+  // is safe on every open and on each message that arrives while it is open.
+  const markRead = useCallback(() => {
+    if (!roomId) return;
+    chatApi
+      .post(`/chat/${roomId}/read`)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['chats'] }))
+      .catch(() => {});
+  }, [roomId, queryClient]);
+
+  useEffect(() => {
+    markRead();
+  }, [markRead]);
+
   // Scroll to a specific message
   const scrollToMessage = useCallback((messageId) => {
     const element = document.getElementById(`message-${messageId}`);
@@ -109,14 +123,16 @@ export default function ChatRoom() {
     socketRef.current = socket;
 
     const handleNewMessage = (data) => {
-      console.log('SOCKET: new_message received', data);
       if (data.chatId === roomId && data.message) {
+        const arrivedFrom = data.message.sender || data.message.senderId;
+        if (arrivedFrom !== currentUserId) {
+          markRead();
+        }
         queryClient.setQueryData(['messages', roomId], (old = []) => {
           const msgId = data.message._id || data.message.id;
-          const senderId = data.message.sender || data.message.senderId;
 
           // If this is our own message, remove the optimistic version
-          if (senderId === currentUserId) {
+          if (arrivedFrom === currentUserId) {
             // Filter out any pending messages with matching content (optimistic)
             const filtered = old.filter((m) => {
               if (m.isPending && m.content === data.message.content) {
@@ -198,7 +214,7 @@ export default function ChatRoom() {
         socket.emit('leave_chat', { chatId: roomId });
       }
     };
-  }, [roomId, queryClient]);
+  }, [roomId, queryClient, currentUserId, markRead]);
 
   // 4. Scroll to bottom when messages change
   useEffect(() => {

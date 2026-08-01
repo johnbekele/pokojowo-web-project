@@ -205,6 +205,25 @@ async def load_messages(sid, data):
 
 
 @sio.event
+async def mark_read(sid, data):
+    chat_id = data.get("chatId") or data.get("room")
+    user_id = await get_user_from_sid(sid)
+    if not chat_id:
+        await sio.emit("error", {"message": "Chat ID required"}, room=sid)
+        return
+    if not user_id:
+        await sio.emit("error", {"message": "Authentication required"}, room=sid)
+        return
+
+    chat = await Chat.get(chat_id)
+    if not chat or user_id not in chat.participants:
+        await sio.emit("error", {"message": "Chat not found or access denied"}, room=sid)
+        return
+
+    await chat_service.mark_chat_read(chat, user_id)
+
+
+@sio.event
 async def typing(sid, data):
     chat_id = data.get("chatId") or data.get("room")
     user_id = await get_user_from_sid(sid)
