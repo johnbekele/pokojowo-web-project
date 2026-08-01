@@ -1,7 +1,21 @@
 import * as React from "react";
 
-const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+// A small stack, so two quick actions do not silently drop the first message.
+const TOAST_LIMIT = 3;
+
+// How long a closed toast lingers in state before being dropped. This is only
+// cleanup after the exit animation — it is not the visible duration, which is
+// the `duration` below, handed to Radix. It was 1,000,000ms, which held a
+// timer and the toast object for 16 minutes after each dismissal.
+const TOAST_REMOVE_DELAY = 1000;
+
+// Long enough to read a short confirmation without lingering.
+const DEFAULT_DURATION = 5000;
+
+// Errors say something went wrong and often what to do about it, so they get
+// noticeably longer. Callers wanting one to stay until dismissed can pass
+// duration: Infinity.
+const ERROR_DURATION = 10000;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -112,6 +126,7 @@ function toast({ ...props }) {
   dispatch({
     type: actionTypes.ADD_TOAST,
     toast: {
+      duration: props.variant === 'destructive' ? ERROR_DURATION : DEFAULT_DURATION,
       ...props,
       id,
       open: true,

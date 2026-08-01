@@ -6,10 +6,12 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/useToast";
 
 export function Toaster() {
   const { toasts } = useToast();
+  const { t } = useTranslation('common');
 
   return (
     <ToastProvider>
@@ -21,7 +23,7 @@ export function Toaster() {
               {description && <ToastDescription>{description}</ToastDescription>}
             </div>
             {action}
-            <ToastClose />
+            <ToastClose label={t('actions.closeNotification', 'Close notification')} />
           </Toast>
         );
       })}
