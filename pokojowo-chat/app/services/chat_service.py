@@ -105,7 +105,25 @@ async def create_message_in_chat(
     chat.updated_at = datetime.utcnow()
     await chat.save()
 
+    await broadcast_new_message(message, reply_to_data, chat.participants)
+
     return message, reply_to_data
+
+
+async def broadcast_new_message(
+    message: Message,
+    reply_to_data: Optional[dict],
+    participants: list[str],
+) -> None:
+    """Push a new message to participants over Socket.IO.
+
+    Imported late because app.core.socket imports this module at import time;
+    this mirrors how the main service reaches send_notification.
+    """
+    from app.core.socket import emit_to_participants
+
+    payload = {"chatId": message.room_id, "message": message_to_dict(message, reply_to_data)}
+    await emit_to_participants("new_message", payload, participants)
 
 
 def message_to_dict(message: Message, reply_to_data: Optional[dict] = None) -> dict:
@@ -147,4 +165,11 @@ async def soft_delete_message(message_id: str, user_id: str) -> tuple[str, str]:
     message.is_deleted = True
     message.deleted_at = datetime.utcnow()
     await message.save()
+
+    from app.core.socket import emit_to_participants
+
+    chat = await Chat.get(message.room_id)
+    payload = {"chatId": message.room_id, "messageId": message_id}
+    await emit_to_participants("message_deleted", payload, chat.participants if chat else [user_id])
+
     return message.room_id, message_id
