@@ -1,0 +1,43 @@
+# The Dockerfile uses `COPY . .`, so anything not excluded here is baked into
+# the published image.
+
+# Secrets
+.env*
+
+# TLS material
+certs/
+
+# Python bytecode / build artifacts
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv
+venv/
+ENV/
+
+# VCS and tooling
+.git
+.gitignore
+.dockerignore
+.vscode
+.idea
+
+# Docs
+*.md
+!README.md
+
+# Tests and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local noise
+.DS_Store
+*.log

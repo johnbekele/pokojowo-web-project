@@ -77,6 +77,9 @@ web_modules/
 .env
 .env.*
 !.env.example
+# Vite inlines VITE_* values into the public bundle, so this file holds no
+# secrets and is deliberately tracked.
+!.env.production
 .env.development.local
 .env.test.local
 .env.production.local

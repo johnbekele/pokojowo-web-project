@@ -18,8 +18,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.env
-.env.local
+# Dockerfile uses `COPY . .`; .env.production was not matched by `.env`/`.env.local`.
+# certs/ is deliberately NOT excluded here: Dockerfile.dev copies corporate-ca.crt.
+.env*
 .venv
 venv/
 ENV/
