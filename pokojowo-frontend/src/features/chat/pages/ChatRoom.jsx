@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import SafetyActions from '@/components/shared/SafetyActions';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import {
   untrackChatRoom,
 } from '@/lib/chatSocket';
 import useAuthStore from '@/stores/authStore';
+import useOlderMessages from '@/hooks/useOlderMessages';
 import MessageBubble from '../components/MessageBubble';
 import ReplyPreview from '../components/ReplyPreview';
 
@@ -59,6 +60,13 @@ export default function ChatRoom() {
     enabled: !!roomId,
     staleTime: 0,
   });
+
+  const { older, isLoadingOlder, handleScroll } = useOlderMessages(
+    roomId,
+    messages,
+    messagesContainerRef
+  );
+  const thread = useMemo(() => [...older, ...messages], [older, messages]);
 
   // Clear this conversation's unread badge in the chat list. Idempotent, so it
   // is safe on every open and on each message that arrives while it is open.
@@ -358,6 +366,7 @@ export default function ChatRoom() {
       {/* Messages */}
       <div
         ref={messagesContainerRef}
+        onScroll={handleScroll}
         className="relative flex-1 overflow-y-auto bg-surface-canvas px-4 py-6 md:px-6"
       >
         <div
@@ -369,7 +378,7 @@ export default function ChatRoom() {
             <Loader2 size={22} className="animate-spin text-accent" />
             <p className="mt-2 text-sm text-muted-foreground">{t('loadingMessages')}</p>
           </div>
-        ) : messages.length === 0 ? (
+        ) : thread.length === 0 ? (
           <div className="relative flex flex-col items-center justify-center py-16 text-center">
             <span className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-surface-paper text-muted-foreground">
               <Send className="h-5 w-5" />
@@ -379,7 +388,12 @@ export default function ChatRoom() {
           </div>
         ) : (
           <>
-            {messages.map((msg, idx) => {
+            {isLoadingOlder && (
+              <div className="relative flex justify-center pb-4">
+                <Loader2 size={18} className="animate-spin text-accent" />
+              </div>
+            )}
+            {thread.map((msg, idx) => {
               const senderId = msg.sender || msg.senderId;
               const isMine = senderId === currentUserId;
               return (

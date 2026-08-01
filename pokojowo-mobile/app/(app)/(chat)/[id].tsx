@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import {
   CHAT_KEYS,
 } from '@/hooks/chat/useChat';
 import { useMarkChatRead } from '@/hooks/chat/useMarkChatRead';
+import { useOlderMessages, MESSAGE_PAGE_SIZE } from '@/hooks/chat/useOlderMessages';
 import useAuthStore from '@/stores/authStore';
 import {
   getChatSocket,
@@ -53,13 +54,25 @@ export default function ChatRoomScreen() {
   const peerTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: chat, isLoading: isChatLoading } = useChat(id);
-  const { data: messages, isLoading: isMessagesLoading, refetch } = useMessages(id);
+  const {
+    data: messages,
+    isLoading: isMessagesLoading,
+    refetch,
+  } = useMessages(id, { limit: MESSAGE_PAGE_SIZE });
+  const { older, isLoadingOlder, loadOlder } = useOlderMessages(id, messages);
   const { mutate: sendMessage, isPending: isSending } = useSendMessage();
   const { mutate: deleteMessage } = useDeleteMessage();
   const { mutate: markRead } = useMarkChatRead();
 
   const otherUser = chat?.otherUser;
   const currentUserId = user?.id;
+
+  // The list is `inverted`, which renders index 0 at the bottom, so it needs
+  // newest-first. Both message sources are chronological.
+  const thread = useMemo(
+    () => [...older, ...(messages ?? [])].reverse(),
+    [older, messages]
+  );
 
   // Real-time: join the chat room and subscribe to socket events. Event names
   // and payload shapes are aligned with the backend (see app/core/socket.py):
@@ -253,10 +266,21 @@ export default function ChatRoomScreen() {
         {/* Messages */}
         <FlatList
           ref={flatListRef}
-          data={messages || []}
+          data={thread}
           renderItem={renderMessage}
           keyExtractor={(item, index) => item._id || `msg-${index}`}
           inverted
+          // The end of an inverted list is the top of the thread, so this is
+          // "scrolled back far enough, fetch older messages".
+          onEndReached={loadOlder}
+          onEndReachedThreshold={0.4}
+          ListFooterComponent={
+            isLoadingOlder ? (
+              <View className="py-3">
+                <LoadingSpinner />
+              </View>
+            ) : null
+          }
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
