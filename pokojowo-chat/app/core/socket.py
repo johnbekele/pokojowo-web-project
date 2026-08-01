@@ -40,7 +40,7 @@ async def connect(sid, environ, auth=None):
         return True
 
     payload = decode_token(token)
-    if not payload or not payload.get("user_id"):
+    if not payload or payload.get("type") != "access" or not payload.get("user_id"):
         await sio.emit(
             "connection",
             {"status": "connected", "authenticated": False, "error": "Invalid token", "sid": sid},
