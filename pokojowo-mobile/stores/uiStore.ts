@@ -89,7 +89,9 @@ const useUIStore = create<UIState>()(
             ...state.toasts,
             {
               id: Date.now() + Math.floor(Math.random() * 1000),
-              duration: 3000,
+              // No duration default here: ToastHost picks one from the type, so
+              // errors stay up longer than confirmations. Callers can still
+              // pass an explicit duration.
               ...toast,
             },
           ].slice(-2), // cap visible toasts at 2

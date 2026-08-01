@@ -10,6 +10,8 @@ interface ToastProps {
   title?: string;
   message: string;
   onDismiss?: () => void;
+  /** Screen-reader label for the dismiss control. */
+  dismissLabel?: string;
 }
 
 const accent: Record<ToastType, string> = {
@@ -23,7 +25,13 @@ const accent: Record<ToastType, string> = {
  * Presentational toast card. The queue/animation host lives in
  * components/shared/ToastHost.tsx (see issue #89).
  */
-export default function Toast({ type = 'info', title, message, onDismiss }: ToastProps) {
+export default function Toast({
+  type = 'info',
+  title,
+  message,
+  onDismiss,
+  dismissLabel = 'Close notification',
+}: ToastProps) {
   const { colors } = useTheme();
 
   const iconColor = {
@@ -55,6 +63,8 @@ export default function Toast({ type = 'info', title, message, onDismiss }: Toas
       {onDismiss && (
         <TouchableOpacity
           onPress={onDismiss}
+          accessibilityRole="button"
+          accessibilityLabel={dismissLabel}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <X size={18} color={colors.muted} />

@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import api from '@/lib/api';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
+import { clearSessionData } from '@/lib/sessionTeardown';
 
 // API URL for regular requests
 const API_URL = import.meta.env.VITE_API_URL;
@@ -59,6 +60,10 @@ const useAuthStore = create(
           isAuthenticated: false,
           error: null,
         });
+        // Emptying this store is not enough: the query cache and the feature
+        // stores still hold the signed-out user's shortlists, likes and viewed
+        // listings, and nothing here reloads the page.
+        clearSessionData();
       },
 
       // Login with email/password

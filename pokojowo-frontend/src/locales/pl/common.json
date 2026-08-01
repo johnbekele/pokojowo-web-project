@@ -41,6 +41,7 @@
     "search": "Szukaj",
     "filter": "Filtruj",
     "clear": "Wyczyść",
+    "closeNotification": "Zamknij powiadomienie",
     "loading": "Ładowanie...",
     "retry": "Ponów",
     "viewAll": "Zobacz wszystko",
@@ -61,7 +62,13 @@
     "network": "Błąd sieci. Sprawdź połączenie.",
     "unauthorized": "Zaloguj się, aby kontynuować.",
     "forbidden": "Nie masz uprawnień do tej akcji.",
-    "notFound": "Żądany zasób nie został znaleziony."
+    "notFound": "Żądany zasób nie został znaleziony.",
+    "boundaryTitle": "Coś poszło nie tak",
+    "boundaryBody": "Ta część strony nie została wczytana. Spróbuj ponownie lub wróć na stronę główną.",
+    "staleBuildTitle": "Dostępna jest nowa wersja",
+    "staleBuildBody": "Odśwież stronę, aby wczytać najnowszą wersję.",
+    "reload": "Odśwież stronę",
+    "goHome": "Strona główna"
   },
   "empty": {
     "noData": "Brak danych",
