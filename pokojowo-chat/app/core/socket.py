@@ -1,6 +1,5 @@
 """Chat-only Socket.IO server."""
 import logging
-from datetime import datetime
 
 import socketio
 
@@ -28,6 +27,18 @@ async def get_user_from_sid(sid: str) -> str | None:
 
 async def get_sids_for_user(user_id: str) -> list:
     return [sid for sid, uid in connected_users.items() if uid == user_id]
+
+
+async def emit_to_participants(event: str, payload: dict, participants: list[str]) -> None:
+    """Deliver an event to every live session of every participant.
+
+    Addressing sessions directly rather than emitting to the chat room reaches a
+    participant sitting on the chat list who never ran join_chat, and stops
+    anyone receiving two copies for being both a room member and a participant.
+    """
+    for user_id in participants:
+        for sid in await get_sids_for_user(user_id):
+            await sio.emit(event, payload, room=sid)
 
 
 @sio.event
@@ -143,7 +154,7 @@ async def send_message(sid, data):
         return
 
     try:
-        message, reply_to_data = await chat_service.create_message_in_chat(
+        message, _ = await chat_service.create_message_in_chat(
             chat_id=chat_id,
             sender_id=user_id,
             content=content,
@@ -162,23 +173,8 @@ async def send_message(sid, data):
         await sio.emit("error", {"message": "Failed to send message"}, room=sid)
         return
 
-    message_data = {
-        "chatId": chat_id,
-        "message": {
-            **chat_service.message_to_dict(message, reply_to_data),
-            "content": message.content,
-            "isDeleted": False,
-            "createdAt": message.created_at.isoformat() if message.created_at else datetime.utcnow().isoformat(),
-        },
-    }
-
-    await sio.emit("new_message", message_data, room=chat_id)
-    chat = await Chat.get(chat_id)
-    if chat:
-        for participant_id in chat.participants:
-            for psid in await get_sids_for_user(participant_id):
-                await sio.emit("new_message", message_data, room=psid)
-
+    # create_message_in_chat broadcasts to participants itself, so that REST
+    # callers get the same delivery; only the sender's ack belongs here.
     await sio.emit("message_sent", {"success": True, "messageId": str(message.id), "chatId": chat_id}, room=sid)
 
 
@@ -243,11 +239,5 @@ async def delete_message(sid, data):
         await sio.emit("error", {"message": errors.get(str(e), "Failed to delete message")}, room=sid)
         return
 
-    delete_data = {"chatId": chat_id, "messageId": msg_id}
-    await sio.emit("message_deleted", delete_data, room=chat_id)
-    chat = await Chat.get(chat_id)
-    if chat:
-        for participant_id in chat.participants:
-            for psid in await get_sids_for_user(participant_id):
-                await sio.emit("message_deleted", delete_data, room=psid)
+    # soft_delete_message broadcasts to participants itself; see send_message.
     await sio.emit("delete_success", {"success": True, "messageId": msg_id}, room=sid)
