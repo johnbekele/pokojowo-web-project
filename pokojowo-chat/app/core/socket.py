@@ -134,6 +134,7 @@ async def send_message(sid, data):
     chat_id = data.get("chatId") or data.get("room")
     content = data.get("content") or data.get("message")
     reply_to = data.get("replyTo")
+    temp_id = data.get("tempId")
 
     if not chat_id or not content:
         await sio.emit("error", {"message": "Chat ID and content required"}, room=sid)
@@ -158,6 +159,7 @@ async def send_message(sid, data):
             sender_id=user_id,
             content=content,
             reply_to=reply_to,
+            temp_id=temp_id,
         )
     except ValueError as e:
         errors = {
@@ -174,7 +176,10 @@ async def send_message(sid, data):
 
     # create_message_in_chat broadcasts to participants itself, so that REST
     # callers get the same delivery; only the sender's ack belongs here.
-    await sio.emit("message_sent", {"success": True, "messageId": str(message.id), "chatId": chat_id}, room=sid)
+    ack = {"success": True, "messageId": str(message.id), "chatId": chat_id}
+    if temp_id:
+        ack["tempId"] = temp_id
+    await sio.emit("message_sent", ack, room=sid)
 
 
 @sio.event

@@ -50,6 +50,7 @@ export default function ChatRoomScreen() {
 
   const flatListRef = useRef<FlatList>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const peerTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: chat, isLoading: isChatLoading } = useChat(id);
   const { data: messages, isLoading: isMessagesLoading, refetch } = useMessages(id);
@@ -75,10 +76,27 @@ export default function ChatRoomScreen() {
         queryClient.invalidateQueries({ queryKey: CHAT_KEYS.list });
       }
     };
-    const handleTyping = ({ chatId, userId }: { chatId: string; userId: string }) => {
-      if (chatId === id && userId !== currentUserId) {
-        setOtherUserTyping(true);
-        setTimeout(() => setOtherUserTyping(false), 3000);
+    const handleTyping = ({
+      chatId,
+      userId,
+      isTyping: peerIsTyping = true,
+    }: {
+      chatId: string;
+      userId: string;
+      isTyping?: boolean;
+    }) => {
+      if (chatId !== id || userId === currentUserId) return;
+
+      if (peerTypingTimeoutRef.current) {
+        clearTimeout(peerTypingTimeoutRef.current);
+        peerTypingTimeoutRef.current = null;
+      }
+      setOtherUserTyping(peerIsTyping);
+
+      // The server sends isTyping:false when they stop, so this is only a
+      // safety net for a dropped event, not the mechanism that clears it.
+      if (peerIsTyping) {
+        peerTypingTimeoutRef.current = setTimeout(() => setOtherUserTyping(false), 6000);
       }
     };
     const handleDeleted = ({ chatId }: { chatId: string }) => {
@@ -106,6 +124,10 @@ export default function ChatRoomScreen() {
       socket?.off('new_message', handleNewMessage);
       socket?.off('typing', handleTyping);
       socket?.off('message_deleted', handleDeleted);
+      if (peerTypingTimeoutRef.current) {
+        clearTimeout(peerTypingTimeoutRef.current);
+        peerTypingTimeoutRef.current = null;
+      }
     };
   }, [id, currentUserId, refetch, queryClient, markRead]);
 
@@ -125,8 +147,6 @@ export default function ChatRoomScreen() {
     };
 
     if (socket?.connected) {
-      // Socket send persists on the server AND broadcasts to both participants
-      // in real-time (the REST endpoint does not emit socket events).
       socket.emit('send_message', {
         chatId: id,
         content,

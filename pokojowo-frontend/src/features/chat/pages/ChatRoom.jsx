@@ -131,12 +131,18 @@ export default function ChatRoom() {
         queryClient.setQueryData(['messages', roomId], (old = []) => {
           const msgId = data.message._id || data.message.id;
 
-          // If this is our own message, remove the optimistic version
+          // If this is our own message, replace the optimistic version
           if (arrivedFrom === currentUserId) {
-            // Filter out any pending messages with matching content (optimistic)
+            const { tempId } = data.message;
             const filtered = old.filter((m) => {
-              if (m.isPending && m.content === data.message.content) {
-                return false; // Remove optimistic message
+              // Match on tempId; content is only a fallback for messages sent
+              // before the server echoed it, since short repeated messages
+              // ("ok", "?") collide and drop or duplicate a bubble.
+              if (m.isPending) {
+                const matches = tempId
+                  ? (m._id || m.id) === tempId
+                  : m.content === data.message.content;
+                if (matches) return false;
               }
               return (m._id || m.id) !== msgId; // Also prevent duplicates
             });
@@ -268,6 +274,7 @@ export default function ChatRoom() {
           roomId: roomId,
           content,
           replyTo: replyToId || null,
+          tempId,
         });
         // Replace optimistic message with real one
         queryClient.setQueryData(['messages', roomId], (old = []) =>
