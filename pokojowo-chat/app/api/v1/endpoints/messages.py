@@ -21,6 +21,7 @@ async def create_message(
             sender_id=current_user.id,
             content=message_data.content,
             reply_to=message_data.reply_to,
+            temp_id=message_data.temp_id,
         )
     except ValueError as e:
         code = str(e)
@@ -40,6 +41,7 @@ async def create_message(
         "sender": message.sender,
         "roomId": message.room_id,
         "createdAt": message.created_at,
+        "tempId": message_data.temp_id,
     }
 
 

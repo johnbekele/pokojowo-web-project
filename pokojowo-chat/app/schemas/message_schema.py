@@ -7,6 +7,9 @@ class MessageCreate(BaseModel):
     content: str
     room_id: str = Field(..., alias="roomId")
     reply_to: Optional[str] = Field(None, alias="replyTo")
+    # Client-generated ID for its optimistic bubble; echoed back so the sender
+    # can correlate the result without comparing message content.
+    temp_id: Optional[str] = Field(None, alias="tempId")
 
     class Config:
         populate_by_name = True

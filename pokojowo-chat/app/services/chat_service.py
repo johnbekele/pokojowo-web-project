@@ -143,6 +143,7 @@ async def create_message_in_chat(
     sender_id: str,
     content: str,
     reply_to: Optional[str] = None,
+    temp_id: Optional[str] = None,
 ) -> tuple[Message, Optional[dict]]:
     chat = await Chat.get(chat_id)
     if not chat:
@@ -170,7 +171,7 @@ async def create_message_in_chat(
     chat.updated_at = datetime.utcnow()
     await chat.save()
 
-    await broadcast_new_message(message, reply_to_data, chat.participants)
+    await broadcast_new_message(message, reply_to_data, chat.participants, temp_id=temp_id)
 
     return message, reply_to_data
 
@@ -179,6 +180,7 @@ async def broadcast_new_message(
     message: Message,
     reply_to_data: Optional[dict],
     participants: list[str],
+    temp_id: Optional[str] = None,
 ) -> None:
     """Push a new message to participants over Socket.IO.
 
@@ -188,6 +190,10 @@ async def broadcast_new_message(
     from app.core.socket import emit_to_participants
 
     payload = {"chatId": message.room_id, "message": message_to_dict(message, reply_to_data)}
+    if temp_id:
+        # Echoed so the sender's sessions can replace the right optimistic
+        # bubble; matching on content collides on short repeated messages.
+        payload["message"]["tempId"] = temp_id
     await emit_to_participants("new_message", payload, participants)
 
 
