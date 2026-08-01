@@ -20,6 +20,7 @@ import { Button, Badge, EmptyState } from '@/components/ui';
 import { UserActionsMenu } from '@/components/feature/profile';
 import { useMatchWithUser } from '@/hooks/matching/useMatching';
 import { useLikeUser, useLikeStatus } from '@/hooks/likes/useLikes';
+import { useOpenChatWithUser } from '@/hooks/chat/useOpenChatWithUser';
 import useTheme from '@/hooks/useTheme';
 import { getAvatarUrl } from '@/lib/image';
 import { translateExplanation } from '@/lib/explanations';
@@ -37,6 +38,7 @@ export default function MatchProfileScreen() {
   const { data: matchData, isLoading, error } = useMatchWithUser(userId || '');
   const { data: likeStatus } = useLikeStatus(userId || '');
   const { mutate: likeUser, isPending: isLiking } = useLikeUser();
+  const { openChat, isOpeningChat } = useOpenChatWithUser();
 
   const handleLike = () => {
     if (userId) {
@@ -52,7 +54,7 @@ export default function MatchProfileScreen() {
 
   const handleMessage = () => {
     if (userId) {
-      router.push(`/(app)/(chat)/${userId}`);
+      openChat(userId);
     }
   };
 
@@ -407,6 +409,7 @@ export default function MatchProfileScreen() {
             onPress={handleMessage}
             variant="primary"
             className="flex-1"
+            loading={isOpeningChat}
             icon={<MessageSquare size={20} color="white" />}
           >
             {t('card.chat', 'Send Message')}
@@ -417,6 +420,7 @@ export default function MatchProfileScreen() {
               onPress={handleMessage}
               variant="outline"
               className="flex-1 mr-2"
+              loading={isOpeningChat}
               icon={<MessageSquare size={20} color={colors.text} />}
             >
               {t('card.sendMessage', 'Message')}

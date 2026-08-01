@@ -34,6 +34,7 @@ import ShareSheet from '@/components/shared/ShareSheet';
 import { useListing } from '@/hooks/listings/useListings';
 import { useSaveListing, useUnsaveListing, useIsListingSaved } from '@/hooks/favorites/useFavorites';
 import { useTrackView } from '@/hooks/listingInteractions/useListingInteractions';
+import { useOpenChatWithUser } from '@/hooks/chat/useOpenChatWithUser';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { IMAGE_BASE_URL } from '@/lib/constants';
 import useTheme from '@/hooks/useTheme';
@@ -70,6 +71,7 @@ export default function ListingDetailScreen() {
   const { mutate: saveListing } = useSaveListing();
   const { mutate: unsaveListing } = useUnsaveListing();
   const { mutate: trackView } = useTrackView(id);
+  const { openChat, isOpeningChat } = useOpenChatWithUser();
 
   // Track view when listing is loaded
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function ListingDetailScreen() {
 
   const handleContact = () => {
     if (listing?.owner_id) {
-      router.push(`/(app)/(chat)/${listing.owner_id}`);
+      openChat(listing.owner_id);
     }
   };
 
@@ -512,6 +514,7 @@ export default function ListingDetailScreen() {
           <Button
             variant="primary"
             className="flex-1"
+            loading={isOpeningChat}
             icon={<MessageSquare size={18} color="white" />}
             onPress={handleContact}
           >

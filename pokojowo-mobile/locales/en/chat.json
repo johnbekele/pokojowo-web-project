@@ -37,6 +37,7 @@
     "title": "Error",
     "loadFailed": "Failed to load conversations. Please try again.",
     "chatNotFound": "Chat not found",
+    "openFailed": "Could not open the conversation. Please try again.",
     "sendFailed": "Failed to send message",
     "connectionLost": "Connection lost. Reconnecting..."
   },

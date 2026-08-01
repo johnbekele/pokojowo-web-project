@@ -37,6 +37,7 @@
     "title": "Błąd",
     "loadFailed": "Nie udało się załadować rozmów. Spróbuj ponownie.",
     "chatNotFound": "Nie znaleziono rozmowy",
+    "openFailed": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
     "sendFailed": "Nie udało się wysłać wiadomości",
     "connectionLost": "Utracono połączenie. Ponowne łączenie..."
   },
