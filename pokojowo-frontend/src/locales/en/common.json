@@ -62,7 +62,13 @@
     "network": "Network error. Please check your connection.",
     "unauthorized": "Please log in to continue.",
     "forbidden": "You don't have permission to do this.",
-    "notFound": "The requested resource was not found."
+    "notFound": "The requested resource was not found.",
+    "boundaryTitle": "Something went wrong",
+    "boundaryBody": "This part of the page failed to load. You can try again, or head back home.",
+    "staleBuildTitle": "A new version is available",
+    "staleBuildBody": "Reload the page to pick up the latest version.",
+    "reload": "Reload page",
+    "goHome": "Go home"
   },
   "empty": {
     "noData": "No data available",

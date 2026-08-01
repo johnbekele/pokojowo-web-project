@@ -5,6 +5,7 @@ import FloatingHeader from './FloatingHeader';
 import BottomNavigation from './BottomNavigation';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
 import VerifyEmailBanner from '@/components/shared/VerifyEmailBanner';
+import RouteErrorBoundary from '@/components/shared/RouteErrorBoundary';
 
 /**
  * Global app shell with the editorial luxury frame.
@@ -43,7 +44,11 @@ export default function PageLayout() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Outlet />
+              {/* Scoped to the content area so a page that throws leaves the
+                  header and navigation intact to move on with. */}
+              <RouteErrorBoundary>
+                <Outlet />
+              </RouteErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </div>

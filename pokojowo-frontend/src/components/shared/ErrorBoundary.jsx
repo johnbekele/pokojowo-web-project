@@ -1,9 +1,12 @@
 import { Component } from 'react';
-import { AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import ErrorFallback from './ErrorFallback';
+import { reportError } from '@/lib/errorReporting';
 
 /**
- * Error boundary to catch and display errors gracefully
+ * Catches render errors in its subtree and shows a way out.
+ *
+ * Without one of these a single render-time exception unmounts everything and
+ * leaves a blank white page — no message, no retry, and nothing in any log.
  */
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -16,7 +19,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    reportError(error, { componentStack: errorInfo?.componentStack });
   }
 
   handleReset = () => {
@@ -26,14 +29,11 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8 text-center">
-          <AlertTriangle className="h-12 w-12 text-destructive" />
-          <h2 className="text-xl font-semibold">Something went wrong</h2>
-          <p className="text-muted-foreground max-w-md">
-            We encountered an unexpected error. Please try again.
-          </p>
-          <Button onClick={this.handleReset}>Try Again</Button>
-        </div>
+        <ErrorFallback
+          error={this.state.error}
+          fullPage={this.props.fullPage}
+          onRetry={this.handleReset}
+        />
       );
     }
 
