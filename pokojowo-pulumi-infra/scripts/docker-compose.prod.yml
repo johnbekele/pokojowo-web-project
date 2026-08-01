@@ -15,6 +15,12 @@ services:
       - PORT=10000
       - DEBUG=False
       - CHAT_SERVICE_URL=http://chat:10002
+      # Both images default to 2 workers, which cannot work while Socket.IO
+      # state (connected_users, rooms) lives in process memory: notifications
+      # only reach clients that happen to share a worker, and polling clients
+      # get "session ID unknown" when a request lands on the other one.
+      # Raise this only once #144 puts a Redis adapter behind the sockets.
+      - GUNICORN_WORKERS=1
     env_file:
       # AWS_REGION and S3_UPLOADS_BUCKET must be present in backend.env.
       # AWS credentials come from the EC2 instance profile via IMDSv2 —
@@ -45,6 +51,8 @@ services:
       - DEBUG=False
       - DATABASE_NAME=pokojowo_chat
       - MAIN_API_URL=http://backend:10000
+      # Single worker until #144; see the note on the backend service.
+      - GUNICORN_WORKERS=1
     env_file:
       - ./chat.env
     depends_on:
