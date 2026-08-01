@@ -40,7 +40,7 @@ async def connect(sid, environ, auth=None):
         return True
 
     payload = decode_token(token)
-    if not payload or not payload.get("user_id"):
+    if not payload or payload.get("type") != "access" or not payload.get("user_id"):
         await sio.emit(
             "connection",
             {"status": "connected", "authenticated": False, "error": "Invalid token", "sid": sid},
@@ -89,14 +89,6 @@ async def broadcast_user_status(user_id: str, is_online: bool):
 
 
 @sio.event
-async def join_room(sid, data):
-    room = data.get("room") or data.get("roomId")
-    if room:
-        await sio.enter_room(sid, room)
-        await sio.emit("joined_room", {"room": room}, room=sid)
-
-
-@sio.event
 async def join_chat(sid, data):
     chat_id = data.get("chatId") or data.get("room")
     user_id = await get_user_from_sid(sid)
@@ -117,14 +109,6 @@ async def join_chat(sid, data):
 
     await sio.enter_room(sid, chat_id)
     await sio.emit("joined_chat", {"chatId": chat_id}, room=sid)
-
-
-@sio.event
-async def leave_room(sid, data):
-    room = data.get("room") or data.get("roomId")
-    if room:
-        await sio.leave_room(sid, room)
-        await sio.emit("left_room", {"room": room}, room=sid)
 
 
 @sio.event

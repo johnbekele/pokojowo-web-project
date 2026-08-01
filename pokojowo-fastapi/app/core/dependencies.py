@@ -14,7 +14,9 @@ async def get_current_user(
     token = credentials.credentials
 
     payload = decode_token(token)
-    if payload is None:
+    # Refresh tokens live for days, access tokens for minutes; without this the
+    # former would authenticate requests for its whole lifetime.
+    if payload is None or payload.get("type") != "access":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

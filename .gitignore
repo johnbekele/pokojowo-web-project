@@ -1,7 +1,16 @@
 # Environment variables
+# Broad by default: .env.production held live Mongo credentials and the JWT
+# signing secret, and was matched by none of the previous patterns.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+# Per-service env files named by docker-compose.prod.yml; on the host these hold
+# live secrets, and they match none of the patterns above.
+backend.env
+chat.env
+
+# TLS material
+pokojowo-fastapi/certs/
 
 # Docker
 .docker/
