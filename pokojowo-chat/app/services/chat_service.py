@@ -154,6 +154,54 @@ async def format_message_with_reply(message: Message) -> dict:
     return message_to_dict(message, reply_to_data)
 
 
+DEFAULT_PAGE_SIZE = 50
+MAX_PAGE_SIZE = 100
+
+
+async def load_message_page(
+    *,
+    room_id: str,
+    limit: int = DEFAULT_PAGE_SIZE,
+    before: Optional[str] = None,
+    skip: int = 0,
+) -> dict:
+    """Return the newest page of a conversation, oldest-first for rendering.
+
+    `before` is a message ID to page backwards from. Unlike skip/limit it does
+    not drift as new messages arrive, which otherwise makes a client scrolling
+    up see duplicates or holes. skip is still honoured for clients built against
+    the previous contract.
+    """
+    limit = max(1, min(limit, MAX_PAGE_SIZE))
+
+    query: dict = {"roomId": room_id}
+    anchor = await Message.get(before) if before else None
+    if anchor:
+        # Keyset rather than offset: everything strictly older than the anchor,
+        # with _id breaking ties on identical timestamps.
+        query["$or"] = [
+            {"createdAt": {"$lt": anchor.created_at}},
+            {"createdAt": anchor.created_at, "_id": {"$lt": anchor.id}},
+        ]
+
+    finder = Message.find(query).sort("-createdAt", "-_id")
+    if skip:
+        finder = finder.skip(skip)
+
+    # Reading one extra row answers "is there an older page" exactly, where
+    # len(page) == limit is wrong whenever the total is a multiple of the size.
+    page = await finder.limit(limit + 1).to_list()
+    has_more = len(page) > limit
+    page = page[:limit]
+    page.reverse()
+
+    return {
+        "messages": [await format_message_with_reply(msg) for msg in page],
+        "hasMore": has_more,
+        "nextBefore": str(page[0].id) if page else None,
+    }
+
+
 async def soft_delete_message(message_id: str, user_id: str) -> tuple[str, str]:
     """Soft-delete a message. Returns (chat_id, message_id)."""
     message = await Message.get(message_id)

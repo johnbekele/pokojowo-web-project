@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from typing import List
+from typing import Optional
 
 from app.schemas.message_schema import MessageCreate
 from app.models.message import Message
@@ -43,21 +43,27 @@ async def create_message(
     }
 
 
-@router.get("/room/{room_id}", response_model=List[dict])
+@router.get("/room/{room_id}", response_model=dict)
 async def get_messages_by_room(
     room_id: str,
+    limit: int = chat_service.DEFAULT_PAGE_SIZE,
+    before: Optional[str] = None,
     skip: int = 0,
-    limit: int = 50,
     current_user: TokenUser = Depends(get_current_user),
 ):
+    """Newest page of a conversation, oldest-first. Page back with `before`.
+
+    Returns {messages, hasMore, nextBefore}; this used to be a bare array.
+    """
     chat = await Chat.get(room_id)
     if not chat:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat room not found")
     if current_user.id not in chat.participants:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a participant in this chat")
 
-    messages = await Message.find({"roomId": room_id}).sort("createdAt").skip(skip).limit(limit).to_list()
-    return [await chat_service.format_message_with_reply(msg) for msg in messages]
+    return await chat_service.load_message_page(
+        room_id=room_id, limit=limit, before=before, skip=skip
+    )
 
 
 @router.get("/{message_id}", response_model=dict)

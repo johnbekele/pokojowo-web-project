@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '@/services';
-import type { CreateMessageData } from '@/types/chat.types';
+import type { CreateMessageData, Message, MessagePage } from '@/types/chat.types';
 
 export const CHAT_KEYS = {
   all: ['chats'] as const,
@@ -42,12 +42,22 @@ export function useChatWithUser(userId: string) {
   });
 }
 
-export function useMessages(roomId: string, params?: { skip?: number; limit?: number }) {
+/** The API returned a bare array before it returned a page; accept both so the
+ * app keeps working against either version. */
+function toMessages(data: MessagePage | Message[] | undefined): Message[] {
+  if (Array.isArray(data)) return data;
+  return data?.messages ?? [];
+}
+
+export function useMessages(
+  roomId: string,
+  params?: { limit?: number; before?: string }
+) {
   return useQuery({
     queryKey: [...CHAT_KEYS.messages(roomId), params],
     queryFn: async () => {
       const response = await chatService.getMessages(roomId, params);
-      return response.data;
+      return toMessages(response.data);
     },
     enabled: !!roomId,
   });

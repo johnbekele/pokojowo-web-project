@@ -32,6 +32,13 @@ export interface Message {
   isDeleted?: boolean;
 }
 
+export interface MessagePage {
+  messages: Message[];
+  hasMore: boolean;
+  /** Message ID to pass as `before` to fetch the next older page. */
+  nextBefore: string | null;
+}
+
 export interface ReplyData {
   _id: string;
   content: string;
