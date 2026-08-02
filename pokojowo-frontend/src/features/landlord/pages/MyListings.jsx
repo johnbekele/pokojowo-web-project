@@ -43,19 +43,23 @@ export default function MyListings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  // The API returns the current user as `_id`; older payloads used `id`.
+  const userId = user?._id || user?.id;
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [listingToDelete, setListingToDelete] = useState(null);
 
   // Fetch landlord's listings
-  const { data: listings, isLoading } = useQuery({
-    queryKey: ['my-listings', user?.id],
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ['my-listings', userId],
     queryFn: async () => {
-      const response = await api.get(`/listings/owner/${user.id}`);
+      const response = await api.get(`/listings/owner/${userId}`);
       return response.data;
     },
-    enabled: !!user?.id,
+    enabled: !!userId,
   });
+
+  const listings = data ?? [];
 
   // Delete listing mutation
   const deleteMutation = useMutation({
@@ -117,7 +121,7 @@ export default function MyListings() {
           <div>
             <h1 className="text-3xl font-bold">My Listings</h1>
             <p className="text-muted-foreground">
-              {listings?.length || 0} listing{listings?.length !== 1 ? 's' : ''}
+              {listings.length} listing{listings.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -141,7 +145,19 @@ export default function MyListings() {
             </Card>
           ))}
         </div>
-      ) : listings?.length === 0 ? (
+      ) : isError ? (
+        <Card className="p-12">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold mb-2">Could not load your listings</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Something went wrong while fetching them. Check your connection and try again.
+            </p>
+            <Button onClick={() => refetch()} size="lg" variant="outline">
+              Try again
+            </Button>
+          </div>
+        </Card>
+      ) : listings.length === 0 ? (
         <Card className="p-12">
           <div className="text-center">
             <Home className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
