@@ -13,28 +13,32 @@ export default function LandlordDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  // The API returns the current user as `_id`; older payloads used `id`.
+  const userId = user?._id || user?.id;
 
   // Fetch landlord's listings
-  const { data: listings, isLoading } = useQuery({
-    queryKey: ['my-listings', user?.id],
+  const { data, isLoading } = useQuery({
+    queryKey: ['my-listings', userId],
     queryFn: async () => {
-      const response = await api.get(`/listings/owner/${user.id}`);
+      const response = await api.get(`/listings/owner/${userId}`);
       return response.data;
     },
-    enabled: !!user?.id,
+    enabled: !!userId,
   });
+
+  const listings = data ?? [];
 
   const stats = [
     {
       title: 'Total Listings',
-      value: listings?.length || 0,
+      value: listings.length,
       icon: Home,
       color: 'text-blue-500',
       bgColor: 'bg-blue-100 dark:bg-blue-900/30',
     },
     {
       title: 'Active Listings',
-      value: listings?.filter(l => new Date(l.availableFrom) <= new Date()).length || 0,
+      value: listings.filter(l => new Date(l.availableFrom) <= new Date()).length,
       icon: TrendingUp,
       color: 'text-green-500',
       bgColor: 'bg-green-100 dark:bg-green-900/30',
@@ -120,7 +124,7 @@ export default function LandlordDashboard() {
                 </div>
               ))}
             </div>
-          ) : listings?.length === 0 ? (
+          ) : listings.length === 0 ? (
             <div className="text-center py-12">
               <Home className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
@@ -134,7 +138,7 @@ export default function LandlordDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {listings?.slice(0, 5).map((listing) => (
+              {listings.slice(0, 5).map((listing) => (
                 <div
                   key={listing._id}
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
