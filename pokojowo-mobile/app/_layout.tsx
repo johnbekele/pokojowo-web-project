@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { queryClient } from '@/lib/queryClient';
+// Side effect: teaches React Query to pause instead of failing while offline.
+import '@/lib/onlineManager';
 import i18n from '@/lib/i18n';
 import useAuthStore from '@/stores/authStore';
 import ThemeProvider from '@/components/shared/ThemeProvider';

@@ -93,6 +93,9 @@
     "pl": "Polish",
     "select": "Select language"
   },
+  "offline": {
+    "message": "You're offline. Some actions will wait until you reconnect."
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",

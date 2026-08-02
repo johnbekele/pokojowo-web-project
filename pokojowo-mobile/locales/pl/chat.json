@@ -31,7 +31,8 @@
     "delivered": "Dostarczono",
     "read": "Przeczytano",
     "sending": "Wysyłanie...",
-    "failed": "Nie udało się wysłać"
+    "failed": "Nie udało się wysłać",
+    "tapToRetry": "Nie wysłano. Dotknij, aby ponowić."
   },
   "error": {
     "title": "Błąd",

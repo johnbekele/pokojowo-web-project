@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '@/services';
-import type { CreateMessageData, Message, MessagePage } from '@/types/chat.types';
+import type { Message, MessagePage } from '@/types/chat.types';
 
 export const CHAT_KEYS = {
   all: ['chats'] as const,
@@ -74,17 +74,9 @@ export function useCreateChat() {
   });
 }
 
-export function useSendMessage() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateMessageData) => chatService.sendMessage(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: CHAT_KEYS.messages(variables.room_id) });
-      queryClient.invalidateQueries({ queryKey: CHAT_KEYS.list });
-    },
-  });
-}
+// Sending is no longer a plain mutation: lib/chatOutbox owns it, because a
+// message has to survive the screen being closed and be retryable after a
+// failure, which a mutation's lifecycle cannot carry.
 
 export function useDeleteMessage() {
   const queryClient = useQueryClient();
