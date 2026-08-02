@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
@@ -35,7 +35,9 @@ import {
   MediaFrame,
 } from "@/components/shared/editorial";
 import SearchFilters from "../components/SearchFilters";
-import MapSearchView from "../components/MapSearchView";
+// Leaflet and its CSS are around 50 KB gzipped, which everyone arriving on
+// this page used to pay for whether or not they ever opened the map.
+const MapSearchView = lazy(() => import("../components/MapSearchView"));
 import SaveSearchDialog from "../components/SaveSearchDialog";
 import InterestedUsersPreview from "../components/InterestedUsersPreview";
 import ListingLikeButton from "../components/ListingLikeButton";
@@ -314,7 +316,9 @@ export default function HomeListings() {
 
       {isMapView ? (
         <EditorialSection>
-          <MapSearchView search={debouncedSearch} sort={sortBy} filters={filters} />
+          <Suspense fallback={<MapViewSkeleton />}>
+            <MapSearchView search={debouncedSearch} sort={sortBy} filters={filters} />
+          </Suspense>
         </EditorialSection>
       ) : (
         <ListingsGrid
@@ -332,6 +336,20 @@ export default function HomeListings() {
         filters={filters}
         search={searchQuery}
       />
+    </div>
+  );
+}
+
+/** Holds the map's shape while its chunk downloads, so the page does not jump. */
+function MapViewSkeleton() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+      <div className="order-2 space-y-3 lg:order-1">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-xl" />
+        ))}
+      </div>
+      <Skeleton className="order-1 h-[60vh] w-full rounded-2xl lg:order-2 lg:h-[70vh]" />
     </div>
   );
 }

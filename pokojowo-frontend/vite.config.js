@@ -2,8 +2,45 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// Dependencies grouped so that each chunk is one thing a deploy can invalidate
+// on its own: app code changes every deploy, these almost never do, and they
+// used to share a single 830 KB entry chunk that was re-downloaded every time.
+//
+// Grouping is per library on purpose. Folding everything into one `vendor`
+// chunk was measured to be worse, because it drags libraries that only a lazy
+// route needs into the entry. Keep `vendor` for small, broadly used packages.
+const VENDOR_CHUNKS = {
+  react: ['react', 'react-dom', 'scheduler', 'react-router', 'react-router-dom'],
+  motion: ['framer-motion', 'motion-dom', 'motion-utils'],
+  query: ['@tanstack/react-query', '@tanstack/query-core'],
+  socket: ['socket.io-client', 'socket.io-parser', 'engine.io-client', 'engine.io-parser'],
+  forms: ['react-hook-form', 'zod', '@hookform/resolvers'],
+  i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+};
+
+// Leaflet is deliberately absent from the groups above and left to Rollup's own
+// splitting. Naming it turns it into a static dependency of the entry, which
+// puts 55 KB of map code back on the critical path of every first visit.
+const LEAVE_TO_ROLLUP = ['leaflet', 'react-leaflet', '@react-leaflet/core'];
+
+const PACKAGE_TO_CHUNK = new Map(
+  Object.entries(VENDOR_CHUNKS).flatMap(([chunk, packages]) =>
+    packages.map((pkg) => [pkg, chunk])
+  )
+);
+
+function chunkForModule(id) {
+  const afterModules = id.split(/node_modules[\\/]/).pop();
+  if (!afterModules || afterModules === id) return undefined;
+  const [first, second] = afterModules.split(/[\\/]/);
+  const pkg = first.startsWith('@') ? `${first}/${second}` : first;
+  if (LEAVE_TO_ROLLUP.includes(pkg)) return undefined;
+  if (pkg.startsWith('@radix-ui/')) return 'radix';
+  return PACKAGE_TO_CHUNK.get(pkg) ?? 'vendor';
+}
+
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
@@ -38,6 +75,14 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // Publishing these serves the full readable source to anyone who opens
+    // devtools on production. `vite build --mode development` still emits them
+    // for debugging a real build locally.
+    sourcemap: mode !== 'production',
+    rollupOptions: {
+      output: {
+        manualChunks: chunkForModule,
+      },
+    },
   },
-});
+}));
