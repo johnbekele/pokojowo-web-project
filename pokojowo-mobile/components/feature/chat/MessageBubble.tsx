@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Reply, Trash2 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { AlertCircle, Clock, Reply, Trash2 } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
 import { formatRelativeTime } from '@/lib/utils';
 import type { Message } from '@/types/chat.types';
@@ -10,6 +11,8 @@ interface MessageBubbleProps {
   isOwn: boolean;
   onReply?: () => void;
   onDelete?: () => void;
+  /** Called when a message that failed to send is tapped. */
+  onRetry?: () => void;
   showTimestamp?: boolean;
 }
 
@@ -18,10 +21,15 @@ export default function MessageBubble({
   isOwn,
   onReply,
   onDelete,
+  onRetry,
   showTimestamp = true,
 }: MessageBubbleProps) {
-  const { content, createdAt, replyToData, isDeleted } = message;
+  const { content, createdAt, replyToData, isDeleted, pendingStatus } = message;
   const { colors } = useTheme();
+  const { t } = useTranslation('chat');
+
+  const isSending = pendingStatus === 'sending';
+  const hasFailed = pendingStatus === 'failed';
 
   return (
     <View className={cn('mb-2 max-w-[80%]', isOwn ? 'self-end' : 'self-start')}>
@@ -43,12 +51,21 @@ export default function MessageBubble({
 
       {/* Message bubble */}
       <TouchableOpacity
+        onPress={hasFailed ? onRetry : undefined}
         onLongPress={() => {}}
         activeOpacity={0.8}
+        accessibilityRole={hasFailed ? 'button' : 'text'}
+        accessibilityLabel={
+          hasFailed ? t('message.tapToRetry', 'Not sent. Tap to try again.') : undefined
+        }
         className={cn(
           'px-4 py-2.5 rounded-2xl',
           isOwn ? 'bg-brand rounded-br-md' : 'bg-surface rounded-bl-md',
-          replyToData && 'rounded-t-none'
+          replyToData && 'rounded-t-none',
+          // Dimmed while in flight, outlined once it has failed, so the state is
+          // legible from the thread without reading the label.
+          isSending && 'opacity-60',
+          hasFailed && 'border border-danger'
         )}
       >
         {isDeleted ? (
@@ -74,13 +91,26 @@ export default function MessageBubble({
           isOwn ? 'justify-end' : 'justify-start'
         )}
       >
-        {showTimestamp && (
-          <Text className="text-xs text-muted">
-            {formatRelativeTime(createdAt)}
-          </Text>
+        {isSending ? (
+          <View className="flex-row items-center gap-1">
+            <Clock size={12} color={colors.muted} />
+            <Text className="text-xs text-muted">{t('message.sending', 'Sending…')}</Text>
+          </View>
+        ) : hasFailed ? (
+          <TouchableOpacity onPress={onRetry} hitSlop={8} className="flex-row items-center gap-1">
+            <AlertCircle size={12} color={colors.danger} />
+            <Text className="text-xs text-danger">
+              {t('message.tapToRetry', 'Not sent. Tap to try again.')}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          showTimestamp && (
+            <Text className="text-xs text-muted">{formatRelativeTime(createdAt)}</Text>
+          )
         )}
 
-        {!isDeleted && (
+        {/* A message with no server ID yet cannot be replied to or deleted. */}
+        {!isDeleted && !pendingStatus && (
           <View className="flex-row items-center gap-2">
             {onReply && (
               <TouchableOpacity onPress={onReply} hitSlop={8}>

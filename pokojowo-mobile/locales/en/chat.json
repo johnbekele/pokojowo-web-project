@@ -31,7 +31,8 @@
     "delivered": "Delivered",
     "read": "Read",
     "sending": "Sending...",
-    "failed": "Failed to send"
+    "failed": "Failed to send",
+    "tapToRetry": "Not sent. Tap to try again."
   },
   "error": {
     "title": "Error",

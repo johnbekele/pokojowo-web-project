@@ -93,6 +93,9 @@
     "pl": "Polski",
     "select": "Wybierz język"
   },
+  "offline": {
+    "message": "Jesteś offline. Niektóre akcje poczekają na ponowne połączenie."
+  },
   "notifications": {
     "title": "Powiadomienia",
     "markAllRead": "Oznacz jako przeczytane",

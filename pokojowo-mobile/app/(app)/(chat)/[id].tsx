@@ -20,11 +20,11 @@ import { Avatar, LoadingSpinner } from '@/components/ui';
 import {
   useChat,
   useMessages,
-  useSendMessage,
   useDeleteMessage,
   CHAT_KEYS,
 } from '@/hooks/chat/useChat';
 import { useMarkChatRead } from '@/hooks/chat/useMarkChatRead';
+import { useMessageOutbox } from '@/hooks/chat/useMessageOutbox';
 import { useOlderMessages, MESSAGE_PAGE_SIZE } from '@/hooks/chat/useOlderMessages';
 import useAuthStore from '@/stores/authStore';
 import {
@@ -60,18 +60,20 @@ export default function ChatRoomScreen() {
     refetch,
   } = useMessages(id, { limit: MESSAGE_PAGE_SIZE });
   const { older, isLoadingOlder, loadOlder } = useOlderMessages(id, messages);
-  const { mutate: sendMessage, isPending: isSending } = useSendMessage();
   const { mutate: deleteMessage } = useDeleteMessage();
   const { mutate: markRead } = useMarkChatRead();
 
   const otherUser = chat?.otherUser;
   const currentUserId = user?.id;
 
+  const { pending, send, retry } = useMessageOutbox(id, currentUserId);
+
   // The list is `inverted`, which renders index 0 at the bottom, so it needs
-  // newest-first. Both message sources are chronological.
+  // newest-first. Both message sources are chronological, and anything still
+  // unconfirmed is newer than all of them.
   const thread = useMemo(
-    () => [...older, ...(messages ?? [])].reverse(),
-    [older, messages]
+    () => [...older, ...(messages ?? []), ...pending].reverse(),
+    [older, messages, pending]
   );
 
   // Real-time: join the chat room and subscribe to socket events. Event names
@@ -82,12 +84,12 @@ export default function ChatRoomScreen() {
     let cancelled = false;
 
     const handleNewMessage = ({ chatId }: { chatId: string; message: Message }) => {
-      if (chatId === id) {
-        refetch();
-        // Arriving while the conversation is on screen counts as read.
-        markRead(id);
-        queryClient.invalidateQueries({ queryKey: CHAT_KEYS.list });
-      }
+      if (chatId !== id) return;
+
+      refetch();
+      // Arriving while the conversation is on screen counts as read.
+      markRead(id);
+      queryClient.invalidateQueries({ queryKey: CHAT_KEYS.list });
     };
     const handleTyping = ({
       chatId,
@@ -150,35 +152,15 @@ export default function ChatRoomScreen() {
 
   const handleSendMessage = useCallback(() => {
     const content = messageText.trim();
-    if (!content || isSending) return;
+    if (!content) return;
 
-    const socket = getChatSocket();
-    const resetInput = () => {
-      setMessageText('');
-      setReplyingTo(null);
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-    };
-
-    if (socket?.connected) {
-      socket.emit('send_message', {
-        chatId: id,
-        content,
-        replyTo: replyingTo?._id,
-      });
-      resetInput();
-    } else {
-      // Offline fallback: persist via REST, then refresh.
-      sendMessage(
-        { room_id: id, content, reply_to: replyingTo?._id },
-        {
-          onSuccess: () => {
-            resetInput();
-            refetch();
-          },
-        }
-      );
-    }
-  }, [messageText, id, replyingTo, isSending, sendMessage, refetch]);
+    // The outbox owns delivery from here: it shows the message immediately,
+    // picks the socket or REST, and marks it failed if nothing comes back.
+    send(content, replyingTo?._id, replyingTo?.content);
+    setMessageText('');
+    setReplyingTo(null);
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, [messageText, replyingTo, send]);
 
   const handleDeleteMessage = useCallback(
     (messageId: string) => {
@@ -215,6 +197,7 @@ export default function ChatRoomScreen() {
       isOwn={item.sender === currentUserId || item.senderId === currentUserId}
       onReply={() => setReplyingTo(item)}
       onDelete={() => handleDeleteMessage(item._id)}
+      onRetry={item.tempId ? () => retry(item.tempId as string) : undefined}
     />
   );
 
@@ -320,7 +303,7 @@ export default function ChatRoomScreen() {
           />
           <TouchableOpacity
             onPress={handleSendMessage}
-            disabled={!messageText.trim() || isSending}
+            disabled={!messageText.trim()}
             className={`ml-2 w-12 h-12 rounded-full items-center justify-center ${
               messageText.trim() ? 'bg-brand' : 'bg-surface'
             }`}
