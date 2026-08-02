@@ -20,6 +20,9 @@ import chatApi from '@/lib/chatApi';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { getChatSocket, connectChatSocket } from '@/lib/chatSocket';
 
+// How stale the list has to be before a reconnect refetches it.
+const RECONNECT_REFRESH_AFTER = 15_000;
+
 export default function ChatList() {
   const { t } = useTranslation('chat');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,23 +32,27 @@ export default function ChatList() {
     const socket = getChatSocket() || connectChatSocket();
     if (!socket) return;
 
-    const handleNewMessage = () => {
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
-    };
-    const handleUserStatus = () => {
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
-    };
-    const handleConnect = () => {
+    const refresh = () => {
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     };
 
-    socket.on('new_message', handleNewMessage);
-    socket.on('user_status', handleUserStatus);
+    // A reconnect still reconciles what was missed while the socket was down,
+    // but only when the list is old enough to have missed something. This used
+    // to refetch unconditionally, so a flaky mobile connection meant a request
+    // per reconnect — and reconnects come in bursts.
+    const handleConnect = () => {
+      const updatedAt = queryClient.getQueryState(['chats'])?.dataUpdatedAt ?? 0;
+      if (Date.now() - updatedAt < RECONNECT_REFRESH_AFTER) return;
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+    };
+
+    socket.on('new_message', refresh);
+    socket.on('user_status', refresh);
     socket.on('connect', handleConnect);
 
     return () => {
-      socket.off('new_message', handleNewMessage);
-      socket.off('user_status', handleUserStatus);
+      socket.off('new_message', refresh);
+      socket.off('user_status', refresh);
       socket.off('connect', handleConnect);
     };
   }, [queryClient]);

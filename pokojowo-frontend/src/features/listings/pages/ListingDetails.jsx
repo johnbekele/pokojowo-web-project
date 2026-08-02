@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +23,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserAvatar from '@/components/shared/UserAvatar';
-import ListingMap from '@/components/shared/ListingMap';
+// This is the page most search and social traffic lands on, and the map sits
+// well below the fold, so Leaflet is not part of what the visitor waits for.
+const ListingMap = lazy(() => import('@/components/shared/ListingMap'));
 import {
   Eyebrow,
   DisplayTitle,
@@ -310,10 +313,12 @@ export default function ListingDetails() {
             <>
               <EditorialRule label={t('details.nearbyEyebrow', 'In the neighbourhood')} />
               {listing.locationGeo && (
-                <ListingMap
-                  locationGeo={listing.locationGeo}
-                  className="overflow-hidden rounded-2xl border border-border/70 shadow-editorial"
-                />
+                <Suspense fallback={<Skeleton className="h-[280px] w-full rounded-2xl" />}>
+                  <ListingMap
+                    locationGeo={listing.locationGeo}
+                    className="overflow-hidden rounded-2xl border border-border/70 shadow-editorial"
+                  />
+                </Suspense>
               )}
               {listing.closeTo?.length > 0 && (
                 <div className="flex flex-wrap gap-2">

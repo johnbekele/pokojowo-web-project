@@ -1,5 +1,6 @@
 from beanie import Document, Indexed
 from pydantic import BaseModel as PydanticBaseModel, ConfigDict, Field, EmailStr, validator
+from pymongo import ASCENDING, IndexModel
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -368,6 +369,43 @@ class User(Document):
     class Settings:
         name = "users"
         use_state_management = True
+        # Index keys use the stored alias names, since the raw queries do.
+        indexes = [
+            # The swipe deck's candidate query, which runs on the app's main
+            # screen. role leads because it is the only selective field here —
+            # the other three are booleans that are true for most of the
+            # collection, and only narrow the scan once role has.
+            IndexModel(
+                [
+                    ("role", ASCENDING),
+                    ("isProfileComplete", ASCENDING),
+                    ("isActive", ASCENDING),
+                    ("isVerified", ASCENDING),
+                ],
+                name="match_candidates",
+            ),
+            # blocking.blocked_ids_for asks "who has blocked me", which reads
+            # the array backwards and so cannot use anything on this user's own
+            # document. Multikey over the nested array.
+            IndexModel(
+                [("chatSettings.blockedUsers", ASCENDING)],
+                name="blocked_users_reverse",
+            ),
+            # Every Google and Apple sign-in resolves the account by provider
+            # id. The Indexed() markers on those fields produce no index at
+            # all, because Beanie only reads that annotation at the top level
+            # and both are wrapped in Optional — confirmed against a real
+            # database with index_information().
+            #
+            # Deliberately neither unique nor partial. The declared uniqueness
+            # is not restored here: it cannot be added blind, because a build
+            # that hits duplicates fails and init_beanie surfaces that as a
+            # failed startup. Partial on $type: string would keep the nulls out
+            # of the index, but the planner will not prove an equality implies
+            # $type, so the query goes back to a collection scan.
+            IndexModel([("googleId", ASCENDING)], name="google_id_lookup"),
+            IndexModel([("appleId", ASCENDING)], name="apple_id_lookup"),
+        ]
 
     class Config:
         populate_by_name = True

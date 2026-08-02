@@ -39,7 +39,10 @@ class SavedSearch(Document):
         name = "saved_searches"
         use_state_management = True
         indexes = [
-            [("userId", 1)],
+            # The list endpoint filters by owner and sorts newest-first, so
+            # createdAt belongs in the key too — otherwise the sort is done in
+            # memory after the index lookup.
+            [("userId", 1), ("createdAt", -1)],
         ]
 
     class Config:
