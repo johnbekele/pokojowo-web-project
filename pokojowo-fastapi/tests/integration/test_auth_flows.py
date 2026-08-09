@@ -156,3 +156,31 @@ async def test_resend_verification_rate_limit_boundary(client):
         for _ in range(4)
     ]
     assert [response.status_code for response in responses] == [200, 200, 200, 429]
+
+
+async def test_login_rate_limit_boundary(client, make_user):
+    user = await make_user(username="rate-limited-login")
+
+    responses = [
+        await client.post(
+            "/api/auth/login",
+            json={"email": str(user.email), "password": "wrong password"},
+        )
+        for _ in range(6)
+    ]
+
+    assert [response.status_code for response in responses] == [401, 401, 401, 401, 401, 429]
+    assert responses[-1].headers["retry-after"]
+
+
+async def test_forgot_password_rate_limit_boundary(client):
+    responses = [
+        await client.post(
+            "/api/auth/forgot-password",
+            json={"email": "unknown-reset@example.com"},
+        )
+        for _ in range(4)
+    ]
+
+    assert [response.status_code for response in responses] == [200, 200, 200, 429]
+    assert responses[-1].headers["retry-after"]
