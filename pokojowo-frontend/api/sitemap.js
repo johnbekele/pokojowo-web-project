@@ -20,7 +20,10 @@ const localizedUrl = (pathname, language) => {
 };
 
 const listingApiBase = () => {
-  const configured = process.env.SITEMAP_API_URL || process.env.VITE_API_BASE_URL || DEFAULT_BACKEND;
+  // Keep the sitemap independent from the browser bundle's API setting. The
+  // web app still has a legacy Render value in VITE_API_BASE_URL, while the
+  // live listing data is served through the CloudFront distribution.
+  const configured = process.env.SITEMAP_API_URL || DEFAULT_BACKEND;
   const base = configured.replace(/\/$/, '');
   return base.endsWith('/api') ? base : `${base}/api`;
 };
