@@ -5,6 +5,7 @@ hotlinked CDN URLs die when the source listing is removed."""
 
 import io
 import logging
+from datetime import datetime
 
 import httpx
 from PIL import Image
@@ -119,5 +120,33 @@ async def publish(listing: ExtractedListing) -> dict:
         )
         if resp.status_code == 401:
             raise PublishError("backend rejected X-Scraper-Key (is SCRAPER_API_KEY set?)")
+        resp.raise_for_status()
+        return resp.json()
+
+
+async def update_source_status(
+    source_url: str,
+    *,
+    available: bool,
+    checked_at: datetime,
+    consecutive_failures: int,
+    reason: str,
+) -> dict:
+    """Tell the backend whether a published source is still available."""
+    payload = {
+        "sourceUrl": source_url,
+        "available": available,
+        "checkedAt": checked_at.isoformat(),
+        "consecutiveFailures": consecutive_failures,
+        "reason": reason,
+    }
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            f"{settings.pokojowo_api_url}/api/listings/revalidate",
+            headers={"X-Scraper-Key": settings.pokojowo_api_key},
+            json=payload,
+        )
+        if resp.status_code in (401, 403):
+            raise PublishError("backend rejected X-Scraper-Key for source revalidation")
         resp.raise_for_status()
         return resp.json()

@@ -61,6 +61,16 @@ class ScrapedListingImport(BaseModel):
     offeredBy: Optional[str] = None
 
 
+class ScrapedListingRevalidation(BaseModel):
+    """A source check reported by the authenticated scraper."""
+
+    sourceUrl: str
+    available: bool
+    checkedAt: datetime
+    consecutiveFailures: int = 0
+    reason: str = "unknown"
+
+
 def listing_to_dict(listing: Listing) -> dict:
     """Serialize a Listing document to the camelCase API response shape."""
     return {
@@ -88,6 +98,10 @@ def listing_to_dict(listing: Listing) -> dict:
         "isScraped": listing.is_scraped,
         "sourceUrl": listing.source_url,
         "sourceSite": listing.source_site,
+        "isActive": getattr(listing, "is_active", True),
+        "sourceStatus": getattr(listing, "source_status", "active"),
+        "sourceLastVerifiedAt": getattr(listing, "source_last_verified_at", None),
+        "sourceUnpublishedAt": getattr(listing, "source_unpublished_at", None),
         "createdAt": listing.created_at,
         "updatedAt": listing.updated_at
     }
@@ -169,6 +183,10 @@ def build_listing_query(
     while 'agency' matches strictly.
     """
     query = {}
+
+    # Legacy documents without isActive are visible; only explicitly
+    # unpublished listings are removed from public search and map results.
+    query["isActive"] = {"$ne": False}
 
     # Text search on address and description
     if search:
@@ -599,6 +617,9 @@ async def import_scraped_listing(
         source_url=listing_data.sourceUrl,
         source_site=listing_data.sourceSite,
         phone=listing_data.phone,
+        is_active=True,
+        source_status="active",
+        source_last_verified_at=datetime.utcnow(),
     )
 
     await listing.insert()
@@ -621,6 +642,55 @@ async def import_scraped_listing(
     }
 
 
+@router.post("/revalidate", response_model=dict)
+async def revalidate_scraped_listing(
+    check: ScrapedListingRevalidation,
+    x_scraper_key: Optional[str] = Header(None),
+):
+    """Update source freshness and unpublish after two confirmed failures."""
+    if not settings.SCRAPER_API_KEY or not x_scraper_key or not secrets.compare_digest(
+        x_scraper_key, settings.SCRAPER_API_KEY
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Valid X-Scraper-Key header is required",
+        )
+    if check.consecutiveFailures < 0:
+        raise HTTPException(status_code=422, detail="consecutiveFailures cannot be negative")
+
+    listing = await Listing.find_one(
+        {"sourceUrl": check.sourceUrl, "isScraped": True}
+    )
+    if not listing:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scraped listing not found")
+
+    now = datetime.utcnow()
+    listing.source_last_verified_at = check.checkedAt
+    listing.updated_at = now
+    if check.available:
+        listing.is_active = True
+        listing.source_status = "active"
+        listing.source_unpublished_at = None
+    elif check.consecutiveFailures >= 2:
+        listing.is_active = False
+        listing.source_status = "unavailable"
+        listing.source_unpublished_at = listing.source_unpublished_at or now
+    else:
+        # Keep serving the listing after the first failure; it may be a
+        # transient source outage. The timestamp still records the check.
+        listing.source_status = "unverified"
+
+    await listing.save()
+    return {
+        "message": "Source status updated",
+        "listing_id": str(listing.id),
+        "unpublished": listing.is_active is False,
+        "isActive": listing.is_active,
+        "sourceStatus": listing.source_status,
+        "sourceLastVerifiedAt": listing.source_last_verified_at,
+    }
+
+
 # ============================================================================
 # Dynamic /{listing_id} routes — keep these LAST (see note at top of file)
 # ============================================================================
@@ -634,6 +704,12 @@ async def get_listing_by_id(listing_id: str):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Listing not found"
+        )
+
+    if listing.is_scraped and listing.is_active is False:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing is no longer available",
         )
 
     result = listing_to_dict(listing)
