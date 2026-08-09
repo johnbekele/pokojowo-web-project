@@ -1,6 +1,19 @@
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+function activeLanguage() {
+  if (typeof localStorage !== 'undefined') {
+    const stored = localStorage.getItem('i18nextLng');
+    if (stored) return stored;
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language;
+  }
+
+  return 'en';
+}
+
 /**
  * Merge Tailwind CSS classes with clsx
  */
@@ -13,12 +26,15 @@ export function cn(...inputs) {
  */
 export function formatDate(date, options = {}) {
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
+  if (Number.isNaN(d.getTime())) return '';
+
+  const language = activeLanguage();
+  return new Intl.DateTimeFormat(language, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     ...options,
-  });
+  }).format(d);
 }
 
 /**

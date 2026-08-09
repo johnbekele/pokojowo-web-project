@@ -23,7 +23,7 @@ import useUIStore, { type ThemeMode } from '@/stores/uiStore';
 import { useDeleteAccount, useUpdateProfile } from '@/hooks/user/useUser';
 import useTheme from '@/hooks/useTheme';
 import useBiometricSetting from '@/hooks/useBiometricSetting';
-import i18n from '@/lib/i18n';
+import i18n, { changeLanguage } from '@/lib/i18n';
 
 const PRIVACY_URL = 'https://pokojowo-web-project.onrender.com/privacy';
 const TERMS_URL = 'https://pokojowo-web-project.onrender.com/terms';
@@ -115,7 +115,7 @@ export default function SettingsScreen() {
 
   const handleLanguageChange = async () => {
     const nextLang = currentLanguage === 'pl' ? 'en' : 'pl';
-    await i18n.changeLanguage(nextLang);
+    await changeLanguage(nextLang);
   };
 
   const openLink = (url: string) => {
