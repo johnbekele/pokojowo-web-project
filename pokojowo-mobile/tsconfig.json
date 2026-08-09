@@ -14,7 +14,7 @@
       "@/locales/*": ["./locales/*"],
       "@/assets/*": ["./assets/*"]
     },
-    "types": ["nativewind/types"]
+    "types": ["nativewind/types", "jest"]
   },
   "include": [
     "**/*.ts",
