@@ -1,9 +1,10 @@
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
 from curl_cffi.requests import RequestsError
 
 from pokojowo_scraper.config import settings
-from pokojowo_scraper.fetch.client import Fetcher
+from pokojowo_scraper.fetch.client import Fetcher, RobotsDisallowedError
 
 
 class Response:
@@ -32,7 +33,12 @@ class Session:
 @pytest.mark.asyncio
 async def test_retries_429_and_5xx_with_backoff(monkeypatch):
     fetcher = Fetcher()
-    fetcher._session = Session([Response(429), Response(503), Response(200)])
+    fetcher._session = Session([
+        Response(200, "User-agent: *\nAllow: /\n"),
+        Response(429),
+        Response(503),
+        Response(200),
+    ])
     monkeypatch.setattr(fetcher, "_respect_rate_limit", AsyncMock())
     monkeypatch.setattr(settings, "fetch_backoff_base", 0)
     monkeypatch.setattr(settings, "fetch_backoff_max", 0)
@@ -40,7 +46,7 @@ async def test_retries_429_and_5xx_with_backoff(monkeypatch):
     result = await fetcher.get("https://example.test/listing")
 
     assert result == "<html>ok</html>"
-    assert fetcher._session.calls == 3
+    assert fetcher._session.calls == 4
     assert fetcher.fetch_attempts == 3
     assert fetcher.fetch_retries == 2
     assert fetcher.fetch_successes == 1
@@ -49,7 +55,11 @@ async def test_retries_429_and_5xx_with_backoff(monkeypatch):
 @pytest.mark.asyncio
 async def test_retries_network_error_but_not_404(monkeypatch):
     fetcher = Fetcher()
-    fetcher._session = Session([RequestsError("connection reset"), Response(200)])
+    fetcher._session = Session([
+        Response(200, "User-agent: *\nAllow: /\n"),
+        RequestsError("connection reset"),
+        Response(200),
+    ])
     monkeypatch.setattr(fetcher, "_respect_rate_limit", AsyncMock())
     monkeypatch.setattr(settings, "fetch_backoff_base", 0)
     monkeypatch.setattr(settings, "fetch_backoff_max", 0)
@@ -58,8 +68,55 @@ async def test_retries_network_error_but_not_404(monkeypatch):
     assert fetcher.fetch_retries == 1
 
     fetcher = Fetcher()
-    fetcher._session = Session([Response(404)])
+    fetcher._session = Session([
+        Response(200, "User-agent: *\nAllow: /\n"),
+        Response(404),
+    ])
     monkeypatch.setattr(fetcher, "_respect_rate_limit", AsyncMock())
     with pytest.raises(RequestsError):
         await fetcher.get("https://example.test/missing")
+    assert fetcher._session.calls == 2
+
+
+@pytest.mark.asyncio
+async def test_disallowed_path_is_not_fetched(monkeypatch):
+    fetcher = Fetcher()
+    fetcher._session = Session([
+        Response(200, "User-agent: *\nDisallow: /private\n"),
+        Response(200),
+    ])
+    monkeypatch.setattr(fetcher, "_respect_rate_limit", AsyncMock())
+
+    with pytest.raises(RobotsDisallowedError):
+        await fetcher.get("https://example.test/private/listing")
+
     assert fetcher._session.calls == 1
+    assert fetcher.robots_checked == 1
+    assert fetcher.robots_blocked == 1
+
+
+@pytest.mark.asyncio
+async def test_robots_policy_is_cached_per_origin(monkeypatch):
+    fetcher = Fetcher()
+    fetcher._session = Session([
+        Response(200, "User-agent: *\nAllow: /\n"),
+        Response(200, "<html>one</html>"),
+        Response(200, "<html>two</html>"),
+    ])
+    monkeypatch.setattr(fetcher, "_respect_rate_limit", AsyncMock())
+
+    assert await fetcher.get("https://example.test/one") == "<html>one</html>"
+    assert await fetcher.get("https://example.test/two") == "<html>two</html>"
+    assert fetcher._session.calls == 3
+    assert fetcher.robots_checked == 1
+
+
+@pytest.mark.asyncio
+async def test_missing_robots_file_uses_standard_allow_policy(monkeypatch):
+    fetcher = Fetcher()
+    fetcher._session = Session([Response(404), Response(200)])
+    monkeypatch.setattr(fetcher, "_respect_rate_limit", AsyncMock())
+
+    assert await fetcher.get("https://example.test/listing") == "<html>ok</html>"
+    assert fetcher._session.calls == 2
+    assert fetcher.robots_blocked == 0

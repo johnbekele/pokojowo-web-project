@@ -38,6 +38,15 @@ Publishing goes through `POST /api/listings/import` (X-Scraper-Key auth,
 idempotent on sourceUrl). Images are downloaded, downscaled to ≤1600px JPEG,
 and re-hosted via `POST /api/upload/scraped` — no hotlinking.
 
+The fetcher identifies itself as `SCRAPER_SCRAPER_USER_AGENT` and loads each
+origin's `robots.txt` once per run before reading either a cached or live page.
+Disallowed paths are skipped, and an unavailable policy fails closed; a 404 or
+410 uses the standard convention that no robots policy is published. Phone
+numbers from private or unknown sellers are extracted only for internal quality
+checks and are never included in the import payload. Agency phone numbers are
+treated as business contacts. Legal review, a privacy-policy update, and a
+takedown process are still required before changing that default.
+
 ## Setup (macOS, Apple Silicon)
 
 ```bash

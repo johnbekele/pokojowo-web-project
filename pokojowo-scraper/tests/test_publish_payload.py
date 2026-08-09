@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pokojowo_scraper.publish import build_import_payload
 from pokojowo_scraper.schemas import (
@@ -29,7 +29,7 @@ def full_listing() -> ExtractedListing:
     l.geo_precision = GeoPrecision.EXACT
     l.offered_by = fv(OfferedBy.OWNER, "structured")
     l.phone = fv("601234567", "structured")
-    l.available_from = fv(datetime(2026, 9, 1, tzinfo=timezone.utc), "regex")
+    l.available_from = fv(datetime(2026, 9, 1, tzinfo=UTC), "regex")
     l.room_type = fv(RoomType.SINGLE, "llm")
     l.building_type = fv(BuildingType.BLOCK, "llm")
     l.rent_for_only = fv(["Student"], "llm")
@@ -51,8 +51,8 @@ def test_payload_matches_import_contract():
     assert p["city"] == "Warszawa"
     assert p["district"] == "Mokotów"
     assert p["offeredBy"] == "owner"
-    assert p["phone"] == "601234567"
-    assert p["canBeContacted"] == ["Message", "Phone"]
+    assert "phone" not in p
+    assert "canBeContacted" not in p
     assert p["roomType"] == "Single"          # exact enum spelling
     assert p["buildingType"] == "Block"
     assert p["rentForOnly"] == ["Student"]
@@ -71,3 +71,19 @@ def test_optional_fields_omitted_not_nulled():
     assert "latitude" not in p and "longitude" not in p
     assert "phone" not in p and "canBeContacted" not in p
     assert "roomType" not in p
+
+
+def test_agency_phone_is_published_as_business_contact():
+    l = full_listing()
+    l.offered_by = fv(OfferedBy.AGENCY, "structured")
+    p = build_import_payload(l, ["/uploads/x.jpg"])
+    assert p["phone"] == "601234567"
+    assert p["canBeContacted"] == ["Message", "Phone"]
+
+
+def test_unknown_seller_phone_is_not_published():
+    l = full_listing()
+    l.offered_by = fv(OfferedBy.UNKNOWN, "structured")
+    p = build_import_payload(l, ["/uploads/x.jpg"])
+    assert "phone" not in p
+    assert "canBeContacted" not in p

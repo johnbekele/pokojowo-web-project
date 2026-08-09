@@ -10,7 +10,7 @@ import httpx
 from PIL import Image
 
 from pokojowo_scraper.config import settings
-from pokojowo_scraper.schemas import ExtractedListing
+from pokojowo_scraper.schemas import ExtractedListing, OfferedBy
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,11 @@ def build_import_payload(listing: ExtractedListing, image_urls: list[str]) -> di
         payload["longitude"] = listing.coordinates.value.longitude
     if listing.offered_by:
         payload["offeredBy"] = listing.offered_by.value
-    if listing.phone:
+    # A phone number scraped from an owner's listing is personal data. Do not
+    # republish it until a documented lawful basis and takedown process exist.
+    # Agency contacts remain eligible because they represent a business
+    # publisher rather than a private landlord.
+    if listing.phone and listing.offered_by and listing.offered_by.value == OfferedBy.AGENCY:
         payload["phone"] = listing.phone.value
         payload["canBeContacted"] = ["Message", "Phone"]
     if listing.available_from:
