@@ -17,6 +17,7 @@ from app.schemas.matching_schema import MatchResponse, MatchResult
 router = APIRouter()
 
 FULL_RESULT_LIMIT = 100  # cached entries hold up to this many matches
+MAX_MAP_PINS = 100
 
 
 async def get_scored_matches(current_user: User, use_cache: bool = True) -> dict:
@@ -176,7 +177,12 @@ async def get_matches_map(
     min_score: float = Query(
         0, ge=0, le=100, alias="minScore", description="Minimum compatibility score"
     ),
-    limit: int = Query(200, ge=1, le=500, description="Maximum pins to return"),
+    limit: int = Query(
+        MAX_MAP_PINS,
+        ge=1,
+        le=MAX_MAP_PINS,
+        description="Maximum pins to return",
+    ),
     current_user: User = Depends(require_verified)
 ):
     """Flatmates whose preferred area falls inside the visible map region.
@@ -242,10 +248,13 @@ async def get_matches_map(
         })
 
     pins.sort(key=lambda p: -p["score"])
+    truncated = len(pins) > limit
+    visible_pins = pins[:limit]
 
     return {
-        "pins": pins[:limit],
-        "total": min(len(pins), limit),
+        "pins": visible_pins,
+        "total": len(visible_pins),
+        "truncated": truncated,
         # How many of your matches have set a preferred area at all — lets the
         # client explain an empty map ("no matches have shared an area yet")
         # instead of implying nobody is looking here.

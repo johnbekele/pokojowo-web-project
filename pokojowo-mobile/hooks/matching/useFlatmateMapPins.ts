@@ -6,6 +6,7 @@ import { MATCHING_KEYS } from './useMatching';
 const EMPTY: FlatmateMapResponse = {
   pins: [],
   total: 0,
+  truncated: false,
   totalWithArea: 0,
   totalMatches: 0,
 };
@@ -28,7 +29,9 @@ export function useFlatmateMapPins({
   const query = useQuery({
     queryKey: [...MATCHING_KEYS.all, 'map', bbox, minScore] as const,
     queryFn: () =>
-      mapService.getFlatmatePins({ bbox: bbox!, minScore }).then((res) => res.data),
+      mapService
+        .getFlatmatePins({ bbox: bbox!, minScore })
+        .then((res) => res.data),
     enabled: enabled && !!bbox,
     retry: false,
     placeholderData: (previous) => previous,

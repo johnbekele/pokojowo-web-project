@@ -4,13 +4,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Crosshair, List, SlidersHorizontal } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Crosshair,
+  List,
+  SlidersHorizontal,
+} from 'lucide-react-native';
 
 import ListingMapView from '@/components/feature/listings/ListingMapView';
 import MapPinCard from '@/components/feature/listings/MapPinCard';
 import SearchFiltersModal from '@/components/feature/listings/SearchFiltersModal';
 import FlatmatePinCard from '@/components/feature/matching/FlatmatePinCard';
-import MapLayerToggle, { type MapLayer } from '@/components/feature/listings/MapLayerToggle';
+import MapLayerToggle, {
+  type MapLayer,
+} from '@/components/feature/listings/MapLayerToggle';
 import { useListingMapPins } from '@/hooks/listings/useListingMapPins';
 import { useFlatmateMapPins } from '@/hooks/matching/useFlatmateMapPins';
 import useAuthStore from '@/stores/authStore';
@@ -36,7 +43,9 @@ export default function ListingsMapScreen() {
 
   const [filters, setFilters] = useState<ListingFilters>(() => {
     try {
-      return params.filters ? (JSON.parse(params.filters) as ListingFilters) : {};
+      return params.filters
+        ? (JSON.parse(params.filters) as ListingFilters)
+        : {};
     } catch {
       return {};
     }
@@ -44,13 +53,19 @@ export default function ListingsMapScreen() {
 
   const [showFilters, setShowFilters] = useState(false);
   const [layer, setLayer] = useState<MapLayer>('flats');
-  const [viewport, setViewport] = useState<{ bbox: string | null; zoom: number | null }>({
+  const [viewport, setViewport] = useState<{
+    bbox: string | null;
+    zoom: number | null;
+  }>({
     bbox: null,
     zoom: null,
   });
   const [selectedPin, setSelectedPin] = useState<ListingMapPin | null>(null);
-  const [selectedFlatmate, setSelectedFlatmate] = useState<FlatmateMapPin | null>(null);
-  const [focusRegion, setFocusRegion] = useState<ReturnType<typeof regionAround> | null>(null);
+  const [selectedFlatmate, setSelectedFlatmate] =
+    useState<FlatmateMapPin | null>(null);
+  const [focusRegion, setFocusRegion] = useState<ReturnType<
+    typeof regionAround
+  > | null>(null);
   const [isLocating, setIsLocating] = useState(false);
 
   const showListings = layer !== 'flatmates';
@@ -87,7 +102,9 @@ export default function ListingsMapScreen() {
         return;
       }
       const position = await Location.getCurrentPositionAsync({});
-      setFocusRegion(regionAround(position.coords.latitude, position.coords.longitude));
+      setFocusRegion(
+        regionAround(position.coords.latitude, position.coords.longitude),
+      );
     } catch {
       showToast({
         type: 'error',
@@ -101,10 +118,15 @@ export default function ListingsMapScreen() {
   const summary = showListings
     ? listingData.mode === 'clusters'
       ? t('map.zoomForPins', 'Zoom in to see individual rooms')
-      : t('map.listingCount', '{{count}} rooms in view', { count: listingData.total })
+      : t('map.listingCount', '{{count}} rooms in view', {
+          count: listingData.total,
+        })
     : t('map.flatmateCount', '{{count}} flatmates looking here', {
         count: flatmateData.pins.length,
       });
+  const hasTruncatedResults =
+    (showListings && listingData.truncated) ||
+    (showFlatmates && flatmateData.truncated);
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
@@ -113,13 +135,20 @@ export default function ListingsMapScreen() {
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <View className="flex-1">
-          <Text className="text-xl font-bold text-text">{t('map.title', 'Map search')}</Text>
+          <Text className="text-xl font-bold text-text">
+            {t('map.title', 'Map search')}
+          </Text>
           <View className="flex-row items-center gap-2">
             <Text className="text-muted text-xs">{summary}</Text>
-            {isFetching && <ActivityIndicator size="small" color={colors.muted} />}
+            {isFetching && (
+              <ActivityIndicator size="small" color={colors.muted} />
+            )}
           </View>
         </View>
-        <TouchableOpacity className="bg-surface p-2.5 rounded-xl" onPress={() => setShowFilters(true)}>
+        <TouchableOpacity
+          className="bg-surface p-2.5 rounded-xl"
+          onPress={() => setShowFilters(true)}
+        >
           <SlidersHorizontal size={18} color={colors.text} />
         </TouchableOpacity>
         <TouchableOpacity
@@ -138,7 +167,9 @@ export default function ListingsMapScreen() {
       <View className="flex-1">
         <ListingMapView
           data={listingData}
-          flatmatePins={showFlatmates && canSeeFlatmates ? flatmateData.pins : []}
+          flatmatePins={
+            showFlatmates && canSeeFlatmates ? flatmateData.pins : []
+          }
           showListings={showListings}
           selectedPinId={selectedPin?.id ?? null}
           onRegionChange={handleRegionChange}
@@ -177,11 +208,24 @@ export default function ListingsMapScreen() {
           </View>
         )}
 
+        {hasTruncatedResults && (
+          <View className="absolute left-4 right-16 top-16 rounded-xl bg-card/95 border border-border px-3 py-2">
+            <Text className="text-muted text-xs">
+              {t(
+                'map.truncated',
+                'Some results are hidden at this zoom. Zoom in to see more.',
+              )}
+            </Text>
+          </View>
+        )}
+
         {selectedPin && (
           <MapPinCard
             pin={selectedPin}
             onDismiss={() => setSelectedPin(null)}
-            onPress={() => router.push(`/(app)/(home)/listing/${selectedPin.id}`)}
+            onPress={() =>
+              router.push(`/(app)/(home)/listing/${selectedPin.id}`)
+            }
           />
         )}
 
