@@ -76,6 +76,30 @@ async def make_user() -> Callable[..., Coroutine[Any, Any, User]]:
 
 
 @pytest_asyncio.fixture
+async def verified_user(make_user):
+    """A normal active, verified account for endpoint integration tests."""
+    return await make_user(username="verified-fixture", verified=True)
+
+
+@pytest_asyncio.fixture
+async def unverified_user(make_user):
+    """An active account that must be refused by verified-only routes."""
+    return await make_user(username="unverified-fixture", verified=False)
+
+
+@pytest_asyncio.fixture
+async def landlord_user(make_user):
+    """A verified landlord account for role and listing scenarios."""
+    return await make_user(username="landlord-fixture", roles=[RoleEnum.LANDLORD])
+
+
+@pytest_asyncio.fixture
+async def admin_user(make_user):
+    """An active administrator for paired role-authorization assertions."""
+    return await make_user(username="admin-fixture", roles=[RoleEnum.ADMIN])
+
+
+@pytest_asyncio.fixture
 async def login(client):
     """Return a bearer-token helper that uses the real login endpoint."""
 
