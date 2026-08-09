@@ -12,6 +12,34 @@ const api = axios.create({
   },
 });
 
+// Share one refresh request between concurrent 401 responses. Without this,
+// a burst of expired requests can rotate the same refresh token repeatedly
+// and race the retries against one another.
+let refreshPromise = null;
+
+function refreshAccessToken(refreshToken) {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post(`${API_BASE_URL}/auth/refresh`, {
+        refresh_token: refreshToken,
+      })
+      .then((response) => {
+        const accessToken = response.data.access_token || response.data.accessToken;
+        const newRefreshToken =
+          response.data.refresh_token || response.data.refreshToken;
+        localStorage.setItem('token', accessToken);
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
+        }
+        return response.data;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
 /**
  * Request interceptor - adds JWT token to requests
  */
@@ -51,18 +79,8 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refresh_token: refreshToken,
-          });
-
-          const accessToken =
-            response.data.access_token || response.data.accessToken;
-          const newRefreshToken =
-            response.data.refresh_token || response.data.refreshToken;
-          localStorage.setItem('token', accessToken);
-          if (newRefreshToken) {
-            localStorage.setItem('refreshToken', newRefreshToken);
-          }
+          const response = await refreshAccessToken(refreshToken);
+          const accessToken = response.access_token || response.accessToken;
 
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
