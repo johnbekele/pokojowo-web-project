@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     pokojowo_api_url: str = "http://localhost:3000"
     pokojowo_api_key: str = ""  # sent as X-Scraper-Key to /api/listings/import
 
+    # Dashboard API — fail closed when unset. The admin key is required for
+    # actions that mutate data or trigger a scrape run.
+    dashboard_api_key: str = ""
+    dashboard_admin_key: str = ""
+    dashboard_run_cooldown_seconds: int = 60
+
     # Local LLM (Ollama)
     ollama_url: str = "http://localhost:11434"
     ollama_model: str = "gemma3:12b-it-qat"

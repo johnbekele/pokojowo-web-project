@@ -5,11 +5,13 @@ precision metrics, live SSE logs, and manual run triggering."""
 import asyncio
 import json
 import logging
+import secrets
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal, Optional
 
 from bson import ObjectId
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
@@ -19,15 +21,52 @@ from pokojowo_scraper.store import db, ensure_indexes, utcnow
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Pokojowo Scraper Dashboard API", version="2.0.0")
+from pokojowo_scraper.config import settings
+
+
+async def require_dashboard_key(
+    request: Request,
+    x_internal_key: str | None = Header(None, alias="X-Internal-Key"),
+    key: str | None = Query(None, description="Only used by EventSource log streams"),
+) -> None:
+    """Authenticate every dashboard request and fail closed if misconfigured."""
+    # EventSource cannot set headers, so the log stream may use a query token.
+    # Do not allow query-string credentials on ordinary endpoints where they
+    # would be more likely to leak through access logs or browser history.
+    supplied = x_internal_key or (
+        key if request.url.path == "/api/scraper/logs/stream" else None
+    )
+    valid_keys = [
+        value
+        for value in (settings.dashboard_api_key, settings.dashboard_admin_key)
+        if value
+    ]
+    if not supplied or not any(secrets.compare_digest(supplied, value) for value in valid_keys):
+        raise HTTPException(status_code=401, detail="Valid X-Internal-Key is required")
+
+
+async def require_admin_key(
+    x_internal_key: str | None = Header(None, alias="X-Internal-Key"),
+) -> None:
+    expected = settings.dashboard_admin_key
+    if not expected or not x_internal_key or not secrets.compare_digest(x_internal_key, expected):
+        raise HTTPException(status_code=403, detail="Admin dashboard key is required")
+
+
+app = FastAPI(
+    title="Pokojowo Scraper Dashboard API",
+    version="2.0.0",
+    dependencies=[Depends(require_dashboard_key)],
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5174"],
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "X-Internal-Key"],
 )
 
 _active_run: asyncio.Task | None = None
+_last_run_started = 0.0
 
 
 @app.on_event("startup")
@@ -49,15 +88,29 @@ async def list_runs(limit: int = Query(30, le=200), skip: int = 0) -> list[dict]
     return [r async for r in cursor]
 
 
-@app.post("/api/scraper/runs", status_code=202)
+@app.post(
+    "/api/scraper/runs",
+    status_code=202,
+    dependencies=[Depends(require_admin_key)],
+)
 async def trigger_run(site: Optional[str] = None, city: Optional[str] = None) -> dict:
     """Manual run trigger. One run at a time."""
-    global _active_run
+    global _active_run, _last_run_started
     if _active_run and not _active_run.done():
         raise HTTPException(409, "a run is already active")
+    elapsed = time.monotonic() - _last_run_started
+    cooldown = settings.dashboard_run_cooldown_seconds
+    if elapsed < cooldown:
+        retry_after = max(1, int(cooldown - elapsed))
+        raise HTTPException(
+            429,
+            f"run trigger is rate limited; retry in {retry_after}s",
+            headers={"Retry-After": str(retry_after)},
+        )
     from pokojowo_scraper.pipeline import run_all
 
     _active_run = asyncio.create_task(run_all(site=site, city=city, trigger="dashboard"))
+    _last_run_started = time.monotonic()
     return {"message": "run started"}
 
 
@@ -112,7 +165,7 @@ class ListingEdit(BaseModel):
     edits: dict[str, Any]
 
 
-@app.put("/api/scraper/queue/{item_id}")
+@app.put("/api/scraper/queue/{item_id}", dependencies=[Depends(require_admin_key)])
 async def edit_queue_item(item_id: str, body: ListingEdit) -> dict:
     doc = await _get_item(item_id)
     updates = {}
@@ -143,7 +196,7 @@ class ApprovalAction(BaseModel):
     reason: Optional[str] = None  # reject reason — doubles as an annotation
 
 
-@app.post("/api/scraper/queue/{item_id}/decision")
+@app.post("/api/scraper/queue/{item_id}/decision", dependencies=[Depends(require_admin_key)])
 async def decide(item_id: str, body: ApprovalAction) -> dict:
     doc = await _get_item(item_id)
     if doc["status"] not in ("pending", "held"):
@@ -200,7 +253,7 @@ class Annotation(BaseModel):
     corrected_value: Optional[Any] = None
 
 
-@app.post("/api/scraper/queue/{item_id}/annotate")
+@app.post("/api/scraper/queue/{item_id}/annotate", dependencies=[Depends(require_admin_key)])
 async def annotate(item_id: str, body: Annotation) -> dict:
     if body.issue not in ISSUE_TAGS:
         raise HTTPException(422, f"issue must be one of {ISSUE_TAGS}")
