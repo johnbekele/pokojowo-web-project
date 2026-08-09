@@ -10,6 +10,7 @@ import enListings from '@/locales/en/listings.json';
 import enMatching from '@/locales/en/matching.json';
 import enChat from '@/locales/en/chat.json';
 import enHome from '@/locales/en/home.json';
+import enSeo from '@/locales/en/seo.json';
 
 import plCommon from '@/locales/pl/common.json';
 import plAuth from '@/locales/pl/auth.json';
@@ -18,6 +19,7 @@ import plListings from '@/locales/pl/listings.json';
 import plMatching from '@/locales/pl/matching.json';
 import plChat from '@/locales/pl/chat.json';
 import plHome from '@/locales/pl/home.json';
+import plSeo from '@/locales/pl/seo.json';
 
 const resources = {
   en: {
@@ -28,6 +30,7 @@ const resources = {
     matching: enMatching,
     chat: enChat,
     home: enHome,
+    seo: enSeo,
   },
   pl: {
     common: plCommon,
@@ -37,6 +40,7 @@ const resources = {
     matching: plMatching,
     chat: plChat,
     home: plHome,
+    seo: plSeo,
   },
 };
 
@@ -106,16 +110,19 @@ i18n
     fallbackLng: 'en',
     supportedLngs: SUPPORTED_LANGUAGES,
     defaultNS: 'common',
-    ns: ['common', 'auth', 'profile', 'listings', 'matching', 'chat', 'home'],
+    ns: ['common', 'auth', 'profile', 'listings', 'matching', 'chat', 'home', 'seo'],
     interpolation: {
       escapeValue: false,
     },
     detection: {
       // localStorage first so any explicit user choice wins forever.
       // geo is our timezone+region hint, navigator/htmlTag are the safety nets.
-      order: ['localStorage', 'geo', 'navigator', 'htmlTag'],
+      // An explicit URL language is useful for crawlers and shareable links;
+      // it also lets the sitemap expose stable English and Polish variants.
+      order: ['querystring', 'localStorage', 'geo', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
+      lookupQuerystring: 'lang',
     },
   });
 

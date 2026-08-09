@@ -7,6 +7,7 @@ import useAuthStore from '@/stores/authStore';
 import { useNotificationListener } from '@/hooks/useNotificationListener';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
+import SeoHead from '@/components/shared/SeoHead';
 
 /**
  * Main application component
@@ -46,6 +47,7 @@ function AppContent() {
   // rejection surfaces as a render error above the Suspense boundary.
   return (
     <RouteErrorBoundary fullPage>
+      <SeoHead />
       <AppRouter />
     </RouteErrorBoundary>
   );

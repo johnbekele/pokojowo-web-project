@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserAvatar from '@/components/shared/UserAvatar';
+import SeoHead from '@/components/shared/SeoHead';
 // This is the page most search and social traffic lands on, and the map sits
 // well below the fold, so Leaflet is not part of what the visitor waits for.
 const ListingMap = lazy(() => import('@/components/shared/ListingMap'));
@@ -127,7 +128,9 @@ export default function ListingDetails() {
   const sideImages = images.slice(1, 5);
 
   return (
-    <div className="space-y-12">
+    <>
+      <SeoHead listing={listing} />
+      <div className="space-y-12">
       <div className="flex items-center justify-between gap-4">
         <Link
           to="/"
@@ -465,7 +468,8 @@ export default function ListingDetails() {
           </LuxuryPanel>
         </aside>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

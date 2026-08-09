@@ -1,0 +1,26 @@
+{
+  "siteName": "Pokojowo",
+  "home": {
+    "title": "Znajdź pokój lub współlokatora, który pasuje - Pokojowo",
+    "description": "Przeglądaj wybrane pokoje i poznawaj kompatybilnych współlokatorów w Polsce. Pokojowo ułatwia spokojne i świadome szukanie domu."
+  },
+  "discover": {
+    "title": "Pokoje na wynajem w Polsce - Pokojowo",
+    "description": "Przeglądaj sprawdzone pokoje i mieszkania na wynajem w Warszawie, Krakowie, Wrocławiu i innych miastach. Filtruj po cenie, metrażu i dzielnicy."
+  },
+  "listing": {
+    "title": "{{title}} w {{location}} - {{price}}/miesiąc - Pokojowo",
+    "description": "{{title}} w {{location}} za {{price}} miesięcznie. Zobacz zdjęcia, szczegóły pokoju, udogodnienia i dostępność w Pokojowo."
+  },
+  "fallbackListingTitle": "Pokój na wynajem",
+  "fallbackListingDescription": "Zobacz ten pokój na wynajem w Pokojowo: zdjęcia, szczegóły, udogodnienia i aktualna dostępność.",
+  "auth": {
+    "loginTitle": "Zaloguj się do Pokojowo",
+    "signupTitle": "Utwórz konto Pokojowo",
+    "description": "Zaloguj się do Pokojowo, aby zapisywać pokoje, poznawać kompatybilnych współlokatorów i zarządzać poszukiwaniem domu."
+  },
+  "generic": {
+    "title": "Pokojowo - Wybrane pokoje i współlokatorzy",
+    "description": "Spokojniejszy sposób na znalezienie pokoju, domu i kompatybilnego współlokatora w Polsce."
+  }
+}
