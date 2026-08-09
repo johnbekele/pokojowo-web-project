@@ -19,11 +19,16 @@ const getLocalizedText = (value, language) => {
   return String(value);
 };
 
-const getListingLocation = (listing) => {
+const getListingLocation = (listing, listingTitle = '', language = 'en') => {
   const address = typeof listing?.address === 'string'
     ? listing.address
     : [listing?.address?.street, listing?.address?.city].filter(Boolean).join(', ');
-  return [listing?.district, listing?.city].filter(Boolean).join(', ') || address || 'Poland';
+  const structuredLocation = [listing?.district, listing?.city].filter(Boolean).join(', ');
+  if (structuredLocation) return structuredLocation;
+  if (address && listingTitle && address.trim().toLowerCase() === listingTitle.trim().toLowerCase()) {
+    return language === 'pl' ? 'Polska' : 'Poland';
+  }
+  return address || (language === 'pl' ? 'Polska' : 'Poland');
 };
 
 const formatListingPrice = (listing, language) => {
@@ -78,18 +83,19 @@ const routeMetadata = (pathname, t, language, listing) => {
     return { title: t('discover.title'), description: t('discover.description'), indexable: true };
   }
   if (/^\/listing\/[^/]+$/.test(pathname)) {
-    const listingTitle = getLocalizedText(listing?.title, language) || getListingLocation(listing);
+    const listingTitle = getLocalizedText(listing?.title, language) || getListingLocation(listing, '', language);
+    const listingLocation = getListingLocation(listing, listingTitle, language);
     const title = listing
       ? t('listing.title', {
           title: listingTitle,
-          location: getListingLocation(listing),
+          location: listingLocation,
           price: formatListingPrice(listing, language),
         })
       : t('fallbackListingTitle');
     const description = listing
       ? t('listing.description', {
           title: listingTitle,
-          location: getListingLocation(listing),
+          location: listingLocation,
           price: formatListingPrice(listing, language),
         })
       : t('fallbackListingDescription');
