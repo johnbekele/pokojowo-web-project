@@ -1,0 +1,28 @@
+appId: com.pokojowo.app
+
+---
+
+- launchApp:
+    clearState: true
+
+# A clean install starts on the welcome carousel. Skip it to exercise the
+# production login route instead of depending on persisted device state.
+- tapOn: "Skip"
+- assertVisible: "Welcome Back"
+
+- tapOn: "Email"
+- inputText: ${TEST_EMAIL}
+- tapOn: "Password"
+- inputText: ${TEST_PASSWORD}
+- tapOn: "Sign In"
+
+# Login must land on the authenticated shell and every tab must be reachable.
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+- tapOn: "Flatmates"
+- assertVisible: "Flatmates"
+- tapOn: "Chat"
+- assertVisible: "Chat"
+- tapOn: "Profile"
+- assertVisible: "Profile"

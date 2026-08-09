@@ -396,13 +396,41 @@ jobs:
           cache-dependency-path: pokojowo-mobile/package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Typecheck (3 pre-existing errors are the accepted baseline)
-        run: |
-          set +e
-          npx tsc --noEmit 2>&1 | tee tsc.log
-          COUNT=$(grep -cE "error TS" tsc.log || true)
-          echo "tsc errors: $COUNT (baseline: 3)"
-          if [ "$COUNT" -gt 3 ]; then
-            echo "::error::tsc error count ($COUNT) exceeds the accepted baseline of 3"
-            exit 1
-          fi
+      - name: Typecheck (strict)
+        run: npx tsc --noEmit
+
+  mobile-tests:
+    name: Mobile tests (Jest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokojowo-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pokojowo-mobile/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run unit tests
+        run: npm test -- --runInBand
+
+  mobile-doctor:
+    name: Mobile Expo Doctor
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokojowo-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pokojowo-mobile/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate Expo dependencies
+        run: npm run doctor
