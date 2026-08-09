@@ -12,15 +12,28 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import useAuthStore from '@/stores/authStore';
 
-const signupSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
+const signupSchema = z
+  .object({
+    username: z.string().min(3, 'Username must be at least 3 characters'),
+    email: z.string().email('Please enter a valid email'),
+    password: z.string().min(10, 'Password must be at least 10 characters'),
+    confirmPassword: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const normalized = data.password.toLowerCase();
+    const emailLocalPart = data.email.split('@')[0];
+    if ([data.username, emailLocalPart].some((value) => value && normalized.includes(value.toLowerCase()))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Password must not contain your username or email address',
+        path: ['password'],
+      });
+    }
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 export default function Signup() {
   const { t } = useTranslation('auth');
@@ -129,6 +142,9 @@ export default function Signup() {
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
+              <p className="text-xs text-muted-foreground">
+                {t('signup.passwordRequirements')}
+              </p>
             </div>
 
             <div className="space-y-2">

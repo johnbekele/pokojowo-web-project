@@ -14,7 +14,7 @@ import useAuthStore from '@/stores/authStore';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 export default function Login() {

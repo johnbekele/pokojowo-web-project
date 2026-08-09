@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from typing import List, Optional
 from datetime import datetime
+from app.core.passwords import validate_password_strength
 
 
 class UserBase(BaseModel):
@@ -17,6 +18,15 @@ class UserCreate(BaseModel):
     firstname: Optional[str] = None
     lastname: Optional[str] = None
     role: Optional[List[str]] = ["User"]
+
+    @model_validator(mode="after")
+    def validate_password(self):
+        validate_password_strength(
+            self.password,
+            username=self.username,
+            email=str(self.email),
+        )
+        return self
 
 
 class UserLogin(BaseModel):
@@ -73,7 +83,25 @@ class PasswordReset(BaseModel):
 
 class PasswordResetConfirm(BaseModel):
     token: str
+    new_password: str = Field(..., alias="password")
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        return validate_password_strength(value)
+
+    class Config:
+        populate_by_name = True
+
+
+class PasswordChange(BaseModel):
+    old_password: str
     new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        return validate_password_strength(value)
 
 
 class ProfileCompletionUpdate(BaseModel):
