@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+Allow: /discover
+Allow: /listing/
+
+# Authentication, account, messaging and administration are private app views.
+Disallow: /api/
+Disallow: /auth/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /select-role
+Disallow: /welcome
+Disallow: /profile
+Disallow: /profile-completion/
+Disallow: /matches
+Disallow: /chat
+Disallow: /likes
+Disallow: /favorites
+Disallow: /dashboard
+Disallow: /admin/
+Disallow: /landlord/
+
+Sitemap: https://pokojowo.com/sitemap.xml

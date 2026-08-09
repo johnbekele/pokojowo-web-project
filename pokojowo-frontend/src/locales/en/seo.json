@@ -1,0 +1,26 @@
+{
+  "siteName": "Pokojowo",
+  "home": {
+    "title": "Find a room or flatmate who fits - Pokojowo",
+    "description": "Browse considered rooms and meet compatible flatmates in Poland. Pokojowo makes finding a home feel quieter, clearer and more human."
+  },
+  "discover": {
+    "title": "Rooms for rent in Poland - Pokojowo",
+    "description": "Explore hand-reviewed rooms and apartments for rent across Warsaw, Krakow, Wroclaw and more. Filter by price, size and neighbourhood."
+  },
+  "listing": {
+    "title": "{{title}} in {{location}} - {{price}}/month - Pokojowo",
+    "description": "{{title}} in {{location}} for {{price}} per month. See photos, room details, amenities and availability on Pokojowo."
+  },
+  "fallbackListingTitle": "Room for rent",
+  "fallbackListingDescription": "Explore this room for rent on Pokojowo, with photos, details, amenities and current availability.",
+  "auth": {
+    "loginTitle": "Sign in to Pokojowo",
+    "signupTitle": "Create your Pokojowo account",
+    "description": "Sign in to Pokojowo to save rooms, connect with compatible flatmates and manage your home search."
+  },
+  "generic": {
+    "title": "Pokojowo - Considered rooms and flatmates",
+    "description": "A quieter way to find rooms, homes and compatible flatmates in Poland."
+  }
+}
