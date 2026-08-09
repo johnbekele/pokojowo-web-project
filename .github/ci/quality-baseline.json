@@ -1,0 +1,6 @@
+{
+  "frontend_eslint": { "errors": 48, "warnings": 10 },
+  "mobile_eslint": { "errors": 0, "warnings": 18 },
+  "fastapi_ruff": { "errors": 47 },
+  "chat_ruff": { "errors": 2 }
+}
