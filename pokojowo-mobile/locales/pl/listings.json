@@ -199,6 +199,7 @@
     "flatmateCount_few": "{{count}} osoby szukają tutaj",
     "flatmateCount_many": "{{count}} osób szuka tutaj",
     "flatmatesNeedProfile": "Uzupełnij profil najemcy, aby zobaczyć, kto jeszcze szuka w tej okolicy.",
+    "truncated": "Część wyników jest ukryta przy tym powiększeniu. Przybliż mapę, aby zobaczyć więcej.",
     "dismissPin": "Zamknij",
     "layers": {
       "flats": "Pokoje",

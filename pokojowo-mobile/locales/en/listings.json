@@ -193,6 +193,7 @@
     "flatmateCount_one": "1 flatmate looking here",
     "flatmateCount_other": "{{count}} flatmates looking here",
     "flatmatesNeedProfile": "Complete your tenant profile to see who else is looking here.",
+    "truncated": "Some results are hidden at this zoom. Zoom in to see more.",
     "dismissPin": "Close",
     "layers": {
       "flats": "Flats",

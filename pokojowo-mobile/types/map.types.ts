@@ -47,12 +47,18 @@ export interface FlatmateMapPin {
   age?: number | null;
   preferredLocation?: string | null;
   preferredDistricts: string[];
-  budget?: { min?: number | null; max?: number | null; currency?: string | null } | null;
+  budget?: {
+    min?: number | null;
+    max?: number | null;
+    currency?: string | null;
+  } | null;
 }
 
 export interface FlatmateMapResponse {
   pins: FlatmateMapPin[];
   total: number;
+  /** True when more matching pins fell inside the viewport than the cap. */
+  truncated: boolean;
   /** How many of your matches shared an area at all, in view or not. */
   totalWithArea: number;
   totalMatches: number;
