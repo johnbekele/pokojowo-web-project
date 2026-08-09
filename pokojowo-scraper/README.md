@@ -76,6 +76,21 @@ pokojowo-scraper run
 pokojowo-scraper translate-test --count 20
 ```
 
+### Refreshing extractor fixtures
+
+When OLX or Otodom changes its page structure, capture fresh real pages before
+changing an extractor:
+
+```bash
+pokojowo-scraper probe olx --city warszawa
+pokojowo-scraper probe otodom --city warszawa
+pytest tests/test_real_fixtures.py
+```
+
+Review the expected values in `tests/test_real_fixtures.py` when replacing a
+fixture. Keep the fixture-backed assertions specific so a markup change cannot
+silently produce a partially populated listing.
+
 ## Scheduling (launchd)
 
 launchd is used instead of cron because it runs missed schedules after wake.
