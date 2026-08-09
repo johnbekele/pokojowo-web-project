@@ -114,6 +114,12 @@ export default function ListingDetails() {
   const isScraped = listing.isScraped;
   const sourceUrl = listing.sourceUrl;
   const sourceSite = listing.sourceSite;
+  const sourceLastVerifiedAt = listing.sourceLastVerifiedAt;
+  const sourceLastVerified = sourceLastVerifiedAt
+    ? new Date(sourceLastVerifiedAt).toLocaleDateString(currentLang === 'pl' ? 'pl-PL' : 'en-GB', {
+        dateStyle: 'medium',
+      })
+    : null;
 
   const description = getTranslatedText(listing.description, currentLang);
   const title = getTranslatedText(listing.title, currentLang) || listing.address;
@@ -355,7 +361,14 @@ export default function ListingDetails() {
               <AlertDescription className="text-foreground">
                 {t(
                   'detail.scrapedNotice',
-                  'This listing was imported from an external source. Contact the host directly through the original website or phone number.',
+                  'This listing was imported from an external source. Contact the host directly through the original website.',
+                )}
+                {sourceLastVerified && (
+                  <span className="mt-2 block text-xs text-muted-foreground">
+                    {t('detail.sourceLastVerified', 'Source last checked {{date}}', {
+                      date: sourceLastVerified,
+                    })}
+                  </span>
                 )}
               </AlertDescription>
             </Alert>

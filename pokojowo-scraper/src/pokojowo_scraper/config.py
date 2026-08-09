@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     fetch_backoff_max: float = 30.0
     extraction_alert_min_samples: int = 5
     extraction_alert_threshold: float = 0.25
+    revalidation_limit: int = 100
 
     # Quality routing
     auto_publish_threshold: float = 0.85

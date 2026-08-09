@@ -47,6 +47,13 @@ checks and are never included in the import payload. Agency phone numbers are
 treated as business contacts. Legal review, a privacy-policy update, and a
 takedown process are still required before changing that default.
 
+Each non-dry run also revalidates up to `SCRAPER_REVALIDATION_LIMIT` imported
+listings per source. A 404/410 or a clear delisted marker is recorded as a
+failure; challenge pages and transient errors are deferred. The backend keeps a
+listing visible after the first failure and unpublishes it after two consecutive
+failures, without deleting the record. A successful later check restores it,
+and `sourceLastVerifiedAt` is exposed to the listing detail UI.
+
 ## Setup (macOS, Apple Silicon)
 
 ```bash

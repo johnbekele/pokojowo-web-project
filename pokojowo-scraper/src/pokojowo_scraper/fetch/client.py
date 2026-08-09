@@ -34,6 +34,14 @@ class RobotsDisallowedError(BlockedError):
     """The site's robots.txt disallows this URL or could not be verified."""
 
 
+class NotFoundError(RequestsError):
+    """The source explicitly reports that a listing no longer exists."""
+
+    def __init__(self, url: str, status_code: int):
+        self.status_code = status_code
+        super().__init__(f"HTTP {status_code} for {url}")
+
+
 class Fetcher:
     def __init__(self, cache_dir: Path | None = None):
         self._session: AsyncSession | None = None
@@ -168,6 +176,8 @@ class Fetcher:
 
             if resp.status_code == 403:
                 raise BlockedError(f"403 for {url}")
+            if resp.status_code in (404, 410):
+                raise NotFoundError(url, resp.status_code)
             if resp.status_code == 429 or 500 <= resp.status_code <= 599:
                 if attempt + 1 >= settings.fetch_max_attempts:
                     resp.raise_for_status()

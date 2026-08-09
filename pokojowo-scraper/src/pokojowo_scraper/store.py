@@ -9,11 +9,12 @@ poi_cache       — Overpass results keyed by geohash-6 cell
 translations    — sha256(source_text) -> translated text
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import pymongo
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pymongo import ReturnDocument
 
 from pokojowo_scraper.config import settings
 
@@ -43,7 +44,7 @@ async def ensure_indexes() -> None:
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 async def is_seen(source_url: str) -> dict[str, Any] | None:
@@ -73,6 +74,61 @@ async def record_price_change(source_url: str, old: float, new: float) -> None:
         {"source_url": source_url},
         {"$push": {"price_history": {"from": old, "to": new, "at": utcnow()}}},
     )
+
+
+async def published_scraped_sources(
+    source_site: str | None = None, limit: int = 100
+) -> list[dict[str, Any]]:
+    """Return imported scraped listings that need source revalidation."""
+    query: dict[str, Any] = {
+        "status": "published",
+        "source_url": {"$exists": True},
+        "pokojowo_listing_id": {"$exists": True},
+    }
+    if source_site:
+        query["source_site"] = source_site
+    cursor = (
+        db().pending.find(
+            query,
+            {"source_url": 1, "source_site": 1, "pokojowo_listing_id": 1},
+        )
+        .sort("published_at", pymongo.ASCENDING)
+        .limit(limit)
+    )
+    return [doc async for doc in cursor]
+
+
+async def record_source_check(
+    source_url: str, run_id: str, available: bool
+) -> dict[str, Any]:
+    """Persist a source check and return its count/timestamp.
+
+    A successful check resets the consecutive failure count. Failures are
+    incremented atomically so two scheduled runs, rather than two requests in
+    one run, are required before a source can be unpublished.
+    """
+    checked_at = utcnow()
+    common = {
+        "last_verified_at": checked_at,
+        "last_verification_run": run_id,
+        "last_verification_status": "active" if available else "unavailable",
+    }
+    if available:
+        await db().seen_listings.update_one(
+            {"source_url": source_url},
+            {"$set": {**common, "source_failure_count": 0}},
+        )
+        return {"consecutive_failures": 0, "checked_at": checked_at}
+
+    doc = await db().seen_listings.find_one_and_update(
+        {"source_url": source_url},
+        {"$set": common, "$inc": {"source_failure_count": 1}},
+        return_document=ReturnDocument.AFTER,
+    )
+    return {
+        "consecutive_failures": int((doc or {}).get("source_failure_count", 1)),
+        "checked_at": checked_at,
+    }
 
 
 async def archive_stale(pending_days: int = 14, absent_runs: int = 5) -> dict:

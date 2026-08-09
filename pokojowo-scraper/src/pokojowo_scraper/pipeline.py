@@ -16,8 +16,9 @@ from pokojowo_scraper.enrich.poi import enrich_close_to
 from pokojowo_scraper.enrich.rules import apply_rules
 from pokojowo_scraper.enrich.translate import translate_pl_to_en
 from pokojowo_scraper.fetch.client import BlockedError, Fetcher
-from pokojowo_scraper.publish import PublishError, publish
+from pokojowo_scraper.publish import PublishError, publish, update_source_status
 from pokojowo_scraper.quality import score
+from pokojowo_scraper.revalidation import check_source
 from pokojowo_scraper.schemas import ExtractedListing, RouteDecision, RunStats, fv
 from pokojowo_scraper.sites import ADAPTERS
 from pokojowo_scraper.store import (
@@ -26,7 +27,9 @@ from pokojowo_scraper.store import (
     ensure_indexes,
     is_seen,
     mark_seen,
+    published_scraped_sources,
     record_price_change,
+    record_source_check,
     utcnow,
 )
 
@@ -71,6 +74,10 @@ async def run_all(
                         logger.error("%s blocked: %s", s, e)
                         stats.blocked = True
                         break  # stop this site for the whole run
+                if not dry_run:
+                    await revalidate_published(
+                        fetcher, run_id, source_site=s, stats=stats
+                    )
                 stats.fetch_attempts = fetcher.fetch_attempts
                 stats.fetch_retries = fetcher.fetch_retries
                 stats.fetch_successes = fetcher.fetch_successes
@@ -182,6 +189,52 @@ async def process_listing(
                 url, decision, q.confidence, q.gates_failed or "ok")
     stats.new += 1
     return decision
+
+
+async def revalidate_published(
+    fetcher: Fetcher,
+    run_id: str,
+    *,
+    source_site: str,
+    stats: RunStats | None = None,
+) -> dict[str, int]:
+    """Recheck imported sources and unpublish only after two failures."""
+    checked = unpublished = 0
+    docs = await published_scraped_sources(source_site, settings.revalidation_limit)
+    for doc in docs:
+        source_url = doc.get("source_url")
+        if not source_url:
+            continue
+        check = await check_source(fetcher, source_url)
+        if check.available is None:
+            logger.info("source revalidation deferred for %s (%s)", source_url, check.reason)
+            continue
+
+        verification = await record_source_check(
+            source_url, run_id, available=check.available
+        )
+        failures = verification["consecutive_failures"]
+        try:
+            result = await update_source_status(
+                source_url,
+                available=check.available,
+                checked_at=verification["checked_at"],
+                consecutive_failures=failures,
+                reason=check.reason,
+            )
+        except PublishError as exc:
+            logger.warning("source revalidation update failed for %s: %s", source_url, exc)
+            continue
+
+        checked += 1
+        if result.get("unpublished"):
+            unpublished += 1
+            logger.warning("unpublished stale scraped listing %s", source_url)
+
+    if stats:
+        stats.sources_checked += checked
+        stats.sources_unpublished += unpublished
+    return {"checked": checked, "unpublished": unpublished}
 
 
 async def route(

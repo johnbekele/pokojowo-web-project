@@ -76,6 +76,12 @@ class Listing(Document):
     source_url: Optional[str] = Field(None, alias="sourceUrl")
     source_site: Optional[str] = Field(None, alias="sourceSite")  # olx, otodom, etc.
     phone: Optional[str] = Field(None)  # Contact phone from scraped listing
+    # Source lifecycle for imported listings. Missing isActive on legacy
+    # documents is treated as active by public queries for compatibility.
+    is_active: bool = Field(True, alias="isActive")
+    source_status: str = Field("active", alias="sourceStatus")
+    source_last_verified_at: Optional[datetime] = Field(None, alias="sourceLastVerifiedAt")
+    source_unpublished_at: Optional[datetime] = Field(None, alias="sourceUnpublishedAt")
 
     # Timestamps
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow, alias="createdAt")

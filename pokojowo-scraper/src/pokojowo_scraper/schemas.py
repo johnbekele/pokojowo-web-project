@@ -143,3 +143,5 @@ class RunStats(BaseModel):
     queued: int = 0
     held: int = 0
     duplicates: int = 0
+    sources_checked: int = 0
+    sources_unpublished: int = 0
