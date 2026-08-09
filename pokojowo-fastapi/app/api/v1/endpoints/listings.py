@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Query, Header
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends, Query, Header
 from pydantic import BaseModel
 from app.schemas.listing_schema import ListingCreate, ListingUpdate, ListingResponse
 from app.models.listing import Listing
@@ -14,8 +14,11 @@ from app.core.geo import (
     parse_bbox,
 )
 from app.core.locations import CITY_DISTRICTS, canonical_city, districts_for_city
+from app.services import saved_search_service
+from app.services.geo_enrichment import resolve_listing_geo_by_id
 from typing import List, Optional
 from datetime import datetime
+import logging
 import re
 import secrets
 
@@ -28,6 +31,7 @@ import secrets
 #    MUST use the alias names, never the snake_case attribute names.
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Keep list responses bounded so an anonymous request cannot force the whole
 # collection into memory. The cap is above every current web/mobile page size
@@ -115,9 +119,35 @@ def listing_to_dict(listing: Listing) -> dict:
     }
 
 
+async def _run_saved_search_notifications(listing: Listing) -> None:
+    """Run notification fan-out without allowing it to fail the response."""
+    try:
+        await saved_search_service.notify_matching_saved_searches(listing)
+    except Exception:  # noqa: BLE001 - background failures must be logged
+        logger.exception(
+            "Saved-search notification task failed for listing %s",
+            getattr(listing, "id", "?"),
+        )
+
+
+async def _run_listing_geocoding(listing_id: str) -> None:
+    """Resolve a listing pin and record success or failure for operators."""
+    try:
+        resolved = await resolve_listing_geo_by_id(listing_id)
+    except Exception:  # noqa: BLE001 - guard the BackgroundTasks worker
+        logger.exception("Geocoding task failed for listing %s", listing_id)
+        return
+
+    if resolved:
+        logger.info("Geocoding completed for listing %s", listing_id)
+    else:
+        logger.warning("Geocoding produced no coordinates for listing %s", listing_id)
+
+
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_listing(
     listing_data: ListingCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(require_verified)
 ):
     """Create a new listing"""
@@ -143,16 +173,13 @@ async def create_listing(
 
     await listing.insert()
 
-    # Fire-and-forget: notify users whose saved search matches this listing.
-    import asyncio
-    from app.services import saved_search_service
-    asyncio.create_task(saved_search_service.notify_matching_saved_searches(listing))
+    # Run after the response and keep failures visible in application logs.
+    background_tasks.add_task(_run_saved_search_notifications, listing)
 
-    # Also fire-and-forget: geocoding is rate-limited to 1 req/s, far too slow
-    # to hold a create request open. The pin appears a moment later.
+    # Geocoding is rate-limited to 1 req/s, far too slow to hold a create
+    # request open. The pin appears a moment later.
     if not listing.location_geo:
-        from app.services.geo_enrichment import resolve_listing_geo_by_id
-        asyncio.create_task(resolve_listing_geo_by_id(str(listing.id)))
+        background_tasks.add_task(_run_listing_geocoding, str(listing.id))
 
     return {
         "message": "Listing created successfully",
@@ -532,6 +559,7 @@ async def get_listings_by_owner(
 @router.post("/import", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def import_scraped_listing(
     listing_data: ScrapedListingImport,
+    background_tasks: BackgroundTasks,
     x_scraper_key: Optional[str] = Header(None)
 ):
     """
@@ -637,16 +665,12 @@ async def import_scraped_listing(
 
     await listing.insert()
 
-    # Fire-and-forget: notify users whose saved search matches this listing.
-    import asyncio
-    from app.services import saved_search_service
-    asyncio.create_task(saved_search_service.notify_matching_saved_searches(listing))
+    background_tasks.add_task(_run_saved_search_notifications, listing)
 
     # Some source sites don't embed coordinates; resolve them from the address
     # so imported listings still appear on the map.
     if not listing.location_geo:
-        from app.services.geo_enrichment import resolve_listing_geo_by_id
-        asyncio.create_task(resolve_listing_geo_by_id(str(listing.id)))
+        background_tasks.add_task(_run_listing_geocoding, str(listing.id))
 
     return {
         "message": "Scraped listing imported successfully",
@@ -756,6 +780,7 @@ async def get_listing_by_id(listing_id: str):
 async def update_listing(
     listing_id: str,
     listing_data: ListingUpdate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user)
 ):
     """Update a listing"""
@@ -793,9 +818,7 @@ async def update_listing(
     await listing.save()
 
     if not listing.location_geo:
-        import asyncio
-        from app.services.geo_enrichment import resolve_listing_geo_by_id
-        asyncio.create_task(resolve_listing_geo_by_id(str(listing.id)))
+        background_tasks.add_task(_run_listing_geocoding, str(listing.id))
 
     return {"message": "Listing updated successfully"}
 
