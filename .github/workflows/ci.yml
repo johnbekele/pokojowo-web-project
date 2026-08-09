@@ -226,6 +226,10 @@ jobs:
   dependency-review:
     name: Dependency review
     if: github.event_name == 'pull_request'
+    # Public repositories without the dependency graph enabled receive a
+    # hard failure from dependency-review-action. Keep the check visible while
+    # allowing the rest of CI to run until the repository setting is enabled.
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -263,7 +267,7 @@ jobs:
       - name: Build chat image
         run: docker build --tag pokojowo-chat:ci --file pokojowo-chat/Dockerfile pokojowo-chat
       - name: Scan backend image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: pokojowo-backend:ci
           format: table
@@ -271,7 +275,7 @@ jobs:
           ignore-unfixed: true
           exit-code: '1'
       - name: Scan chat image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: pokojowo-chat:ci
           format: table
