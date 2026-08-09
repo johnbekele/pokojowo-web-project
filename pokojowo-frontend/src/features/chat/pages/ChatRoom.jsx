@@ -8,6 +8,7 @@ import chatApi from '@/lib/chatApi';
 import {
   getChatSocket,
   connectChatSocket,
+  sendChatTyping,
   trackChatRoom,
   untrackChatRoom,
 } from '@/lib/chatSocket';
@@ -27,6 +28,10 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const socketRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const peerTypingTimeoutRef = useRef(null);
+  const isTypingRef = useRef(false);
+  const [otherUserTyping, setOtherUserTyping] = useState(false);
 
   const currentUserId = currentUser?._id || currentUser?.id;
 
@@ -47,6 +52,39 @@ export default function ChatRoom() {
 
   const roomId = chat?._id || chat?.id;
   const otherUser = chat?.otherUser;
+
+  const stopTyping = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    if (isTypingRef.current) {
+      sendChatTyping(roomId, false);
+      isTypingRef.current = false;
+    }
+  }, [roomId]);
+
+  const handleInputChange = useCallback((event) => {
+    const nextMessage = event.target.value;
+    setMessage(nextMessage);
+
+    if (!nextMessage.trim()) {
+      stopTyping();
+      return;
+    }
+
+    const socket = socketRef.current;
+    if (socket?.connected && !isTypingRef.current) {
+      sendChatTyping(roomId, true);
+      isTypingRef.current = true;
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(stopTyping, 2000);
+  }, [roomId, stopTyping]);
 
   // 2. Fetch messages from DB when roomId is available
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
@@ -179,6 +217,35 @@ export default function ChatRoom() {
       }
     };
 
+    const handleTyping = (data) => {
+      if (data.chatId !== roomId) return;
+
+      const typingUserId = data.userId || data.senderId;
+      if (
+        typingUserId &&
+        currentUserId &&
+        String(typingUserId) === String(currentUserId)
+      ) {
+        return;
+      }
+
+      if (peerTypingTimeoutRef.current) {
+        clearTimeout(peerTypingTimeoutRef.current);
+        peerTypingTimeoutRef.current = null;
+      }
+
+      const peerIsTyping = data.isTyping !== false;
+      setOtherUserTyping(peerIsTyping);
+
+      // A dropped stop event should not leave the header stuck forever.
+      if (peerIsTyping) {
+        peerTypingTimeoutRef.current = setTimeout(() => {
+          peerTypingTimeoutRef.current = null;
+          setOtherUserTyping(false);
+        }, 6000);
+      }
+    };
+
     const handleMessageSent = (data) => {
       console.log('SOCKET: message_sent', data);
       // Message already added optimistically, nothing to do
@@ -205,6 +272,7 @@ export default function ChatRoom() {
 
     socket.on('new_message', handleNewMessage);
     socket.on('message_deleted', handleMessageDeleted);
+    socket.on('typing', handleTyping);
     socket.on('message_sent', handleMessageSent);
     socket.on('delete_success', handleDeleteSuccess);
     socket.on('error', handleError);
@@ -219,16 +287,23 @@ export default function ChatRoom() {
     return () => {
       socket.off('new_message', handleNewMessage);
       socket.off('message_deleted', handleMessageDeleted);
+      socket.off('typing', handleTyping);
       socket.off('message_sent', handleMessageSent);
       socket.off('delete_success', handleDeleteSuccess);
       socket.off('error', handleError);
       socket.off('connect', joinRoom);
+      stopTyping();
+      if (peerTypingTimeoutRef.current) {
+        clearTimeout(peerTypingTimeoutRef.current);
+        peerTypingTimeoutRef.current = null;
+      }
+      setOtherUserTyping(false);
       untrackChatRoom(roomId);
       if (socket.connected) {
         socket.emit('leave_chat', { chatId: roomId });
       }
     };
-  }, [roomId, queryClient, currentUserId, markRead]);
+  }, [roomId, queryClient, currentUserId, markRead, stopTyping]);
 
   // 4. Scroll to bottom when messages change
   useEffect(() => {
@@ -240,6 +315,7 @@ export default function ChatRoom() {
     e.preventDefault();
     if (!message.trim() || !roomId) return;
 
+    stopTyping();
     const content = message.trim();
     const replyToId = replyingTo?._id || replyingTo?.id;
     const tempId = `temp-${Date.now()}`;
@@ -352,7 +428,11 @@ export default function ChatRoom() {
             {otherUser?.firstname} {otherUser?.lastname}
           </p>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            {otherUser?.isOnline ? t('online', 'Online') : t('offline', 'Offline')}
+            {otherUserTyping
+              ? t('conversation.typing', 'typing…')
+              : otherUser?.isOnline
+                ? t('online', 'Online')
+                : t('offline', 'Offline')}
           </p>
         </div>
         {(otherUser?._id || otherUser?.id) && (
@@ -430,7 +510,7 @@ export default function ChatRoom() {
         <input
           type="text"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={handleInputChange}
           placeholder={replyingTo ? t('replyPlaceholder') : t('inputPlaceholder')}
           className="flex-1 rounded-full border border-border/70 bg-card px-5 py-3 text-base text-foreground outline-none transition-all placeholder:text-muted-foreground/70 focus:border-foreground/40 focus:ring-2 focus:ring-ring/30 md:text-sm"
         />
