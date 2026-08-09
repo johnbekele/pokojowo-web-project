@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { installAuthInterceptors } from './authInterceptor';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -12,91 +13,19 @@ const api = axios.create({
   },
 });
 
-// Share one refresh request between concurrent 401 responses. Without this,
-// a burst of expired requests can rotate the same refresh token repeatedly
-// and race the retries against one another.
-let refreshPromise = null;
-
-function refreshAccessToken(refreshToken) {
-  if (!refreshPromise) {
-    refreshPromise = axios
-      .post(`${API_BASE_URL}/auth/refresh`, {
-        refresh_token: refreshToken,
-      })
-      .then((response) => {
-        const accessToken = response.data.access_token || response.data.accessToken;
-        const newRefreshToken =
-          response.data.refresh_token || response.data.refreshToken;
-        localStorage.setItem('token', accessToken);
-        if (newRefreshToken) {
-          localStorage.setItem('refreshToken', newRefreshToken);
-        }
-        return response.data;
-      })
-      .finally(() => {
-        refreshPromise = null;
-      });
-  }
-  return refreshPromise;
-}
-
-/**
- * Request interceptor - adds JWT token to requests
- */
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-/**
- * Response interceptor - handles 401 errors and token refresh
- */
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Verification gate: normalize the structured 403 so screens can
-    // show the verify-email CTA instead of a generic error message.
+installAuthInterceptors(api, {
+  refreshBaseURL: API_BASE_URL,
+  onForbidden: (error) => {
+    // Verification gate: normalize the structured 403 so screens can show
+    // the verify-email CTA instead of a generic error message.
     const detail = error.response?.data?.detail;
     if (error.response?.status === 403 && detail?.code === 'EMAIL_NOT_VERIFIED') {
       error.isEmailNotVerified = true;
       error.friendlyMessage = detail.message;
       window.dispatchEvent(new CustomEvent('email-not-verified'));
-      return Promise.reject(error);
     }
-
-    // If 401 and not already retrying
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await refreshAccessToken(refreshToken);
-          const accessToken = response.access_token || response.accessToken;
-
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
+  },
+});
 
 /**
  * Normalize API errors for consistent handling
