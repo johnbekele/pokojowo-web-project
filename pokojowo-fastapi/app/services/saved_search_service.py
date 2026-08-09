@@ -189,8 +189,8 @@ async def _notify_one(listing: Listing, search: SavedSearch) -> None:
             "listingId": listing_id,
             "message": message,
         })
-    except Exception as e:
-        logger.error(f"Failed saved-search socket notification to {user_id}: {e}")
+    except Exception:
+        logger.error("Failed saved-search socket notification")
 
     # Stored in-app notification.
     try:
@@ -201,8 +201,8 @@ async def _notify_one(listing: Listing, search: SavedSearch) -> None:
             message=message,
             data=data,
         )
-    except Exception as e:
-        logger.error(f"Failed to store saved-search notification for {user_id}: {e}")
+    except Exception:
+        logger.error("Failed to store saved-search notification")
 
     # Throttled email (no-ops gracefully when SMTP unconfigured).
     try:
@@ -215,5 +215,5 @@ async def _notify_one(listing: Listing, search: SavedSearch) -> None:
                 listing_address=listing.address,
                 url=url,
             ))
-    except Exception as e:
-        logger.error(f"Failed to send saved-search email to {user_id}: {e}")
+    except Exception:
+        logger.error("Failed to send saved-search email")

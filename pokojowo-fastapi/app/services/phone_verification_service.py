@@ -75,7 +75,8 @@ class PhoneVerificationService:
             user.phone_otp_hash = hashlib.sha256(code.encode()).hexdigest()
             user.phone_otp_expires = datetime.utcnow() + timedelta(minutes=OTP_TTL_MINUTES)
             # Server log only — never returned in the response
-            logger.warning("DEV MODE phone OTP for %s (%s): %s", user.email, e164, code)
+            # Never log the OTP; it is an authentication credential.
+            logger.warning("DEV MODE phone verification code generated")
 
         # Persist the (possibly reformatted) number being verified
         user.phone = e164

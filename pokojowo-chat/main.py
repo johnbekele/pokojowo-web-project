@@ -7,15 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.core.logging import configure_logging
+from app.core.request_context import RequestIdMiddleware
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.core.socket import sio
 from app.models.chat import Chat
 from app.models.message import Message
 
-logging.basicConfig(
-    level=logging.INFO if settings.DEBUG else logging.WARNING,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+configure_logging(settings.DEBUG)
 logger = logging.getLogger(__name__)
 
 _STARTED_AT = datetime.utcnow()
@@ -34,7 +33,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
 )
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

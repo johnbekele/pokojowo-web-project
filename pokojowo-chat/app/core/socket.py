@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 sio = socketio.AsyncServer(
     async_mode="asgi",
     cors_allowed_origins=settings.CORS_ORIGINS if settings.CORS_ORIGINS else "*",
-    logger=True,
-    engineio_logger=True,
+    logger=settings.DEBUG,
+    engineio_logger=settings.DEBUG,
 )
 
 connected_users: dict[str, str] = {}
@@ -94,8 +94,8 @@ async def broadcast_user_status(user_id: str, is_online: bool):
                 if participant_id != user_id:
                     for psid in await get_sids_for_user(participant_id):
                         await sio.emit("user_status", {"userId": user_id, "isOnline": is_online}, room=psid)
-    except Exception as e:
-        logger.error("Error broadcasting user status: %s", e)
+    except Exception:
+        logger.error("Error broadcasting user status")
 
 
 @sio.event
@@ -169,8 +169,8 @@ async def send_message(sid, data):
         }
         await sio.emit("error", {"message": errors.get(str(e), "Failed to send message")}, room=sid)
         return
-    except Exception as e:
-        logger.error("Error sending message from %s: %s", sid, e)
+    except Exception:
+        logger.error("Error sending chat message")
         await sio.emit("error", {"message": "Failed to send message"}, room=sid)
         return
 

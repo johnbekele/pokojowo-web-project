@@ -2,10 +2,15 @@
 from typing import Optional
 import httpx
 from app.core.config import settings
+from app.core.request_context import get_request_id
 
 
 def _headers() -> dict:
-    return {"X-Internal-Key": settings.INTERNAL_API_KEY}
+    headers = {"X-Internal-Key": settings.INTERNAL_API_KEY}
+    request_id = get_request_id()
+    if request_id != "-":
+        headers["X-Request-ID"] = request_id
+    return headers
 
 
 async def get_users_batch(user_ids: list[str]) -> dict[str, dict]:
