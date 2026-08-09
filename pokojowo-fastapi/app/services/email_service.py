@@ -49,7 +49,7 @@ class EmailService:
             bool: True if email was sent successfully
         """
         if not self._is_configured():
-            logger.warning("Email not configured. Skipping email send to %s", to_email)
+            logger.warning("Email not configured. Skipping email send")
             return False
 
         try:
@@ -80,8 +80,8 @@ class EmailService:
             logger.info("Email sent successfully to %s", to_email)
             return True
 
-        except Exception as e:
-            logger.error("Failed to send email to %s: %s", to_email, str(e))
+        except Exception:
+            logger.error("Failed to send email")
             return False
 
     @property
@@ -106,8 +106,8 @@ class EmailService:
         if not self._is_configured():
             # Dev convenience: surface the link in the server log so local
             # signups can still be verified without SMTP.
-            logger.warning("SMTP not configured — verification link for %s: %s",
-                           to_email, verification_url)
+            # Never log the verification URL: it contains a bearer token.
+            logger.warning("SMTP not configured — verification email was not sent")
             return False
 
         subject = "Verify Your Pokojowo Account"

@@ -6,15 +6,13 @@ import logging
 from datetime import datetime
 
 from app.core.config import settings
+from app.core.logging import configure_logging
+from app.core.request_context import RequestIdMiddleware
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.api.v1.api import api_router
 from app.core.socket import sio
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO if settings.DEBUG else logging.WARNING,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+configure_logging(settings.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +44,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
 )
+app.add_middleware(RequestIdMiddleware)
 
 # NOTE: /uploads/* is no longer served by FastAPI. Public uploads live in
 # S3 (`{bucket}/uploads/...`) and are served by CloudFront's ordered cache

@@ -159,8 +159,8 @@ class NotificationService:
 
             return success
 
-        except Exception as e:
-            logger.error(f"Failed to send match notification: {e}")
+        except Exception:
+            logger.error("Failed to send match notification")
             return False
 
     async def send_message_notification(
@@ -193,12 +193,12 @@ class NotificationService:
             )
 
             if success:
-                logger.info(f"Message notification sent to {recipient.email}")
+                logger.info("Message notification sent")
 
             return success
 
-        except Exception as e:
-            logger.error(f"Failed to send message notification: {e}")
+        except Exception:
+            logger.error("Failed to send message notification")
             return False
 
     # ========== Database notification storage methods ==========

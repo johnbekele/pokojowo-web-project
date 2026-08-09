@@ -64,8 +64,8 @@ class AppleOAuthService:
                 issuer=APPLE_ISSUER,
             )
             return claims
-        except jwt.PyJWTError as e:
-            logger.error(f"Apple identity token verification failed: {e}")
+        except jwt.PyJWTError:
+            logger.error("Apple identity token verification failed")
             raise HTTPException(status_code=401, detail="Invalid Apple identity token")
 
     async def authenticate(

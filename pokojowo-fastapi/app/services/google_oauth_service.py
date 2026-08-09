@@ -76,7 +76,7 @@ class GoogleOAuthService:
             # Build from request URL
             redirect_uri = str(request.url_for("google_callback"))
 
-        logger.info(f"Initiating Google OAuth with redirect_uri: {redirect_uri}")
+        logger.info("Initiating Google OAuth")
 
         return await self.oauth.google.authorize_redirect(
             request,
@@ -99,7 +99,7 @@ class GoogleOAuthService:
             token = await self.oauth.google.authorize_access_token(request)
             logger.info("Successfully obtained access token from Google")
         except Exception as e:
-            logger.error(f"Failed to get access token: {str(e)}")
+            logger.error("Failed to get access token from Google")
             raise HTTPException(
                 status_code=401,
                 detail=f"Google authentication failed: {str(e)}"
@@ -118,8 +118,8 @@ class GoogleOAuthService:
                     )
                     resp.raise_for_status()
                     user_info = resp.json()
-            except Exception as e:
-                logger.error(f"Failed to fetch user info: {str(e)}")
+            except Exception:
+                logger.error("Failed to fetch user info from Google")
                 raise HTTPException(
                     status_code=401,
                     detail="Failed to fetch user information from Google"
@@ -140,7 +140,7 @@ class GoogleOAuthService:
                 detail="Missing required user information from Google"
             )
 
-        logger.info(f"Google user info: email={email}, name={name}")
+        logger.info("Google user info received")
 
         # Find or create user
         user, is_new_user = await self._find_or_create_user(
@@ -215,7 +215,7 @@ class GoogleOAuthService:
         user = await User.find_one(User.google_id == google_id)
 
         if user:
-            logger.info(f"Found existing user by Google ID: {user.email}")
+            logger.info("Found existing user by Google ID")
             # Update profile picture if changed
             if picture and (not user.photo or user.photo.url != picture):
                 user.photo = PhotoModel(url=picture)
@@ -227,7 +227,7 @@ class GoogleOAuthService:
         user = await User.find_one(User.email == email)
 
         if user:
-            logger.info(f"Linking Google account to existing user: {user.email}")
+            logger.info("Linking Google account to existing user")
             # Link Google account to existing user
             user.google_id = google_id
             user.is_verified = True  # Google verified the email
@@ -242,7 +242,7 @@ class GoogleOAuthService:
             return user, False  # Existing user (linking)
 
         # Create new user
-        logger.info(f"Creating new user from Google: {email}")
+        logger.info("Creating new user from Google")
 
         # Generate unique username from email
         base_username = email.split("@")[0]

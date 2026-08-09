@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 sio = socketio.AsyncServer(
     async_mode="asgi",
     cors_allowed_origins=settings.CORS_ORIGINS if settings.CORS_ORIGINS else "*",
-    logger=True,
-    engineio_logger=True,
+    logger=settings.DEBUG,
+    engineio_logger=settings.DEBUG,
 )
 
 connected_users: dict[str, str] = {}
