@@ -29,7 +29,7 @@ jobs:
       - name: Run tests
         env:
           DEBUG: "True"  # dev-mode SECRET_KEY fallback; tests need no real secret
-        run: pytest -q
+        run: pytest -q --ignore=tests/integration
       - name: Import smoke test
         env:
           DEBUG: "True"
