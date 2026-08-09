@@ -71,6 +71,9 @@ async def run_all(
                         logger.error("%s blocked: %s", s, e)
                         stats.blocked = True
                         break  # stop this site for the whole run
+                stats.fetch_attempts = fetcher.fetch_attempts
+                stats.fetch_retries = fetcher.fetch_retries
+                stats.fetch_successes = fetcher.fetch_successes
         except Exception:
             logger.exception("site %s failed", s)
             stats.errors += 1
@@ -117,6 +120,7 @@ async def run_site_city(
                 if consecutive_seen >= settings.stop_after_seen:
                     logger.info("%s/%s: %d consecutive seen — stopping",
                                 site, city, consecutive_seen)
+                    _log_extraction_alert(site, city, stats)
                     return
                 continue
             consecutive_seen = 0
@@ -129,6 +133,23 @@ async def run_site_city(
                 logger.exception("failed to process %s", url)
                 stats.errors += 1
 
+    _log_extraction_alert(site, city, stats)
+
+
+def _log_extraction_alert(site: str, city: str, stats: RunStats) -> None:
+    if (
+        stats.details_fetched >= settings.extraction_alert_min_samples
+        and stats.records_extracted / stats.details_fetched < settings.extraction_alert_threshold
+    ):
+        logger.error(
+            "extraction success rate alert for %s/%s: %d/%d (%.1f%%)",
+            site,
+            city,
+            stats.records_extracted,
+            stats.details_fetched,
+            100 * stats.records_extracted / stats.details_fetched,
+        )
+
 
 async def process_listing(
     url, adapter, fetcher: Fetcher, run_id: str, stats: RunStats, dry_run: bool
@@ -140,6 +161,7 @@ async def process_listing(
     if listing is None:
         stats.errors += 1
         return None
+    stats.records_extracted += 1
 
     listing = apply_rules(listing)
     listing = await geocode(listing)
@@ -153,6 +175,8 @@ async def process_listing(
             listing.translation_suspect = result.suspect
 
     q = score(listing)
+    if q.confidence >= settings.queue_threshold and not q.gates_failed:
+        stats.records_quality_passed += 1
     decision = await route(listing, q, run_id, stats, dry_run)
     logger.info("%s -> %s (conf %.2f, gates %s)",
                 url, decision, q.confidence, q.gates_failed or "ok")

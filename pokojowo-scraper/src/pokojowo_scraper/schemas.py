@@ -127,8 +127,13 @@ RouteDecision = Literal["published", "queued", "held", "duplicate", "updated"]
 
 
 class RunStats(BaseModel):
+    fetch_attempts: int = 0
+    fetch_retries: int = 0
+    fetch_successes: int = 0
     pages_fetched: int = 0
     details_fetched: int = 0
+    records_extracted: int = 0
+    records_quality_passed: int = 0
     new: int = 0
     updated: int = 0
     skipped_seen: int = 0

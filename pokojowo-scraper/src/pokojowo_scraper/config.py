@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     req_delay_min: float = 3.0
     req_delay_max: float = 6.0
     stop_after_seen: int = 8  # consecutive already-seen URLs that end pagination
+    fetch_max_attempts: int = 3
+    fetch_backoff_base: float = 1.0
+    fetch_backoff_max: float = 30.0
+    extraction_alert_min_samples: int = 5
+    extraction_alert_threshold: float = 0.25
 
     # Quality routing
     auto_publish_threshold: float = 0.85
