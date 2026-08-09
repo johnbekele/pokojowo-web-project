@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from app.schemas.user_schema import (
     UserCreate, UserLogin, UserResponse, Token,
-    PasswordReset, PasswordResetConfirm
+    PasswordReset, PasswordResetConfirm, PasswordChange
 )
 from app.models.user import User
 from app.core.security import (
@@ -14,6 +14,7 @@ from app.core.security import (
 )
 from app.core.dependencies import get_current_user
 from app.core.config import settings
+from app.core.passwords import validate_password_strength
 from app.services.email_service import email_service
 from datetime import datetime
 from typing import Optional
@@ -292,6 +293,15 @@ async def reset_password(reset_data: PasswordResetConfirm):
             detail="User not found"
         )
 
+    try:
+        validate_password_strength(
+            reset_data.new_password,
+            username=user.username,
+            email=str(user.email),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+
     # Update password
     user.password = get_password_hash(reset_data.new_password)
     user.reset_password_token = None
@@ -303,18 +313,27 @@ async def reset_password(reset_data: PasswordResetConfirm):
 
 @router.put("/change-password")
 async def change_password(
-    password_data: dict,
+    password_data: PasswordChange,
     current_user: User = Depends(get_current_user)
 ):
     """Change password for authenticated user"""
-    old_password = password_data.get("old_password")
-    new_password = password_data.get("new_password")
+    old_password = password_data.old_password
+    new_password = password_data.new_password
 
     if not verify_password(old_password, current_user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect old password"
         )
+
+    try:
+        validate_password_strength(
+            new_password,
+            username=current_user.username,
+            email=str(current_user.email),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
     current_user.password = get_password_hash(new_password)
     await current_user.save()

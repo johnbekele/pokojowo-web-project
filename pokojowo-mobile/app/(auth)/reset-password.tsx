@@ -15,7 +15,7 @@ import useTheme from '@/hooks/useTheme';
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    password: z.string().min(10, 'Password must be at least 10 characters'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -99,6 +99,10 @@ export default function ResetPasswordScreen() {
           />
         )}
       />
+
+      <Text className="text-muted text-xs mb-4">
+        {t('resetPassword.passwordRequirements', 'Use at least 10 characters and avoid your username or email.')}
+      </Text>
 
       <Controller
         control={control}

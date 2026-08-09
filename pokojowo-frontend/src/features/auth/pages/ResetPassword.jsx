@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import api from '@/lib/api';
 
 const resetPasswordSchema = z.object({
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(10, 'Password must be at least 10 characters'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -144,6 +144,9 @@ export default function ResetPassword() {
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
+              <p className="text-xs text-muted-foreground">
+                {t('resetPassword.passwordRequirements')}
+              </p>
             </div>
 
             <div className="space-y-2">
