@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
-from curl_cffi.requests import AsyncSession
+from curl_cffi.requests import AsyncSession, RequestsError
 
 from pokojowo_scraper.config import settings
 
@@ -35,6 +35,9 @@ class Fetcher:
         self._locks: dict[str, asyncio.Lock] = {}
         self.cache_dir = cache_dir if cache_dir is not None else settings.html_cache_dir
         self.pages_fetched = 0
+        self.fetch_attempts = 0
+        self.fetch_retries = 0
+        self.fetch_successes = 0
 
     async def __aenter__(self) -> "Fetcher":
         self._session = AsyncSession(
@@ -71,21 +74,46 @@ class Fetcher:
             return cache.read_text(encoding="utf-8")
 
         assert self._session, "use `async with Fetcher()`"
-        await self._respect_rate_limit(urlparse(url).netloc)
+        for attempt in range(settings.fetch_max_attempts):
+            self.fetch_attempts += 1
+            await self._respect_rate_limit(urlparse(url).netloc)
+            try:
+                resp = await self._session.get(url)
+            except RequestsError as exc:
+                if attempt + 1 >= settings.fetch_max_attempts:
+                    raise
+                await self._backoff(url, attempt, exc)
+                continue
 
-        resp = await self._session.get(url)
-        self.pages_fetched += 1
+            if resp.status_code == 403:
+                raise BlockedError(f"403 for {url}")
+            if resp.status_code == 429 or 500 <= resp.status_code <= 599:
+                if attempt + 1 >= settings.fetch_max_attempts:
+                    resp.raise_for_status()
+                await self._backoff(url, attempt, f"HTTP {resp.status_code}")
+                continue
+            # 404 and other permanent 4xx responses are raised immediately.
+            resp.raise_for_status()
 
-        if resp.status_code in (403, 429):
-            raise BlockedError(f"{resp.status_code} for {url}")
-        resp.raise_for_status()
+            self.pages_fetched += 1
+            self.fetch_successes += 1
+            text = resp.text
+            head = text[:4000]
+            if any(marker in head for marker in BLOCK_MARKERS):
+                raise BlockedError(f"challenge page at {url}")
 
-        text = resp.text
-        head = text[:4000]
-        if any(marker in head for marker in BLOCK_MARKERS):
-            raise BlockedError(f"challenge page at {url}")
+            if cache:
+                cache.parent.mkdir(parents=True, exist_ok=True)
+                cache.write_text(text, encoding="utf-8")
+            return text
 
-        if cache:
-            cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_text(text, encoding="utf-8")
-        return text
+        raise RuntimeError(f"fetch attempts exhausted for {url}")
+
+    async def _backoff(self, url: str, attempt: int, reason: object) -> None:
+        self.fetch_retries += 1
+        delay = min(
+            settings.fetch_backoff_max,
+            settings.fetch_backoff_base * (2**attempt) + random.uniform(0, 0.25),
+        )
+        logger.warning("transient fetch failure for %s (%s); retrying in %.2fs", url, reason, delay)
+        await asyncio.sleep(delay)

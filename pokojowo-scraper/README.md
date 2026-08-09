@@ -27,6 +27,13 @@ harvest (search pages, newest-first, stop-on-seen)
   → route     [≥0.85 + gates pass → auto-publish · ≥0.60 → queue · else → held]
 ```
 
+Fetcher failures that are likely transient (network errors, HTTP 429, and HTTP
+5xx) are retried with bounded exponential backoff. HTTP 403 challenges and
+permanent 4xx responses are not retried. Each run records fetch attempts,
+retries, successful fetches, extracted records, and records passing quality;
+the dashboard log emits an error when extraction falls below the configured
+minimum sample threshold and success-rate threshold.
+
 Publishing goes through `POST /api/listings/import` (X-Scraper-Key auth,
 idempotent on sourceUrl). Images are downloaded, downscaled to ≤1600px JPEG,
 and re-hosted via `POST /api/upload/scraped` — no hotlinking.
