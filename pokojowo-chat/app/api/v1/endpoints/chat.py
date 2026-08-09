@@ -48,7 +48,6 @@ async def create_chat(chat_data: ChatCreate, current_user: TokenUser = Depends(r
             "chat_id": str(existing_chat.id),
             "_id": str(existing_chat.id),
             "participants": existing_chat.participants,
-            "messages": existing_chat.messages,
             "lastMessage": existing_chat.last_message,
             "updatedAt": existing_chat.updated_at,
         }
@@ -60,7 +59,6 @@ async def create_chat(chat_data: ChatCreate, current_user: TokenUser = Depends(r
         "chat_id": str(chat.id),
         "_id": str(chat.id),
         "participants": chat.participants,
-        "messages": chat.messages,
         "lastMessage": chat.last_message,
         "updatedAt": chat.updated_at,
     }
@@ -107,10 +105,12 @@ async def delete_chat(chat_id: str, current_user: TokenUser = Depends(get_curren
     if current_user.id not in chat.participants:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a participant in this chat")
 
-    for message_id in chat.messages:
-        message = await Message.get(message_id)
-        if message:
-            await message.delete()
+    # Messages are stored in their own collection. Query by room rather than
+    # relying on the legacy, unbounded Chat.messages ID array so old and new
+    # conversations are deleted consistently.
+    messages = await Message.find({"roomId": chat_id}).to_list()
+    for message in messages:
+        await message.delete()
     await chat.delete()
     return {"message": "Chat deleted successfully"}
 
@@ -144,7 +144,6 @@ async def get_chat_with_user(user_id: str, current_user: TokenUser = Depends(req
         "id": str(new_chat.id),
         "participants": new_chat.participants,
         "otherUser": other_user,
-        "messages": new_chat.messages,
         "lastMessage": new_chat.last_message,
         "unreadCount": 0,
         "updatedAt": new_chat.updated_at.isoformat() if new_chat.updated_at else None,

@@ -170,3 +170,11 @@ def test_enriching_seeds_a_missing_cursor(chat, seed_messages):
 
     assert item["unreadCount"] == 0
     assert "alice" in chat.last_read
+
+
+def test_chat_detail_does_not_return_legacy_message_ids(chat, seed_messages):
+    seed_messages(200, sender="bob")
+
+    detail = run(chat_service.enrich_chat_detail(chat, "alice"))
+
+    assert "messages" not in detail

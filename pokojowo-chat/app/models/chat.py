@@ -7,7 +7,10 @@ from datetime import datetime
 
 class Chat(Document):
     participants: List[str]
-    messages: List[str] = []
+    # Legacy documents may still contain this embedded ID list. New messages
+    # live exclusively in the messages collection, so this field is retained
+    # only as an optional compatibility read and is never appended to.
+    messages: Optional[List[str]] = Field(default=None)
     last_message: Optional[str] = Field(None, alias="lastMessage")
     # Participant ID -> when they last read this chat. Absent means the chat
     # predates read tracking; chat_service seeds a cursor rather than reporting

@@ -15,7 +15,7 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import chat as chat_endpoint
 from app.core.dependencies import TokenUser, get_current_user, require_verified
 
-from .conftest import FakeChat
+from .conftest import FakeChat, FakeMessage
 
 
 @pytest.fixture
@@ -33,6 +33,7 @@ def test_creating_a_chat_with_a_known_user_succeeds(client):
 
     assert response.status_code == 201
     assert sorted(response.json()["participants"]) == ["alice", "bob"]
+    assert "messages" not in response.json()
 
 
 def test_an_unknown_participant_is_rejected(client):
@@ -79,6 +80,17 @@ def test_creating_twice_returns_the_existing_chat(client):
 
     assert second["chat_id"] == first["chat_id"]
     assert len(FakeChat.store) == 1
+
+
+def test_deleting_a_chat_removes_messages_even_without_legacy_ids(client, chat, seed_messages):
+    seed_messages(2)
+    chat.messages = []
+
+    response = client.delete(f"/chat/{chat.id}")
+
+    assert response.status_code == 200
+    assert FakeMessage.store == {}
+    assert FakeChat.store == {}
 
 
 @pytest.mark.parametrize(
