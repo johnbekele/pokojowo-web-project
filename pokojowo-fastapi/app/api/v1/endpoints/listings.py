@@ -35,6 +35,7 @@ router = APIRouter()
 # unbounded MongoDB walk for deep pagination.
 MAX_PAGE_SIZE = 100
 MAX_PAGE_SKIP = 10_000
+SEARCH_MAX_LENGTH = 100
 
 
 class ScrapedListingImport(BaseModel):
@@ -197,12 +198,13 @@ def build_listing_query(
 
     # Text search on address and description
     if search:
+        safe_search = re.escape(search)
         query["$or"] = [
-            {"address": {"$regex": search, "$options": "i"}},
-            {"description.en": {"$regex": search, "$options": "i"}},
-            {"description.pl": {"$regex": search, "$options": "i"}},
+            {"address": {"$regex": safe_search, "$options": "i"}},
+            {"description.en": {"$regex": safe_search, "$options": "i"}},
+            {"description.pl": {"$regex": safe_search, "$options": "i"}},
             # Mongo applies the regex to each element of the string array
-            {"closeTo": {"$regex": search, "$options": "i"}}
+            {"closeTo": {"$regex": safe_search, "$options": "i"}}
         ]
 
     # Price filter
@@ -285,7 +287,7 @@ def listing_sort_field(sort: Optional[str]) -> str:
 async def get_listings(
     skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
     limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
-    search: Optional[str] = None,
+    search: Optional[str] = Query(None, max_length=SEARCH_MAX_LENGTH),
     sort: Optional[str] = "newest",
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
@@ -345,7 +347,7 @@ MAP_CLUSTER_LIMIT = 300
 async def get_listings_map(
     bbox: str = Query(..., description="Visible area as 'swLng,swLat,neLng,neLat'"),
     zoom: int = Query(12, ge=0, le=22, description="Current map zoom level"),
-    search: Optional[str] = None,
+    search: Optional[str] = Query(None, max_length=SEARCH_MAX_LENGTH),
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     min_size: Optional[float] = None,
