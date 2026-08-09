@@ -14,6 +14,7 @@ from app.core.security import (
 )
 from app.core.dependencies import get_current_user
 from app.core.config import settings
+from app.core.rate_limit import check_rate_limit
 from app.core.passwords import validate_password_strength
 from app.services.email_service import email_service
 from datetime import datetime
@@ -89,6 +90,11 @@ async def register(user_data: UserCreate, background_tasks: BackgroundTasks):
 @router.post("/login", response_model=Token)
 async def login(user_data: UserLogin):
     """Login user"""
+    # Rate-limit by normalized account identifier before looking up the user,
+    # so failed-password attempts cannot become an inexpensive brute-force
+    # oracle. The fixed-window counter is shared by all workers via MongoDB.
+    await check_rate_limit(f"login:{str(user_data.email).strip().lower()}", 5)
+
     # Find user by email
     user = await User.find_one({"email": user_data.email})
 
@@ -195,7 +201,6 @@ async def resend_verification_email(email_data: dict, background_tasks: Backgrou
     Always answers 200 for well-formed requests so account existence
     can't be probed. Rate limited per email address.
     """
-    from app.core.rate_limit import check_rate_limit
     from datetime import timedelta
 
     email = (email_data.get("email") or "").strip().lower()
@@ -237,6 +242,8 @@ async def resend_verification_email(email_data: dict, background_tasks: Backgrou
 @router.post("/forgot-password")
 async def forgot_password(reset_data: PasswordReset, background_tasks: BackgroundTasks):
     """Request password reset"""
+    await check_rate_limit(f"forgot_password:{str(reset_data.email).strip().lower()}", 3)
+
     user = await User.find_one({"email": reset_data.email})
 
     if not user:
