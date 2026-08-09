@@ -7,7 +7,7 @@ and provides roommate matching data for listings.
 
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import List, Optional
-from app.models.user import User
+from app.models.user import RoleEnum, User
 from app.models.listing import Listing
 from app.core.dependencies import get_current_user
 from app.services.listing_interaction_service import listing_interaction_service
@@ -239,7 +239,7 @@ async def get_listing_stats(
 
     # Check if user is owner or admin
     is_owner = str(listing.owner_id) == str(current_user.id)
-    is_admin = current_user.has_role(current_user.role[0].__class__.ADMIN) if current_user.role else False
+    is_admin = current_user.has_role(RoleEnum.ADMIN)
 
     if not is_owner and not is_admin:
         raise HTTPException(
