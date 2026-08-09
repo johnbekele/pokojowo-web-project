@@ -6,6 +6,7 @@ absent (local dev), a random 6-digit code is generated, its sha256 is
 stored on the user with a 10-minute expiry, and the code is written to
 the SERVER LOG ONLY — there is deliberately no universal bypass code.
 """
+import asyncio
 import hashlib
 import logging
 import re
@@ -54,10 +55,15 @@ class PhoneVerificationService:
 
         if self.twilio_configured:
             try:
-                client = self._twilio_client()
-                client.verify.v2.services(
-                    settings.TWILIO_VERIFY_SERVICE_SID
-                ).verifications.create(to=e164, channel="sms")
+                def send_verification() -> None:
+                    client = self._twilio_client()
+                    client.verify.v2.services(
+                        settings.TWILIO_VERIFY_SERVICE_SID
+                    ).verifications.create(to=e164, channel="sms")
+
+                # The Twilio SDK is synchronous. Keep its network wait off the
+                # event loop so one slow SMS request cannot stall the worker.
+                await asyncio.to_thread(send_verification)
             except Exception as exc:
                 logger.error("Twilio Verify start failed for %s: %s", e164, exc)
                 raise HTTPException(
@@ -94,10 +100,14 @@ class PhoneVerificationService:
 
         if self.twilio_configured:
             try:
-                client = self._twilio_client()
-                result = client.verify.v2.services(
-                    settings.TWILIO_VERIFY_SERVICE_SID
-                ).verification_checks.create(to=user.phone, code=code)
+                def check_verification() -> object:
+                    client = self._twilio_client()
+                    return client.verify.v2.services(
+                        settings.TWILIO_VERIFY_SERVICE_SID
+                    ).verification_checks.create(to=user.phone, code=code)
+
+                # As above, verification_checks.create performs blocking I/O.
+                result = await asyncio.to_thread(check_verification)
                 approved = result.status == "approved"
             except Exception as exc:
                 logger.error("Twilio Verify check failed for %s: %s", user.phone, exc)

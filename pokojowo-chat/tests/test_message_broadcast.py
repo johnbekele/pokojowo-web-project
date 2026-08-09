@@ -63,6 +63,18 @@ def test_service_broadcasts_exactly_once_per_message(chat, emitted):
     assert len(emitted) == 1
 
 
+def test_new_messages_do_not_grow_the_legacy_chat_id_array(chat, emitted):
+    chat.messages = ["legacy-message-id"]
+
+    run(
+        chat_service.create_message_in_chat(
+            chat_id=chat.id, sender_id="alice", content="hello"
+        )
+    )
+
+    assert chat.messages == ["legacy-message-id"]
+
+
 def test_rejected_message_is_not_broadcast(chat, emitted, blocked_pairs):
     blocked_pairs.add(("alice", "bob"))
 

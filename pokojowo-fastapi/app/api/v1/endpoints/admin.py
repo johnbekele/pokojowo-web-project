@@ -4,6 +4,8 @@ Admin API endpoints for administrative tasks.
 
 from datetime import datetime
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from app.models.user import User, RoleEnum
 from app.core.config import settings
@@ -13,6 +15,28 @@ from app.services.notification_service import notification_service
 from app.services.seeding_service import seeding_service
 
 router = APIRouter()
+
+
+def _report_user_query_ids(reports) -> list:
+    """Convert report IDs into values Mongo can match against ``User._id``.
+
+    Report IDs are stored as strings for API portability. Current users use
+    ObjectIds, but keeping non-ObjectId values in the query preserves support
+    for legacy/test documents that used string IDs.
+    """
+    raw_ids = {
+        user_id
+        for report in reports
+        for user_id in (report.reporter_id, report.reported_user_id)
+        if user_id
+    }
+    query_ids = []
+    for user_id in raw_ids:
+        try:
+            query_ids.append(ObjectId(str(user_id)))
+        except (InvalidId, TypeError):
+            query_ids.append(user_id)
+    return query_ids
 
 
 # ---------------------------------------------------------------------------
@@ -282,10 +306,19 @@ async def list_reports(
 
     reports = await Report.find(query).sort("-createdAt").to_list(length=200)
 
+    # Resolve every reporter/reported user with one batched query instead of
+    # two sequential lookups per report. Missing users remain represented by
+    # null enrichment fields below, just as they were before.
+    users_by_id = {}
+    user_query_ids = _report_user_query_ids(reports)
+    if user_query_ids:
+        users = await User.find({"_id": {"$in": user_query_ids}}).to_list()
+        users_by_id = {str(user.id): user for user in users}
+
     enriched = []
     for report in reports:
-        reported = await User.get(report.reported_user_id)
-        reporter = await User.get(report.reporter_id)
+        reported = users_by_id.get(str(report.reported_user_id))
+        reporter = users_by_id.get(str(report.reporter_id))
         enriched.append({
             "id": str(report.id),
             "reason": report.reason.value,

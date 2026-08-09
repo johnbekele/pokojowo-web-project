@@ -104,6 +104,9 @@ class FakeMessage:
         type(self).store[self.id] = self
         return self
 
+    async def delete(self):
+        type(self).store.pop(self.id, None)
+
     @classmethod
     async def get(cls, message_id):
         return cls.store.get(message_id)
@@ -136,6 +139,9 @@ class FakeChat:
     async def save(self):
         self.save_count += 1
         return self
+
+    async def delete(self):
+        type(self).store.pop(self.id, None)
 
     @classmethod
     async def get(cls, chat_id):

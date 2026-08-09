@@ -10,7 +10,6 @@ class ChatCreate(BaseModel):
 class ChatResponse(BaseModel):
     id: str = Field(..., alias="_id")
     participants: List[str]
-    messages: List[str] = []
     last_message: Optional[str] = Field(None, alias="lastMessage")
     updated_at: datetime = Field(..., alias="updatedAt")
 

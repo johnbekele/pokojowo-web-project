@@ -5,7 +5,6 @@ export interface Chat {
   id: string;
   participants: string[];
   otherUser?: ChatUser;
-  messages: string[];
   lastMessage?: Message | null;
   unreadCount?: number;
   updatedAt?: string;

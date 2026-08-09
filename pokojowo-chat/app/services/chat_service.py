@@ -39,7 +39,6 @@ def new_chat_document(participants: list[str]) -> Chat:
     now = datetime.utcnow()
     return Chat(
         participants=participants,
-        messages=[],
         last_message=None,
         last_read={pid: now for pid in participants},
     )
@@ -130,7 +129,6 @@ async def enrich_chat_detail(chat: Chat, current_user_id: str) -> dict:
         "id": str(chat.id),
         "participants": chat.participants,
         "otherUser": other_user,
-        "messages": chat.messages,
         "lastMessage": chat.last_message,
         "unreadCount": await unread_count_for(chat, current_user_id),
         "updatedAt": chat.updated_at.isoformat() if chat.updated_at else None,
@@ -166,7 +164,6 @@ async def create_message_in_chat(
     message = Message(content=content, sender=sender_id, room_id=chat_id, reply_to=reply_to)
     await message.insert()
 
-    chat.messages.append(str(message.id))
     chat.last_message = str(message.id)
     chat.updated_at = datetime.utcnow()
     await chat.save()
