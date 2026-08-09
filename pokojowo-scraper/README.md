@@ -53,6 +53,16 @@ cp .env.example .env
 # local mongod as the main app.
 ```
 
+The dashboard API fails closed unless both dashboard keys are configured. Put
+the same values in the admin UI's environment as `VITE_SCRAPER_DASHBOARD_KEY`
+and `VITE_SCRAPER_DASHBOARD_ADMIN_KEY`; the admin key is required for starting
+runs and approving, rejecting, editing, or annotating listings. Keep the API
+bound to localhost unless it is deployed behind an authenticated proxy:
+
+```bash
+uvicorn pokojowo_scraper.api.app:app --host 127.0.0.1 --port 8001
+```
+
 ## First run
 
 ```bash
