@@ -68,6 +68,30 @@ async def test_register_login_refresh_and_logout(client):
     assert rejected_refresh.status_code == 401
 
 
+async def test_access_and_refresh_tokens_cannot_be_used_interchangeably(client, make_user, login):
+    user = await make_user(username="token-types")
+    tokens = await login(user)
+
+    access_with_refresh = await client.get(
+        "/api/users/me",
+        headers={"Authorization": f"Bearer {tokens['refresh_token']}"},
+    )
+    assert access_with_refresh.status_code == 401
+
+    refresh_with_access = await client.post(
+        "/api/auth/refresh",
+        json={"refresh_token": tokens["access_token"]},
+    )
+    assert refresh_with_access.status_code == 401
+
+
+async def test_logout_requires_authentication(client):
+    response = await client.post("/api/auth/logout")
+
+    # HTTPBearer's default missing-credentials response is 403.
+    assert response.status_code == 403
+
+
 async def test_verification_and_password_reset_happy_and_failure_paths(client):
     registered = await client.post(
         "/api/auth/register",
@@ -135,6 +159,17 @@ async def test_verification_and_password_reset_happy_and_failure_paths(client):
         json={"email": "reset@example.com", "password": NEW_PASSWORD},
     )
     assert new_login.status_code == 200
+
+
+async def test_inactive_accounts_cannot_login(client, make_user):
+    user = await make_user(username="inactive-login", active=False)
+
+    response = await client.post(
+        "/api/auth/login",
+        json={"email": str(user.email), "password": PASSWORD},
+    )
+
+    assert response.status_code == 403
 
 
 async def test_resend_verification_rate_limit_boundary(client):
