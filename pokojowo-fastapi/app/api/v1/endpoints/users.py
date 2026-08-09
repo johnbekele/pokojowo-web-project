@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Query
 from pydantic import BaseModel
 from app.schemas.user_schema import UserResponse, UserUpdate
 from app.models.user import User, RoleEnum
@@ -9,6 +9,9 @@ from typing import List, Optional
 from datetime import datetime
 
 router = APIRouter()
+
+MAX_PAGE_SIZE = 100
+MAX_PAGE_SKIP = 10_000
 
 
 class RoleUpdate(BaseModel):
@@ -185,8 +188,8 @@ async def get_user_by_id(user_id: str):
 
 @router.get("/", response_model=List[dict])
 async def get_all_users(
-    skip: int = 0,
-    limit: int = 20,
+    skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
+    limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
     role: str = None,
     current_user: User = Depends(get_current_user)
 ):

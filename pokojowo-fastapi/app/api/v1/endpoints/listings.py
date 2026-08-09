@@ -29,6 +29,13 @@ import secrets
 
 router = APIRouter()
 
+# Keep list responses bounded so an anonymous request cannot force the whole
+# collection into memory. The cap is above every current web/mobile page size
+# (including the 30-pin map request), while skip is bounded to avoid an
+# unbounded MongoDB walk for deep pagination.
+MAX_PAGE_SIZE = 100
+MAX_PAGE_SKIP = 10_000
+
 
 class ScrapedListingImport(BaseModel):
     """Schema for importing scraped listings from external sources."""
@@ -276,8 +283,8 @@ def listing_sort_field(sort: Optional[str]) -> str:
 @router.get("", response_model=List[dict])
 @router.get("/", response_model=List[dict])
 async def get_listings(
-    skip: int = 0,
-    limit: int = 20,
+    skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
+    limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
     search: Optional[str] = None,
     sort: Optional[str] = "newest",
     min_price: Optional[float] = None,
@@ -477,8 +484,8 @@ async def get_districts(city: Optional[str] = None):
 @router.get("/my-listings", response_model=List[dict])
 async def get_my_listings(
     current_user: User = Depends(get_current_user),
-    skip: int = 0,
-    limit: int = 20
+    skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
+    limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
 ):
     """Get current user's listings (for landlords)"""
     if not current_user.is_landlord:
@@ -494,8 +501,8 @@ async def get_my_listings(
 
 @router.get("/scraped", response_model=List[dict])
 async def get_scraped_listings(
-    skip: int = 0,
-    limit: int = 20,
+    skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
+    limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
     source_site: Optional[str] = None
 ):
     """Get all scraped listings, optionally filtered by source site."""
@@ -509,7 +516,11 @@ async def get_scraped_listings(
 
 
 @router.get("/owner/{owner_id}", response_model=List[dict])
-async def get_listings_by_owner(owner_id: str, skip: int = 0, limit: int = 20):
+async def get_listings_by_owner(
+    owner_id: str,
+    skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
+    limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
+):
     """Get all listings by owner ID"""
     listings = await Listing.find({"ownerId": owner_id}).skip(skip).limit(limit).to_list()
 
