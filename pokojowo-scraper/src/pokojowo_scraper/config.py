@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     nominatim_url: str = "https://nominatim.openstreetmap.org"
     overpass_url: str = "https://overpass-api.de/api/interpreter"
     geo_user_agent: str = "pokojowo-scraper/2.0 (rental aggregator; contact via repo)"
+    # Identify the scraper to site operators and use the same token when
+    # evaluating robots.txt rules. Keep this contact URL accurate in deploys.
+    scraper_user_agent: str = "PokojowoBot/1.0 (+https://pokojowo.pl/contact)"
 
     # Scrape targets & politeness
     cities: list[str] = ["warszawa", "krakow", "wroclaw", "poznan", "gdansk", "lodz"]
