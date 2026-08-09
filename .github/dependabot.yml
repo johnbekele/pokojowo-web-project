@@ -1,0 +1,50 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /pokojowo-frontend
+    schedule: { interval: weekly }
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /pokojowo-mobile
+    schedule: { interval: weekly }
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /pokojowo-scraper/admin
+    schedule: { interval: weekly }
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: pip
+    directory: /pokojowo-fastapi
+    schedule: { interval: weekly }
+    groups:
+      pip-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: pip
+    directory: /pokojowo-chat
+    schedule: { interval: weekly }
+    groups:
+      pip-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: pip
+    directory: /pokojowo-scraper
+    schedule: { interval: weekly }
+    groups:
+      pip-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: docker
+    directory: /pokojowo-fastapi
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: /pokojowo-chat
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    groups:
+      actions-minor-and-patch:
+        update-types: [minor, patch]
