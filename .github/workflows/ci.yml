@@ -54,6 +54,22 @@ jobs:
       - name: Build
         run: npm run build
 
+  scraper-tests:
+    name: Scraper tests (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pokojowo-scraper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: latest
+      - name: Install dependencies
+        run: uv sync --extra dev
+      - name: Run scraper tests
+        run: uv run pytest -q
+
   mobile-typecheck:
     name: Mobile typecheck (tsc)
     runs-on: ubuntu-latest
