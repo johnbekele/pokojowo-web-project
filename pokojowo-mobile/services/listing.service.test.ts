@@ -55,4 +55,34 @@ describe('listingService pagination and response mapping', () => {
       created_at: '2026-08-10T00:00:00Z',
     });
   });
+
+  it('normalizes a single camelCase listing before it reaches the detail screen', async () => {
+    const get = api.get as jest.Mock;
+    get.mockResolvedValueOnce({
+      data: {
+        _id: 'listing-2',
+        ownerId: 'owner-2',
+        address: 'ul. Testowa 2',
+        price: 2800,
+        images: ['/uploads/room.jpg'],
+        description: { en: 'A bright room', pl: 'Jasny pokój' },
+        canBeContacted: ['Phone'],
+        isScraped: true,
+        sourceUrl: 'https://example.com/listing-2',
+        sourceSite: 'example',
+        createdAt: '2026-08-10T00:00:00Z',
+      },
+    });
+
+    const response = await listingService.getListing('listing-2');
+
+    expect(response.data).toMatchObject({
+      id: 'listing-2',
+      owner_id: 'owner-2',
+      can_be_contacted: ['Phone'],
+      isScraped: true,
+      sourceUrl: 'https://example.com/listing-2',
+      sourceSite: 'example',
+    });
+  });
 });

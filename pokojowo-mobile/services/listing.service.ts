@@ -34,6 +34,11 @@ export function normalizeListing(listing: Listing): Listing {
     available_from: listing.available_from ?? listing.availableFrom,
     room_type: listing.room_type ?? listing.roomType,
     building_type: listing.building_type ?? listing.buildingType,
+    can_be_contacted: listing.can_be_contacted ?? listing.canBeContacted,
+    close_to: listing.close_to ?? listing.closeTo,
+    isScraped: listing.isScraped ?? listing.is_scraped,
+    sourceUrl: listing.sourceUrl ?? listing.source_url,
+    sourceSite: listing.sourceSite ?? listing.source_site,
     created_at: listing.created_at || listing.createdAt || '',
   };
 }
@@ -61,7 +66,9 @@ export const listingService = {
       .then((response) => ({ ...response, data: normalizePage(response.data) })),
 
   getListing: (id: string) =>
-    api.get<Listing>(`/listings/${id}`),
+    api
+      .get<Listing>(`/listings/${id}`)
+      .then((response) => ({ ...response, data: normalizeListing(response.data) })),
 
   getMyListings: () =>
     api.get<Listing[]>('/listings/my-listings'),
