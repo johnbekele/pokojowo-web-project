@@ -58,6 +58,9 @@ const mockSecureStore = jest.requireMock('expo-secure-store') as {
   setItemAsync: jest.Mock;
   deleteItemAsync: jest.Mock;
 };
+const mockWebBrowser = jest.requireMock('expo-web-browser') as {
+  openAuthSessionAsync: jest.Mock;
+};
 
 describe('mobile auth store', () => {
   beforeEach(() => {
@@ -84,5 +87,39 @@ describe('mobile auth store', () => {
     expect(mockApi.get).toHaveBeenCalledWith('/users/me');
     expect(useAuthStore.getState().user).toEqual(user);
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
+  });
+
+  it('completes Google OAuth from the custom-scheme callback', async () => {
+    const user = { _id: 'google-user', role: ['Tenant'], username: 'google-user' };
+    mockWebBrowser.openAuthSessionAsync.mockResolvedValueOnce({
+      type: 'success',
+      url: 'pokojowo://auth/callback?token=google-access&refresh_token=google-refresh',
+    });
+    mockApi.get.mockResolvedValueOnce({ data: user });
+
+    const result = await useAuthStore.getState().loginWithGoogle();
+
+    expect(result).toEqual({ success: true, user });
+    expect(mockWebBrowser.openAuthSessionAsync).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/google?mobile_redirect=pokojowo%3A%2F%2Fauth%2Fcallback'),
+      'pokojowo://auth/callback'
+    );
+    expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('token', 'google-access');
+    expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('refreshToken', 'google-refresh');
+  });
+
+  it('leaves auth state untouched when Google OAuth is cancelled', async () => {
+    mockWebBrowser.openAuthSessionAsync.mockResolvedValueOnce({ type: 'cancel' });
+
+    await expect(useAuthStore.getState().loginWithGoogle()).resolves.toEqual({
+      success: false,
+      canceled: true,
+    });
+    expect(mockSecureStore.__values.token).toBeUndefined();
+    expect(mockSecureStore.__values.refreshToken).toBeUndefined();
+    expect(useAuthStore.getState().user).toBeNull();
+    expect(useAuthStore.getState().token).toBeNull();
+    expect(useAuthStore.getState().refreshToken).toBeNull();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });
 });

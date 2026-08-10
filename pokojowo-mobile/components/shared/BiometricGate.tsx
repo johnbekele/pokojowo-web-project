@@ -3,7 +3,11 @@ import { AppState, AppStateStatus, StyleSheet, Text, TouchableOpacity, View } fr
 import { Fingerprint } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
-import { authenticateWithBiometrics, isBiometricLoginEnabled } from '@/lib/biometrics';
+import {
+  authenticateWithBiometrics,
+  isBiometricAvailable,
+  isBiometricLoginEnabled,
+} from '@/lib/biometrics';
 import useAuthStore from '@/stores/authStore';
 import useTheme from '@/hooks/useTheme';
 
@@ -28,16 +32,26 @@ export default function BiometricGate({ children }: BiometricGateProps) {
   const tryUnlock = useCallback(async () => {
     if (authenticating.current) return;
     authenticating.current = true;
-    const result = await authenticateWithBiometrics(t('locked.prompt', 'Unlock Pokojowo'));
-    authenticating.current = false;
-    if (result.success) setLocked(false);
+    try {
+      const result = await authenticateWithBiometrics(t('locked.prompt', 'Unlock Pokojowo'));
+      if (result.success) setLocked(false);
+    } finally {
+      authenticating.current = false;
+    }
   }, [t]);
 
   const maybeLock = useCallback(async () => {
-    if (isAuthenticated && (await isBiometricLoginEnabled())) {
+    try {
+      const enabled = isAuthenticated && (await isBiometricLoginEnabled());
+      // If enrollment is removed after opting in, fail open rather than
+      // trapping the user behind an unlock prompt that can never succeed.
+      if (!enabled || !(await isBiometricAvailable())) {
+        setLocked(false);
+        return;
+      }
       setLocked(true);
-      tryUnlock();
-    } else {
+      void tryUnlock();
+    } catch {
       setLocked(false);
     }
   }, [isAuthenticated, tryUnlock]);

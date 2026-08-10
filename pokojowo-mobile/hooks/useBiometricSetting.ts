@@ -14,7 +14,7 @@ interface BiometricSetting {
   enabled: boolean;
   types: BiometricType[];
   /** Toggle biometric login; requires a successful auth before enabling. */
-  toggle: (next: boolean) => Promise<boolean>;
+  toggle: (next: boolean, promptMessage?: string) => Promise<boolean>;
 }
 
 /**
@@ -29,11 +29,18 @@ export function useBiometricSetting(): BiometricSetting {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const [avail, supported, on] = await Promise.all([
-        isBiometricAvailable(),
-        getSupportedBiometricTypes(),
-        isBiometricLoginEnabled(),
-      ]);
+      let avail = false;
+      let supported: BiometricType[] = [];
+      let on = false;
+      try {
+        [avail, supported, on] = await Promise.all([
+          isBiometricAvailable(),
+          getSupportedBiometricTypes(),
+          isBiometricLoginEnabled(),
+        ]);
+      } catch {
+        // Native biometric APIs can be unavailable on simulators/web builds.
+      }
       if (!mounted) return;
       setAvailable(avail);
       setTypes(supported);
@@ -44,14 +51,18 @@ export function useBiometricSetting(): BiometricSetting {
     };
   }, []);
 
-  const toggle = useCallback(async (next: boolean) => {
-    if (next) {
-      const result = await authenticateWithBiometrics('Confirm to enable biometric unlock');
-      if (!result.success) return false;
+  const toggle = useCallback(async (next: boolean, promptMessage = 'Confirm to enable biometric unlock') => {
+    try {
+      if (next) {
+        const result = await authenticateWithBiometrics(promptMessage);
+        if (!result.success) return false;
+      }
+      await setBiometricLoginEnabled(next);
+      setEnabled(next);
+      return true;
+    } catch {
+      return false;
     }
-    await setBiometricLoginEnabled(next);
-    setEnabled(next);
-    return true;
   }, []);
 
   return { available, enabled, types, toggle };

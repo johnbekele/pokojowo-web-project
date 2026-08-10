@@ -271,6 +271,7 @@
     "security": "Bezpieczeństwo",
     "biometric": "Odblokowanie biometryczne",
     "biometricSubtitle": "Wymagaj Face ID / odcisku palca przy otwieraniu aplikacji",
+    "biometricConfirm": "Potwierdź odblokowanie biometryczne",
     "biometricError": "Nie udało się zweryfikować biometrii",
     "privacy": "Prywatność",
     "privacyPolicy": "Polityka prywatności",
