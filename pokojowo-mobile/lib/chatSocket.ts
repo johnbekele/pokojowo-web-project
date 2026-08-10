@@ -4,6 +4,16 @@ import { CHAT_SOCKET_URL } from './constants';
 
 export let chatSocket: Socket | null = null;
 
+/** Socket event names owned by the chat service. Keep room lifecycle and
+ * message delivery in this module so screens never drift from the backend
+ * contract (the server currently exposes join_chat/leave_chat). */
+export const CHAT_SOCKET_EVENTS = {
+  joinRoom: 'join_chat',
+  leaveRoom: 'leave_chat',
+  sendMessage: 'send_message',
+  typing: 'typing',
+} as const;
+
 const activeRooms = new Set<string>();
 let isConnecting = false;
 
@@ -39,7 +49,7 @@ export async function connectChatSocket(token?: string): Promise<Socket | null> 
   chatSocket.on('connect', () => {
     isConnecting = false;
     activeRooms.forEach((roomId) => {
-      chatSocket?.emit('join_chat', { chatId: roomId });
+      chatSocket?.emit(CHAT_SOCKET_EVENTS.joinRoom, { chatId: roomId });
     });
   });
 
@@ -81,21 +91,26 @@ export function disconnectChatSocket(): void {
 export function joinChatRoom(roomId: string): void {
   if (chatSocket && roomId) {
     activeRooms.add(roomId);
-    chatSocket.emit('join_chat', { chatId: roomId });
+    chatSocket.emit(CHAT_SOCKET_EVENTS.joinRoom, { chatId: roomId });
   }
 }
 
 export function leaveChatRoom(roomId: string): void {
   if (chatSocket && roomId) {
     activeRooms.delete(roomId);
-    chatSocket.emit('leave_chat', { chatId: roomId });
+    chatSocket.emit(CHAT_SOCKET_EVENTS.leaveRoom, { chatId: roomId });
   }
 }
 
-export function sendChatMessage(chatId: string, content: string, replyTo?: string): void {
-  chatSocket?.emit('send_message', { chatId, content, replyTo });
+export function sendChatMessage(
+  chatId: string,
+  content: string,
+  replyTo?: string,
+  tempId?: string
+): void {
+  chatSocket?.emit(CHAT_SOCKET_EVENTS.sendMessage, { chatId, content, replyTo, tempId });
 }
 
 export function sendChatTyping(chatId: string, isTyping: boolean): void {
-  chatSocket?.emit('typing', { chatId, isTyping });
+  chatSocket?.emit(CHAT_SOCKET_EVENTS.typing, { chatId, isTyping });
 }

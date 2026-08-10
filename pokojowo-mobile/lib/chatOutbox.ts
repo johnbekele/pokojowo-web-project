@@ -1,4 +1,4 @@
-import { getChatSocket } from '@/lib/chatSocket';
+import { getChatSocket, sendChatMessage } from '@/lib/chatSocket';
 import queryClient from '@/lib/queryClient';
 import { CHAT_KEYS } from '@/hooks/chat/useChat';
 import { chatService } from '@/services';
@@ -57,7 +57,7 @@ export function dispatchSend(params: {
 
   const socket = getChatSocket();
   if (socket?.connected) {
-    socket.emit('send_message', { chatId, content, replyTo, tempId });
+    sendChatMessage(chatId, content, replyTo, tempId);
 
     // Nothing else notices a socket emit that never lands — no error, no
     // rejection — so this timeout is all that stands between a lost message and

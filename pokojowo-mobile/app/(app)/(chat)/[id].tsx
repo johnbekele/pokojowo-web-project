@@ -11,12 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Send, X } from 'lucide-react-native';
+import { ArrowLeft, MessageSquare, Send, X } from 'lucide-react-native';
 
 import { useQueryClient } from '@tanstack/react-query';
 
 import { MessageBubble } from '@/components/feature/chat';
-import { Avatar, LoadingSpinner } from '@/components/ui';
+import { Avatar, EmptyState, LoadingSpinner, Skeleton } from '@/components/ui';
 import {
   useChat,
   useMessages,
@@ -32,14 +32,34 @@ import {
   connectChatSocket,
   joinChatRoom,
   leaveChatRoom,
+  sendChatTyping,
 } from '@/lib/chatSocket';
 import type { Message } from '@/types/chat.types';
 import useTheme from '@/hooks/useTheme';
 
+function ChatRoomSkeleton() {
+  return (
+    <View className="flex-1 gap-4 px-4 py-6">
+      <View className="self-start gap-2">
+        <Skeleton width={190} height={42} radius={18} />
+        <Skeleton width={70} height={11} />
+      </View>
+      <View className="self-end gap-2">
+        <Skeleton width={230} height={52} radius={18} />
+        <Skeleton width={70} height={11} />
+      </View>
+      <View className="self-start gap-2">
+        <Skeleton width={150} height={42} radius={18} />
+        <Skeleton width={70} height={11} />
+      </View>
+    </View>
+  );
+}
+
 export default function ChatRoomScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { t } = useTranslation('chat');
+  const { t, i18n } = useTranslation('chat');
   const { colors } = useTheme();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
@@ -53,10 +73,16 @@ export default function ChatRoomScreen() {
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const peerTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: chat, isLoading: isChatLoading } = useChat(id);
+  const {
+    data: chat,
+    isLoading: isChatLoading,
+    error: chatError,
+    refetch: refetchChat,
+  } = useChat(id);
   const {
     data: messages,
     isLoading: isMessagesLoading,
+    error: messagesError,
     refetch,
   } = useMessages(id, { limit: MESSAGE_PAGE_SIZE });
   const { older, isLoadingOlder, loadOlder } = useOlderMessages(id, messages);
@@ -176,7 +202,7 @@ export default function ChatRoomScreen() {
       const socket = getChatSocket();
       if (socket?.connected && !isTyping) {
         setIsTyping(true);
-        socket.emit('typing', { chatId: id, isTyping: true });
+        sendChatTyping(id, true);
       }
 
       if (typingTimeoutRef.current) {
@@ -185,26 +211,81 @@ export default function ChatRoomScreen() {
 
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
-        getChatSocket()?.emit('typing', { chatId: id, isTyping: false });
+        sendChatTyping(id, false);
       }, 2000);
     },
     [id, isTyping]
   );
 
-  const renderMessage = ({ item }: { item: Message }) => (
-    <MessageBubble
-      message={item}
-      isOwn={item.sender === currentUserId || item.senderId === currentUserId}
-      onReply={() => setReplyingTo(item)}
-      onDelete={() => handleDeleteMessage(item._id)}
-      onRetry={item.tempId ? () => retry(item.tempId as string) : undefined}
-    />
+  const formatDay = useCallback(
+    (value: string) => {
+      const date = new Date(value);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      if (date.toDateString() === today.toDateString()) return t('day.today');
+      if (date.toDateString() === yesterday.toDateString()) return t('day.yesterday');
+      return date.toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+    },
+    [i18n.language, t]
   );
+
+  const renderMessage = ({ item, index }: { item: Message; index: number }) => {
+    const olderMessage = thread[index + 1];
+    const showDay =
+      !olderMessage ||
+      new Date(item.createdAt).toDateString() !== new Date(olderMessage.createdAt).toDateString();
+    return (
+      <View>
+        <MessageBubble
+          message={item}
+          isOwn={item.sender === currentUserId || item.senderId === currentUserId}
+          onReply={() => setReplyingTo(item)}
+          onDelete={() => handleDeleteMessage(item._id)}
+          onRetry={item.tempId ? () => retry(item.tempId as string) : undefined}
+        />
+        {showDay && (
+          <View className="my-3 flex-row items-center justify-center">
+            <View className="h-px flex-1 bg-border" />
+            <Text className="px-3 text-xs font-medium text-muted">{formatDay(item.createdAt)}</Text>
+            <View className="h-px flex-1 bg-border" />
+          </View>
+        )}
+      </View>
+    );
+  };
 
   if (isChatLoading || isMessagesLoading) {
     return (
       <SafeAreaView className="flex-1 bg-bg">
-        <LoadingSpinner fullScreen />
+        <View className="flex-row items-center border-b border-border px-4 py-4">
+          <Skeleton width={42} circle />
+          <Skeleton width="35%" height={18} className="ml-3" />
+        </View>
+        <ChatRoomSkeleton />
+      </SafeAreaView>
+    );
+  }
+
+  if (chatError || messagesError || !chat) {
+    return (
+      <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
+        <EmptyState
+          icon={<MessageSquare size={48} color={colors.muted} />}
+          title={t('error.title')}
+          description={chatError ? t('error.chatNotFound') : t('error.loadMessages')}
+          action={{
+            label: t('error.retry'),
+            onPress: () => {
+              void refetchChat();
+              void refetch();
+            },
+          }}
+        />
       </SafeAreaView>
     );
   }
@@ -246,7 +327,7 @@ export default function ChatRoomScreen() {
             {otherUserTyping ? (
               <Text className="text-sm text-brand">{t('typing', 'typing...')}</Text>
             ) : otherUser?.isOnline ? (
-              <Text className="text-sm text-green-600">{t('online', 'Online')}</Text>
+              <Text className="text-sm text-success">{t('online', 'Online')}</Text>
             ) : null}
           </View>
         </View>
