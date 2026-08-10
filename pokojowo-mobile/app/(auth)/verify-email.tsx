@@ -31,7 +31,7 @@ export default function VerifyEmailScreen() {
         setStatus('error');
         const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data
           ?.detail;
-        setErrorMessage(detail || t('verifyEmail.error.failed', 'Email verification failed'));
+        setErrorMessage(detail || t('verifyEmail.error.failed'));
       }
     };
     verify();
@@ -45,7 +45,7 @@ export default function VerifyEmailScreen() {
           <Text className="text-3xl font-extrabold text-brand text-center mb-8">Pokojowo</Text>
           <ActivityIndicator size="large" color={colors.brand} />
           <Text className="text-muted text-center mt-4">
-            {t('verifyEmail.verifying', 'Verifying your email...')}
+            {t('verifyEmail.verifying')}
           </Text>
         </View>
       </SafeAreaView>
@@ -56,10 +56,10 @@ export default function VerifyEmailScreen() {
     return (
       <AuthStatusView
         tone="warning"
-        title={t('verifyEmail.invalid.title', 'Invalid Link')}
-        message={t('verifyEmail.invalid.message', 'This verification link is invalid or has expired.')}
+        title={t('verifyEmail.invalid.title')}
+        message={t('verifyEmail.invalid.message')}
         primaryAction={{
-          label: t('verifyEmail.backToLogin', 'Go to Login'),
+          label: t('verifyEmail.backToLogin'),
           onPress: () => router.replace('/(auth)/login'),
         }}
       />
@@ -70,13 +70,10 @@ export default function VerifyEmailScreen() {
     return (
       <AuthStatusView
         tone="success"
-        title={t('verifyEmail.success.title', 'Email Verified!')}
-        message={t(
-          'verifyEmail.success.message',
-          'Your email has been verified successfully. You can now log in to your account.'
-        )}
+        title={t('verifyEmail.success.title')}
+        message={t('verifyEmail.success.message')}
         primaryAction={{
-          label: t('verifyEmail.continueToLogin', 'Continue to Login'),
+          label: t('verifyEmail.continueToLogin'),
           onPress: () => router.replace('/(auth)/login'),
         }}
       />
@@ -86,14 +83,14 @@ export default function VerifyEmailScreen() {
   return (
     <AuthStatusView
       tone="error"
-      title={t('verifyEmail.error.title', 'Verification Failed')}
-      message={errorMessage || t('verifyEmail.error.message', 'We could not verify your email. The link may have expired.')}
+      title={t('verifyEmail.error.title')}
+      message={errorMessage || t('verifyEmail.error.message')}
       primaryAction={{
-        label: t('verifyEmail.backToLogin', 'Go to Login'),
+        label: t('verifyEmail.backToLogin'),
         onPress: () => router.replace('/(auth)/login'),
       }}
       secondaryAction={{
-        label: t('verifyEmail.tryAgain', 'Sign Up Again'),
+        label: t('verifyEmail.tryAgain'),
         onPress: () => router.replace('/(auth)/signup'),
       }}
     />

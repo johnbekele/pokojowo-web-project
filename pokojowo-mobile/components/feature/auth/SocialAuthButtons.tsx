@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import useAuthStore from '@/stores/authStore';
+import useTheme from '@/hooks/useTheme';
+import useUIStore from '@/stores/uiStore';
 import { getPostAuthRoute } from '@/lib/onboardingRoute';
 import { GoogleLogo, AppleLogo } from '@/components/shared/brand';
 
@@ -11,12 +13,14 @@ type Provider = 'google' | 'apple';
 
 /**
  * Brand-compliant Google + Apple sign-in buttons. Google uses the white/bordered
- * treatment; Apple uses the black button (iOS only, shown when Sign in with
+ * surface-aware treatment; Apple uses the black button (iOS only, shown when Sign in with
  * Apple is available). Both route to the correct post-auth screen on success.
  */
 export default function SocialAuthButtons() {
   const { t } = useTranslation('auth');
   const { loginWithGoogle, loginWithApple } = useAuthStore();
+  const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
 
   const [pending, setPending] = useState<Provider | null>(null);
   const [appleAvailable, setAppleAvailable] = useState(false);
@@ -44,6 +48,11 @@ export default function SocialAuthButtons() {
     setPending(null);
     if (result.success) {
       router.replace(getPostAuthRoute(result.user ?? null));
+    } else if (!result.canceled) {
+      showToast({
+        type: 'error',
+        message: result.error || t(`login.error.${provider}`),
+      });
     }
   };
 
@@ -53,16 +62,22 @@ export default function SocialAuthButtons() {
         onPress={() => run('google')}
         disabled={pending !== null}
         activeOpacity={0.8}
-        className="flex-row items-center justify-center gap-3 bg-white border border-gray-300 rounded-lg min-h-[52px] px-4"
-        style={{ opacity: pending && pending !== 'google' ? 0.5 : 1 }}
+        className="flex-row items-center justify-center gap-3 border rounded-lg min-h-[52px] px-4"
+        style={{
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+          opacity: pending && pending !== 'google' ? 0.5 : 1,
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={t('login.google')}
       >
         {pending === 'google' ? (
-          <ActivityIndicator size="small" color="#111827" />
+          <ActivityIndicator size="small" color={colors.text} />
         ) : (
           <>
             <GoogleLogo size={20} />
-            <Text className="text-base font-semibold text-gray-900">
-              {t('login.google', 'Continue with Google')}
+            <Text className="text-base font-semibold text-text">
+              {t('login.google')}
             </Text>
           </>
         )}
@@ -75,6 +90,8 @@ export default function SocialAuthButtons() {
           activeOpacity={0.8}
           className="flex-row items-center justify-center gap-3 bg-black rounded-lg min-h-[52px] px-4"
           style={{ opacity: pending && pending !== 'apple' ? 0.5 : 1 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('login.apple')}
         >
           {pending === 'apple' ? (
             <ActivityIndicator size="small" color="#ffffff" />
@@ -82,7 +99,7 @@ export default function SocialAuthButtons() {
             <>
               <AppleLogo size={20} color="#ffffff" />
               <Text className="text-base font-semibold text-white">
-                {t('login.apple', 'Continue with Apple')}
+                {t('login.apple')}
               </Text>
             </>
           )}
