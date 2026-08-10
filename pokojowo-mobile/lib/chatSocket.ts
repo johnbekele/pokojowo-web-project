@@ -1,11 +1,6 @@
 import { io, Socket } from 'socket.io-client';
-import Constants from 'expo-constants';
 import { storage, STORAGE_KEYS } from './storage';
-
-const CHAT_SOCKET_URL =
-  Constants.expoConfig?.extra?.chatSocketUrl ||
-  Constants.expoConfig?.extra?.socketUrl ||
-  'https://dh3iw703m1vvi.cloudfront.net';
+import { CHAT_SOCKET_URL } from './constants';
 
 export let chatSocket: Socket | null = null;
 

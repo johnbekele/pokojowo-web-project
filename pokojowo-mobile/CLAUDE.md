@@ -35,6 +35,27 @@ Configured in:
 - `lib/socket.ts` - Socket.IO client
 - `app.config.ts` - Environment variables
 
+### Configuration and EAS environments
+
+`app.config.ts` is the only source of Expo metadata and runtime URLs; there is
+intentionally no `app.json` to merge with it. The config publishes
+`apiUrl`, `chatApiUrl`, `socketUrl`, `chatSocketUrl`, and `imageBaseUrl` in
+`Constants.expoConfig.extra`. Consumers import these values from
+`lib/constants.ts` and must not add host fallbacks of their own.
+
+EAS profiles provide the public environment values:
+
+| Profile | Backend |
+|---------|---------|
+| `development` | Local backend (`localhost:3000`) |
+| `preview` | CloudFront (`dh3iw703m1vvi.cloudfront.net`) |
+| `production` | CloudFront (`dh3iw703m1vvi.cloudfront.net`) |
+
+Copy `.env.example` to a local environment file when developing. Set
+`EAS_PROJECT_ID` in the EAS environment (created by `npx eas init`) before
+running `eas build` or `eas update`; it is intentionally omitted from the
+public config when unset so a placeholder can never be shipped.
+
 ## Folder Structure
 
 ```
