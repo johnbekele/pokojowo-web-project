@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import {
   MapPin,
   Calendar,
@@ -117,9 +116,7 @@ export default function ListingDetails() {
   const sourceSite = listing.sourceSite;
   const sourceLastVerifiedAt = listing.sourceLastVerifiedAt;
   const sourceLastVerified = sourceLastVerifiedAt
-    ? new Date(sourceLastVerifiedAt).toLocaleDateString(currentLang === 'pl' ? 'pl-PL' : 'en-GB', {
-        dateStyle: 'medium',
-      })
+    ? formatDate(sourceLastVerifiedAt, { timeZone: 'UTC' }, i18n.language)
     : null;
 
   const description = getTranslatedText(listing.description, currentLang);

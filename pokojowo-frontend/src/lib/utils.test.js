@@ -26,6 +26,14 @@ describe('formatDate', () => {
     expect(formatDate('2026-01-15T00:00:00Z', { timeZone: 'UTC' })).toBe('15 sty 2026');
   });
 
+  it('allows a view to format using its current i18next language', () => {
+    localStorage.setItem('i18nextLng', 'en');
+
+    expect(
+      formatDate('2026-01-15T00:00:00Z', { timeZone: 'UTC' }, 'pl'),
+    ).toBe('15 sty 2026');
+  });
+
   it('returns an empty string for invalid dates', () => {
     expect(formatDate('not-a-date')).toBe('');
   });

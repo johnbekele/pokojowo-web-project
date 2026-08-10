@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
 import useAuthStore from '@/stores/authStore';
+import { formatDate } from '@/lib/utils';
 
 export default function LandlordDashboard() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
   // The API returns the current user as `_id`; older payloads used `id`.
@@ -166,7 +167,7 @@ export default function LandlordDashboard() {
                   <div className="text-right">
                     <p className="text-sm font-medium text-green-600">Active</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(listing.createdAt).toLocaleDateString()}
+                      {formatDate(listing.createdAt, { timeZone: 'UTC' }, i18n.language)}
                     </p>
                   </div>
                 </div>
