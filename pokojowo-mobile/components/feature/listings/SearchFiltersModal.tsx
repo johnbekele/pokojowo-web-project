@@ -12,30 +12,30 @@ import useTheme from '@/hooks/useTheme';
 import { CITIES, districtsForCity } from '@/lib/districts';
 
 const OFFERED_BY_OPTIONS = [
-  { value: 'owner' as const, label: 'Private owner', icon: '🔑' },
-  { value: 'agency' as const, label: 'Agency', icon: '🏢' },
+  { value: 'owner' as const, labelKey: 'filters.privateOwner', icon: '🔑' },
+  { value: 'agency' as const, labelKey: 'filters.agency', icon: '🏢' },
 ];
 
 const ROOM_TYPES = [
-  { value: 'Single', label: 'Single', icon: '🛏️' },
-  { value: 'Double', label: 'Double', icon: '🛏️🛏️' },
-  { value: 'Suite', label: 'Suite', icon: '🏠' },
+  { value: 'Single', labelKey: 'filters.roomTypes.single', icon: '🛏️' },
+  { value: 'Double', labelKey: 'filters.roomTypes.double', icon: '🛏️🛏️' },
+  { value: 'Suite', labelKey: 'filters.roomTypes.suite', icon: '🏠' },
 ];
 
 const BUILDING_TYPES = [
-  { value: 'Apartment', label: 'Apartment', icon: '🏢' },
-  { value: 'Loft', label: 'Loft', icon: '🏗️' },
-  { value: 'Block', label: 'Block', icon: '🏘️' },
-  { value: 'Detached_House', label: 'House', icon: '🏡' },
+  { value: 'Apartment', labelKey: 'filters.buildingTypes.apartment', icon: '🏢' },
+  { value: 'Loft', labelKey: 'filters.buildingTypes.loft', icon: '🏗️' },
+  { value: 'Block', labelKey: 'filters.buildingTypes.block', icon: '🏘️' },
+  { value: 'Detached_House', labelKey: 'filters.buildingTypes.house', icon: '🏡' },
 ];
 
 const RENT_FOR_OPTIONS = [
-  { value: 'Open to All', label: 'Anyone', icon: '👥' },
-  { value: 'Women', label: 'Women', icon: '👩' },
-  { value: 'Man', label: 'Men', icon: '👨' },
-  { value: 'Student', label: 'Students', icon: '🎓' },
-  { value: 'Family', label: 'Families', icon: '👨‍👩‍👧' },
-  { value: 'Couple', label: 'Couples', icon: '💑' },
+  { value: 'Open to All', labelKey: 'filters.rentForOptions.anyone', icon: '👥' },
+  { value: 'Women', labelKey: 'filters.rentForOptions.women', icon: '👩' },
+  { value: 'Man', labelKey: 'filters.rentForOptions.men', icon: '👨' },
+  { value: 'Student', labelKey: 'filters.rentForOptions.students', icon: '🎓' },
+  { value: 'Family', labelKey: 'filters.rentForOptions.families', icon: '👨‍👩‍👧' },
+  { value: 'Couple', labelKey: 'filters.rentForOptions.couples', icon: '💑' },
 ];
 
 const MAX_TENANTS_OPTIONS = [
@@ -170,11 +170,7 @@ export default function SearchFiltersModal({
               {OFFERED_BY_OPTIONS.map((option) => (
                 <FilterChip
                   key={option.value}
-                  label={
-                    option.value === 'owner'
-                      ? t('filters.privateOwner', 'Private owner')
-                      : t('filters.agency', 'Agency')
-                  }
+                  label={t(option.labelKey)}
                   icon={option.icon}
                   selected={localFilters.offered_by === option.value}
                   onPress={() =>
@@ -191,11 +187,11 @@ export default function SearchFiltersModal({
           {/* Price Range */}
           <View className="mb-6">
             <Text className="text-base font-semibold text-text mb-3">
-              {t('filters.price', 'Price Range')} (PLN/month)
+              {t('filters.price', 'Price Range')} ({t('filters.priceUnit', 'PLN/month')})
             </Text>
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
-                <Text className="text-xs text-muted mb-1">Min</Text>
+                <Text className="text-xs text-muted mb-1">{t('filters.min', 'Min')}</Text>
                 <TextInput
                   className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
@@ -212,7 +208,7 @@ export default function SearchFiltersModal({
               </View>
               <Text className="text-muted mt-5">—</Text>
               <View className="flex-1">
-                <Text className="text-xs text-muted mb-1">Max</Text>
+                <Text className="text-xs text-muted mb-1">{t('filters.max', 'Max')}</Text>
                 <TextInput
                   className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
@@ -233,11 +229,11 @@ export default function SearchFiltersModal({
           {/* Size Range */}
           <View className="mb-6">
             <Text className="text-base font-semibold text-text mb-3">
-              {t('filters.size', 'Room Size')} (m²)
+              {t('filters.size', 'Room Size')} ({t('filters.sizeUnit', 'm²')})
             </Text>
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
-                <Text className="text-xs text-muted mb-1">Min</Text>
+                <Text className="text-xs text-muted mb-1">{t('filters.min', 'Min')}</Text>
                 <TextInput
                   className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
@@ -254,7 +250,7 @@ export default function SearchFiltersModal({
               </View>
               <Text className="text-muted mt-5">—</Text>
               <View className="flex-1">
-                <Text className="text-xs text-muted mb-1">Max</Text>
+                <Text className="text-xs text-muted mb-1">{t('filters.max', 'Max')}</Text>
                 <TextInput
                   className="border border-border rounded-lg px-3 py-3 text-center text-base text-text bg-card"
                   keyboardType="number-pad"
@@ -281,7 +277,7 @@ export default function SearchFiltersModal({
               {ROOM_TYPES.map((type) => (
                 <FilterChip
                   key={type.value}
-                  label={type.label}
+                  label={t(type.labelKey)}
                   icon={type.icon}
                   selected={localFilters.room_types?.includes(type.value) || false}
                   onPress={() => toggleArrayFilter('room_types', type.value)}
@@ -299,7 +295,7 @@ export default function SearchFiltersModal({
               {BUILDING_TYPES.map((type) => (
                 <FilterChip
                   key={type.value}
-                  label={type.label}
+                  label={t(type.labelKey)}
                   icon={type.icon}
                   selected={localFilters.building_types?.includes(type.value) || false}
                   onPress={() => toggleArrayFilter('building_types', type.value)}
@@ -317,7 +313,7 @@ export default function SearchFiltersModal({
               {RENT_FOR_OPTIONS.map((option) => (
                 <FilterChip
                   key={option.value}
-                  label={option.label}
+                  label={t(option.labelKey)}
                   icon={option.icon}
                   selected={localFilters.rent_for?.includes(option.value) || false}
                   onPress={() => toggleArrayFilter('rent_for', option.value)}

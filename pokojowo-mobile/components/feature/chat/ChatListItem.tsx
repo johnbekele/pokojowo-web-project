@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/components/ui';
 import { formatRelativeTime } from '@/lib/utils';
 import type { ChatListItem as ChatListItemType } from '@/types/chat.types';
@@ -9,11 +10,12 @@ interface ChatListItemProps {
 }
 
 export default function ChatListItem({ chat, onPress }: ChatListItemProps) {
+  const { t } = useTranslation('chat');
   const { otherUser, lastMessage, unreadCount } = chat;
 
   const displayName = otherUser?.firstname
     ? `${otherUser.firstname} ${otherUser.lastname || ''}`.trim()
-    : 'Unknown User';
+    : t('unknownUser', 'Unknown user');
 
   return (
     <TouchableOpacity
@@ -48,7 +50,7 @@ export default function ChatListItem({ chat, onPress }: ChatListItemProps) {
             className="flex-1 text-muted text-sm"
             numberOfLines={1}
           >
-            {lastMessage?.content || 'No messages yet'}
+            {lastMessage?.content || t('noMessages', 'No messages yet')}
           </Text>
 
           {unreadCount && unreadCount > 0 && (

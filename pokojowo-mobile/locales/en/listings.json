@@ -48,21 +48,30 @@
       "private": "Private Room",
       "shared": "Shared Room",
       "studio": "Studio",
-      "apartment": "Entire Apartment"
+      "apartment": "Entire Apartment",
+      "single": "Single",
+      "double": "Double",
+      "suite": "Suite"
     },
     "buildingType": "Building Type",
     "buildingTypes": {
       "apartment": "Apartment Building",
       "house": "House",
       "studentHousing": "Student Housing",
-      "dormitory": "Dormitory"
+      "dormitory": "Dormitory",
+      "loft": "Loft",
+      "block": "Block",
+      "house": "House"
     },
     "rentFor": "Suitable For",
     "rentForOptions": {
       "students": "Students",
       "professionals": "Professionals",
       "couples": "Couples",
-      "anyone": "Anyone"
+      "anyone": "Anyone",
+      "women": "Women",
+      "men": "Men",
+      "families": "Families"
     },
     "maxTenants": "Maximum Flatmates",
     "anyTenants": "Any number",
@@ -84,7 +93,11 @@
     "neighbourhood": "Neighbourhood",
     "offeredBy": "Offered by",
     "privateOwner": "Private owner",
-    "agency": "Agency"
+    "agency": "Agency",
+    "min": "Min",
+    "max": "Max",
+    "priceUnit": "PLN/month",
+    "sizeUnit": "m²"
   },
   "card": {
     "perMonth": "/month",
@@ -156,6 +169,7 @@
     "description": "Description",
     "amenities": "Amenities",
     "details": "Details",
+    "notAvailable": "N/A",
     "landlord": "Landlord",
     "contactInfo": "Contact Information",
     "phoneNumber": "Phone Number",

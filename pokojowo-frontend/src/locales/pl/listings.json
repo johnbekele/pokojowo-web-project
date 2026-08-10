@@ -99,12 +99,43 @@
     "roomTypes": {
       "private": "Pokój prywatny",
       "shared": "Pokój dzielony",
-      "studio": "Kawalerka"
+      "studio": "Kawalerka",
+      "single": "Pokój jednoosobowy",
+      "double": "Pokój dwuosobowy",
+      "suite": "Apartament"
     },
     "buildingType": "Typ budynku",
+    "buildingTypes": {
+      "apartment": "Mieszkanie",
+      "loft": "Loft",
+      "block": "Blok",
+      "house": "Dom"
+    },
     "rentFor": "Odpowiedni dla",
+    "rentForOptions": {
+      "anyone": "Dla każdego",
+      "women": "Kobiety",
+      "men": "Mężczyźni",
+      "students": "Studenci",
+      "families": "Rodziny",
+      "couples": "Pary"
+    },
     "maxTenants": "Maksymalna liczba lokatorów",
     "anyTenants": "Dowolna liczba",
+    "tenantCount": {
+      "one": "1 lokator",
+      "two": "2 lokatorów",
+      "three": "3 lokatorów",
+      "fourPlus": "4+ lokatorów"
+    },
+    "min": "Min.",
+    "max": "Maks.",
+    "priceUnit": "zł/mies.",
+    "sizeUnit": "m²",
+    "minPrice": "0 zł",
+    "maxPrice": "{{max}} zł",
+    "minSize": "0 m²",
+    "maxSize": "{{max}} m²",
     "amenities": "Udogodnienia",
     "available": "Dostępne teraz",
     "apply": "Zastosuj filtry",

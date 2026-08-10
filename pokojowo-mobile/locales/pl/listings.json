@@ -49,21 +49,30 @@
       "private": "Pokój prywatny",
       "shared": "Pokój dzielony",
       "studio": "Kawalerka",
-      "apartment": "Całe mieszkanie"
+      "apartment": "Całe mieszkanie",
+      "single": "Jednoosobowy",
+      "double": "Dwuosobowy",
+      "suite": "Apartament"
     },
     "buildingType": "Typ budynku",
     "buildingTypes": {
       "apartment": "Blok mieszkalny",
       "house": "Dom",
       "studentHousing": "Akademik prywatny",
-      "dormitory": "Akademik"
+      "dormitory": "Akademik",
+      "loft": "Loft",
+      "block": "Blok",
+      "house": "Dom"
     },
     "rentFor": "Odpowiedni dla",
     "rentForOptions": {
       "students": "Studentów",
       "professionals": "Pracujących",
       "couples": "Par",
-      "anyone": "Wszystkich"
+      "anyone": "Wszystkich",
+      "women": "Kobiety",
+      "men": "Mężczyźni",
+      "families": "Rodziny"
     },
     "maxTenants": "Maks. współlokatorów",
     "anyTenants": "Dowolna liczba",
@@ -85,7 +94,11 @@
     "neighbourhood": "Dzielnica",
     "offeredBy": "Oferowane przez",
     "privateOwner": "Właściciel prywatny",
-    "agency": "Agencja"
+    "agency": "Agencja",
+    "min": "Min.",
+    "max": "Maks.",
+    "priceUnit": "zł/mies.",
+    "sizeUnit": "m²"
   },
   "card": {
     "perMonth": "/mies.",
@@ -160,6 +173,7 @@
     "description": "Opis",
     "amenities": "Udogodnienia",
     "details": "Szczegóły",
+    "notAvailable": "Brak danych",
     "landlord": "Właściciel",
     "contactInfo": "Dane kontaktowe",
     "phoneNumber": "Numer telefonu",
