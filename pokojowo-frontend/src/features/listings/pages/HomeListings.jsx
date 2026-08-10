@@ -45,8 +45,8 @@ import api, { normalizeError } from "@/lib/api";
 import { listingParams, MAX_PRICE, MAX_SIZE } from "@/lib/listingQuery";
 import { formatCurrency, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/useToast";
-import useListingInteractionStore from "@/stores/listingInteractionStore";
 import useAuthStore from "@/stores/authStore";
+import { useBatchInterestedUsers } from "@/hooks/useListingInteractions";
 
 const FALLBACK_LISTING_IMAGE = "/images/promo/modern-room.avif";
 const LISTING_PAGE_SIZE = 20;
@@ -138,9 +138,6 @@ export default function HomeListings() {
       { replace: true },
     );
   };
-  const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } =
-    useListingInteractionStore();
-
   // Keep the browse context when a user opens a listing and goes back. The
   // query cache keeps the loaded pages, while this restores the exact place
   // in the document after the route remounts.
@@ -237,6 +234,16 @@ export default function HomeListings() {
 
   const totalListings = listingPages?.pages[0]?.total ?? listings.length;
 
+  const listingIds = useMemo(
+    () => listings.map((listing) => listing._id || listing.id).filter(Boolean),
+    [listings],
+  );
+  const { usersByListing: interestedUsersByListing } = useBatchInterestedUsers(
+    listingIds,
+    { minCompatibility: 70, limitPerListing: 3 },
+    { enabled: Boolean(user) },
+  );
+
   useEffect(() => {
     if (isLoading || restoredScroll.current) return;
     const savedScroll = Number(sessionStorage.getItem(DISCOVER_SCROLL_KEY));
@@ -248,17 +255,6 @@ export default function HomeListings() {
       });
     }
   }, [isLoading]);
-
-  useEffect(() => {
-    if (user && listings && listings.length > 0) {
-      const listingIds = listings.map((l) => l._id || l.id).filter(Boolean);
-      if (listingIds.length > 0) fetchBatchInterestedUsers(listingIds, 70, 3);
-    }
-  }, [user, listings, fetchBatchInterestedUsers]);
-
-  useEffect(() => {
-    if (user) fetchMyLikedListings();
-  }, [user, fetchMyLikedListings]);
 
   return (
     <div className="space-y-12 lg:space-y-16">
@@ -385,7 +381,7 @@ export default function HomeListings() {
           isFetchingNextPage={isFetchingNextPage}
           fetchNextPage={fetchNextPage}
           refetch={refetch}
-          getInterestedUsers={getInterestedUsers}
+          interestedUsersByListing={interestedUsersByListing}
         />
       )}
 
@@ -422,7 +418,7 @@ function ListingsGrid({
   isFetchingNextPage,
   fetchNextPage,
   refetch,
-  getInterestedUsers,
+  interestedUsersByListing,
 }) {
   const { t } = useTranslation("listings");
 
@@ -476,7 +472,7 @@ function ListingsGrid({
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing, index) => {
               const listingId = listing._id || listing.id;
-              const interestedUsers = getInterestedUsers(listingId);
+              const interestedUsers = interestedUsersByListing[listingId] || [];
               return (
                 <ListingCard
                   key={listingId}

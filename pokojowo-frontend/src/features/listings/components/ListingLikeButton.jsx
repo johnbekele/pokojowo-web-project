@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import useListingInteractionStore from '@/stores/listingInteractionStore';
+import { useListingLike } from '@/hooks/useListingInteractions';
 import useAuthStore from '@/stores/authStore';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,11 +23,11 @@ export default function ListingLikeButton({
   const { t } = useTranslation('listings');
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { isLiked, toggleLike } = useListingInteractionStore();
+  const { isLiked: liked, isPending, toggleLike } = useListingLike(listingId, {
+    enabled: Boolean(user),
+  });
   const [animating, setAnimating] = useState(false);
   const pendingRef = useRef(false);
-
-  const liked = isLiked(listingId);
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -50,9 +50,11 @@ export default function ListingLikeButton({
     }
 
     // Optimistic update - no await, fire and forget
-    toggleLike(listingId).finally(() => {
-      pendingRef.current = false;
-    });
+    toggleLike()
+      .catch(() => undefined)
+      .finally(() => {
+        pendingRef.current = false;
+      });
   };
 
   const sizeClasses = {
@@ -70,6 +72,7 @@ export default function ListingLikeButton({
   return (
     <button
       onClick={handleClick}
+      disabled={isPending}
       className={cn(
         'relative flex items-center justify-center rounded-full border border-border/60 transition-all duration-300',
         'bg-surface-paper/90 backdrop-blur-md shadow-[0_2px_8px_hsl(var(--surface-onyx)/0.10)]',
