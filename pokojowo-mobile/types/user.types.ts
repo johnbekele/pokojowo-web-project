@@ -16,6 +16,11 @@ export interface User {
   isVerified?: boolean;
   /** Server-computed from the tenant profile; gates matching features. */
   isProfileComplete?: boolean;
+  /** Completion percentage returned by the onboarding/profile endpoints. */
+  profileCompletionStep?: number;
+  /** Legacy snake_case payloads from older mobile/backend builds. */
+  is_profile_complete?: boolean;
+  profile_completion_step?: number;
   gender?: 'male' | 'female' | 'other';
   bio?: string;
   job?: UserJob;

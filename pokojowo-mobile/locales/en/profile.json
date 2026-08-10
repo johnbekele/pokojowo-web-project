@@ -1,6 +1,17 @@
 {
   "title": "Profile",
   "logoutConfirm": "Are you sure you want to log out?",
+  "landlord": {
+    "title": "Complete Your Landlord Profile",
+    "subtitle": "Add your details to start listing properties",
+    "personalInfo": "Personal Information",
+    "companyName": "Company Name (Optional)",
+    "companyPlaceholder": "Your company or business name",
+    "contactInfo": "Contact Information",
+    "aboutYou": "About You",
+    "bio": "About You / Your Properties",
+    "bioPlaceholder": "Tell potential tenants about yourself and your properties..."
+  },
   "trust": {
     "verified": "Verified",
     "idVerified": "ID Verified",
@@ -51,11 +62,13 @@
     "progress": "{{percentage}}% complete",
     "success": {
       "title": "Profile Updated",
-      "description": "Your profile has been saved successfully."
+      "description": "Your profile has been saved successfully.",
+      "landlordDescription": "Your landlord profile has been saved. Start listing your properties!"
     },
     "error": {
       "title": "Error",
-      "description": "Failed to save profile. Please try again."
+      "description": "Failed to save profile. Please try again.",
+      "requiredFields": "First name and last name are required."
     },
     "exit": {
       "title": "Exit profile setup?",
@@ -66,7 +79,9 @@
     "title": "Basic Information",
     "subtitle": "Tell us about yourself",
     "firstName": "First Name",
+    "firstNamePlaceholder": "John",
     "lastName": "Last Name",
+    "lastNamePlaceholder": "Doe",
     "age": "Age",
     "gender": "Gender",
     "selectGender": "Select gender",
@@ -85,7 +100,9 @@
     "title": "Contact Information",
     "subtitle": "How can people reach you?",
     "phone": "Phone Number",
+    "phonePlaceholder": "+48 123 456 789",
     "location": "City / Location",
+    "locationPlaceholder": "e.g., Warsaw, Krakow",
     "preferredContact": "Preferred Contact Method"
   },
   "preferences": {
@@ -170,6 +187,7 @@
     "subtitle": "What languages do you speak?",
     "select": "Select languages you speak",
     "preferredLanguage": "Preferred Language",
+    "remove": "Remove {{language}}",
     "selectPreferred": "Select preferred language",
     "options": {
       "polish": "Polish",
@@ -178,7 +196,8 @@
       "german": "German",
       "russian": "Russian",
       "spanish": "Spanish",
-      "french": "French"
+      "french": "French",
+      "italian": "Italian"
     },
     "other": "Other language",
     "otherPlaceholder": "e.g. Czech, Portuguese…",
@@ -198,6 +217,7 @@
     "next": "Next",
     "back": "Back",
     "skip": "Skip for now",
+    "skipForNow": "Skip for now",
     "saving": "Saving...",
     "cancel": "Cancel",
     "exit": "Exit",

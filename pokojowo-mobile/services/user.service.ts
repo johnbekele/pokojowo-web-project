@@ -105,7 +105,11 @@ export const userService = {
     api.put<{ message: string; user: User }>('/profile/complete-tenant', data),
 
   completeLandlordProfile: (data: LandlordProfileData) =>
-    api.put<{ message: string; user: User }>('/profile/complete-landlord', data),
+    api.put<{
+      message: string;
+      isProfileComplete: boolean;
+      profileCompletionStep: number;
+    }>('/profile/landlord', data),
 
   getUserById: (userId: string) =>
     api.get<User>(`/users/${userId}`),
