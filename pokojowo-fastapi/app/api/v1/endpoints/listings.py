@@ -16,7 +16,7 @@ from app.core.geo import (
 from app.core.locations import CITY_DISTRICTS, canonical_city, districts_for_city
 from app.services import saved_search_service
 from app.services.geo_enrichment import resolve_listing_geo_by_id
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import datetime
 import logging
 import re
@@ -81,6 +81,16 @@ class ScrapedListingRevalidation(BaseModel):
     checkedAt: datetime
     consecutiveFailures: int = 0
     reason: str = "unknown"
+
+
+class ListingPage(BaseModel):
+    """A page of listings with enough metadata for deterministic client paging."""
+
+    listings: List[dict]
+    total: int
+    skip: int
+    limit: int
+    hasMore: bool
 
 
 def listing_to_dict(listing: Listing) -> dict:
@@ -309,8 +319,8 @@ def listing_sort_field(sort: Optional[str]) -> str:
     return "-createdAt"  # Default: newest first
 
 
-@router.get("", response_model=List[dict])
-@router.get("/", response_model=List[dict])
+@router.get("", response_model=Union[List[dict], ListingPage])
+@router.get("/", response_model=Union[List[dict], ListingPage])
 async def get_listings(
     skip: int = Query(0, ge=0, le=MAX_PAGE_SKIP),
     limit: int = Query(20, ge=1, le=MAX_PAGE_SIZE),
@@ -327,6 +337,10 @@ async def get_listings(
     city: Optional[str] = None,
     district: Optional[List[str]] = Query(None),
     offered_by: Optional[str] = None,
+    with_meta: bool = Query(
+        False,
+        description="Return pagination metadata alongside the listings.",
+    ),
     bbox: Optional[str] = Query(
         None,
         description="Restrict to 'swLng,swLat,neLng,neLat'. Keeps the map "
@@ -353,15 +367,23 @@ async def get_listings(
         bbox=bbox,
     )
 
-    listings = (
-        await Listing.find(query)
-        .sort(listing_sort_field(sort))
-        .skip(skip)
-        .limit(limit)
-        .to_list()
-    )
+    finder = Listing.find(query).sort(listing_sort_field(sort)).skip(skip).limit(limit)
+    listings = await finder.to_list()
+    serialized = [listing_to_dict(listing) for listing in listings]
 
-    return [listing_to_dict(listing) for listing in listings]
+    if with_meta:
+        total = await Listing.find(query).count()
+        return ListingPage(
+            listings=serialized,
+            total=total,
+            skip=skip,
+            limit=limit,
+            hasMore=skip + len(serialized) < total,
+        )
+
+    # Keep the original array response as the default so existing mobile and
+    # map consumers can adopt metadata paging independently.
+    return serialized
 
 
 # A map view can legitimately cover thousands of listings; cap the pin payload
