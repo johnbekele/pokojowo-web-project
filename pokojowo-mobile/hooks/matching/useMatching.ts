@@ -83,10 +83,25 @@ export function useDashboard() {
     queryKey: MATCHING_KEYS.dashboard,
     queryFn: async () => {
       const response = await matchingService.getDashboard();
-      return response.data;
+      const data = response.data;
+      return {
+        ...data,
+        previews: data.previews
+          ? {
+              ...data.previews,
+              top_matches: data.previews.top_matches?.map(normalizeMatch) ?? [],
+            }
+          : data.previews,
+      };
     },
     staleTime: 2 * 60 * 1000,
   });
+}
+
+/** Descriptive alias for consumers that need the dashboard without knowing
+ * the legacy `useDashboard` name. */
+export function useMatchingDashboard() {
+  return useDashboard();
 }
 
 export function useRefreshMatches() {

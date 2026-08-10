@@ -1,4 +1,5 @@
-import { View, Text, Image, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,15 +15,12 @@ import {
   Users,
 } from 'lucide-react-native';
 
-import { Modal, Button, Badge, Avatar } from '@/components/ui';
+import { Modal, Button, Badge } from '@/components/ui';
 import { matchingService } from '@/services';
 import type { MatchResult } from '@/types/matching.types';
 import { translateExplanation } from '@/lib/explanations';
 import { getAvatarUrl } from '@/lib/image';
-import { palette } from '@/lib/theme';
 import useTheme from '@/hooks/useTheme';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface MatchDetailModalProps {
   visible: boolean;
@@ -45,18 +43,11 @@ const BREAKDOWN_LABELS: Record<string, string> = {
 };
 
 // Get score color
-function getScoreColor(score: number) {
-  if (score >= 85) return palette.status.success;
-  if (score >= 70) return palette.primary[600];
-  if (score >= 55) return palette.status.warning;
-  return palette.gray[400];
-}
-
-function getScoreBgClass(score: number) {
-  if (score >= 80) return 'bg-green-500';
-  if (score >= 60) return 'bg-primary-500';
-  if (score >= 40) return 'bg-yellow-500';
-  return 'bg-gray-400';
+function getScoreColor(score: number, colors: ReturnType<typeof useTheme>['colors']) {
+  if (score >= 85) return colors.success;
+  if (score >= 70) return colors.brand;
+  if (score >= 55) return colors.warning;
+  return colors.muted;
 }
 
 export default function MatchDetailModal({
@@ -102,7 +93,8 @@ export default function MatchDetailModal({
   const shared_interests = (userData as any).shared_interests || [];
   const shared_languages = (userData as any).shared_languages || [];
 
-  const score = Math.round(compatibility_score);
+  const score = Math.max(0, Math.min(100, Math.round(compatibility_score)));
+  const scoreColor = getScoreColor(score, colors);
 
   // Get photo URL
   const photoUrl = getAvatarUrl(photo as string | { url?: string } | undefined, user_id || username);
@@ -152,13 +144,15 @@ export default function MatchDetailModal({
                 <Image
                   source={{ uri: photoUrl }}
                   className="w-28 h-28 rounded-2xl"
-                  resizeMode="cover"
+                  contentFit="cover"
+                  transition={180}
                 />
                 {/* Score badge */}
                 <View
-                  className={`absolute -bottom-2 -right-2 w-12 h-12 rounded-full items-center justify-center ${getScoreBgClass(score)}`}
+                  className="absolute -bottom-2 -right-2 h-14 w-14 items-center justify-center rounded-full bg-card"
+                  style={{ borderColor: scoreColor, borderWidth: 3 }}
                 >
-                  <Text className="text-white font-bold text-sm">{score}%</Text>
+                  <Text className="text-sm font-bold" style={{ color: scoreColor }}>{score}%</Text>
                 </View>
               </View>
 
@@ -239,15 +233,18 @@ export default function MatchDetailModal({
                         <Text className="text-muted">{label}</Text>
                         <Text
                           className="font-semibold"
-                          style={{ color: getScoreColor(value) }}
+                          style={{ color: getScoreColor(value, colors) }}
                         >
                           {value}%
                         </Text>
                       </View>
                       <View className="h-2 bg-surface rounded-full overflow-hidden">
                         <View
-                          className={`h-full rounded-full ${getScoreBgClass(value)}`}
-                          style={{ width: `${value}%` }}
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${Math.max(0, Math.min(100, value))}%`,
+                            backgroundColor: getScoreColor(value, colors),
+                          }}
                         />
                       </View>
                     </View>
@@ -264,9 +261,9 @@ export default function MatchDetailModal({
                 </Text>
                 <View className="space-y-2">
                   {explanations.positive.map((exp: any, i: number) => (
-                    <View key={i} className="flex-row items-start gap-2 bg-green-50 rounded-lg p-3">
+                    <View key={i} className="flex-row items-start gap-2 rounded-lg bg-surface p-3">
                       <Check size={16} color={colors.success} className="mt-0.5" />
-                      <Text className="flex-1 text-green-700 text-sm">{translateExplanation(t, exp)}</Text>
+                      <Text className="flex-1 text-sm text-text">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                   {explanations.neutral.map((exp: any, i: number) => (
@@ -276,9 +273,9 @@ export default function MatchDetailModal({
                     </View>
                   ))}
                   {explanations.negative.map((exp: any, i: number) => (
-                    <View key={i} className="flex-row items-start gap-2 bg-yellow-50 rounded-lg p-3">
+                    <View key={i} className="flex-row items-start gap-2 rounded-lg bg-surface p-3">
                       <X size={16} color={colors.warning} className="mt-0.5" />
-                      <Text className="flex-1 text-yellow-700 text-sm">{translateExplanation(t, exp)}</Text>
+                      <Text className="flex-1 text-sm text-text">{translateExplanation(t, exp)}</Text>
                     </View>
                   ))}
                 </View>

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ interface SwipeStackProps {
   onSwipeRight: (match: MatchResult) => void;
   onCardPress?: (match: MatchResult) => void;
   onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export default function SwipeStack({
@@ -35,6 +36,7 @@ export default function SwipeStack({
   onSwipeRight,
   onCardPress,
   onRefresh,
+  refreshing = false,
 }: SwipeStackProps) {
   const { t } = useTranslation('matching');
   const { colors } = useTheme();
@@ -48,6 +50,16 @@ export default function SwipeStack({
   const { mutate: unlikeUser } = useUnlikeUser();
   const { mutate: passUser } = usePassUser();
   const { mutate: undoPass } = useUndoPass();
+  const [isAnimating, setIsAnimating] = useState(false);
+  const swipeLeftRef = useRef<() => void>(() => undefined);
+  const swipeRightRef = useRef<() => void>(() => undefined);
+
+  const matchIds = matches.map((match) => match.user_id).join('|');
+  useEffect(() => {
+    setCurrentIndex(0);
+    setLastSwipe({ direction: null, match: null });
+    position.setValue({ x: 0, y: 0 });
+  }, [matchIds, position]);
 
   const rotate = position.x.interpolate({
     inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
@@ -89,9 +101,9 @@ export default function SwipeStack({
       },
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx > SWIPE_THRESHOLD) {
-          swipeRight();
+          swipeRightRef.current();
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
-          swipeLeft();
+          swipeLeftRef.current();
         } else {
           resetPosition();
         }
@@ -100,7 +112,9 @@ export default function SwipeStack({
   ).current;
 
   const swipeLeft = useCallback(() => {
+    if (isAnimating) return;
     const match = matches[currentIndex];
+    setIsAnimating(true);
     Animated.timing(position, {
       toValue: { x: -SCREEN_WIDTH * 1.5, y: 0 },
       duration: 300,
@@ -114,11 +128,14 @@ export default function SwipeStack({
       }
       setCurrentIndex((prev) => prev + 1);
       position.setValue({ x: 0, y: 0 });
+      setIsAnimating(false);
     });
-  }, [currentIndex, matches, onSwipeLeft, passUser, position]);
+  }, [currentIndex, isAnimating, matches, onSwipeLeft, passUser, position]);
 
   const swipeRight = useCallback(() => {
+    if (isAnimating) return;
     const match = matches[currentIndex];
+    setIsAnimating(true);
     Animated.timing(position, {
       toValue: { x: SCREEN_WIDTH * 1.5, y: 0 },
       duration: 300,
@@ -130,8 +147,9 @@ export default function SwipeStack({
       }
       setCurrentIndex((prev) => prev + 1);
       position.setValue({ x: 0, y: 0 });
+      setIsAnimating(false);
     });
-  }, [currentIndex, matches, onSwipeRight, position]);
+  }, [currentIndex, isAnimating, matches, onSwipeRight, position]);
 
   const resetPosition = useCallback(() => {
     Animated.spring(position, {
@@ -140,6 +158,11 @@ export default function SwipeStack({
       useNativeDriver: false,
     }).start();
   }, [position]);
+
+  // PanResponder is created once; refs keep gesture callbacks on the latest
+  // match/index instead of the values from the first render.
+  swipeLeftRef.current = swipeLeft;
+  swipeRightRef.current = swipeRight;
 
   const handleUndo = useCallback(() => {
     if (currentIndex <= 0 || !lastSwipe.match) return;
@@ -179,7 +202,11 @@ export default function SwipeStack({
             </Button>
           )}
           {onRefresh && (
-            <Button onPress={onRefresh} icon={<RotateCcw size={18} color="white" />}>
+            <Button
+              onPress={onRefresh}
+              loading={refreshing}
+              icon={<RotateCcw size={18} color={colors.brandFg} />}
+            >
               {t('swipe.refresh', 'Refresh')}
             </Button>
           )}
@@ -192,7 +219,7 @@ export default function SwipeStack({
     <View className="flex-1 items-center justify-center">
       {/* Cards stack */}
       <View style={{ width: SCREEN_WIDTH - 32, height: 500 }}>
-        {visibleMatches.reverse().map((match, index) => {
+        {[...visibleMatches].reverse().map((match, index) => {
           const isFirst = index === visibleMatches.length - 1;
 
           if (isFirst) {
@@ -292,6 +319,7 @@ export default function SwipeStack({
         {canUndo && (
           <TouchableOpacity
             onPress={handleUndo}
+            disabled={isAnimating}
             className="w-12 h-12 rounded-full border-2 border-amber-400 items-center justify-center bg-card"
             accessibilityRole="button"
             accessibilityLabel={t('accessibility.undo')}
@@ -303,6 +331,7 @@ export default function SwipeStack({
         {/* Pass button */}
         <TouchableOpacity
           onPress={swipeLeft}
+          disabled={isAnimating}
           className="w-16 h-16 rounded-full border-2 border-border items-center justify-center bg-card"
           accessibilityRole="button"
           accessibilityLabel={t('accessibility.pass')}
@@ -313,6 +342,7 @@ export default function SwipeStack({
         {/* Like button */}
         <TouchableOpacity
           onPress={swipeRight}
+          disabled={isAnimating}
           className="w-20 h-20 rounded-full bg-brand items-center justify-center"
           accessibilityRole="button"
           accessibilityLabel={t('accessibility.like')}
