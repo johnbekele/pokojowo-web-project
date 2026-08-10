@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
 import useTheme from '@/hooks/useTheme';
@@ -32,6 +33,7 @@ export default function Header({
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation('common');
 
   const handleBack = () => {
     if (onBack) return onBack();
@@ -49,6 +51,8 @@ export default function Header({
             onPress={handleBack}
             className="-ml-2 mr-1 p-1 rounded-full"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.back')}
           >
             <ChevronLeft size={26} color={colors.text} />
           </TouchableOpacity>

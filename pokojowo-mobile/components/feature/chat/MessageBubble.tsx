@@ -75,7 +75,7 @@ export default function MessageBubble({
               isOwn ? 'text-white/70' : 'text-muted'
             )}
           >
-            Message deleted
+            {t('message.deleted', 'Message deleted')}
           </Text>
         ) : (
           <Text className={cn(isOwn ? 'text-brand-fg' : 'text-text')}>
@@ -97,7 +97,13 @@ export default function MessageBubble({
             <Text className="text-xs text-muted">{t('message.sending', 'Sending…')}</Text>
           </View>
         ) : hasFailed ? (
-          <TouchableOpacity onPress={onRetry} hitSlop={8} className="flex-row items-center gap-1">
+          <TouchableOpacity
+            onPress={onRetry}
+            hitSlop={8}
+            className="flex-row items-center gap-1"
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.retryMessage')}
+          >
             <AlertCircle size={12} color={colors.danger} />
             <Text className="text-xs text-danger">
               {t('message.tapToRetry', 'Not sent. Tap to try again.')}
@@ -113,12 +119,22 @@ export default function MessageBubble({
         {!isDeleted && !pendingStatus && (
           <View className="flex-row items-center gap-2">
             {onReply && (
-              <TouchableOpacity onPress={onReply} hitSlop={8}>
+              <TouchableOpacity
+                onPress={onReply}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('accessibility.replyToMessage')}
+              >
                 <Reply size={14} color={colors.muted} />
               </TouchableOpacity>
             )}
             {isOwn && onDelete && (
-              <TouchableOpacity onPress={onDelete} hitSlop={8}>
+              <TouchableOpacity
+                onPress={onDelete}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('accessibility.deleteMessage')}
+              >
                 <Trash2 size={14} color={colors.muted} />
               </TouchableOpacity>
             )}

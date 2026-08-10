@@ -57,6 +57,7 @@ export default function TabBar() {
               className="flex-1 items-center py-2"
               onPress={() => router.navigate(tab.href)}
               accessibilityRole="button"
+              accessibilityLabel={t('accessibility.tab', { label: t(tab.labelKey) })}
               accessibilityState={{ selected: isActive }}
             >
               <View>

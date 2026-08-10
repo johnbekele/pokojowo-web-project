@@ -33,8 +33,10 @@
     "read": "Przeczytano",
     "sending": "Wysyłanie...",
     "failed": "Nie udało się wysłać",
-    "tapToRetry": "Nie wysłano. Dotknij, aby ponowić."
+    "tapToRetry": "Nie wysłano. Dotknij, aby ponowić.",
+    "deleted": "Wiadomość usunięta"
   },
+  "replyingTo": "Odpowiedź do",
   "error": {
     "title": "Błąd",
     "loadFailed": "Nie udało się załadować rozmów. Spróbuj ponownie.",
@@ -57,6 +59,16 @@
     "delete": "Usuń wiadomość",
     "copy": "Kopiuj tekst",
     "reply": "Odpowiedz"
+  },
+  "accessibility": {
+    "openChat": "Otwórz rozmowę z {{name}}",
+    "cancelReply": "Anuluj odpowiedź",
+    "sendMessage": "Wyślij wiadomość",
+    "messageActions": "Opcje wiadomości",
+    "retryMessage": "Ponów wysyłanie wiadomości",
+    "replyToMessage": "Odpowiedz na wiadomość",
+    "deleteMessage": "Usuń wiadomość",
+    "input": "Wiadomość"
   },
   "deleteConfirm": {
     "title": "Usunąć wiadomość?",

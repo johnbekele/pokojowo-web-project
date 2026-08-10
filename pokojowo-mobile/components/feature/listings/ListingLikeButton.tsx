@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { TouchableOpacity, Animated } from 'react-native';
 import { Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import {
   useMyInteractions,
   useLikeListing,
@@ -23,6 +24,7 @@ export default function ListingLikeButton({
 }: ListingLikeButtonProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const { t } = useTranslation('common');
   const { data: interactions } = useMyInteractions(listingId);
   const { mutate: likeListing, isPending: isLiking } = useLikeListing();
   const { mutate: unlikeListing, isPending: isUnliking } = useUnlikeListing();
@@ -79,6 +81,11 @@ export default function ListingLikeButton({
       disabled={isPending}
       className={className}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={
+        isLiked ? t('accessibility.unlikeListing') : t('accessibility.likeListing')
+      }
+      accessibilityState={{ disabled: isPending, selected: isLiked }}
     >
       <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
         <Heart

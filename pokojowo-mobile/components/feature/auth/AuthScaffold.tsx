@@ -3,6 +3,7 @@ import { View, Text, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacit
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import useTheme from '@/hooks/useTheme';
 import { PokojowoMark } from '@/components/shared/brand';
 
@@ -23,6 +24,7 @@ export default function AuthScaffold({
   children,
 }: AuthScaffoldProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation('common');
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
@@ -35,6 +37,8 @@ export default function AuthScaffold({
             onPress={onBack}
             className="px-4 pt-2 pb-1 flex-row items-center"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.back')}
           >
             <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>

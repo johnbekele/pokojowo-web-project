@@ -62,6 +62,19 @@
     "apply": "Zastosuj",
     "reset": "Resetuj"
   },
+  "accessibility": {
+    "back": "Wróć",
+    "backToChats": "Wróć do wiadomości",
+    "close": "Zamknij",
+    "tab": "Zakładka: {{label}}",
+    "openFilters": "Otwórz filtry",
+    "likeListing": "Polub ogłoszenie",
+    "unlikeListing": "Usuń polubienie ogłoszenia",
+    "openChat": "Otwórz rozmowę z {{name}}",
+    "notifications": "Powiadomienia",
+    "showPassword": "Pokaż hasło",
+    "hidePassword": "Ukryj hasło"
+  },
   "validation": {
     "required": "To pole jest wymagane",
     "email": "Podaj prawidłowy adres e-mail",
