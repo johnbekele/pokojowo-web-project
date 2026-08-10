@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Reply, Trash2, MoreVertical, X } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,11 +21,11 @@ import {
 export default function MessageBubble({
   message,
   isMine,
-  currentUserId,
   onReply,
   onDelete,
   onScrollToMessage,
 }) {
+  const { t } = useTranslation('chat');
   const [showActions, setShowActions] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const bubbleRef = useRef(null);
@@ -76,7 +77,11 @@ export default function MessageBubble({
           >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground">
+                <button
+                  type="button"
+                  aria-label={t('accessibility.messageOptions', 'Message options')}
+                  className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                >
                   <MoreVertical size={16} />
                 </button>
               </DropdownMenuTrigger>
@@ -167,9 +172,11 @@ export default function MessageBubble({
             }`}
           >
             <button
+              type="button"
               onClick={handleReply}
               className="p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
-              title="Reply"
+              title={t('accessibility.reply', 'Reply')}
+              aria-label={t('accessibility.reply', 'Reply')}
             >
               <Reply size={16} />
             </button>

@@ -411,7 +411,7 @@ export default function ChatRoom() {
         <button
           onClick={() => navigate('/chat')}
           className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-surface-parchment hover:text-foreground touch-target"
-          aria-label="Back"
+          aria-label={t('accessibility.back', 'Back')}
         >
           <ArrowLeft size={18} />
         </button>
@@ -481,7 +481,6 @@ export default function ChatRoom() {
                   key={msg._id || msg.id || idx}
                   message={msg}
                   isMine={isMine}
-                  currentUserId={currentUserId}
                   onReply={handleReply}
                   onDelete={handleDelete}
                   onScrollToMessage={scrollToMessage}
@@ -517,6 +516,7 @@ export default function ChatRoom() {
         <button
           type="submit"
           disabled={!message.trim()}
+          aria-label={t('accessibility.sendMessage', 'Send message')}
           className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 touch-target active:scale-95 ${
             message.trim()
               ? 'bg-foreground text-background shadow-[0_4px_18px_hsl(var(--surface-onyx)/0.18)] hover:bg-surface-ink'

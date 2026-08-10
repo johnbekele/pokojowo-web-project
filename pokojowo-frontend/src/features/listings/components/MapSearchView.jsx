@@ -105,7 +105,10 @@ export default function MapSearchView({ search, sort, filters }) {
                   onError={(e) => {
                     e.currentTarget.src = FALLBACK_LISTING_IMAGE;
                   }}
-                  alt=""
+                  alt={t('accessibility.listingPhoto', {
+                    title: [listing.district, listing.city].filter(Boolean).join(', ') || listing.address,
+                    defaultValue: 'Listing photo for {{title}}',
+                  })}
                   className="h-20 w-24 flex-shrink-0 rounded-lg object-cover"
                 />
                 <div className="min-w-0 flex-1 space-y-1 py-0.5">

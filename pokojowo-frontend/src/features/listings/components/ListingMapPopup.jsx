@@ -18,7 +18,10 @@ export default function ListingMapPopup({ pin }) {
         onError={(e) => {
           e.currentTarget.src = FALLBACK_LISTING_IMAGE;
         }}
-        alt=""
+        alt={t('accessibility.listingPhoto', {
+          title: place,
+          defaultValue: 'Listing photo for {{title}}',
+        })}
         className="h-28 w-full rounded-lg object-cover"
       />
       <div className="mt-2 space-y-1">

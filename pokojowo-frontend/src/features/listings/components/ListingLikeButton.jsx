@@ -80,6 +80,7 @@ export default function ListingLikeButton({
         className,
       )}
       title={liked ? t('actions.unlike') : t('actions.like')}
+      aria-label={liked ? t('actions.unlike') : t('actions.like')}
     >
       <Heart
         size={iconSizes[size]}
