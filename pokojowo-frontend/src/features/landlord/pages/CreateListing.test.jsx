@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -67,5 +67,38 @@ describe('create listing form', () => {
 
     expect(screen.getByText('Step 3 of 5')).toBeVisible();
     expect(screen.getByText(/Property Photos/)).toBeVisible();
+  });
+
+  it('restores a saved draft and its current step', async () => {
+    localStorage.setItem(
+      'pokojowo.draft.create-listing.new',
+      JSON.stringify({
+        version: 1,
+        currentStep: 2,
+        formData: {
+          address: 'ul. Zachowana 10',
+          city: '',
+          district: '',
+          coordinates: null,
+          price: '2400',
+          size: '42',
+          maxTenants: 1,
+          images: [],
+          description: { en: '', pl: '' },
+          availableFrom: '2026-01-01',
+          roomType: 'Single',
+          buildingType: 'Apartment',
+          rentForOnly: ['Open to All'],
+          canBeContacted: ['email', 'chat'],
+          closeTo: [],
+          AIHelp: false,
+        },
+      }),
+    );
+
+    renderPage();
+
+    await waitFor(() => expect(screen.getByText('Step 2 of 5')).toBeVisible());
+    expect(screen.getByLabelText(/Monthly Rent/)).toHaveValue(2400);
   });
 });
