@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { TouchableOpacity, Animated } from 'react-native';
+import { TouchableOpacity, Animated, type GestureResponderEvent } from 'react-native';
 import { Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -35,7 +35,10 @@ export default function ListingLikeButton({
   const isLiked = interactions?.has_liked ?? false;
   const isPending = isLiking || isUnliking;
 
-  const handlePress = () => {
+  const handlePress = (event: GestureResponderEvent) => {
+    // The card wraps this control in a Link; prevent a save tap from also
+    // navigating into the listing detail screen.
+    event.stopPropagation();
     if (!isAuthenticated) {
       router.push('/(auth)/login');
       return;

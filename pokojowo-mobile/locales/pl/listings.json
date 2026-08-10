@@ -29,7 +29,8 @@
       "newest": "Najnowsze",
       "priceAsc": "Cena: od najniższej",
       "priceDesc": "Cena: od najwyższej",
-      "closest": "Najbliżej"
+      "closest": "Najbliżej",
+      "oldest": "Najstarsze"
     }
   },
   "results": {
@@ -121,7 +122,8 @@
     "rooms_few": "{{count}} pokoje",
     "rooms_many": "{{count}} pokoi",
     "privateOwner": "Właściciel prywatny",
-    "agency": "Agencja"
+    "agency": "Agencja",
+    "imported": "Ogłoszenie z importu"
   },
   "details": {
     "title": "Szczegóły ogłoszenia",

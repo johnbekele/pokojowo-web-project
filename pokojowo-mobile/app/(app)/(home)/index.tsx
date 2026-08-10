@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const savedSearchParam = Array.isArray(params.savedSearch) ? params.savedSearch[0] : params.savedSearch;
   const showToast = useUIStore((state) => state.showToast);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showSaveSearch, setShowSaveSearch] = useState(false);
   const [saveName, setSaveName] = useState('');
@@ -50,9 +51,24 @@ export default function HomeScreen() {
       });
   }, [savedSearchParam, showToast, t]);
 
-  const { data: listings, isLoading, isRefetching, refetch } = useListings({
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const {
+    data: listings,
+    total,
+    isLoading,
+    isError,
+    isRefetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListings({
     ...filters,
-    search: searchQuery,
+    search: debouncedSearch,
   });
 
   const activeFilterCount = Object.keys(filters).filter((key) => {
@@ -143,7 +159,7 @@ export default function HomeScreen() {
         </View>
         {!isLoading && (
           <Text className="text-muted mb-1">
-            {t('results.count', '{{count}} listings found', { count: listings?.length || 0 })}
+            {t('results.count', '{{count}} listings found', { count: total })}
           </Text>
         )}
       </View>
@@ -155,14 +171,32 @@ export default function HomeScreen() {
             <ListingCardSkeleton key={i} />
           ))}
         </View>
+      ) : isError ? (
+        <EmptyState
+          icon={<HomeIcon size={48} color={colors.muted} />}
+          title={t('error.title')}
+          description={t('error.loadingFailed')}
+          action={{ label: t('error.retry'), onPress: () => refetch() }}
+        />
       ) : hasListings ? (
         <FlashList
           data={listings}
           keyExtractor={(item, index) => item.id || item._id || `listing-${index}`}
           renderItem={({ item }) => <ListingCard listing={item} />}
           contentContainerStyle={{ paddingBottom: 20 }}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? <ListingCardSkeleton /> : null
+          }
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} tintColor={colors.brand} />
+            <RefreshControl
+              refreshing={isRefetching && !isFetchingNextPage}
+              onRefresh={onRefresh}
+              tintColor={colors.brand}
+            />
           }
         />
       ) : (

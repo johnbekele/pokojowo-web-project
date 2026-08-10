@@ -29,7 +29,8 @@
       "newest": "Newest first",
       "priceAsc": "Price: Low to High",
       "priceDesc": "Price: High to Low",
-      "closest": "Closest"
+      "closest": "Closest",
+      "oldest": "Oldest first"
     }
   },
   "results": {
@@ -117,7 +118,8 @@
     "rooms_one": "1 room",
     "rooms_other": "{{count}} rooms",
     "privateOwner": "Private owner",
-    "agency": "Agency"
+    "agency": "Agency",
+    "imported": "Imported listing"
   },
   "details": {
     "title": "Listing Details",
