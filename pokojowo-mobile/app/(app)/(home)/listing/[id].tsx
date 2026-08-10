@@ -96,7 +96,11 @@ export default function ListingDetailScreen() {
 
   const shareUrl = `https://pokojowo.com/listing/${id}`;
   const shareMessage = listing
-    ? `Check out this listing: ${listing.address} - ${formatCurrency(listing.price)}/mo`
+    ? t('detail.shareMessage', {
+        address: listing.address,
+        price: formatCurrency(listing.price),
+        unit: t('card.month'),
+      })
     : '';
 
   const handleShare = () => {
@@ -161,9 +165,9 @@ export default function ListingDetailScreen() {
   if (error || !listing) {
     return (
       <SafeAreaView className="flex-1 bg-bg items-center justify-center">
-        <Text className="text-muted">Listing not found</Text>
+        <Text className="text-muted">{t('detail.notFound')}</Text>
         <Button onPress={() => router.back()} variant="ghost" className="mt-4">
-          Go Back
+          {t('detail.goBack')}
         </Button>
       </SafeAreaView>
     );
@@ -259,7 +263,7 @@ export default function ListingDetailScreen() {
           <View className="flex-row items-center justify-between mb-2">
             <Text className="text-2xl font-bold text-brand">
               {formatCurrency(listing.price)}
-              <Text className="text-base font-normal text-muted">/mo</Text>
+              <Text className="text-base font-normal text-muted">/{t('card.month')}</Text>
             </Text>
             <View className="flex-row items-center gap-2">
               {(listing.offeredBy === 'owner' || listing.offeredBy === 'agency') && (
