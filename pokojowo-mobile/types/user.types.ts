@@ -94,6 +94,17 @@ export interface ChatSettings {
 }
 
 export interface NotificationPreferences {
+  email?: {
+    new_messages?: boolean;
+    property_updates?: boolean;
+    match_notifications?: boolean;
+    marketing_emails?: boolean;
+  };
+  push?: {
+    new_messages?: boolean;
+    property_updates?: boolean;
+    match_notifications?: boolean;
+  };
   email_new_match?: boolean;
   email_new_message?: boolean;
   email_listing_interest?: boolean;

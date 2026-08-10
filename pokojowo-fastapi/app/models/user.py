@@ -358,6 +358,8 @@ class User(Document):
 
     # Notifications
     notification_preferences: Optional[NotificationPreferencesModel] = Field(None, alias="notificationPreferences")
+    # The latest Expo token for this account. Kept out of public user responses.
+    expo_push_token: Optional[str] = Field(None, alias="expoPushToken")
 
     # Flexible fields
     other_details: Optional[dict] = Field(None, alias="otherDetails")
