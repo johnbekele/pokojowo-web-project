@@ -40,6 +40,21 @@ pulumi preview
 pulumi up
 ```
 
+## GitHub Actions deployment
+
+`.github/workflows/production-deploy.yml` builds and deploys both the backend
+and chat images after a successful `CI` run on `main`. It can also be started
+manually from the `main` branch. The workflow uses the repository secrets
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, discovers the existing ECR,
+EC2, S3, and CloudFront resources through AWS, and tags images with the tested
+commit SHA. It does not require the Pulumi passphrase in GitHub Actions.
+
+The SSM rollout waits for both containers' local health endpoints and restores
+the previous Compose/image configuration if either service fails to become
+healthy. A second health gate verifies the backend through CloudFront. When
+production environment files are not present in the checkout (the normal CI
+case), the deploy preserves the environment files already on the EC2 host.
+
 ## Notes
 
 - The passphrase (`PULUMI_CONFIG_PASSPHRASE`) is required for every command
