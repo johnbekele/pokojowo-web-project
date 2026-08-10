@@ -11,6 +11,7 @@
     "refresh": "Odśwież"
   },
   "accessibility": {
+    "profilePhoto": "Zdjęcie profilu współlokatora",
     "openProfile": "Zobacz profil użytkownika {{name}}",
     "openProfileHint": "Kliknij dwukrotnie, aby otworzyć profil",
     "undo": "Cofnij ostatnie przesunięcie",
@@ -45,6 +46,8 @@
     "compatible": "{{score}}% zgodności",
     "yearsOld": "{{age}} lat",
     "whyYouMatch": "Dlaczego pasujecie",
+    "idVerified": "Zweryfikowany dokument",
+    "verified": "Zweryfikowany",
     "matchMessages": {
       "perfect": "Możecie być świetnymi współlokatorami!",
       "great": "Macie wiele wspólnego!",
@@ -127,6 +130,7 @@
     },
     "topMatches": {
       "title": "Najlepsze dopasowania",
+      "open": "Otwórz najlepsze dopasowanie",
       "subtitle": "Osoby z najwyższą zgodnością",
       "viewAll": "Zobacz wszystkie",
       "empty": "Brak dopasowań. Aktualizuj swój profil!"

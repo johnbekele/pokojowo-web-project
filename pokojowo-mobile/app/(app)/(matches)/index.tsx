@@ -193,26 +193,16 @@ export default function MatchesScreen() {
       {/* Matching dashboard (stats + activity shortcuts) */}
       <MatchDashboardCard />
 
-      {/* Swipe Stack */}
-      {matches.length > 0 ? (
-        <SwipeStack
-          matches={matches}
-          onSwipeLeft={handleSwipeLeft}
-          onSwipeRight={handleSwipeRight}
-          onCardPress={handleCardPress}
-          onRefresh={() => refreshMatches()}
-        />
-      ) : (
-        <EmptyState
-          icon={<Users size={48} color={colors.muted} />}
-          title={t('empty.title', 'No matches found')}
-          description={t('empty.description', 'Complete your profile to see compatible flatmates')}
-          action={{
-            label: t('empty.action', 'Complete Profile'),
-            onPress: () => router.push('/(app)/(profile)/edit'),
-          }}
-        />
-      )}
+      {/* SwipeStack owns the exhausted-deck state so a user can undo or
+          refresh even after the final card has been swiped away. */}
+      <SwipeStack
+        matches={matches}
+        onSwipeLeft={handleSwipeLeft}
+        onSwipeRight={handleSwipeRight}
+        onCardPress={handleCardPress}
+        onRefresh={() => refreshMatches()}
+        refreshing={isRefreshing}
+      />
 
       {/* Match Detail Modal */}
       <MatchDetailModal

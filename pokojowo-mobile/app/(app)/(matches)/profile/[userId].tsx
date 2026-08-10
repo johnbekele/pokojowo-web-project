@@ -257,6 +257,22 @@ export default function MatchProfileScreen() {
             </View>
           )}
 
+          {considerations.length > 0 && (
+            <View className="mb-6 rounded-xl border border-border bg-surface p-4">
+              <View className="mb-2 flex-row items-center gap-2">
+                <AlertCircle size={17} color={colors.warning} />
+                <Text className="font-semibold text-text">
+                  {t('detail.thingsToConsider', 'Things to consider')}
+                </Text>
+              </View>
+              {considerations.slice(0, 2).map((exp, idx) => (
+                <Text key={idx} className="mb-1 text-sm leading-5 text-muted">
+                  • {translateExplanation(t, exp)}
+                </Text>
+              ))}
+            </View>
+          )}
+
           {/* Shared interests */}
           {sharedInterests.length > 0 && (
             <View className="mb-6">
@@ -363,10 +379,10 @@ export default function MatchProfileScreen() {
                     {considerations.map((exp, idx) => (
                       <View
                         key={idx}
-                        className="flex-row items-start gap-2 bg-yellow-50 rounded-lg p-3"
+                        className="flex-row items-start gap-2 rounded-lg bg-surface p-3"
                       >
                         <AlertCircle size={16} color={colors.warning} />
-                        <Text className="flex-1 text-yellow-700 text-sm">
+                        <Text className="flex-1 text-sm text-text">
                           {translateExplanation(t, exp)}
                         </Text>
                       </View>

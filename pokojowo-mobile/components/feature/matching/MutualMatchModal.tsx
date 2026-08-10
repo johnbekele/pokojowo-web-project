@@ -1,10 +1,11 @@
 import { View, Text, Animated } from 'react-native';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Heart, MessageSquare } from 'lucide-react-native';
 
 import { Modal, Button, Avatar } from '@/components/ui';
 import type { User } from '@/types/user.types';
-import { palette } from '@/lib/theme';
+import useTheme from '@/hooks/useTheme';
 
 interface MutualMatchModalProps {
   visible: boolean;
@@ -21,6 +22,8 @@ export default function MutualMatchModal({
   onSendMessage,
   onKeepSwiping,
 }: MutualMatchModalProps) {
+  const { t } = useTranslation('matching');
+  const { colors } = useTheme();
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -57,14 +60,14 @@ export default function MutualMatchModal({
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
           <View className="relative mb-6">
             <View className="w-24 h-24 rounded-full bg-brand items-center justify-center">
-              <Heart size={48} color="white" fill="white" />
+              <Heart size={48} color={colors.brandFg} fill={colors.brandFg} />
             </View>
             {/* Floating hearts */}
             <View className="absolute -top-2 -right-2">
-              <Heart size={24} color={palette.primary[400]} fill={palette.primary[400]} />
+              <Heart size={24} color={colors.brand} fill={colors.brand} />
             </View>
             <View className="absolute -bottom-1 -left-3">
-              <Heart size={20} color={palette.primary[300]} fill={palette.primary[300]} />
+              <Heart size={20} color={colors.brand} fill={colors.brand} />
             </View>
           </View>
         </Animated.View>
@@ -74,14 +77,14 @@ export default function MutualMatchModal({
           style={{ opacity: fadeAnim }}
           className="text-2xl font-bold text-text mb-2"
         >
-          It's a Match!
+          {t('mutualMatch.title')}
         </Animated.Text>
 
         <Animated.Text
           style={{ opacity: fadeAnim }}
           className="text-muted text-center mb-6"
         >
-          You and {user.firstname || user.username} liked each other
+          {t('mutualMatch.subtitle', { name: user.firstname || user.username })}
         </Animated.Text>
 
         {/* User avatar */}
@@ -102,16 +105,16 @@ export default function MutualMatchModal({
             onPress={onSendMessage}
             variant="primary"
             fullWidth
-            icon={<MessageSquare size={20} color="white" />}
+            icon={<MessageSquare size={20} color={colors.brandFg} />}
           >
-            Send a Message
+            {t('mutualMatch.sendMessage')}
           </Button>
           <Button
             onPress={onKeepSwiping}
             variant="ghost"
             fullWidth
           >
-            Keep Swiping
+            {t('mutualMatch.keepSwiping')}
           </Button>
         </View>
       </View>
