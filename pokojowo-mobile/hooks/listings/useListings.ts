@@ -1,12 +1,24 @@
-import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueries, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { listingService, listingInteractionService } from '@/services';
-import type { ListingFilters, CreateListingData } from '@/types/listing.types';
+import type { ListingFilters, CreateListingData, ListingPage } from '@/types/listing.types';
+
+const LISTING_PAGE_SIZE = 20;
 
 export function useListings(filters?: ListingFilters) {
-  return useQuery({
+  const query = useInfiniteQuery({
     queryKey: ['listings', filters],
-    queryFn: () => listingService.getListings(filters).then((res) => res.data),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      listingService.getListingsPage(filters, pageParam, LISTING_PAGE_SIZE).then((res) => res.data),
+    getNextPageParam: (lastPage: ListingPage) =>
+      lastPage.hasMore ? lastPage.skip + lastPage.listings.length : undefined,
   });
+
+  return {
+    ...query,
+    data: query.data?.pages.flatMap((page) => page.listings) ?? [],
+    total: query.data?.pages[0]?.total ?? 0,
+  };
 }
 
 export function useListing(id: string | undefined) {

@@ -45,6 +45,13 @@ const MAX_TENANTS_OPTIONS = [
   { value: 4, label: '4+' },
 ];
 
+const SORT_OPTIONS = [
+  { value: 'newest' as const, labelKey: 'search.sortOptions.newest' },
+  { value: 'price_asc' as const, labelKey: 'search.sortOptions.priceAsc' },
+  { value: 'price_desc' as const, labelKey: 'search.sortOptions.priceDesc' },
+  { value: 'oldest' as const, labelKey: 'search.sortOptions.oldest' },
+];
+
 interface SearchFiltersModalProps {
   visible: boolean;
   onClose: () => void;
@@ -108,6 +115,7 @@ export default function SearchFiltersModal({
     if (localFilters.city) count++;
     if (localFilters.districts?.length) count++;
     if (localFilters.offered_by) count++;
+    if (localFilters.sort && localFilters.sort !== 'newest') count++;
     return count;
   };
 
@@ -321,6 +329,28 @@ export default function SearchFiltersModal({
                   icon={option.icon}
                   selected={localFilters.rent_for?.includes(option.value) || false}
                   onPress={() => toggleArrayFilter('rent_for', option.value)}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Sort order */}
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-text mb-3">
+              {t('search.sort')}
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              {SORT_OPTIONS.map((option) => (
+                <FilterChip
+                  key={option.value}
+                  label={t(option.labelKey)}
+                  selected={(localFilters.sort || 'newest') === option.value}
+                  onPress={() =>
+                    setLocalFilters((prev) => ({
+                      ...prev,
+                      sort: option.value === 'newest' ? undefined : option.value,
+                    }))
+                  }
                 />
               ))}
             </View>

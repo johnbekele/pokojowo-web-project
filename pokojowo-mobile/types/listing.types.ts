@@ -2,18 +2,23 @@ export interface Listing {
   id: string;
   _id?: string; // MongoDB returns _id
   owner_id: string;
+  ownerId?: string;
   address: string;
   price: number;
   size?: number;
   max_tenants?: number;
+  maxTenants?: number;
   images: string[];
   description: {
     en?: string;
     pl?: string;
   };
   available_from?: string;
+  availableFrom?: string;
   room_type?: 'Single' | 'Double' | 'Suite' | 'private' | 'shared' | 'studio';
+  roomType?: Listing['room_type'];
   building_type?: 'Apartment' | 'Loft' | 'Block' | 'Detached_House' | 'house';
+  buildingType?: Listing['building_type'];
   rent_for?: string;
   rent_for_only?: string;
   can_be_contacted?: string[];
@@ -58,6 +63,16 @@ export interface Listing {
   };
   // Who offers the flat
   offeredBy?: 'owner' | 'agency' | 'unknown';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ListingPage {
+  listings: Listing[];
+  total: number;
+  skip: number;
+  limit: number;
+  hasMore: boolean;
 }
 
 export interface ListingFilters {
@@ -79,6 +94,10 @@ export interface ListingFilters {
   sort_by?: 'price' | 'created_at' | 'size';
   sort_order?: 'asc' | 'desc';
   sort?: 'newest' | 'oldest' | 'price_asc' | 'price_desc';
+  /** Pagination is normally managed by useListings; exposed for service callers. */
+  skip?: number;
+  limit?: number;
+  with_meta?: boolean;
 }
 
 export interface CreateListingData {

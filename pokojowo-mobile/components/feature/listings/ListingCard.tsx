@@ -22,12 +22,22 @@ export default function ListingCard({ listing }: ListingCardProps) {
     listing.description?.[i18n.language as 'en' | 'pl'] || listing.description?.en || '';
   const imageUrl = getImageUrl(listing.images?.[0]);
   const listingId = listing.id || listing._id || '';
+  const roomType = listing.room_type || listing.roomType;
+  const buildingType = listing.building_type || listing.buildingType;
+  const roomLabelKey = roomType
+    ? `filters.roomTypes.${({ Single: 'single', Double: 'double', Suite: 'suite', private: 'private', shared: 'shared', studio: 'studio' } as Record<string, string>)[roomType] || roomType.toLowerCase()}`
+    : '';
+  const buildingLabelKey = buildingType
+    ? `filters.buildingTypes.${({ Apartment: 'apartment', Loft: 'loft', Block: 'block', Detached_House: 'house', house: 'house' } as Record<string, string>)[buildingType] || buildingType.toLowerCase()}`
+    : '';
 
   return (
     <Link href={`/(app)/(home)/listing/${listingId}`} asChild>
       <TouchableOpacity
         className="bg-card border border-border rounded-2xl mx-4 mb-4 overflow-hidden"
         activeOpacity={0.9}
+        accessibilityRole="button"
+        accessibilityLabel={t('card.viewDetails', 'View listing details')}
       >
         <View className="relative">
           <Image
@@ -56,9 +66,16 @@ export default function ListingCard({ listing }: ListingCardProps) {
             />
           </View>
 
-          {listing.room_type && (
+          {roomType && (
             <View className="absolute top-3 left-3 bg-brand px-2.5 py-1 rounded-full">
-              <Text className="text-brand-fg text-xs font-medium">{listing.room_type}</Text>
+              <Text className="text-brand-fg text-xs font-medium">{t(roomLabelKey, roomType)}</Text>
+            </View>
+          )}
+          {listing.isScraped && (
+            <View className="absolute top-12 left-3 bg-black/60 px-2.5 py-1 rounded-full">
+              <Text className="text-white text-xs font-medium">
+                {t('card.imported', 'Imported listing')}
+              </Text>
             </View>
           )}
         </View>
@@ -84,17 +101,17 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 <Text className="text-muted text-sm ml-1">{listing.size} m²</Text>
               </View>
             ) : null}
-            {listing.max_tenants ? (
+            {(listing.max_tenants ?? listing.maxTenants) ? (
               <View className="flex-row items-center">
                 <Users size={14} color={colors.muted} />
                 <Text className="text-muted text-sm ml-1">
-                  {t('card.maxTenants', 'Max {{count}}', { count: listing.max_tenants })}
+                  {t('card.maxTenants', 'Max {{count}}', { count: listing.max_tenants ?? listing.maxTenants })}
                 </Text>
               </View>
             ) : null}
-            {listing.building_type ? (
+            {buildingType ? (
               <Text className="text-muted text-sm">
-                {listing.building_type.replace('_', ' ')}
+                {t(buildingLabelKey, buildingType.replace('_', ' '))}
               </Text>
             ) : null}
           </View>

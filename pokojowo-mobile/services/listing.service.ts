@@ -1,6 +1,6 @@
 import api from '@/lib/api';
 import { fileFromUri } from '@/lib/upload';
-import type { Listing, ListingFilters, CreateListingData } from '@/types/listing.types';
+import type { Listing, ListingFilters, ListingPage, CreateListingData } from '@/types/listing.types';
 
 interface UploadImagesResponse {
   message: string;
@@ -25,9 +25,40 @@ function toQueryParams(filters?: ListingFilters): URLSearchParams {
   return params;
 }
 
+export function normalizeListing(listing: Listing): Listing {
+  return {
+    ...listing,
+    id: listing.id || listing._id || '',
+    owner_id: listing.owner_id || listing.ownerId || '',
+    max_tenants: listing.max_tenants ?? listing.maxTenants,
+    available_from: listing.available_from ?? listing.availableFrom,
+    room_type: listing.room_type ?? listing.roomType,
+    building_type: listing.building_type ?? listing.buildingType,
+    created_at: listing.created_at || listing.createdAt || '',
+  };
+}
+
+function normalizePage(page: ListingPage): ListingPage {
+  return { ...page, listings: page.listings.map(normalizeListing) };
+}
+
 export const listingService = {
   getListings: (filters?: ListingFilters) =>
-    api.get<Listing[]>('/listings/', { params: toQueryParams(filters) }),
+    api
+      .get<Listing[] | ListingPage>('/listings/', { params: toQueryParams(filters) })
+      .then((response) => ({
+        ...response,
+        data: Array.isArray(response.data)
+          ? response.data.map(normalizeListing)
+          : normalizePage(response.data),
+      })),
+
+  getListingsPage: (filters: ListingFilters = {}, skip = 0, limit = 20) =>
+    api
+      .get<ListingPage>('/listings/', {
+        params: toQueryParams({ ...filters, skip, limit, with_meta: true }),
+      })
+      .then((response) => ({ ...response, data: normalizePage(response.data) })),
 
   getListing: (id: string) =>
     api.get<Listing>(`/listings/${id}`),
