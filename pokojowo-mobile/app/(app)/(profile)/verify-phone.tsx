@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { ArrowLeft, Phone, ShieldCheck } from 'lucide-react-native';
 import { Button } from '@/components/ui';
 import KeyboardAwareScrollView from '@/components/shared/KeyboardAwareScrollView';
 import useAuthStore from '@/stores/authStore';
+import useUIStore from '@/stores/uiStore';
 import api from '@/lib/api';
 import { COLORS } from '@/lib/constants';
 
@@ -15,6 +16,7 @@ export default function VerifyPhoneScreen() {
   const { t } = useTranslation('profile');
   const router = useRouter();
   const { user, fetchUser } = useAuthStore();
+  const showToast = useUIStore((s) => s.showToast);
 
   const [phone, setPhone] = useState(user?.phone || '');
   const [code, setCode] = useState('');
@@ -25,12 +27,16 @@ export default function VerifyPhoneScreen() {
 
   const showError = (error: any, fallback: string) => {
     if (error?.response?.status === 429) {
-      Alert.alert(
-        t('phoneVerification.rateLimited', 'Too many attempts'),
-        t('phoneVerification.rateLimitedHintShort', 'Please try again later.')
-      );
+      showToast({
+        type: 'error',
+        title: t('phoneVerification.rateLimited', 'Too many attempts'),
+        message: t('phoneVerification.rateLimitedHintShort', 'Please try again later.'),
+      });
     } else {
-      Alert.alert(fallback, error?.response?.data?.detail || '');
+      showToast({
+        type: 'error',
+        message: error?.response?.data?.detail || fallback,
+      });
     }
   };
 
@@ -51,11 +57,8 @@ export default function VerifyPhoneScreen() {
     try {
       await api.post('/verification/phone/check', { code });
       await fetchUser();
-      Alert.alert(
-        t('phoneVerification.success', 'Phone verified!'),
-        '',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      showToast({ type: 'success', message: t('phoneVerification.success', 'Phone verified!') });
+      router.back();
     } catch (error) {
       showError(error, t('phoneVerification.checkFailed', 'Incorrect code'));
     } finally {

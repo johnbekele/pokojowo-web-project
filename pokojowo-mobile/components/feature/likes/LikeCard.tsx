@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { MapPin, MessageSquare, Handshake } from 'lucide-react-native';
@@ -9,6 +9,7 @@ import { useOpenChatWithUser } from '@/hooks/chat/useOpenChatWithUser';
 import type { Like, MutualMatch } from '@/types/matching.types';
 import type { User } from '@/types/user.types';
 import { COLORS } from '@/lib/constants';
+import useUIStore from '@/stores/uiStore';
 
 interface LikeCardProps {
   like?: Like;
@@ -22,6 +23,7 @@ export default function LikeCard({ like, match, type, onLikeBack }: LikeCardProp
   const router = useRouter();
   const { mutate: likeUser, isPending: isLiking } = useLikeUser();
   const { openChat, isOpeningChat } = useOpenChatWithUser();
+  const showToast = useUIStore((s) => s.showToast);
 
   const user = like?.user || match?.user;
   const matchedUserId =
@@ -38,10 +40,11 @@ export default function LikeCard({ like, match, type, onLikeBack }: LikeCardProp
     likeUser(userId, {
       onSuccess: () => onLikeBack?.(),
       onError: () => {
-        Alert.alert(
-          t('error.title', 'Error'),
-          t('error.likeFailed', 'Failed to send like. Please try again.')
-        );
+        showToast({
+          type: 'error',
+          title: t('error.title', 'Error'),
+          message: t('error.likeFailed', 'Failed to send like. Please try again.'),
+        });
       },
     });
   };
