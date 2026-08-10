@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Modal as RNModal } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { X, SlidersHorizontal } from 'lucide-react-native';
+import { X, SlidersHorizontal, Bookmark } from 'lucide-react-native';
 import { Button } from '@/components/ui';
 import KeyboardAwareScrollView from '@/components/shared/KeyboardAwareScrollView';
 import FilterChip from '@/components/ui/FilterChip';
@@ -51,6 +51,8 @@ interface SearchFiltersModalProps {
   filters: ListingFilters;
   onApply: (filters: ListingFilters) => void;
   onReset: () => void;
+  onSaveSearch?: (filters: ListingFilters) => void;
+  canSaveSearch?: boolean;
 }
 
 export default function SearchFiltersModal({
@@ -59,6 +61,8 @@ export default function SearchFiltersModal({
   filters,
   onApply,
   onReset,
+  onSaveSearch,
+  canSaveSearch = false,
 }: SearchFiltersModalProps) {
   const { t } = useTranslation('listings');
   const { colors } = useTheme();
@@ -347,7 +351,17 @@ export default function SearchFiltersModal({
         </KeyboardAwareScrollView>
 
         {/* Footer */}
-        <View className="flex-row gap-3 p-4 border-t border-border">
+        <View className="gap-3 p-4 border-t border-border">
+          {canSaveSearch && onSaveSearch && (
+            <Button
+              variant="secondary"
+              onPress={() => onSaveSearch(localFilters)}
+              leftIcon={<Bookmark size={18} color={colors.text} />}
+            >
+              {t('savedSearches.saveAction', 'Save this search')}
+            </Button>
+          )}
+          <View className="flex-row gap-3">
           <Button
             variant="outline"
             className="flex-1"
@@ -360,6 +374,7 @@ export default function SearchFiltersModal({
             {t('filters.apply', 'Apply')}
             {activeCount > 0 && ` (${activeCount})`}
           </Button>
+          </View>
         </View>
       </SafeAreaView>
     </RNModal>

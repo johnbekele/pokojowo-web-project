@@ -24,3 +24,6 @@ export * from './favorites/useFavorites';
 
 // Listing Interaction hooks
 export * from './listingInteractions/useListingInteractions';
+
+// Saved searches
+export * from './saved-searches/useSavedSearches';

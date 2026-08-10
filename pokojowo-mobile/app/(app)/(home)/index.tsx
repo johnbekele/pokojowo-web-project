@@ -1,27 +1,54 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Search, SlidersHorizontal, Home as HomeIcon, Map as MapIcon } from 'lucide-react-native';
+import { Search, SlidersHorizontal, Home as HomeIcon, Map as MapIcon, Bookmark } from 'lucide-react-native';
 
 import { useListings } from '@/hooks/listings/useListings';
 import ListingCard from '@/components/feature/listings/ListingCard';
 import ListingCardSkeleton from '@/components/feature/listings/ListingCardSkeleton';
 import SearchFiltersModal from '@/components/feature/listings/SearchFiltersModal';
 import NotificationBell from '@/components/shared/NotificationBell';
-import { EmptyState } from '@/components/ui';
+import { Button, EmptyState, Input, Modal } from '@/components/ui';
 import type { ListingFilters } from '@/types/listing.types';
 import useTheme from '@/hooks/useTheme';
+import { savedSearchService } from '@/services';
+import { savedSearchFilters, savedSearchPayload } from '@/types/saved-search.types';
+import { useCreateSavedSearch } from '@/hooks/saved-searches/useSavedSearches';
+import useUIStore from '@/stores/uiStore';
 
 export default function HomeScreen() {
   const { t } = useTranslation('listings');
   const { colors } = useTheme();
   const router = useRouter();
+  const params = useLocalSearchParams<{ savedSearch?: string | string[] }>();
+  const savedSearchParam = Array.isArray(params.savedSearch) ? params.savedSearch[0] : params.savedSearch;
+  const showToast = useUIStore((state) => state.showToast);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showSaveSearch, setShowSaveSearch] = useState(false);
+  const [saveName, setSaveName] = useState('');
+  const [saveError, setSaveError] = useState('');
   const [filters, setFilters] = useState<ListingFilters>({});
+  const appliedSavedSearch = useRef<string | null>(null);
+  const createSavedSearch = useCreateSavedSearch();
+
+  useEffect(() => {
+    if (!savedSearchParam || appliedSavedSearch.current === savedSearchParam) return;
+    appliedSavedSearch.current = savedSearchParam;
+    savedSearchService
+      .get(savedSearchParam)
+      .then(({ data }) => {
+        const nextFilters = savedSearchFilters(data);
+        setFilters(nextFilters);
+        setSearchQuery(data.search || '');
+      })
+      .catch(() => {
+        showToast({ type: 'error', message: t('savedSearches.applyFailed', 'Could not load that saved search') });
+      });
+  }, [savedSearchParam, showToast, t]);
 
   const { data: listings, isLoading, isRefetching, refetch } = useListings({
     ...filters,
@@ -33,6 +60,31 @@ export default function HomeScreen() {
     if (Array.isArray(value)) return value.length > 0;
     return value !== undefined && value !== null;
   }).length;
+  const canSaveSearch = activeFilterCount > 0 || Boolean(searchQuery.trim());
+
+  const openSaveSearch = (nextFilters = filters) => {
+    setShowFilters(false);
+    setFilters(nextFilters);
+    setSaveError('');
+    setSaveName(nextFilters.city || searchQuery.trim() || t('savedSearches.defaultName', 'My search'));
+    setShowSaveSearch(true);
+  };
+
+  const handleSaveSearch = async () => {
+    const name = saveName.trim();
+    if (!name) {
+      setSaveError(t('savedSearches.nameRequired', 'Enter a name for this search'));
+      return;
+    }
+
+    try {
+      await createSavedSearch.mutateAsync(savedSearchPayload(name, { ...filters, search: searchQuery }));
+      setShowSaveSearch(false);
+      showToast({ type: 'success', message: t('savedSearches.saved', 'Search saved') });
+    } catch {
+      setSaveError(t('savedSearches.saveFailed', 'Could not save search'));
+    }
+  };
 
   const onRefresh = useCallback(() => refetch(), [refetch]);
   const hasListings = !!listings && listings.length > 0;
@@ -127,7 +179,46 @@ export default function HomeScreen() {
         filters={filters}
         onApply={setFilters}
         onReset={() => setFilters({})}
+        canSaveSearch={canSaveSearch}
+        onSaveSearch={openSaveSearch}
       />
+
+      <Modal
+        visible={showSaveSearch}
+        onClose={() => setShowSaveSearch(false)}
+        title={t('savedSearches.dialogTitle', 'Save this search')}
+        size="sm"
+      >
+        <Text className="text-muted mb-4">
+          {t('savedSearches.dialogDescription', 'Name your current filters so you can run them again later.')}
+        </Text>
+        <Input
+          label={t('savedSearches.nameLabel', 'Search name')}
+          value={saveName}
+          maxLength={60}
+          onChangeText={(value) => {
+            setSaveName(value);
+            setSaveError('');
+          }}
+          placeholder={t('savedSearches.namePlaceholder', 'e.g. Warsaw under 2500')}
+          error={saveError}
+          autoFocus
+        />
+        <View className="flex-row gap-3 mt-2">
+          <Button variant="outline" className="flex-1" onPress={() => setShowSaveSearch(false)}>
+            {t('actions.cancel', { ns: 'common' })}
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1"
+            onPress={handleSaveSearch}
+            loading={createSavedSearch.isPending}
+            leftIcon={<Bookmark size={17} color={colors.brandFg} />}
+          >
+            {t('savedSearches.save', 'Save search')}
+          </Button>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

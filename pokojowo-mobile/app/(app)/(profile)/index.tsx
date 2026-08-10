@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Settings,
   Heart,
+  Bookmark,
   LogOut,
   ChevronRight,
   User,
@@ -65,6 +66,7 @@ export default function ProfileScreen() {
       : []),
     { icon: Users, label: t('menu.likesMatches', 'Likes & Matches'), href: '/(app)/(profile)/likes' },
     { icon: Heart, label: t('menu.favorites', 'Saved Matches'), href: '/(app)/(profile)/favorites' },
+    { icon: Bookmark, label: t('menu.savedSearches', 'Saved Searches'), href: '/(app)/(profile)/saved-searches' },
     { icon: Globe, label: t('menu.language', 'Language'), href: '/(app)/(profile)/settings' },
     { icon: Settings, label: t('menu.settings', 'Settings'), href: '/(app)/(profile)/settings' },
   ];
