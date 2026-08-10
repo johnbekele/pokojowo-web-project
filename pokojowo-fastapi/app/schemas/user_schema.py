@@ -45,6 +45,11 @@ class UserUpdate(BaseModel):
     gender: Optional[str] = None
     bio: Optional[str] = None
     languages: Optional[List[str]] = None
+    # Nested settings are accepted here using the same camelCase aliases as
+    # the user response.  Keeping this on /users/me makes the mobile settings
+    # toggle a real persisted preference instead of an ignored extra field.
+    notification_preferences: Optional[dict] = Field(None, alias="notificationPreferences")
+    chat_settings: Optional[dict] = Field(None, alias="chatSettings")
 
     class Config:
         populate_by_name = True

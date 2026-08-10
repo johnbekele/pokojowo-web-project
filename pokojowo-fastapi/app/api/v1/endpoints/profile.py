@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks
-from app.models.user import User
+from app.models.user import ChatSettingsModel, NotificationPreferencesModel, User
 from app.core.dependencies import get_current_user
 from app.services.notification_service import notification_service
 from app.services import matching_cache
@@ -103,6 +103,10 @@ async def update_profile(
         snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in field]).lstrip('_')
 
         if snake_field in allowed_fields and value is not None:
+            if snake_field == "notification_preferences":
+                value = NotificationPreferencesModel.model_validate(value)
+            elif snake_field == "chat_settings":
+                value = ChatSettingsModel.model_validate(value)
             setattr(current_user, snake_field, value)
 
     current_user.updated_at = datetime.utcnow()

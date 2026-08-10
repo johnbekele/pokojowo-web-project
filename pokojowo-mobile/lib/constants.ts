@@ -12,6 +12,7 @@ export const SOCKET_URL = extra.socketUrl || '';
 export const CHAT_SOCKET_URL = extra.chatSocketUrl || SOCKET_URL;
 // Base URL for server-hosted images (uploads). Falls back to the socket host.
 export const IMAGE_BASE_URL = extra.imageBaseUrl || SOCKET_URL;
+export const PUBLIC_SITE_URL = extra.publicSiteUrl || 'https://pokojowo.com';
 
 // App colors — derived from the design-system palette in lib/theme.ts (single
 // source of truth). Kept here for backwards-compatible imports.

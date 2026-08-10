@@ -110,6 +110,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       socketUrl,
       chatSocketUrl,
       imageBaseUrl,
+      publicSiteUrl: process.env.EXPO_PUBLIC_SITE_URL || 'https://pokojowo.com',
       googleClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
       ...(projectId ? { eas: { projectId } } : {}),
     },

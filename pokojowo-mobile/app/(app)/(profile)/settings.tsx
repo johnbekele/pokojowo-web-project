@@ -24,10 +24,16 @@ import { useDeleteAccount, useUpdateProfile } from '@/hooks/user/useUser';
 import useTheme from '@/hooks/useTheme';
 import useBiometricSetting from '@/hooks/useBiometricSetting';
 import i18n, { changeLanguage } from '@/lib/i18n';
+import { PUBLIC_SITE_URL } from '@/lib/constants';
+import { pushNotificationsEnabled } from '@/lib/pushPreferences';
+import {
+  normalizeNotificationPreferences,
+  toNotificationPreferencesPayload,
+} from '@/types/user.types';
 
-const PRIVACY_URL = 'https://pokojowo-web-project.onrender.com/privacy';
-const TERMS_URL = 'https://pokojowo-web-project.onrender.com/terms';
-const HELP_URL = 'https://pokojowo-web-project.onrender.com/help';
+const PRIVACY_URL = `${PUBLIC_SITE_URL}/privacy`;
+const TERMS_URL = `${PUBLIC_SITE_URL}/terms`;
+const HELP_URL = `${PUBLIC_SITE_URL}/help`;
 
 interface SettingItemProps {
   icon: React.ReactNode;
@@ -90,23 +96,26 @@ export default function SettingsScreen() {
   const currentLanguage = i18n.language;
 
   const prefs = user?.notification_preferences;
-  const pushEnabled =
-    !!prefs &&
-    (prefs.push_new_match || prefs.push_new_message || prefs.push_listing_interest);
+  const pushEnabled = pushNotificationsEnabled(prefs);
 
   const handleTogglePush = (value: boolean) => {
-    const next = {
-      push_new_match: value,
-      push_new_message: value,
-      push_listing_interest: value,
-    };
+    const next = toNotificationPreferencesPayload({
+      ...prefs,
+      push: {
+        ...prefs?.push,
+        new_messages: value,
+        property_updates: value,
+        match_notifications: value,
+      },
+    });
+    const previous = prefs;
     // Optimistic update; persist via PUT /users/me.
-    updateUser({ notification_preferences: { ...prefs, ...next } });
+    updateUser({ notification_preferences: normalizeNotificationPreferences(next) });
     updateProfile(
-      { notification_preferences: next },
+      { notificationPreferences: next },
       {
         onError: () => {
-          updateUser({ notification_preferences: prefs });
+          updateUser({ notification_preferences: previous });
           showToast({ type: 'error', message: t('settings.saveError', 'Failed to save settings') });
         },
       }

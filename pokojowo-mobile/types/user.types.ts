@@ -39,6 +39,98 @@ export interface User {
   updated_at?: string;
 }
 
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): UnknownRecord {
+  return value && typeof value === 'object' ? (value as UnknownRecord) : {};
+}
+
+/**
+ * Normalize nested user settings returned by the API.  The FastAPI service
+ * serializes model aliases (chatSettings/blockedUsers and
+ * notificationPreferences/newMessages), while older mobile builds used the
+ * snake_case names.  Keeping one canonical shape prevents settings and
+ * moderation controls from silently appearing disabled or stale.
+ */
+export function normalizeNotificationPreferences(value: unknown): NotificationPreferences | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+
+  const source = asRecord(value);
+  const email = asRecord(source.email);
+  const push = asRecord(source.push);
+
+  const normalized: NotificationPreferences = {
+    ...source,
+    email: source.email
+      ? {
+          new_messages: (email.new_messages ?? email.newMessages) as boolean | undefined,
+          property_updates: (email.property_updates ?? email.propertyUpdates) as boolean | undefined,
+          match_notifications: (email.match_notifications ?? email.matchNotifications) as boolean | undefined,
+          marketing_emails: (email.marketing_emails ?? email.marketingEmails) as boolean | undefined,
+        }
+      : undefined,
+    push: source.push
+      ? {
+          new_messages: (push.new_messages ?? push.newMessages) as boolean | undefined,
+          property_updates: (push.property_updates ?? push.propertyUpdates) as boolean | undefined,
+          match_notifications: (push.match_notifications ?? push.matchNotifications) as boolean | undefined,
+        }
+      : undefined,
+  };
+
+  return normalized;
+}
+
+export function normalizeChatSettings(value: unknown): ChatSettings | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+
+  const source = asRecord(value);
+  const autoReply = asRecord(source.auto_reply ?? source.autoReply);
+  return {
+    ...source,
+    allow_messages: (source.allow_messages ?? source.allowMessages) as boolean | undefined,
+    auto_reply: source.auto_reply || source.autoReply ? autoReply : undefined,
+    blocked_users: (source.blocked_users ?? source.blockedUsers ?? []) as string[],
+  };
+}
+
+/** Convert an API user response to the canonical shape consumed by mobile. */
+export function normalizeUser(value: unknown): User {
+  const source = asRecord(value);
+  const normalized: UnknownRecord = { ...source };
+
+  const id = source.id ?? source._id;
+  if (id !== undefined && id !== null) normalized.id = String(id);
+
+  const aliases: Array<[string, string]> = [
+    ['createdAt', 'created_at'],
+    ['updatedAt', 'updated_at'],
+    ['lastLogin', 'last_login'],
+    ['lastActive', 'last_active'],
+    ['isOnline', 'is_online'],
+    ['preferredLanguage', 'preferred_language'],
+    ['tenantProfile', 'tenant_profile'],
+    ['landlordProfile', 'landlord_profile'],
+  ];
+  for (const [apiName, canonicalName] of aliases) {
+    if (normalized[canonicalName] === undefined && source[apiName] !== undefined) {
+      normalized[canonicalName] = source[apiName];
+    }
+  }
+
+  const notificationPreferences = source.notification_preferences ?? source.notificationPreferences;
+  if (notificationPreferences !== undefined) {
+    normalized.notification_preferences = normalizeNotificationPreferences(notificationPreferences);
+  }
+
+  const chatSettings = source.chat_settings ?? source.chatSettings;
+  if (chatSettings !== undefined) {
+    normalized.chat_settings = normalizeChatSettings(chatSettings);
+  }
+
+  return normalized as unknown as User;
+}
+
 export interface UserJob {
   industry?: string | null;
   title?: string | null;
@@ -94,7 +186,7 @@ export interface LandlordProfile {
 
 export interface ChatSettings {
   allow_messages?: boolean;
-  auto_reply?: string;
+  auto_reply?: string | { enabled?: boolean; message?: string | null };
   blocked_users?: string[];
 }
 
@@ -116,6 +208,52 @@ export interface NotificationPreferences {
   push_new_match?: boolean;
   push_new_message?: boolean;
   push_listing_interest?: boolean;
+}
+
+/** Wire shape accepted by the FastAPI notification preference models. */
+export interface NotificationPreferencesPayload {
+  email?: {
+    newMessages?: boolean;
+    propertyUpdates?: boolean;
+    matchNotifications?: boolean;
+    marketingEmails?: boolean;
+  };
+  push?: {
+    newMessages?: boolean;
+    propertyUpdates?: boolean;
+    matchNotifications?: boolean;
+  };
+}
+
+/** Convert canonical mobile preferences to the API's aliased nested shape. */
+export function toNotificationPreferencesPayload(
+  preferences?: NotificationPreferences | null
+): NotificationPreferencesPayload {
+  if (!preferences) return {};
+
+  const email = preferences.email;
+  const push = preferences.push;
+  return {
+    ...(email
+      ? {
+          email: {
+            ...(email.new_messages !== undefined ? { newMessages: email.new_messages } : {}),
+            ...(email.property_updates !== undefined ? { propertyUpdates: email.property_updates } : {}),
+            ...(email.match_notifications !== undefined ? { matchNotifications: email.match_notifications } : {}),
+            ...(email.marketing_emails !== undefined ? { marketingEmails: email.marketing_emails } : {}),
+          },
+        }
+      : {}),
+    ...(push
+      ? {
+          push: {
+            ...(push.new_messages !== undefined ? { newMessages: push.new_messages } : {}),
+            ...(push.property_updates !== undefined ? { propertyUpdates: push.property_updates } : {}),
+            ...(push.match_notifications !== undefined ? { matchNotifications: push.match_notifications } : {}),
+          },
+        }
+      : {}),
+  };
 }
 
 export interface ProfileCompletion {

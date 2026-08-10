@@ -8,7 +8,7 @@ import { API_BASE_URL } from '@/lib/constants';
 import { storage, STORAGE_KEYS } from '@/lib/storage';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
-import type { User, RegisterData } from '@/types/user.types';
+import { normalizeUser, type User, type RegisterData } from '@/types/user.types';
 
 // Complete any pending browser sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -52,7 +52,7 @@ const useAuthStore = create<AuthState>()(
       error: null,
 
       // Actions
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setUser: (user) => set({ user: user ? normalizeUser(user) : null, isAuthenticated: !!user }),
 
       setTokens: async (token, refreshToken) => {
         await storage.setItem(STORAGE_KEYS.TOKEN, token);
@@ -91,7 +91,14 @@ const useAuthStore = create<AuthState>()(
           await get().setTokens(access_token, refresh_token);
           // Older backend builds omit `user` from the login payload; without it
           // the post-auth route resolver sends us straight back to login.
-          const resolvedUser = user ?? (await get().fetchUser());
+          const resolvedUser = user
+            ? normalizeUser(user)
+            : (await get().fetchUser());
+          if (!resolvedUser) {
+            const message = 'Login succeeded but the user profile could not be loaded';
+            set({ isLoading: false, error: message });
+            return { success: false, error: message };
+          }
           set({ user: resolvedUser, isLoading: false });
           return { success: true, user: resolvedUser };
         } catch (error: unknown) {
@@ -216,7 +223,7 @@ const useAuthStore = create<AuthState>()(
       handleOAuthCallback: async (token, refreshToken, userInfo) => {
         await get().setTokens(token, refreshToken);
         if (userInfo) {
-          set({ user: userInfo });
+          set({ user: normalizeUser(userInfo) });
         }
         // Fetch full user data
         await get().fetchUser();
@@ -233,11 +240,12 @@ const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await api.get('/users/me');
-          set({ user: response.data, isAuthenticated: true, isLoading: false });
+          const user = normalizeUser(response.data);
+          set({ user, isAuthenticated: true, isLoading: false });
           // Ensure socket is connected when user is fetched
           connectSocket(token);
         connectChatSocket(token);
-          return response.data;
+          return user;
         } catch {
           await get().clearAuth();
           set({ isLoading: false });
@@ -267,7 +275,7 @@ const useAuthStore = create<AuthState>()(
           if (accessToken) {
             await get().setTokens(accessToken, refreshToken);
           }
-          set({ user, isLoading: false });
+          set({ user: user ? normalizeUser(user) : null, isLoading: false });
           return { success: true };
         } catch (error: unknown) {
           const axiosError = error as { response?: { data?: { detail?: string } } };

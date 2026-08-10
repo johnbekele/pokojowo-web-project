@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService, userService } from '@/services';
 import useAuthStore from '@/stores/authStore';
-import type { RegisterData } from '@/types/user.types';
+import { normalizeUser, type RegisterData } from '@/types/user.types';
 
 export const AUTH_KEYS = {
   user: ['auth', 'user'] as const,
@@ -14,7 +14,7 @@ export function useCurrentUser() {
     queryKey: AUTH_KEYS.user,
     queryFn: async () => {
       const response = await userService.getMe();
-      return response.data;
+      return normalizeUser(response.data);
     },
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes
