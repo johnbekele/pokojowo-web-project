@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import Constants from 'expo-constants';
 
 import api from '@/lib/api';
+import { API_BASE_URL } from '@/lib/constants';
 import { storage, STORAGE_KEYS } from '@/lib/storage';
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import { connectChatSocket, disconnectChatSocket } from '@/lib/chatSocket';
@@ -12,8 +12,6 @@ import type { User, RegisterData } from '@/types/user.types';
 
 // Complete any pending browser sessions
 WebBrowser.maybeCompleteAuthSession();
-
-const API_URL = Constants.expoConfig?.extra?.apiUrl || '';
 
 interface AuthState {
   user: User | null;
@@ -129,7 +127,7 @@ const useAuthStore = create<AuthState>()(
             scheme: 'pokojowo',
             path: 'auth/callback',
           });
-          const authUrl = `${API_URL}/auth/google?mobile_redirect=${encodeURIComponent(redirectUri)}`;
+          const authUrl = `${API_BASE_URL}/auth/google?mobile_redirect=${encodeURIComponent(redirectUri)}`;
 
           const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
 

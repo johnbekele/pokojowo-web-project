@@ -1,14 +1,6 @@
 import axios from 'axios';
-import Constants from 'expo-constants';
 import { storage, STORAGE_KEYS } from './storage';
-
-const MAIN_API_URL =
-  Constants.expoConfig?.extra?.apiUrl || 'https://dh3iw703m1vvi.cloudfront.net/api';
-
-const CHAT_API_URL =
-  Constants.expoConfig?.extra?.chatApiUrl ||
-  Constants.expoConfig?.extra?.apiUrl ||
-  'https://dh3iw703m1vvi.cloudfront.net/api';
+import { API_BASE_URL, CHAT_API_URL } from './constants';
 
 const chatApi = axios.create({
   baseURL: CHAT_API_URL,
@@ -33,7 +25,7 @@ chatApi.interceptors.response.use(
       const refreshToken = await storage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
       if (refreshToken) {
         try {
-          const response = await axios.post(`${MAIN_API_URL}/auth/refresh`, {
+          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refresh_token: refreshToken,
           });
           const accessToken = response.data.access_token || response.data.accessToken;

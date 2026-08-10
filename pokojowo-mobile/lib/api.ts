@@ -1,10 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import Constants from 'expo-constants';
 import { storage, STORAGE_KEYS } from './storage';
 import { router } from 'expo-router';
-
-const API_BASE_URL =
-  Constants.expoConfig?.extra?.apiUrl || 'https://dh3iw703m1vvi.cloudfront.net/api';
+import { API_BASE_URL } from './constants';
 
 /**
  * Axios instance with interceptors for JWT authentication
