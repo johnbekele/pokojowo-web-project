@@ -26,6 +26,7 @@ function toQueryParams(filters?: ListingFilters): URLSearchParams {
 }
 
 export function normalizeListing(listing: Listing): Listing {
+  const source = listing as Listing & Record<string, unknown>;
   return {
     ...listing,
     id: listing.id || listing._id || '',
@@ -34,6 +35,13 @@ export function normalizeListing(listing: Listing): Listing {
     available_from: listing.available_from ?? listing.availableFrom,
     room_type: listing.room_type ?? listing.roomType,
     building_type: listing.building_type ?? listing.buildingType,
+    is_active: listing.is_active ?? (source.isActive as boolean | undefined),
+    rent_for: listing.rent_for ?? (source.rentFor as string | undefined),
+    rent_for_only: listing.rent_for_only ?? (source.rentForOnly as string | undefined),
+    deposit: listing.deposit ?? (source.depositAmount as number | undefined),
+    utilities_included:
+      listing.utilities_included ?? (source.utilitiesIncluded as boolean | undefined),
+    min_lease: listing.min_lease ?? (source.minLease as number | undefined),
     can_be_contacted: listing.can_be_contacted ?? listing.canBeContacted,
     close_to: listing.close_to ?? listing.closeTo,
     isScraped: listing.isScraped ?? listing.is_scraped,
@@ -71,7 +79,10 @@ export const listingService = {
       .then((response) => ({ ...response, data: normalizeListing(response.data) })),
 
   getMyListings: () =>
-    api.get<Listing[]>('/listings/my-listings'),
+    api.get<Listing[]>('/listings/my-listings').then((response) => ({
+      ...response,
+      data: response.data.map(normalizeListing),
+    })),
 
   getListingsByOwner: (ownerId: string) =>
     api.get<Listing[]>(`/listings/owner/${ownerId}`),

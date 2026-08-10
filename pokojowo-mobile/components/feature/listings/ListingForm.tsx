@@ -17,14 +17,20 @@ import { getImageUrl } from '@/lib/image';
 import { ROOM_TYPES, BUILDING_TYPES } from '@/lib/constants';
 import type { CreateListingData } from '@/types/listing.types';
 
+const positiveNumber = (message: string) =>
+  z.string().refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, message);
+
+const nonNegativeNumber = (message: string) =>
+  z.string().refine((value) => Number.isFinite(Number(value)) && Number(value) >= 0, message);
+
 const listingSchema = z.object({
   address: z.string().min(1, 'Address is required'),
-  price: z.string().min(1, 'Price is required'),
-  size: z.string().optional(),
+  price: positiveNumber('Enter a valid monthly rent'),
+  size: z.union([nonNegativeNumber('Enter a valid size'), z.literal('')]).optional(),
   room_type: z.string().optional(),
   building_type: z.string().optional(),
-  max_tenants: z.string().optional(),
-  floor: z.string().optional(),
+  max_tenants: z.union([positiveNumber('Enter a valid tenant count'), z.literal('')]).optional(),
+  floor: z.union([nonNegativeNumber('Enter a valid floor'), z.literal('')]).optional(),
   description_en: z.string().optional(),
   description_pl: z.string().optional(),
 });

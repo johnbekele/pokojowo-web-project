@@ -10,6 +10,8 @@ import {
   MessageSquare,
   ChevronRight,
   ArrowLeft,
+  CheckCircle2,
+  CircleOff,
 } from 'lucide-react-native';
 
 import { Card, Badge, LoadingSpinner } from '@/components/ui';
@@ -31,9 +33,12 @@ export default function LandlordDashboard() {
 
   const totalListings = listings?.length || 0;
   const activeListings = listings?.filter((l) => l.is_active)?.length || 0;
+  const inactiveListings = totalListings - activeListings;
 
   const stats = [
     { icon: <Home size={24} color={colors.brand} />, label: t('stats.total', 'Total Listings'), value: totalListings },
+    { icon: <CheckCircle2 size={24} color={colors.success} />, label: t('stats.active', 'Active'), value: activeListings },
+    { icon: <CircleOff size={24} color={colors.muted} />, label: t('stats.inactive', 'Inactive'), value: inactiveListings },
     { icon: <Eye size={24} color={colors.info} />, label: t('stats.views', 'Views'), value: totals.views },
     { icon: <Heart size={24} color={colors.danger} />, label: t('stats.likes', 'Likes'), value: totals.likes },
     { icon: <MessageSquare size={24} color={colors.success} />, label: t('stats.inquiries', 'Inquiries'), value: totals.inquiries },

@@ -2,6 +2,7 @@ jest.mock('@/lib/api', () => ({
   __esModule: true,
   default: {
     get: jest.fn(),
+    post: jest.fn(),
   },
 }));
 
@@ -84,5 +85,49 @@ describe('listingService pagination and response mapping', () => {
       sourceUrl: 'https://example.com/listing-2',
       sourceSite: 'example',
     });
+  });
+
+  it('normalizes landlord listings returned from the camelCase endpoint', async () => {
+    const get = api.get as jest.Mock;
+    get.mockResolvedValueOnce({
+      data: [
+        {
+          _id: 'listing-3',
+          ownerId: 'owner-3',
+          address: 'ul. Testowa 3',
+          price: 1900,
+          images: [],
+          description: {},
+          maxTenants: 2,
+          isActive: false,
+          createdAt: '2026-08-10T00:00:00Z',
+        },
+      ],
+    });
+
+    const response = await listingService.getMyListings();
+
+    expect(response.data[0]).toMatchObject({
+      id: 'listing-3',
+      owner_id: 'owner-3',
+      max_tenants: 2,
+      is_active: false,
+    });
+  });
+
+  it('uploads local listing images before they are submitted with a listing', async () => {
+    const post = api.post as jest.Mock;
+    post.mockResolvedValueOnce({
+      data: { message: 'Uploaded', files: [{ url: '/uploads/room.jpg' }] },
+    });
+
+    const response = await listingService.uploadImages(['file:///room.jpg']);
+
+    expect(response.data.files[0].url).toBe('/uploads/room.jpg');
+    expect(post).toHaveBeenCalledWith(
+      '/upload/listing/multiple',
+      expect.any(FormData),
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
   });
 });
