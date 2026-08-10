@@ -33,6 +33,8 @@ import { useToast } from '@/hooks/useToast';
 import api from '@/lib/api';
 import LocationPicker from '@/components/shared/LocationPicker';
 import { CITIES, districtsForCity } from '@/lib/districts';
+import { clearFormDraft, readFormDraft, writeFormDraft } from '@/lib/formDraft';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
 const STEPS = [
   { id: 1, title: 'Location', icon: MapPin },
@@ -89,9 +91,12 @@ export default function CreateListing() {
   const { toast } = useToast();
   const { id: listingId } = useParams();
   const isEditMode = Boolean(listingId);
+  const draftStorageKey = `pokojowo.draft.create-listing.${listingId || 'new'}`;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [draftHydrated, setDraftHydrated] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [formData, setFormData] = useState({
     address: '',
     city: '',
@@ -121,9 +126,20 @@ export default function CreateListing() {
     enabled: isEditMode,
   });
 
-  // Populate form with existing data
+  const confirmNavigation = useUnsavedChangesGuard(isDirty, t('unsavedChanges'));
+
+  // Populate from a saved draft when available, otherwise use the server data.
+  // Waiting for the edit query avoids briefly overwriting a draft with stale
+  // listing data during the first render.
   useEffect(() => {
-    if (existingListing) {
+    if (isEditMode && loadingListing) return;
+
+    const draft = readFormDraft(draftStorageKey);
+    if (draft) {
+      setFormData(draft.formData);
+      setCurrentStep(Math.min(Math.max(Number(draft.currentStep) || 1, 1), STEPS.length));
+      setIsDirty(true);
+    } else if (existingListing) {
       setFormData({
         address: existingListing.address || '',
         city: existingListing.city || '',
@@ -150,7 +166,14 @@ export default function CreateListing() {
         AIHelp: existingListing.AIHelp || false,
       });
     }
-  }, [existingListing]);
+    setDraftHydrated(true);
+  }, [draftStorageKey, existingListing, isEditMode, loadingListing]);
+
+  useEffect(() => {
+    if (draftHydrated && isDirty) {
+      writeFormDraft(draftStorageKey, formData, currentStep);
+    }
+  }, [currentStep, draftHydrated, draftStorageKey, formData, isDirty]);
 
   // Create/Update listing mutation
   const saveMutation = useMutation({
@@ -178,6 +201,8 @@ export default function CreateListing() {
       }
     },
     onSuccess: () => {
+      clearFormDraft(draftStorageKey);
+      setIsDirty(false);
       toast({
         title: isEditMode ? 'Listing Updated' : 'Listing Created',
         description: isEditMode
@@ -196,10 +221,12 @@ export default function CreateListing() {
   });
 
   const handleInputChange = (field, value) => {
+    setIsDirty(true);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleDescriptionChange = (lang, value) => {
+    setIsDirty(true);
     setFormData((prev) => ({
       ...prev,
       description: { ...prev.description, [lang]: value },
@@ -207,6 +234,7 @@ export default function CreateListing() {
   };
 
   const handleCheckboxChange = (field, value, checked) => {
+    setIsDirty(true);
     setFormData((prev) => {
       const currentValues = prev[field] || [];
       if (checked) {
@@ -238,6 +266,7 @@ export default function CreateListing() {
         ...prev,
         images: [...prev.images, ...uploadedUrls],
       }));
+      setIsDirty(true);
 
       toast({
         title: 'Images Uploaded',
@@ -255,6 +284,7 @@ export default function CreateListing() {
   };
 
   const removeImage = (index) => {
+    setIsDirty(true);
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
@@ -652,7 +682,9 @@ export default function CreateListing() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => navigate('/landlord/dashboard')}
+          onClick={() => {
+            if (confirmNavigation()) navigate('/landlord/dashboard');
+          }}
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

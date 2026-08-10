@@ -28,6 +28,8 @@ import api from '@/lib/api';
 import useAuthStore from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 import { SUPPORTED_LANGUAGES } from '@/lib/languages';
+import { clearFormDraft, readFormDraft, writeFormDraft } from '@/lib/formDraft';
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 
 // Latest selectable birth date: exactly 18 years ago today
 const maxDateOfBirth = () => {
@@ -52,12 +54,15 @@ export default function ProfileCompletionTenant() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { user, fetchUser } = useAuthStore();
+  const draftStorageKey = `pokojowo.draft.tenant-profile.${user?.id || user?._id || 'current'}`;
 
   const [currentStep, setCurrentStep] = useState(0);
   const isEditMode = user?.isProfileComplete;
 
   const [dobError, setDobError] = useState('');
   const [customLanguage, setCustomLanguage] = useState('');
+  const [draftHydrated, setDraftHydrated] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const [formData, setFormData] = useState({
     firstname: '',
@@ -90,7 +95,14 @@ export default function ProfileCompletionTenant() {
   });
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    const draft = readFormDraft(draftStorageKey);
+    if (draft) {
+      setFormData(draft.formData);
+      setCurrentStep(Math.min(Math.max(Number(draft.currentStep) || 0, 0), STEPS.length - 1));
+      setIsDirty(true);
+    } else {
       setFormData((prev) => ({
         ...prev,
         firstname: user.firstname || searchParams.get('googleFirstName') || '',
@@ -124,7 +136,19 @@ export default function ProfileCompletionTenant() {
         }),
       }));
     }
-  }, [user, searchParams]);
+    setDraftHydrated(true);
+  }, [draftStorageKey, searchParams, user]);
+
+  useEffect(() => {
+    if (draftHydrated && isDirty) {
+      writeFormDraft(draftStorageKey, formData, currentStep);
+    }
+  }, [currentStep, draftHydrated, draftStorageKey, formData, isDirty]);
+
+  const confirmNavigation = useUnsavedChangesGuard(isDirty, t('unsavedChanges', {
+    ns: 'common',
+    defaultValue: 'You have unsaved changes. Leave this page?',
+  }));
 
   const saveMutation = useMutation({
     mutationFn: async (data) => {
@@ -132,6 +156,8 @@ export default function ProfileCompletionTenant() {
       return response.data;
     },
     onSuccess: async () => {
+      clearFormDraft(draftStorageKey);
+      setIsDirty(false);
       await fetchUser();
       toast({
         title: t('completion.success.title'),
@@ -150,6 +176,7 @@ export default function ProfileCompletionTenant() {
   });
 
   const handleInputChange = (field, value) => {
+    setIsDirty(true);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -167,6 +194,7 @@ export default function ProfileCompletionTenant() {
   const addCustomLanguage = () => {
     const cleaned = customLanguage.trim().replace(/\s+/g, ' ');
     if (!cleaned) return;
+    setIsDirty(true);
     const titled = cleaned
       .split(' ')
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
@@ -759,7 +787,13 @@ export default function ProfileCompletionTenant() {
 
         {/* Skip option */}
         <div className="mt-4 text-center">
-          <Button variant="ghost" onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (confirmNavigation()) navigate('/');
+            }}
+            className="text-muted-foreground hover:text-foreground"
+          >
             {t('actions.skip')}
           </Button>
         </div>
