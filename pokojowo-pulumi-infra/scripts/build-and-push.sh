@@ -322,7 +322,9 @@ wait_for_health() {
   done
 }
 
-if ! wait_for_health http://127.0.0.1:10000/health || ! wait_for_health http://127.0.0.1:10002/health; then
+# Compose publishes the container ports on the host as 80 (backend) and
+# 8081 (chat); the container-only healthcheck ports are 10000/10002.
+if ! wait_for_health http://127.0.0.1:80/health || ! wait_for_health http://127.0.0.1:8081/health; then
   echo "deployment health check failed; restoring the previous deployment" >&2
   rollback
   exit 1
