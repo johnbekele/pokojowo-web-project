@@ -44,8 +44,9 @@ services:
     container_name: pokojowo-chat
     restart: unless-stopped
     ports:
-      # Chat service on host port 81 for CloudFront chat origin.
-      - "81:10002"
+      # Chat service on host port 8081 for CloudFront chat origin.
+      # CloudFront requires origin ports of 80, 443, or 1024-65535.
+      - "8081:10002"
     environment:
       - PORT=10002
       - DEBUG=False
