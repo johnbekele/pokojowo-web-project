@@ -1,96 +1,87 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  SlidersHorizontal,
-  X,
-  Home,
-  DollarSign,
-  Ruler,
-  Users,
   Building2,
-  Check,
-  MapPin,
+  DollarSign,
+  Home,
+  SlidersHorizontal,
+  Users,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
 } from '@/components/ui/sheet';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { CITIES, districtsForCity } from '@/lib/districts';
+import SearchFilterChoiceGroup from './SearchFilterChoiceGroup';
+import SearchFilterLocation from './SearchFilterLocation';
+import SearchFilterRange from './SearchFilterRange';
+import SearchFilterTenants from './SearchFilterTenants';
+import {
+  BUILDING_TYPES,
+  MAX_PRICE,
+  MAX_SIZE,
+  RENT_FOR_OPTIONS,
+  ROOM_TYPES,
+} from './searchFilterOptions';
 
-const ROOM_TYPES = [
-  { value: 'Single', labelKey: 'filters.roomTypes.single', icon: '🛏️' },
-  { value: 'Double', labelKey: 'filters.roomTypes.double', icon: '🛏️🛏️' },
-  { value: 'Suite', labelKey: 'filters.roomTypes.suite', icon: '🏠' },
-];
+const EMPTY_FILTERS = {
+  minPrice: 0,
+  maxPrice: MAX_PRICE,
+  minSize: 0,
+  maxSize: MAX_SIZE,
+  roomTypes: [],
+  buildingTypes: [],
+  rentFor: [],
+  maxTenants: null,
+  city: '',
+  districts: [],
+  offeredBy: null,
+};
 
-const BUILDING_TYPES = [
-  { value: 'Apartment', labelKey: 'filters.buildingTypes.apartment', icon: '🏢' },
-  { value: 'Loft', labelKey: 'filters.buildingTypes.loft', icon: '🏗️' },
-  { value: 'Block', labelKey: 'filters.buildingTypes.block', icon: '🏘️' },
-  { value: 'Detached_House', labelKey: 'filters.buildingTypes.house', icon: '🏡' },
-];
-
-const RENT_FOR_OPTIONS = [
-  { value: 'Open to All', labelKey: 'filters.rentForOptions.anyone', icon: '👥' },
-  { value: 'Women', labelKey: 'filters.rentForOptions.women', icon: '👩' },
-  { value: 'Man', labelKey: 'filters.rentForOptions.men', icon: '👨' },
-  { value: 'Student', labelKey: 'filters.rentForOptions.students', icon: '🎓' },
-  { value: 'Family', labelKey: 'filters.rentForOptions.families', icon: '👨‍👩‍👧' },
-  { value: 'Couple', labelKey: 'filters.rentForOptions.couples', icon: '💑' },
-];
-
-const MAX_PRICE = 10000;
-const MAX_SIZE = 200;
+export { MAX_PRICE, MAX_SIZE };
 
 export default function SearchFilters({ filters, onFiltersChange, onApply, onReset }) {
   const { t } = useTranslation('listings');
   const [isOpen, setIsOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState(filters);
 
-  // Sync local filters when parent filters change
-  useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters]);
+  useEffect(() => setLocalFilters(filters), [filters]);
 
   const updateFilter = (key, value) => {
-    const newFilters = { ...localFilters, [key]: value };
-    setLocalFilters(newFilters);
+    setLocalFilters((previous) => ({ ...previous, [key]: value }));
   };
 
-  const updatePriceRange = (min, max) => {
-    setLocalFilters(prev => ({
-      ...prev,
-      minPrice: min,
-      maxPrice: max,
-    }));
+  const toggleArrayFilter = (key, value) => {
+    setLocalFilters((previous) => {
+      const currentValues = previous[key] || [];
+      const nextValues = currentValues.includes(value)
+        ? currentValues.filter((item) => item !== value)
+        : [...currentValues, value];
+      return { ...previous, [key]: nextValues };
+    });
   };
 
-  const updateSizeRange = (min, max) => {
-    setLocalFilters(prev => ({
-      ...prev,
-      minSize: min,
-      maxSize: max,
-    }));
-  };
+  const activeCount = [
+    localFilters.minPrice > 0,
+    localFilters.maxPrice < MAX_PRICE,
+    localFilters.minSize > 0,
+    localFilters.maxSize < MAX_SIZE,
+    localFilters.roomTypes?.length > 0,
+    localFilters.buildingTypes?.length > 0,
+    localFilters.rentFor?.length > 0,
+    Boolean(localFilters.maxTenants),
+    Boolean(localFilters.city),
+    localFilters.districts?.length > 0,
+    Boolean(localFilters.offeredBy),
+  ].filter(Boolean).length;
 
   const handleApply = () => {
     onFiltersChange(localFilters);
@@ -99,93 +90,33 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
   };
 
   const handleReset = () => {
-    const resetFilters = {
-      minPrice: 0,
-      maxPrice: MAX_PRICE,
-      minSize: 0,
-      maxSize: MAX_SIZE,
-      roomTypes: [],
-      buildingTypes: [],
-      rentFor: [],
-      maxTenants: null,
-      city: '',
-      districts: [],
-      offeredBy: null,
-    };
+    const resetFilters = { ...EMPTY_FILTERS };
     setLocalFilters(resetFilters);
     onFiltersChange(resetFilters);
     onReset?.();
   };
 
-  const toggleArrayFilter = (key, value) => {
-    setLocalFilters((prev) => {
-      const currentValues = prev[key] || [];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter((v) => v !== value)
-        : [...currentValues, value];
-      return { ...prev, [key]: newValues };
-    });
-  };
-
-  const getActiveFilterCount = () => {
-    let count = 0;
-    if (localFilters.minPrice > 0) count++;
-    if (localFilters.maxPrice < MAX_PRICE) count++;
-    if (localFilters.minSize > 0) count++;
-    if (localFilters.maxSize < MAX_SIZE) count++;
-    if (localFilters.roomTypes?.length > 0) count++;
-    if (localFilters.buildingTypes?.length > 0) count++;
-    if (localFilters.rentFor?.length > 0) count++;
-    if (localFilters.maxTenants) count++;
-    if (localFilters.city) count++;
-    if (localFilters.districts?.length > 0) count++;
-    if (localFilters.offeredBy) count++;
-    return count;
-  };
-
-  const activeCount = getActiveFilterCount();
-
-  // Toggle chip component for better touch experience
-  const FilterChip = ({ selected, onClick, children, icon }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 px-3 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border-2 min-h-[44px]",
-        "active:scale-95 touch-manipulation",
-        selected
-          ? "bg-primary text-primary-foreground border-primary shadow-md"
-          : "bg-background text-foreground border-border hover:border-primary/50 hover:bg-accent"
-      )}
-    >
-      {icon && <span className="text-base">{icon}</span>}
-      <span>{children}</span>
-      {selected && <Check className="h-4 w-4 ml-1" />}
-    </button>
-  );
-
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="gap-2 relative min-h-[44px]">
+        <Button variant="outline" className="relative min-h-[44px] gap-2">
           <SlidersHorizontal className="h-4 w-4" />
           <span className="hidden sm:inline">{t('search.filter', 'Filters')}</span>
           {activeCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary">
+            <Badge className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center bg-primary p-0 text-xs">
               {activeCount}
             </Badge>
           )}
         </Button>
       </SheetTrigger>
+
       <SheetContent
         side="bottom"
-        className="h-[85vh] sm:h-auto sm:max-h-[90vh] rounded-t-3xl sm:rounded-t-none sm:rounded-l-xl sm:w-full sm:max-w-lg"
+        className="h-[85vh] rounded-t-3xl sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-lg sm:rounded-l-xl sm:rounded-t-none"
       >
-        {/* Mobile drag handle */}
-        <div className="flex justify-center pt-2 pb-4 sm:hidden">
-          <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+        <div className="flex justify-center pb-4 pt-2 sm:hidden">
+          <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
         </div>
-
         <SheetHeader className="pb-4">
           <SheetTitle className="flex items-center gap-2 text-xl">
             <SlidersHorizontal className="h-5 w-5 text-primary" />
@@ -196,321 +127,93 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
           </SheetDescription>
         </SheetHeader>
 
-        <div className="overflow-y-auto max-h-[calc(85vh-200px)] sm:max-h-[calc(90vh-200px)] pb-4 space-y-6 px-1">
-          {/* Neighbourhood */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                <MapPin className="h-4 w-4 text-red-600 dark:text-red-400" />
-              </div>
-              <Label className="font-semibold text-base">{t('filters.neighbourhood', 'Neighbourhood')}</Label>
-            </div>
-            <Select
-              value={localFilters.city || 'any'}
-              onValueChange={(value) =>
-                setLocalFilters((prev) => ({
-                  ...prev,
-                  city: value === 'any' ? '' : value,
-                  districts: [],
-                }))
-              }
-            >
-              <SelectTrigger className="h-12 text-base">
-                <SelectValue placeholder={t('filters.anyCity', 'Any city')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="any" className="h-12">{t('filters.anyCity', 'Any city')}</SelectItem>
-                {CITIES.map((city) => (
-                  <SelectItem key={city} value={city} className="h-12">{city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {localFilters.city && (
-              <div className="flex flex-wrap gap-2">
-                {districtsForCity(localFilters.city).map((district) => (
-                  <FilterChip
-                    key={district}
-                    selected={localFilters.districts?.includes(district)}
-                    onClick={() => toggleArrayFilter('districts', district)}
-                  >
-                    {district}
-                  </FilterChip>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="max-h-[calc(85vh-200px)] space-y-6 overflow-y-auto px-1 pb-4 sm:max-h-[calc(90vh-200px)]">
+          <SearchFilterLocation
+            filters={localFilters}
+            setFilters={setLocalFilters}
+            toggleArrayFilter={toggleArrayFilter}
+          />
 
+          <SearchFilterRange
+            type="price"
+            filters={localFilters}
+            onChange={(range) => setLocalFilters((previous) => ({ ...previous, ...range }))}
+            icon={DollarSign}
+            iconWrapperClassName="bg-green-100 dark:bg-green-900/30"
+            iconClassName="h-4 w-4 text-green-600 dark:text-green-400"
+          />
+          <SearchFilterRange
+            type="size"
+            filters={localFilters}
+            onChange={(range) => setLocalFilters((previous) => ({ ...previous, ...range }))}
+            icon={Home}
+            iconWrapperClassName="bg-blue-100 dark:bg-blue-900/30"
+            iconClassName="h-4 w-4 text-blue-600 dark:text-blue-400"
+          />
+
+          <SearchFilterChoiceGroup
+            title={t('filters.roomType', 'Room Type')}
+            icon={Home}
+            iconWrapperClassName="bg-purple-100 dark:bg-purple-900/30"
+            iconClassName="h-4 w-4 text-purple-600 dark:text-purple-400"
+            options={ROOM_TYPES}
+            selectedValues={localFilters.roomTypes || []}
+            onToggle={(value) => toggleArrayFilter('roomTypes', value)}
+          />
           <Separator />
-
-          {/* Price Range */}
-          <div className="space-y-4 bg-muted/30 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                  <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </div>
-                <Label className="font-semibold text-base">{t('filters.price', 'Price Range')}</Label>
-              </div>
-              <span className="text-sm text-muted-foreground">{t('filters.priceUnit', 'PLN/month')}</span>
-            </div>
-
-            {/* Price inputs */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.min', 'Min')}</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  max={localFilters.maxPrice || MAX_PRICE}
-                  value={localFilters.minPrice || 0}
-                  onChange={(e) => updatePriceRange(
-                    Math.min(Number(e.target.value), localFilters.maxPrice || MAX_PRICE),
-                    localFilters.maxPrice || MAX_PRICE
-                  )}
-                  className="h-12 text-center text-lg font-medium"
-                  placeholder="0"
-                />
-              </div>
-              <span className="text-muted-foreground mt-5">—</span>
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.max', 'Max')}</Label>
-                <Input
-                  type="number"
-                  min={localFilters.minPrice || 0}
-                  max={MAX_PRICE}
-                  value={localFilters.maxPrice || MAX_PRICE}
-                  onChange={(e) => updatePriceRange(
-                    localFilters.minPrice || 0,
-                    Math.max(Number(e.target.value), localFilters.minPrice || 0)
-                  )}
-                  className="h-12 text-center text-lg font-medium"
-                  placeholder={MAX_PRICE.toString()}
-                />
-              </div>
-            </div>
-
-            {/* Price slider */}
-            <div className="px-2 pt-2">
-              <Slider
-                min={0}
-                max={MAX_PRICE}
-                step={100}
-                value={[localFilters.minPrice || 0, localFilters.maxPrice || MAX_PRICE]}
-                onValueChange={([min, max]) => updatePriceRange(min, max)}
-                className="touch-manipulation"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>{t('filters.minPrice', '0 PLN')}</span>
-                <span>{t('filters.maxPrice', '{{max}} PLN', { max: MAX_PRICE.toLocaleString() })}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Size Range */}
-          <div className="space-y-4 bg-muted/30 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <Ruler className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <Label className="font-semibold text-base">{t('filters.size', 'Room Size')}</Label>
-              </div>
-              <span className="text-sm text-muted-foreground">{t('filters.sizeUnit', 'm²')}</span>
-            </div>
-
-            {/* Size inputs */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.min', 'Min')}</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  max={localFilters.maxSize || MAX_SIZE}
-                  value={localFilters.minSize || 0}
-                  onChange={(e) => updateSizeRange(
-                    Math.min(Number(e.target.value), localFilters.maxSize || MAX_SIZE),
-                    localFilters.maxSize || MAX_SIZE
-                  )}
-                  className="h-12 text-center text-lg font-medium"
-                  placeholder="0"
-                />
-              </div>
-              <span className="text-muted-foreground mt-5">—</span>
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.max', 'Max')}</Label>
-                <Input
-                  type="number"
-                  min={localFilters.minSize || 0}
-                  max={MAX_SIZE}
-                  value={localFilters.maxSize || MAX_SIZE}
-                  onChange={(e) => updateSizeRange(
-                    localFilters.minSize || 0,
-                    Math.max(Number(e.target.value), localFilters.minSize || 0)
-                  )}
-                  className="h-12 text-center text-lg font-medium"
-                  placeholder={MAX_SIZE.toString()}
-                />
-              </div>
-            </div>
-
-            {/* Size slider */}
-            <div className="px-2 pt-2">
-              <Slider
-                min={0}
-                max={MAX_SIZE}
-                step={5}
-                value={[localFilters.minSize || 0, localFilters.maxSize || MAX_SIZE]}
-                onValueChange={([min, max]) => updateSizeRange(min, max)}
-                className="touch-manipulation"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>{t('filters.minSize', '0 m²')}</span>
-                <span>{t('filters.maxSize', '{{max}} m²', { max: MAX_SIZE })}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Room Type */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                <Home className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <Label className="font-semibold text-base">{t('filters.roomType', 'Room Type')}</Label>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {ROOM_TYPES.map((type) => (
-                <FilterChip
-                  key={type.value}
-                  selected={localFilters.roomTypes?.includes(type.value)}
-                  onClick={() => toggleArrayFilter('roomTypes', type.value)}
-                  icon={type.icon}
-                >
-                  {t(type.labelKey)}
-                </FilterChip>
-              ))}
-            </div>
-          </div>
-
+          <SearchFilterChoiceGroup
+            title={t('filters.buildingType', 'Building Type')}
+            icon={Building2}
+            iconWrapperClassName="bg-orange-100 dark:bg-orange-900/30"
+            iconClassName="h-4 w-4 text-orange-600 dark:text-orange-400"
+            options={BUILDING_TYPES}
+            selectedValues={localFilters.buildingTypes || []}
+            onToggle={(value) => toggleArrayFilter('buildingTypes', value)}
+          />
           <Separator />
-
-          {/* Building Type */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
-                <Building2 className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-              </div>
-              <Label className="font-semibold text-base">{t('filters.buildingType', 'Building Type')}</Label>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {BUILDING_TYPES.map((type) => (
-                <FilterChip
-                  key={type.value}
-                  selected={localFilters.buildingTypes?.includes(type.value)}
-                  onClick={() => toggleArrayFilter('buildingTypes', type.value)}
-                  icon={type.icon}
-                >
-                  {t(type.labelKey)}
-                </FilterChip>
-              ))}
-            </div>
-          </div>
-
+          <SearchFilterChoiceGroup
+            title={t('filters.rentFor', 'Suitable For')}
+            icon={Users}
+            iconWrapperClassName="bg-pink-100 dark:bg-pink-900/30"
+            iconClassName="h-4 w-4 text-pink-600 dark:text-pink-400"
+            options={RENT_FOR_OPTIONS}
+            selectedValues={localFilters.rentFor || []}
+            onToggle={(value) => toggleArrayFilter('rentFor', value)}
+          />
           <Separator />
-
-          {/* Rent For */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-pink-100 dark:bg-pink-900/30">
-                <Users className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-              </div>
-              <Label className="font-semibold text-base">{t('filters.rentFor', 'Suitable For')}</Label>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {RENT_FOR_OPTIONS.map((option) => (
-                <FilterChip
-                  key={option.value}
-                  selected={localFilters.rentFor?.includes(option.value)}
-                  onClick={() => toggleArrayFilter('rentFor', option.value)}
-                  icon={option.icon}
-                >
-                  {t(option.labelKey)}
-                </FilterChip>
-              ))}
-            </div>
-          </div>
-
+          <SearchFilterChoiceGroup
+            title={t('filters.offeredBy', 'Offered by')}
+            icon={Building2}
+            iconWrapperClassName="bg-amber-100 dark:bg-amber-900/30"
+            iconClassName="h-4 w-4 text-amber-600 dark:text-amber-400"
+            options={[
+              { value: 'owner', label: t('filters.privateOwner', 'Private owner'), icon: '🔑' },
+              { value: 'agency', label: t('filters.agency', 'Agency'), icon: '🏢' },
+            ]}
+            selectedValues={localFilters.offeredBy ? [localFilters.offeredBy] : []}
+            onToggle={(value) =>
+              updateFilter('offeredBy', localFilters.offeredBy === value ? null : value)
+            }
+            label={(option) => option.label}
+          />
           <Separator />
-
-          {/* Offered By */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                <Building2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-              <Label className="font-semibold text-base">{t('filters.offeredBy', 'Offered by')}</Label>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { value: 'owner', label: t('filters.privateOwner', 'Private owner'), icon: '🔑' },
-                { value: 'agency', label: t('filters.agency', 'Agency'), icon: '🏢' },
-              ].map((option) => (
-                <FilterChip
-                  key={option.value}
-                  selected={localFilters.offeredBy === option.value}
-                  onClick={() =>
-                    updateFilter('offeredBy', localFilters.offeredBy === option.value ? null : option.value)
-                  }
-                  icon={option.icon}
-                >
-                  {option.label}
-                </FilterChip>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Max Tenants */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/30">
-                <Users className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-              </div>
-              <Label className="font-semibold text-base">{t('filters.maxTenants', 'Maximum Tenants')}</Label>
-            </div>
-            <Select
-              value={localFilters.maxTenants?.toString() || 'any'}
-              onValueChange={(value) => updateFilter('maxTenants', value === 'any' ? null : parseInt(value))}
-            >
-              <SelectTrigger className="h-12 text-base">
-                <SelectValue placeholder={t('filters.anyTenants', 'Any number')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="any" className="h-12">{t('filters.anyTenants', 'Any number')}</SelectItem>
-                <SelectItem value="1" className="h-12">{t('filters.tenantCount.one', '1 tenant')}</SelectItem>
-                <SelectItem value="2" className="h-12">{t('filters.tenantCount.two', '2 tenants')}</SelectItem>
-                <SelectItem value="3" className="h-12">{t('filters.tenantCount.three', '3 tenants')}</SelectItem>
-                <SelectItem value="4" className="h-12">{t('filters.tenantCount.fourPlus', '4+ tenants')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <SearchFilterTenants
+            value={localFilters.maxTenants}
+            onChange={(value) => updateFilter('maxTenants', value === 'any' ? null : parseInt(value, 10))}
+          />
         </div>
 
-        <SheetFooter className="flex flex-row gap-3 pt-4 border-t mt-4 sticky bottom-0 bg-background pb-safe">
+        <SheetFooter className="sticky bottom-0 mt-4 flex flex-row gap-3 border-t bg-background pb-safe pt-4">
           <Button
             variant="outline"
             onClick={handleReset}
-            className="flex-1 h-12 text-base"
+            className="h-12 flex-1 text-base"
             disabled={activeCount === 0}
           >
-            <X className="h-4 w-4 mr-2" />
+            <X className="mr-2 h-4 w-4" />
             {t('filters.reset', 'Reset')}
           </Button>
-          <Button
-            onClick={handleApply}
-            className="flex-1 h-12 text-base bg-primary hover:bg-primary/90"
-          >
+          <Button onClick={handleApply} className="h-12 flex-1 bg-primary text-base hover:bg-primary/90">
             {t('filters.apply', 'Show Results')}
             {activeCount > 0 && (
               <Badge variant="secondary" className="ml-2 bg-primary-foreground text-primary">
