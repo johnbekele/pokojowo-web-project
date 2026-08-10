@@ -317,7 +317,9 @@ wait_for_health() {
   local attempts=0
   until curl --fail --silent --show-error "\${url}" >/dev/null; do
     attempts=\$((attempts + 1))
-    if [[ "\${attempts}" -ge 30 ]]; then return 1; fi
+    # Chat waits for its MongoDB connection during startup; allow up to
+    # three minutes while keeping the rollout bounded and cancellable.
+    if [[ "\${attempts}" -ge 90 ]]; then return 1; fi
     sleep 2
   done
 }
@@ -326,6 +328,7 @@ wait_for_health() {
 # 8081 (chat); the container-only healthcheck ports are 10000/10002.
 if ! wait_for_health http://127.0.0.1:80/health || ! wait_for_health http://127.0.0.1:8081/health; then
   echo "deployment health check failed; restoring the previous deployment" >&2
+  docker compose -f docker-compose.prod.yml --env-file .env ps -a || true
   rollback
   exit 1
 fi
