@@ -35,6 +35,11 @@ export default function ListingCard({ listing }: ListingCardProps) {
             style={{ width: '100%', height: 192 }}
             contentFit="cover"
             transition={200}
+            accessible
+            accessibilityLabel={t('card.photoAlt', {
+              location:
+                [listing.district, listing.city].filter(Boolean).join(', ') || t('title'),
+            })}
           />
           <View className="absolute bottom-3 left-3 bg-black/60 px-3 py-1.5 rounded-lg">
             <Text className="text-white font-bold text-lg">

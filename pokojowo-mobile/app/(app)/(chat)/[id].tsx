@@ -211,7 +211,7 @@ export default function ChatRoomScreen() {
 
   const displayName = otherUser?.firstname
     ? `${otherUser.firstname} ${otherUser.lastname || ''}`.trim()
-    : 'Chat';
+    : t('title', 'Chat');
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
@@ -222,7 +222,12 @@ export default function ChatRoomScreen() {
       >
         {/* Header */}
         <View className="flex-row items-center px-4 py-3 border-b border-border">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mr-3"
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.backToChats')}
+          >
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
 
@@ -239,9 +244,9 @@ export default function ChatRoomScreen() {
               {displayName}
             </Text>
             {otherUserTyping ? (
-              <Text className="text-sm text-brand">Typing...</Text>
+              <Text className="text-sm text-brand">{t('typing', 'typing...')}</Text>
             ) : otherUser?.isOnline ? (
-              <Text className="text-sm text-green-600">Online</Text>
+              <Text className="text-sm text-green-600">{t('online', 'Online')}</Text>
             ) : null}
           </View>
         </View>
@@ -279,12 +284,17 @@ export default function ChatRoomScreen() {
         {replyingTo && (
           <View className="flex-row items-center px-4 py-2 bg-surface border-t border-border">
             <View className="flex-1 border-l-2 border-primary-500 pl-3">
-              <Text className="text-xs text-muted">Replying to</Text>
+              <Text className="text-xs text-muted">{t('replyingTo', 'Replying to')}</Text>
               <Text className="text-sm text-text" numberOfLines={1}>
                 {replyingTo.content}
               </Text>
             </View>
-            <TouchableOpacity onPress={() => setReplyingTo(null)} className="ml-2 p-1">
+            <TouchableOpacity
+              onPress={() => setReplyingTo(null)}
+              className="ml-2 p-1"
+              accessibilityRole="button"
+              accessibilityLabel={t('accessibility.cancelReply')}
+            >
               <X size={20} color={colors.muted} />
             </TouchableOpacity>
           </View>
@@ -300,6 +310,7 @@ export default function ChatRoomScreen() {
             onChangeText={handleTyping}
             multiline
             textAlignVertical="center"
+            accessibilityLabel={t('accessibility.input')}
           />
           <TouchableOpacity
             onPress={handleSendMessage}
@@ -307,6 +318,9 @@ export default function ChatRoomScreen() {
             className={`ml-2 w-12 h-12 rounded-full items-center justify-center ${
               messageText.trim() ? 'bg-brand' : 'bg-surface'
             }`}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.sendMessage')}
+            accessibilityState={{ disabled: !messageText.trim() }}
           >
             <Send
               size={20}

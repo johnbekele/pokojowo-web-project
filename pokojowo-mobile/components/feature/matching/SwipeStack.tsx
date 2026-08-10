@@ -214,6 +214,11 @@ export default function SwipeStack({
                 <TouchableOpacity
                   activeOpacity={0.95}
                   onPress={() => onCardPress?.(match)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('accessibility.openProfile', {
+                    name: match.user?.firstname || t('detail.unknown'),
+                  })}
+                  accessibilityHint={t('accessibility.openProfileHint')}
                 >
                   <SwipeCard match={match} />
                 </TouchableOpacity>
@@ -288,6 +293,8 @@ export default function SwipeStack({
           <TouchableOpacity
             onPress={handleUndo}
             className="w-12 h-12 rounded-full border-2 border-amber-400 items-center justify-center bg-card"
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.undo')}
           >
             <Undo2 size={20} color={colors.warning} />
           </TouchableOpacity>
@@ -297,6 +304,8 @@ export default function SwipeStack({
         <TouchableOpacity
           onPress={swipeLeft}
           className="w-16 h-16 rounded-full border-2 border-border items-center justify-center bg-card"
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.pass')}
         >
           <X size={28} color={colors.danger} />
         </TouchableOpacity>
@@ -305,6 +314,8 @@ export default function SwipeStack({
         <TouchableOpacity
           onPress={swipeRight}
           className="w-20 h-20 rounded-full bg-brand items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.like')}
         >
           <Heart size={32} color="white" fill="white" />
         </TouchableOpacity>

@@ -65,6 +65,8 @@ export default function HomeScreen() {
           <TouchableOpacity
             className="bg-surface p-3 rounded-xl relative"
             onPress={() => setShowFilters(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('filters.title', 'Filters')}
           >
             <SlidersHorizontal size={20} color={colors.text} />
             {activeFilterCount > 0 && (

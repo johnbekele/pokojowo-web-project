@@ -33,8 +33,10 @@
     "read": "Read",
     "sending": "Sending...",
     "failed": "Failed to send",
-    "tapToRetry": "Not sent. Tap to try again."
+    "tapToRetry": "Not sent. Tap to try again.",
+    "deleted": "Message deleted"
   },
+  "replyingTo": "Replying to",
   "error": {
     "title": "Error",
     "loadFailed": "Failed to load conversations. Please try again.",
@@ -57,6 +59,16 @@
     "delete": "Delete message",
     "copy": "Copy text",
     "reply": "Reply"
+  },
+  "accessibility": {
+    "openChat": "Open chat with {{name}}",
+    "cancelReply": "Cancel reply",
+    "sendMessage": "Send message",
+    "messageActions": "Message actions",
+    "retryMessage": "Retry sending message",
+    "replyToMessage": "Reply to message",
+    "deleteMessage": "Delete message",
+    "input": "Message"
   },
   "deleteConfirm": {
     "title": "Delete message?",

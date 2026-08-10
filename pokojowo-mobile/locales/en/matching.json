@@ -10,6 +10,13 @@
     "checkBackLater": "Check back later for new potential flatmates",
     "refresh": "Refresh"
   },
+  "accessibility": {
+    "openProfile": "View {{name}}'s profile",
+    "openProfileHint": "Double tap to open the profile",
+    "undo": "Undo last swipe",
+    "pass": "Pass on this profile",
+    "like": "Like this profile"
+  },
   "mutualMatch": {
     "title": "It's a Match!",
     "subtitle": "You and {{name}} liked each other",

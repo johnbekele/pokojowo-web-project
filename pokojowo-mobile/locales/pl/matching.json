@@ -10,6 +10,13 @@
     "checkBackLater": "Sprawdź później, czy pojawili się nowi potencjalni współlokatorzy",
     "refresh": "Odśwież"
   },
+  "accessibility": {
+    "openProfile": "Zobacz profil użytkownika {{name}}",
+    "openProfileHint": "Kliknij dwukrotnie, aby otworzyć profil",
+    "undo": "Cofnij ostatnie przesunięcie",
+    "pass": "Pomiń ten profil",
+    "like": "Polub ten profil"
+  },
   "mutualMatch": {
     "title": "Masz dopasowanie!",
     "subtitle": "Ty i {{name}} polubiliście się nawzajem",

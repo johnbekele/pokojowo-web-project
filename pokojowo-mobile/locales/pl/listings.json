@@ -101,6 +101,7 @@
     "sizeUnit": "m²"
   },
   "card": {
+    "photoAlt": "Zdjęcie ogłoszenia w lokalizacji {{location}}",
     "perMonth": "/mies.",
     "month": "mies.",
     "available": "Dostępny",

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, TextInputProps } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import useTheme from '@/hooks/useTheme';
 
@@ -25,6 +26,7 @@ export default function Input({
   ...props
 }: InputProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation('common');
   const [focused, setFocused] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
@@ -71,6 +73,11 @@ export default function Input({
             className="absolute right-3 top-0 bottom-0 justify-center z-10"
             onPress={() => setRevealed((v) => !v)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              revealed ? 'accessibility.hidePassword' : 'accessibility.showPassword',
+            )}
+            accessibilityState={{ selected: revealed }}
           >
             {revealed ? (
               <EyeOff size={20} color={colors.muted} />

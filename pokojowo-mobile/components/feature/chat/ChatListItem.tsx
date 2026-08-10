@@ -22,6 +22,8 @@ export default function ChatListItem({ chat, onPress }: ChatListItemProps) {
       onPress={onPress}
       className="flex-row items-center px-4 py-3 bg-bg active:bg-surface"
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={t('accessibility.openChat', { name: displayName })}
     >
       {/* Avatar */}
       <Avatar
