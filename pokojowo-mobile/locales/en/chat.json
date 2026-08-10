@@ -37,13 +37,19 @@
     "deleted": "Message deleted"
   },
   "replyingTo": "Replying to",
+  "day": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
   "error": {
     "title": "Error",
     "loadFailed": "Failed to load conversations. Please try again.",
     "chatNotFound": "Chat not found",
+    "loadMessages": "Failed to load this conversation. Please try again.",
     "openFailed": "Could not open the conversation. Please try again.",
     "sendFailed": "Failed to send message",
-    "connectionLost": "Connection lost. Reconnecting..."
+    "connectionLost": "Connection lost. Reconnecting...",
+    "retry": "Try again"
   },
   "connection": {
     "connected": "Connected",

@@ -37,13 +37,19 @@
     "deleted": "Wiadomość usunięta"
   },
   "replyingTo": "Odpowiedź do",
+  "day": {
+    "today": "Dzisiaj",
+    "yesterday": "Wczoraj"
+  },
   "error": {
     "title": "Błąd",
     "loadFailed": "Nie udało się załadować rozmów. Spróbuj ponownie.",
     "chatNotFound": "Nie znaleziono rozmowy",
+    "loadMessages": "Nie udało się załadować tej rozmowy. Spróbuj ponownie.",
     "openFailed": "Nie udało się otworzyć rozmowy. Spróbuj ponownie.",
     "sendFailed": "Nie udało się wysłać wiadomości",
-    "connectionLost": "Utracono połączenie. Ponowne łączenie..."
+    "connectionLost": "Utracono połączenie. Ponowne łączenie...",
+    "retry": "Spróbuj ponownie"
   },
   "connection": {
     "connected": "Połączono",
