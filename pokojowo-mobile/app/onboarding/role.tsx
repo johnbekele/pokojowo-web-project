@@ -6,9 +6,9 @@ import { useState } from 'react';
 import { Search, Building2, Users } from 'lucide-react-native';
 
 import { Button } from '@/components/ui';
-import useAuthStore from '@/stores/authStore';
 import { useUpdateRole } from '@/hooks/auth/useAuth';
 import useTheme from '@/hooks/useTheme';
+import useUIStore from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
 
 type Role = 'Tenant' | 'Landlord' | 'Both';
@@ -44,8 +44,8 @@ const roleOptions: RoleOption[] = [
 export default function OnboardingRoleScreen() {
   const { t } = useTranslation('auth');
   const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const { user } = useAuthStore();
   const updateRoleMutation = useUpdateRole();
 
   const handleContinue = async () => {
@@ -64,12 +64,10 @@ export default function OnboardingRoleScreen() {
       }
     } catch (error) {
       console.error('Failed to update role:', error);
-      // Still navigate even if role update fails
-      if (selectedRole === 'Landlord') {
-        router.replace('/onboarding/profile-completion/landlord');
-      } else {
-        router.replace('/onboarding/profile-completion/tenant');
-      }
+      showToast({
+        type: 'error',
+        message: t('selectRole.error', 'We could not save your choice. Please try again.'),
+      });
     }
   };
 
@@ -111,10 +109,10 @@ export default function OnboardingRoleScreen() {
                   <Text
                     className={cn('text-lg font-semibold', isSelected ? 'text-brand' : 'text-text')}
                   >
-                    {t(option.titleKey, getDefaultTitle(option.id))}
+                    {t(option.titleKey)}
                   </Text>
                   <Text className="text-muted text-sm">
-                    {t(option.descriptionKey, getDefaultDescription(option.id))}
+                    {t(option.descriptionKey)}
                   </Text>
                 </View>
                 <View
@@ -144,30 +142,4 @@ export default function OnboardingRoleScreen() {
       </View>
     </SafeAreaView>
   );
-}
-
-function getDefaultTitle(id: Role): string {
-  switch (id) {
-    case 'Tenant':
-      return "I'm looking for a room";
-    case 'Landlord':
-      return 'I have a room to rent';
-    case 'Both':
-      return 'Both';
-    default:
-      return '';
-  }
-}
-
-function getDefaultDescription(id: Role): string {
-  switch (id) {
-    case 'Tenant':
-      return 'Find your perfect flatmate and place to live';
-    case 'Landlord':
-      return 'List your property and find the ideal tenant';
-    case 'Both':
-      return "I'm looking for a room and also have one to rent";
-    default:
-      return '';
-  }
 }

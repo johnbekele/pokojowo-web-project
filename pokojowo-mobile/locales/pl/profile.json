@@ -1,6 +1,17 @@
 {
   "title": "Profil",
   "logoutConfirm": "Czy na pewno chcesz się wylogować?",
+  "landlord": {
+    "title": "Uzupełnij profil wynajmującego",
+    "subtitle": "Dodaj dane, aby rozpocząć publikowanie ogłoszeń",
+    "personalInfo": "Dane osobowe",
+    "companyName": "Nazwa firmy (opcjonalnie)",
+    "companyPlaceholder": "Nazwa firmy lub działalności",
+    "contactInfo": "Dane kontaktowe",
+    "aboutYou": "O Tobie",
+    "bio": "O Tobie i Twoich nieruchomościach",
+    "bioPlaceholder": "Opowiedz potencjalnym najemcom o sobie i swoich nieruchomościach..."
+  },
   "trust": {
     "verified": "Zweryfikowany",
     "idVerified": "Zweryfikowany (ID)",
@@ -51,11 +62,13 @@
     "progress": "{{percentage}}% ukończone",
     "success": {
       "title": "Profil zapisany",
-      "description": "Twoje zmiany zostały zapisane."
+      "description": "Twoje zmiany zostały zapisane.",
+      "landlordDescription": "Profil wynajmującego został zapisany. Możesz teraz dodawać nieruchomości!"
     },
     "error": {
       "title": "Błąd",
-      "description": "Nie udało się zapisać profilu. Spróbuj ponownie."
+      "description": "Nie udało się zapisać profilu. Spróbuj ponownie.",
+      "requiredFields": "Imię i nazwisko są wymagane."
     },
     "exit": {
       "title": "Zakończyć uzupełnianie profilu?",
@@ -66,7 +79,9 @@
     "title": "Podstawowe dane",
     "subtitle": "Opowiedz nam o sobie",
     "firstName": "Imię",
+    "firstNamePlaceholder": "Jan",
     "lastName": "Nazwisko",
+    "lastNamePlaceholder": "Kowalski",
     "age": "Wiek",
     "gender": "Płeć",
     "selectGender": "Wybierz płeć",
@@ -85,7 +100,9 @@
     "title": "Dane kontaktowe",
     "subtitle": "Jak można się z Tobą skontaktować?",
     "phone": "Numer telefonu",
+    "phonePlaceholder": "+48 123 456 789",
     "location": "Miasto / Lokalizacja",
+    "locationPlaceholder": "np. Warszawa, Kraków",
     "preferredContact": "Preferowany kontakt"
   },
   "preferences": {
@@ -170,6 +187,7 @@
     "subtitle": "Jakimi językami mówisz?",
     "select": "Wybierz języki",
     "preferredLanguage": "Preferowany język",
+    "remove": "Usuń {{language}}",
     "selectPreferred": "Wybierz język",
     "options": {
       "polish": "Polski",
@@ -178,7 +196,8 @@
       "german": "Niemiecki",
       "russian": "Rosyjski",
       "spanish": "Hiszpański",
-      "french": "Francuski"
+      "french": "Francuski",
+      "italian": "Włoski"
     },
     "other": "Inny język",
     "otherPlaceholder": "np. czeski, portugalski…",
@@ -198,6 +217,7 @@
     "next": "Dalej",
     "back": "Wstecz",
     "skip": "Pomiń",
+    "skipForNow": "Pomiń na razie",
     "saving": "Zapisywanie...",
     "cancel": "Anuluj",
     "exit": "Zakończ",

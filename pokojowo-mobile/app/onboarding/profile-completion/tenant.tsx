@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -25,14 +24,17 @@ import {
 } from 'lucide-react-native';
 
 import { Button } from '@/components/ui';
-import { PreferredAreaPicker } from '@/components/feature/profile';
 import { usePreferredArea } from '@/hooks/user/usePreferredArea';
 import { userService, TenantProfileData } from '@/services/user.service';
 import useAuthStore from '@/stores/authStore';
 import useUIStore from '@/stores/uiStore';
 import useTheme from '@/hooks/useTheme';
-import { cn } from '@/lib/utils';
-import { SUPPORTED_LANGUAGES } from '@/lib/languages';
+import TenantBasicStep from '@/components/feature/onboarding/TenantBasicStep';
+import TenantContactStep from '@/components/feature/onboarding/TenantContactStep';
+import TenantPreferencesStep from '@/components/feature/onboarding/TenantPreferencesStep';
+import TenantLifestyleStep from '@/components/feature/onboarding/TenantLifestyleStep';
+import TenantLanguagesStep from '@/components/feature/onboarding/TenantLanguagesStep';
+import type { TenantFormData } from '@/components/feature/onboarding/tenant.types';
 
 // Latest valid birth date: exactly 18 years ago today
 const maxDateOfBirth = (): string => {
@@ -51,69 +53,12 @@ const isValidDob = (value: string): boolean => {
 };
 
 const STEPS = [
-  { id: 'basic', title: 'Basic Info', icon: User },
-  { id: 'contact', title: 'Contact', icon: Phone },
-  { id: 'preferences', title: 'Preferences', icon: Settings },
-  { id: 'lifestyle', title: 'Lifestyle', icon: Heart },
-  { id: 'languages', title: 'Languages', icon: Languages },
+  { id: 'basic', titleKey: 'basicInfo.title', icon: User },
+  { id: 'contact', titleKey: 'contact.title', icon: Phone },
+  { id: 'preferences', titleKey: 'preferences.title', icon: Settings },
+  { id: 'lifestyle', titleKey: 'lifestyle.title', icon: Heart },
+  { id: 'languages', titleKey: 'languages.title', icon: Languages },
 ];
-
-const GENDER_OPTIONS = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
-];
-
-const CLEANLINESS_OPTIONS = [
-  { value: 'very_clean', label: 'Very Clean' },
-  { value: 'clean', label: 'Clean' },
-  { value: 'moderate', label: 'Moderate' },
-  { value: 'relaxed', label: 'Relaxed' },
-];
-
-const SOCIAL_OPTIONS = [
-  { value: 'very_social', label: 'Very Social' },
-  { value: 'social', label: 'Social' },
-  { value: 'moderate', label: 'Moderate' },
-  { value: 'quiet', label: 'Quiet' },
-];
-
-const GUESTS_OPTIONS = [
-  { value: 'often', label: 'Often' },
-  { value: 'sometimes', label: 'Sometimes' },
-  { value: 'rarely', label: 'Rarely' },
-  { value: 'never', label: 'Never' },
-];
-
-interface FormData {
-  firstname: string;
-  lastname: string;
-  dateOfBirth: string;
-  gender: string;
-  bio: string;
-  phone: string;
-  location: string;
-  budgetMin: string;
-  budgetMax: string;
-  preferredLocation: string;
-  preferredDistricts: string[];
-  leaseDuration: string;
-  cleanliness: string;
-  socialLevel: string;
-  guestsFrequency: string;
-  noSmokers: boolean;
-  noPets: boolean;
-  noParties: boolean;
-  sameGenderOnly: boolean;
-  quietHoursRequired: boolean;
-  noChildren: boolean;
-  noCouples: boolean;
-  hasPartner: boolean;
-  hasChildren: boolean;
-  childrenCount: string;
-  languages: string[];
-  preferredLanguage: string;
-}
 
 export default function TenantProfileCompletion() {
   const { t } = useTranslation('profile');
@@ -126,7 +71,7 @@ export default function TenantProfileCompletion() {
   const [currentStep, setCurrentStep] = useState(0);
   const [dobError, setDobError] = useState('');
   const [customLanguage, setCustomLanguage] = useState('');
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<TenantFormData>({
     firstname: '',
     lastname: '',
     dateOfBirth: '',
@@ -209,7 +154,7 @@ export default function TenantProfileCompletion() {
     },
   });
 
-  const handleInputChange = (field: keyof FormData, value: any) => {
+  const handleInputChange = <K extends keyof TenantFormData,>(field: K, value: TenantFormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -299,389 +244,47 @@ export default function TenantProfileCompletion() {
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
-  const renderSelectOption = (
-    options: { value: string; label: string }[],
-    selectedValue: string,
-    onSelect: (value: string) => void
-  ) => (
-    <View className="flex-row flex-wrap gap-2">
-      {options.map((option) => (
-        <TouchableOpacity
-          key={option.value}
-          onPress={() => onSelect(option.value)}
-          className={`px-4 py-2.5 rounded-lg border ${
-            selectedValue === option.value
-              ? 'bg-primary-600 border-primary-600'
-              : 'bg-card border-border'
-          }`}
-        >
-          <Text
-            className={`font-medium ${
-              selectedValue === option.value ? 'text-white' : 'text-text'
-            }`}
-          >
-            {option.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
-  const renderCheckboxOption = (
-    label: string,
-    checked: boolean,
-    onToggle: () => void
-  ) => (
-    <TouchableOpacity
-      onPress={onToggle}
-      className={`flex-row items-center p-3 rounded-lg border ${
-        checked ? 'bg-primary-50 border-primary-300' : 'bg-card border-border'
-      }`}
-    >
-      <View
-        className={`w-5 h-5 rounded border-2 mr-3 items-center justify-center ${
-          checked ? 'bg-primary-600 border-primary-600' : 'border-border'
-        }`}
-      >
-        {checked && <Check size={14} color="white" />}
-      </View>
-      <Text className="text-text flex-1">{label}</Text>
-    </TouchableOpacity>
-  );
-
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0: // Basic Info
+      case 0:
         return (
-          <View className="gap-4">
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Text className="text-text font-medium mb-2">{t('basicInfo.firstName', 'First Name')}</Text>
-                <TextInput
-                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                  value={formData.firstname}
-                  onChangeText={(text) => handleInputChange('firstname', text)}
-                  placeholder="John"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-text font-medium mb-2">{t('basicInfo.lastName', 'Last Name')}</Text>
-                <TextInput
-                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                  value={formData.lastname}
-                  onChangeText={(text) => handleInputChange('lastname', text)}
-                  placeholder="Doe"
-                />
-              </View>
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('basicInfo.dateOfBirth', 'Date of birth')}</Text>
-              <TextInput
-                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                value={formData.dateOfBirth}
-                onChangeText={(text) => {
-                  handleInputChange('dateOfBirth', text);
-                  setDobError('');
-                }}
-                keyboardType="numbers-and-punctuation"
-                placeholder="YYYY-MM-DD"
-                maxLength={10}
-              />
-              {dobError ? (
-                <Text className="text-red-500 text-xs mt-1">{dobError}</Text>
-              ) : (
-                <Text className="text-muted text-xs mt-1">
-                  {t('basicInfo.dateOfBirthHint', 'Your age updates automatically; others only see your age.')}
-                </Text>
-              )}
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('basicInfo.gender', 'Gender')}</Text>
-              {renderSelectOption(GENDER_OPTIONS, formData.gender, (v) => handleInputChange('gender', v))}
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('basicInfo.bio', 'About Me')}</Text>
-              <TextInput
-                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                value={formData.bio}
-                onChangeText={(text) => handleInputChange('bio', text)}
-                placeholder={t('basicInfo.bioPlaceholder', 'Tell us about yourself...')}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                style={{ minHeight: 100 }}
-              />
-            </View>
-          </View>
+          <TenantBasicStep
+            form={formData}
+            update={handleInputChange}
+            dobError={dobError}
+            onDobChange={(value) => {
+              handleInputChange('dateOfBirth', value);
+              setDobError('');
+            }}
+          />
         );
-
-      case 1: // Contact
+      case 1:
+        return <TenantContactStep form={formData} update={handleInputChange} />;
+      case 2:
         return (
-          <View className="gap-4">
-            <View>
-              <Text className="text-text font-medium mb-2">{t('contact.phone', 'Phone Number')}</Text>
-              <TextInput
-                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                value={formData.phone}
-                onChangeText={(text) => handleInputChange('phone', text)}
-                keyboardType="phone-pad"
-                placeholder="+48 123 456 789"
-              />
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('contact.location', 'City / Location')}</Text>
-              <TextInput
-                className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                value={formData.location}
-                onChangeText={(text) => handleInputChange('location', text)}
-                placeholder="e.g., Warsaw, Krakow"
-              />
-            </View>
-          </View>
+          <TenantPreferencesStep
+            form={formData}
+            update={handleInputChange}
+            onAreaChange={(city, districts) =>
+              setFormData((prev) => ({ ...prev, preferredLocation: city, preferredDistricts: districts }))
+            }
+          />
         );
-
-      case 2: // Preferences
+      case 3:
+        return <TenantLifestyleStep form={formData} update={handleInputChange} />;
+      case 4:
         return (
-          <View className="gap-4">
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Text className="text-text font-medium mb-2">{t('preferences.budgetMin', 'Min Budget')} (PLN)</Text>
-                <TextInput
-                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                  value={formData.budgetMin}
-                  onChangeText={(text) => handleInputChange('budgetMin', text)}
-                  keyboardType="number-pad"
-                  placeholder="1000"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-text font-medium mb-2">{t('preferences.budgetMax', 'Max Budget')} (PLN)</Text>
-                <TextInput
-                  className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                  value={formData.budgetMax}
-                  onChangeText={(text) => handleInputChange('budgetMax', text)}
-                  keyboardType="number-pad"
-                  placeholder="3000"
-                />
-              </View>
-            </View>
-
-            <PreferredAreaPicker
-              city={formData.preferredLocation}
-              districts={formData.preferredDistricts}
-              onChange={({ city, districts }) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  preferredLocation: city,
-                  preferredDistricts: districts,
-                }));
-              }}
-            />
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('preferences.leaseDuration', 'Lease Duration')}</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {['3', '6', '12', '24'].map((months) => (
-                  <TouchableOpacity
-                    key={months}
-                    onPress={() => handleInputChange('leaseDuration', months)}
-                    className={`px-4 py-2.5 rounded-lg border ${
-                      formData.leaseDuration === months
-                        ? 'bg-primary-600 border-primary-600'
-                        : 'bg-card border-border'
-                    }`}
-                  >
-                    <Text
-                      className={`font-medium ${
-                        formData.leaseDuration === months ? 'text-white' : 'text-text'
-                      }`}
-                    >
-                      {months}{months === '24' ? '+' : ''} {t('preferences.months', 'months')}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
+          <TenantLanguagesStep
+            form={formData}
+            update={handleInputChange}
+            customLanguage={customLanguage}
+            setCustomLanguage={setCustomLanguage}
+          />
         );
-
-      case 3: // Lifestyle
-        return (
-          <View className="gap-5">
-            <View>
-              <Text className="text-text font-medium mb-2">{t('lifestyle.cleanliness.label', 'Cleanliness Level')}</Text>
-              {renderSelectOption(CLEANLINESS_OPTIONS, formData.cleanliness, (v) => handleInputChange('cleanliness', v))}
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('lifestyle.socialLevel.label', 'Social Level')}</Text>
-              {renderSelectOption(SOCIAL_OPTIONS, formData.socialLevel, (v) => handleInputChange('socialLevel', v))}
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('lifestyle.guests.label', 'Guest Frequency')}</Text>
-              {renderSelectOption(GUESTS_OPTIONS, formData.guestsFrequency, (v) => handleInputChange('guestsFrequency', v))}
-            </View>
-
-            <View className="mt-2">
-              <Text className="text-text font-semibold mb-1">{t('coOccupants.title', 'Who will live with you?')}</Text>
-              <Text className="text-muted text-sm mb-3">{t('coOccupants.subtitle', 'Let flatmates know who is moving in with you.')}</Text>
-              <View className="gap-2">
-                {renderCheckboxOption(t('coOccupants.partner', "I'll move in with a partner"), formData.hasPartner, () => handleInputChange('hasPartner', !formData.hasPartner))}
-                {renderCheckboxOption(t('coOccupants.children', 'I have children living with me'), formData.hasChildren, () => handleInputChange('hasChildren', !formData.hasChildren))}
-              </View>
-              {formData.hasChildren && (
-                <View className="mt-3">
-                  <Text className="text-text font-medium mb-2">{t('coOccupants.childrenCount', 'How many children?')}</Text>
-                  <TextInput
-                    className="border border-border rounded-lg px-4 py-3 text-base text-text bg-card w-24"
-                    value={formData.childrenCount}
-                    onChangeText={(text) => handleInputChange('childrenCount', text)}
-                    keyboardType="number-pad"
-                    placeholder="1"
-                    maxLength={1}
-                  />
-                </View>
-              )}
-            </View>
-
-            <View className="mt-2">
-              <Text className="text-text font-semibold mb-1">{t('dealBreakers.title', 'Deal Breakers')}</Text>
-              <Text className="text-muted text-sm mb-3">{t('dealBreakers.subtitle', "What's absolutely not acceptable?")}</Text>
-              <View className="gap-2">
-                {renderCheckboxOption(t('dealBreakers.noSmokers', 'No smokers'), formData.noSmokers, () => handleInputChange('noSmokers', !formData.noSmokers))}
-                {renderCheckboxOption(t('dealBreakers.noPets', 'No pets'), formData.noPets, () => handleInputChange('noPets', !formData.noPets))}
-                {renderCheckboxOption(t('dealBreakers.noParties', 'No parties'), formData.noParties, () => handleInputChange('noParties', !formData.noParties))}
-                {renderCheckboxOption(t('dealBreakers.sameGenderOnly', 'Same gender only'), formData.sameGenderOnly, () => handleInputChange('sameGenderOnly', !formData.sameGenderOnly))}
-                {renderCheckboxOption(t('dealBreakers.quietHoursRequired', 'Quiet hours required'), formData.quietHoursRequired, () => handleInputChange('quietHoursRequired', !formData.quietHoursRequired))}
-                {renderCheckboxOption(t('dealBreakers.noChildren', 'Prefer no children in the flat'), formData.noChildren, () => handleInputChange('noChildren', !formData.noChildren))}
-                {renderCheckboxOption(t('dealBreakers.noCouples', 'Prefer no couples'), formData.noCouples, () => handleInputChange('noCouples', !formData.noCouples))}
-              </View>
-            </View>
-          </View>
-        );
-
-      case 4: // Languages
-        return (
-          <View className="gap-4">
-            <View>
-              <Text className="text-text font-medium mb-2">{t('languages.select', 'Select languages you speak')}</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {SUPPORTED_LANGUAGES.map((lang) => {
-                  const isSelected = formData.languages.includes(lang);
-                  return (
-                    <TouchableOpacity
-                      key={lang}
-                      onPress={() => {
-                        if (isSelected) {
-                          handleInputChange('languages', formData.languages.filter((l) => l !== lang));
-                        } else {
-                          handleInputChange('languages', [...formData.languages, lang]);
-                        }
-                      }}
-                      className={`px-4 py-2.5 rounded-lg border ${
-                        isSelected ? 'bg-primary-600 border-primary-600' : 'bg-card border-border'
-                      }`}
-                    >
-                      <Text className={`font-medium ${isSelected ? 'text-white' : 'text-text'}`}>
-                        {lang}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-
-            <View>
-              <Text className="text-text font-medium mb-2">{t('languages.other', 'Other language')}</Text>
-              <View className="flex-row gap-2">
-                <TextInput
-                  className="flex-1 border border-border rounded-lg px-4 py-3 text-base text-text bg-card"
-                  value={customLanguage}
-                  onChangeText={setCustomLanguage}
-                  placeholder={t('languages.otherPlaceholder', 'e.g. Czech, Portuguese…')}
-                />
-                <TouchableOpacity
-                  disabled={!customLanguage.trim()}
-                  onPress={() => {
-                    const cleaned = customLanguage.trim().replace(/\s+/g, ' ');
-                    if (!cleaned) return;
-                    const titled = cleaned
-                      .split(' ')
-                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-                      .join(' ');
-                    if (!formData.languages.some((l) => l.toLowerCase() === titled.toLowerCase())) {
-                      handleInputChange('languages', [...formData.languages, titled]);
-                    }
-                    setCustomLanguage('');
-                  }}
-                  className={`px-4 rounded-lg border items-center justify-center ${
-                    customLanguage.trim() ? 'bg-primary-600 border-primary-600' : 'bg-surface border-border'
-                  }`}
-                >
-                  <Text className={customLanguage.trim() ? 'text-white font-medium' : 'text-muted font-medium'}>
-                    {t('languages.add', 'Add')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {formData.languages.filter((l) => !SUPPORTED_LANGUAGES.includes(l)).length > 0 && (
-                <View className="flex-row flex-wrap gap-2 mt-2">
-                  {formData.languages
-                    .filter((l) => !SUPPORTED_LANGUAGES.includes(l))
-                    .map((lang) => (
-                      <TouchableOpacity
-                        key={lang}
-                        onPress={() =>
-                          handleInputChange('languages', formData.languages.filter((l) => l !== lang))
-                        }
-                        className="flex-row items-center px-3 py-2 rounded-lg bg-primary-50 border border-primary-300"
-                      >
-                        <Text className="text-primary-700 font-medium mr-1">{lang}</Text>
-                        <Text className="text-primary-400">×</Text>
-                      </TouchableOpacity>
-                    ))}
-                </View>
-              )}
-            </View>
-
-            {formData.languages.length > 0 && (
-              <View>
-                <Text className="text-text font-medium mb-2">{t('languages.preferredLanguage', 'Preferred Language')}</Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {formData.languages.map((lang) => (
-                    <TouchableOpacity
-                      key={lang}
-                      onPress={() => handleInputChange('preferredLanguage', lang)}
-                      className={`px-4 py-2.5 rounded-lg border ${
-                        formData.preferredLanguage === lang
-                          ? 'bg-primary-600 border-primary-600'
-                          : 'bg-card border-border'
-                      }`}
-                    >
-                      <Text
-                        className={`font-medium ${
-                          formData.preferredLanguage === lang ? 'text-white' : 'text-text'
-                        }`}
-                      >
-                        {lang}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-          </View>
-        );
-
       default:
         return null;
     }
   };
-
   const CurrentIcon = STEPS[currentStep].icon;
 
   return (
@@ -761,7 +364,7 @@ export default function TenantProfileCompletion() {
             <View className="w-10 h-10 rounded-lg bg-primary-600 items-center justify-center">
               <CurrentIcon size={20} color="white" />
             </View>
-            <Text className="text-xl font-semibold text-text">{STEPS[currentStep].title}</Text>
+            <Text className="text-xl font-semibold text-text">{t(STEPS[currentStep].titleKey)}</Text>
           </View>
 
           {renderStepContent()}

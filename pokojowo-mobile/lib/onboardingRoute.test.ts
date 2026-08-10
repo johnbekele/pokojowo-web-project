@@ -5,15 +5,26 @@ describe('post-auth onboarding route', () => {
     expect(getPostAuthRoute(null)).toBe('/(auth)/login');
   });
 
-  it('sends users without a role to role selection', () => {
+  it('sends the backend default User role to role selection', () => {
+    expect(getPostAuthRoute({ role: ['User'] } as never)).toBe('/onboarding/role');
+  });
+
+  it('also handles an empty role list', () => {
     expect(getPostAuthRoute({ role: [] } as never)).toBe('/onboarding/role');
   });
 
   it('sends incomplete landlords to landlord profile completion', () => {
     expect(getPostAuthRoute({
       role: ['Landlord'],
-      profile_completion: { completed: false },
+      isProfileComplete: false,
     } as never)).toBe('/onboarding/profile-completion/landlord');
+  });
+
+  it('sends incomplete tenants to tenant profile completion', () => {
+    expect(getPostAuthRoute({
+      role: ['User', 'Tenant'],
+      isProfileComplete: false,
+    } as never)).toBe('/onboarding/profile-completion/tenant');
   });
 
   it('sends complete users to the home tab', () => {

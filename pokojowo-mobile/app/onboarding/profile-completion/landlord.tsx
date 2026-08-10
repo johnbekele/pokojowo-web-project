@@ -151,10 +151,10 @@ export default function LandlordProfileCompletion() {
             <X size={20} color={colors.muted} />
           </TouchableOpacity>
           <Text className="text-2xl font-bold text-text text-center">
-            {t('completion.landlord.title', 'Complete Your Landlord Profile')}
+            {t('landlord.title')}
           </Text>
           <Text className="text-muted text-center mt-1">
-            {t('completion.landlord.subtitle', 'Add your details to start listing properties')}
+            {t('landlord.subtitle')}
           </Text>
         </View>
 
@@ -183,44 +183,44 @@ export default function LandlordProfileCompletion() {
                 <User size={20} color="white" />
               </View>
               <Text className="text-lg font-semibold text-text">
-                {t('landlord.personalInfo', 'Personal Information')}
+                {t('landlord.personalInfo')}
               </Text>
             </View>
 
             <View className="flex-row gap-3 mb-4">
               <View className="flex-1">
                 <Text className="text-text font-medium mb-2">
-                  {t('basicInfo.firstName', 'First Name')} *
+                  {t('basicInfo.firstName')} *
                 </Text>
                 <TextInput
                   className="bg-card border border-border rounded-lg px-4 py-3 text-base text-text"
                   value={formData.firstname}
                   onChangeText={(text) => handleInputChange('firstname', text)}
-                  placeholder="John"
+                  placeholder={t('basicInfo.firstNamePlaceholder')}
                 />
               </View>
               <View className="flex-1">
                 <Text className="text-text font-medium mb-2">
-                  {t('basicInfo.lastName', 'Last Name')} *
+                  {t('basicInfo.lastName')} *
                 </Text>
                 <TextInput
                   className="bg-card border border-border rounded-lg px-4 py-3 text-base text-text"
                   value={formData.lastname}
                   onChangeText={(text) => handleInputChange('lastname', text)}
-                  placeholder="Doe"
+                  placeholder={t('basicInfo.lastNamePlaceholder')}
                 />
               </View>
             </View>
 
             <View>
               <Text className="text-text font-medium mb-2">
-                {t('landlord.companyName', 'Company Name (Optional)')}
+                {t('landlord.companyName')}
               </Text>
               <TextInput
                 className="bg-card border border-border rounded-lg px-4 py-3 text-base text-text"
                 value={formData.companyName}
                 onChangeText={(text) => handleInputChange('companyName', text)}
-                placeholder={t('landlord.companyPlaceholder', 'Your company or business name')}
+                placeholder={t('landlord.companyPlaceholder')}
               />
             </View>
           </View>
@@ -232,20 +232,20 @@ export default function LandlordProfileCompletion() {
                 <Phone size={20} color="white" />
               </View>
               <Text className="text-lg font-semibold text-text">
-                {t('landlord.contactInfo', 'Contact Information')}
+                {t('landlord.contactInfo')}
               </Text>
             </View>
 
             <View className="mb-4">
               <Text className="text-text font-medium mb-2">
-                {t('contact.phone', 'Phone Number')}
+                {t('contact.phone')}
               </Text>
               <TextInput
                 className="bg-card border border-border rounded-lg px-4 py-3 text-base text-text"
                 value={formData.phone}
                 onChangeText={(text) => handleInputChange('phone', text)}
                 keyboardType="phone-pad"
-                placeholder="+48 123 456 789"
+                placeholder={t('contact.phonePlaceholder')}
               />
             </View>
 
@@ -253,14 +253,14 @@ export default function LandlordProfileCompletion() {
               <View className="flex-row items-center mb-2">
                 <MapPin size={16} color={colors.muted} />
                 <Text className="text-text font-medium ml-1">
-                  {t('contact.location', 'City / Location')}
+                  {t('contact.location')}
                 </Text>
               </View>
               <TextInput
                 className="bg-card border border-border rounded-lg px-4 py-3 text-base text-text"
                 value={formData.location}
                 onChangeText={(text) => handleInputChange('location', text)}
-                placeholder="e.g., Warsaw, Krakow"
+                placeholder={t('contact.locationPlaceholder')}
               />
             </View>
           </View>
@@ -272,18 +272,18 @@ export default function LandlordProfileCompletion() {
                 <FileText size={20} color="white" />
               </View>
               <Text className="text-lg font-semibold text-text">
-                {t('landlord.aboutYou', 'About You')}
+                {t('landlord.aboutYou')}
               </Text>
             </View>
 
             <Text className="text-text font-medium mb-2">
-              {t('landlord.bio', 'About You / Your Properties')}
+              {t('landlord.bio')}
             </Text>
             <TextInput
               className="bg-card border border-border rounded-lg px-4 py-3 text-base text-text"
               value={formData.bio}
               onChangeText={(text) => handleInputChange('bio', text)}
-              placeholder={t('landlord.bioPlaceholder', 'Tell potential tenants about yourself and your properties...')}
+              placeholder={t('landlord.bioPlaceholder')}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
