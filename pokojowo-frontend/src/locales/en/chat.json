@@ -59,5 +59,11 @@
   "viewProfile": "View Profile",
   "online": "Online",
   "offline": "Offline",
-  "typing": "typing…"
+  "typing": "typing…",
+  "accessibility": {
+    "back": "Back",
+    "sendMessage": "Send message",
+    "messageOptions": "Message options",
+    "reply": "Reply"
+  }
 }

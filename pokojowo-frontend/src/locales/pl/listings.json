@@ -180,6 +180,9 @@
     "unlike": "Usuń z zapisanych",
     "liked": "Zapisano"
   },
+  "accessibility": {
+    "listingPhoto": "Zdjęcie ogłoszenia: {{title}}"
+  },
   "detail": {
     "contactInfo": "Dane kontaktowe",
     "phoneNumber": "Numer telefonu",
