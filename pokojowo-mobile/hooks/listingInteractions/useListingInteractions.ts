@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listingInteractionService } from '@/services';
+import type { ListingInteraction } from '@/services/listingInteraction.service';
 
 export const INTERACTION_KEYS = {
   all: ['listing-interactions'] as const,
@@ -36,15 +37,34 @@ export function useLikeListing() {
   return useMutation({
     mutationFn: (listingId: string) =>
       listingInteractionService.likeListing(listingId),
-    onSuccess: (_, listingId) => {
-      queryClient.invalidateQueries({ queryKey: INTERACTION_KEYS.myLiked });
-      queryClient.setQueryData(
+    onMutate: async (listingId) => {
+      await queryClient.cancelQueries({
+        queryKey: INTERACTION_KEYS.myInteractions(listingId),
+      });
+      const previous = queryClient.getQueryData<ListingInteraction>(
+        INTERACTION_KEYS.myInteractions(listingId)
+      );
+      queryClient.setQueryData<ListingInteraction | undefined>(
         INTERACTION_KEYS.myInteractions(listingId),
-        (old: { has_liked?: boolean } | undefined) => ({
-          ...old,
+        (old) => ({
+          has_viewed: old?.has_viewed ?? false,
           has_liked: true,
+          has_inquired: old?.has_inquired ?? false,
         })
       );
+      return { previous };
+    },
+    onError: (_error, listingId, context) => {
+      queryClient.setQueryData(
+        INTERACTION_KEYS.myInteractions(listingId),
+        context?.previous
+      );
+    },
+    onSettled: (_data, _error, listingId) => {
+      queryClient.invalidateQueries({
+        queryKey: INTERACTION_KEYS.myInteractions(listingId),
+      });
+      queryClient.invalidateQueries({ queryKey: INTERACTION_KEYS.myLiked });
     },
   });
 }
@@ -55,15 +75,34 @@ export function useUnlikeListing() {
   return useMutation({
     mutationFn: (listingId: string) =>
       listingInteractionService.unlikeListing(listingId),
-    onSuccess: (_, listingId) => {
-      queryClient.invalidateQueries({ queryKey: INTERACTION_KEYS.myLiked });
-      queryClient.setQueryData(
+    onMutate: async (listingId) => {
+      await queryClient.cancelQueries({
+        queryKey: INTERACTION_KEYS.myInteractions(listingId),
+      });
+      const previous = queryClient.getQueryData<ListingInteraction>(
+        INTERACTION_KEYS.myInteractions(listingId)
+      );
+      queryClient.setQueryData<ListingInteraction | undefined>(
         INTERACTION_KEYS.myInteractions(listingId),
-        (old: { has_liked?: boolean } | undefined) => ({
-          ...old,
+        (old) => ({
+          has_viewed: old?.has_viewed ?? false,
           has_liked: false,
+          has_inquired: old?.has_inquired ?? false,
         })
       );
+      return { previous };
+    },
+    onError: (_error, listingId, context) => {
+      queryClient.setQueryData(
+        INTERACTION_KEYS.myInteractions(listingId),
+        context?.previous
+      );
+    },
+    onSettled: (_data, _error, listingId) => {
+      queryClient.invalidateQueries({
+        queryKey: INTERACTION_KEYS.myInteractions(listingId),
+      });
+      queryClient.invalidateQueries({ queryKey: INTERACTION_KEYS.myLiked });
     },
   });
 }

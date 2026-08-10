@@ -22,7 +22,9 @@ export interface Listing {
   rent_for?: string;
   rent_for_only?: string;
   can_be_contacted?: string[];
+  canBeContacted?: string[];
   close_to?: string[];
+  closeTo?: string[];
   ai_help?: boolean;
   created_at: string;
   updated_at?: string;
@@ -52,8 +54,11 @@ export interface Listing {
   };
   phone?: string; // Direct phone on listing
   isScraped?: boolean;
+  is_scraped?: boolean;
   sourceUrl?: string;
+  source_url?: string;
   sourceSite?: string;
+  source_site?: string;
   // Structured location
   city?: string;
   district?: string;
@@ -61,6 +66,7 @@ export interface Listing {
     type: 'Point';
     coordinates: [number, number]; // [lng, lat]
   };
+  geoPrecision?: string;
   // Who offers the flat
   offeredBy?: 'owner' | 'agency' | 'unknown';
   createdAt?: string;
