@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Users,
   MessageSquare,
@@ -31,21 +31,18 @@ import {
   TrustBadge,
 } from '@/components/shared/editorial';
 import useLikesStore from '@/stores/likesStore';
-import useFavoritesStore from '@/stores/favoritesStore';
 import api from '@/lib/api';
 
 export default function Matches() {
   const { t } = useTranslation('matching');
   const { fetchLikesSent, likeUser } = useLikesStore();
-  const { fetchSavedMatches } = useFavoritesStore();
   const [viewMode, setViewMode] = useState('swipe');
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchLikesSent();
-    fetchSavedMatches();
-  }, [fetchLikesSent, fetchSavedMatches]);
+  }, [fetchLikesSent]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['matches'],
