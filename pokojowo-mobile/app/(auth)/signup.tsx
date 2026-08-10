@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -13,36 +13,46 @@ import AuthStatusView from '@/components/feature/auth/AuthStatusView';
 import SocialAuthButtons from '@/components/feature/auth/SocialAuthButtons';
 import useAuthStore from '@/stores/authStore';
 import useTheme from '@/hooks/useTheme';
+import useUIStore from '@/stores/uiStore';
 
-const signupSchema = z
-  .object({
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(10, 'Password must be at least 10 characters'),
-    confirmPassword: z.string(),
-  })
-  .superRefine((data, ctx) => {
-    const normalized = data.password.toLowerCase();
-    const emailLocalPart = data.email.split('@')[0];
-    if ([data.username, emailLocalPart].some((value) => value && normalized.includes(value.toLowerCase()))) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Password must not contain your username or email address',
-        path: ['password'],
-      });
-    }
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type SignupForm = z.infer<typeof signupSchema>;
+type SignupForm = {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export default function SignupScreen() {
   const { t } = useTranslation('auth');
   const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
   const { register, isLoading, error } = useAuthStore();
+  const signupSchema = useMemo(
+    () =>
+      z
+        .object({
+          username: z.string().min(3, t('validation.username')),
+          email: z.string().email(t('validation.email')),
+          password: z.string().min(10, t('validation.passwordLength')),
+          confirmPassword: z.string(),
+        })
+        .superRefine((data, ctx) => {
+          const normalized = data.password.toLowerCase();
+          const emailLocalPart = data.email.split('@')[0];
+          if ([data.username, emailLocalPart].some((value) => value && normalized.includes(value.toLowerCase()))) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t('validation.passwordPersonalInfo'),
+              path: ['password'],
+            });
+          }
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t('validation.passwordMatch'),
+          path: ['confirmPassword'],
+        }),
+    [t]
+  );
   const [success, setSuccess] = useState(false);
 
   const {
@@ -55,11 +65,14 @@ export default function SignupScreen() {
   });
 
   const onSubmit = async (data: SignupForm) => {
-    try {
-      await register({ username: data.username, email: data.email, password: data.password });
+    const result = await register({ username: data.username, email: data.email, password: data.password });
+    if (result.success) {
       setSuccess(true);
-    } catch {
-      // handled by store
+    } else {
+      showToast({
+        type: 'error',
+        message: result.error || error || t('signup.error.generic'),
+      });
     }
   };
 
@@ -67,10 +80,10 @@ export default function SignupScreen() {
     return (
       <AuthStatusView
         tone="success"
-        title={t('signup.successTitle', 'Account Created!')}
-        message={t('signup.successMessage', 'Please check your email to verify your account.')}
+        title={t('signup.success.title')}
+        message={t('signup.success.message')}
         primaryAction={{
-          label: t('signup.goToLogin', 'Go to Login'),
+          label: t('signup.goToLogin'),
           onPress: () => router.replace('/(auth)/login'),
         }}
       />
@@ -80,8 +93,8 @@ export default function SignupScreen() {
   return (
     <AuthScaffold
       showBrand={false}
-      title={t('signup.title', 'Create Account')}
-      subtitle={t('signup.subtitle', 'Join Pokojowo to find your perfect flatmate')}
+      title={t('signup.title')}
+      subtitle={t('signup.subtitle')}
       onBack={() => router.replace('/(auth)/login')}
     >
       {error && (
@@ -95,8 +108,8 @@ export default function SignupScreen() {
         name="username"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('signup.username', 'Username')}
-            placeholder={t('signup.usernamePlaceholder', 'Choose a username')}
+            label={t('signup.username')}
+            placeholder={t('signup.usernamePlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -113,8 +126,8 @@ export default function SignupScreen() {
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('signup.email', 'Email')}
-            placeholder={t('signup.emailPlaceholder', 'Enter your email')}
+            label={t('signup.email')}
+            placeholder={t('signup.emailPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -133,8 +146,8 @@ export default function SignupScreen() {
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('signup.password', 'Password')}
-            placeholder={t('signup.passwordPlaceholder', 'Create a password')}
+            label={t('signup.password')}
+            placeholder={t('signup.passwordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -147,7 +160,7 @@ export default function SignupScreen() {
       />
 
       <Text className="text-muted text-xs mb-4">
-        {t('signup.passwordRequirements', 'Use at least 10 characters and avoid your username or email.')}
+        {t('signup.passwordRequirements')}
       </Text>
 
       <Controller
@@ -155,8 +168,8 @@ export default function SignupScreen() {
         name="confirmPassword"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('signup.confirmPassword', 'Confirm Password')}
-            placeholder={t('signup.confirmPasswordPlaceholder', 'Confirm your password')}
+            label={t('signup.confirmPassword')}
+            placeholder={t('signup.confirmPasswordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -169,21 +182,21 @@ export default function SignupScreen() {
       />
 
       <Button onPress={handleSubmit(onSubmit)} loading={isLoading} fullWidth className="mt-2">
-        {t('signup.submit', 'Create Account')}
+        {t('signup.submit')}
       </Button>
 
       <View className="flex-row items-center my-6">
         <View className="flex-1 h-px bg-border" />
-        <Text className="mx-4 text-muted">{t('login.or', 'or')}</Text>
+        <Text className="mx-4 text-muted">{t('login.or')}</Text>
         <View className="flex-1 h-px bg-border" />
       </View>
 
       <SocialAuthButtons />
 
       <View className="flex-row justify-center mt-6">
-        <Text className="text-muted">{t('signup.hasAccount', 'Already have an account? ')}</Text>
+        <Text className="text-muted">{t('signup.hasAccount')}</Text>
         <Link href="/(auth)/login" asChild>
-          <Text className="text-brand font-semibold">{t('signup.signIn', 'Sign in')}</Text>
+          <Text className="text-brand font-semibold">{t('signup.signIn')}</Text>
         </Link>
       </View>
     </AuthScaffold>

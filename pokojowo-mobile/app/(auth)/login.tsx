@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -11,19 +12,24 @@ import AuthScaffold from '@/components/feature/auth/AuthScaffold';
 import SocialAuthButtons from '@/components/feature/auth/SocialAuthButtons';
 import useAuthStore from '@/stores/authStore';
 import useTheme from '@/hooks/useTheme';
+import useUIStore from '@/stores/uiStore';
 import { getPostAuthRoute } from '@/lib/onboardingRoute';
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+type LoginForm = { email: string; password: string };
 
 export default function LoginScreen() {
   const { t } = useTranslation('auth');
   const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
   const { login, isLoading, error } = useAuthStore();
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('validation.email')),
+        password: z.string().min(1, t('validation.passwordRequired')),
+      }),
+    [t]
+  );
 
   const {
     control,
@@ -38,11 +44,16 @@ export default function LoginScreen() {
     const result = await login(data.email, data.password);
     if (result.success) {
       router.replace(getPostAuthRoute(result.user ?? null));
+    } else {
+      showToast({
+        type: 'error',
+        message: result.error || error || t('login.error.generic'),
+      });
     }
   };
 
   return (
-    <AuthScaffold subtitle={t('login.subtitle', 'Find your perfect flatmate')}>
+    <AuthScaffold subtitle={t('login.subtitle')}>
       {error && (
         <View className="bg-danger/10 border border-danger/30 rounded-lg p-3 mb-4">
           <Text className="text-danger text-center">{error}</Text>
@@ -54,8 +65,8 @@ export default function LoginScreen() {
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('login.email', 'Email')}
-            placeholder={t('login.emailPlaceholder', 'Enter your email')}
+            label={t('login.email')}
+            placeholder={t('login.emailPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -74,8 +85,8 @@ export default function LoginScreen() {
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('login.password', 'Password')}
-            placeholder={t('login.passwordPlaceholder', 'Enter your password')}
+            label={t('login.password')}
+            placeholder={t('login.passwordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -91,29 +102,29 @@ export default function LoginScreen() {
         <Link href="/(auth)/forgot-password" asChild>
           <TouchableOpacity>
             <Text className="text-brand font-medium">
-              {t('login.forgotPassword', 'Forgot password?')}
+              {t('login.forgotPassword')}
             </Text>
           </TouchableOpacity>
         </Link>
       </View>
 
       <Button onPress={handleSubmit(onSubmit)} loading={isLoading} fullWidth>
-        {t('login.submit', 'Sign In')}
+        {t('login.submit')}
       </Button>
 
       <View className="flex-row items-center my-6">
         <View className="flex-1 h-px bg-border" />
-        <Text className="mx-4 text-muted">{t('login.or', 'or')}</Text>
+        <Text className="mx-4 text-muted">{t('login.or')}</Text>
         <View className="flex-1 h-px bg-border" />
       </View>
 
       <SocialAuthButtons />
 
       <View className="flex-row justify-center mt-6">
-        <Text className="text-muted">{t('login.noAccount', "Don't have an account? ")}</Text>
+        <Text className="text-muted">{t('login.noAccount')}</Text>
         <Link href="/(auth)/signup" asChild>
           <TouchableOpacity>
-            <Text className="text-brand font-semibold">{t('login.signUp', 'Sign up')}</Text>
+            <Text className="text-brand font-semibold">{t('login.signUp')}</Text>
           </TouchableOpacity>
         </Link>
       </View>

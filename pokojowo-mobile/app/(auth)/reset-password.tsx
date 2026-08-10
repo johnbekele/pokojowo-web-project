@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -12,25 +12,30 @@ import AuthScaffold from '@/components/feature/auth/AuthScaffold';
 import AuthStatusView from '@/components/feature/auth/AuthStatusView';
 import { useResetPassword } from '@/hooks/auth/useAuth';
 import useTheme from '@/hooks/useTheme';
+import useUIStore from '@/stores/uiStore';
 
-const resetPasswordSchema = z
-  .object({
-    password: z.string().min(10, 'Password must be at least 10 characters'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+type ResetPasswordFormData = { password: string; confirmPassword: string };
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation('auth');
   const { colors } = useTheme();
+  const showToast = useUIStore((s) => s.showToast);
   const { token } = useLocalSearchParams<{ token?: string }>();
   const [isSuccess, setIsSuccess] = useState(false);
   const resetPasswordMutation = useResetPassword();
+  const resetPasswordSchema = useMemo(
+    () =>
+      z
+        .object({
+          password: z.string().min(10, t('validation.passwordLength')),
+          confirmPassword: z.string(),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+          message: t('validation.passwordMatch'),
+          path: ['confirmPassword'],
+        }),
+    [t]
+  );
 
   const {
     control,
@@ -48,7 +53,7 @@ export default function ResetPasswordScreen() {
       setIsSuccess(true);
       setTimeout(() => router.replace('/(auth)/login'), 2000);
     } catch {
-      // handled by mutation state
+      showToast({ type: 'error', message: t('resetPassword.error.invalidToken') });
     }
   };
 
@@ -56,10 +61,10 @@ export default function ResetPasswordScreen() {
     return (
       <AuthStatusView
         tone="error"
-        title={t('resetPassword.invalid.title', 'Invalid Link')}
-        message={t('resetPassword.invalid.message', 'This password reset link is invalid or has expired.')}
+        title={t('resetPassword.error.invalidTitle')}
+        message={t('resetPassword.error.invalidToken')}
         primaryAction={{
-          label: t('resetPassword.invalid.requestNew', 'Request New Link'),
+          label: t('resetPassword.error.requestNew'),
           onPress: () => router.replace('/(auth)/forgot-password'),
         }}
       />
@@ -70,25 +75,25 @@ export default function ResetPasswordScreen() {
     return (
       <AuthStatusView
         tone="success"
-        title={t('resetPassword.success.title', 'Password Reset!')}
-        message={t('resetPassword.success.message', 'Your password has been reset successfully.')}
-        note={t('resetPassword.success.redirecting', 'Redirecting to login...')}
+        title={t('resetPassword.success.title')}
+        message={t('resetPassword.success.message')}
+        note={t('resetPassword.redirecting')}
       />
     );
   }
 
   return (
     <AuthScaffold
-      title={t('resetPassword.title', 'Reset Your Password')}
-      subtitle={t('resetPassword.subtitle', 'Enter your new password below')}
+      title={t('resetPassword.title')}
+      subtitle={t('resetPassword.subtitle')}
     >
       <Controller
         control={control}
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('resetPassword.password', 'New Password')}
-            placeholder={t('resetPassword.passwordPlaceholder', 'Enter new password')}
+            label={t('resetPassword.password')}
+            placeholder={t('resetPassword.passwordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -101,7 +106,7 @@ export default function ResetPasswordScreen() {
       />
 
       <Text className="text-muted text-xs mb-4">
-        {t('resetPassword.passwordRequirements', 'Use at least 10 characters and avoid your username or email.')}
+        {t('resetPassword.passwordRequirements')}
       </Text>
 
       <Controller
@@ -109,8 +114,8 @@ export default function ResetPasswordScreen() {
         name="confirmPassword"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label={t('resetPassword.confirmPassword', 'Confirm Password')}
-            placeholder={t('resetPassword.confirmPasswordPlaceholder', 'Confirm new password')}
+            label={t('resetPassword.confirmPassword')}
+            placeholder={t('resetPassword.confirmPasswordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -125,17 +130,17 @@ export default function ResetPasswordScreen() {
       {resetPasswordMutation.isError && (
         <View className="bg-danger/10 border border-danger/30 rounded-lg p-3 mb-4">
           <Text className="text-danger text-center">
-            {t('resetPassword.error.failed', 'Failed to reset password. The link may have expired.')}
+            {t('resetPassword.error.invalidToken')}
           </Text>
         </View>
       )}
 
       <Button onPress={handleSubmit(onSubmit)} loading={resetPasswordMutation.isPending} fullWidth>
-        {t('resetPassword.submit', 'Reset Password')}
+        {t('resetPassword.submit')}
       </Button>
 
       <Button variant="ghost" onPress={() => router.replace('/(auth)/login')} fullWidth className="mt-2">
-        {t('resetPassword.backToLogin', 'Back to Sign In')}
+        {t('resetPassword.backToLogin')}
       </Button>
     </AuthScaffold>
   );
