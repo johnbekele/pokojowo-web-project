@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService, profileService } from '@/services';
 import type { UserUpdateData, ReportReason } from '@/services/user.service';
 import { AUTH_KEYS } from '../auth/useAuth';
+import useAuthStore from '@/stores/authStore';
 
 export const USER_KEYS = {
   all: ['users'] as const,
@@ -85,7 +86,20 @@ export function useBlockUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => userService.blockUser(userId),
-    onSuccess: () => {
+    onSuccess: (response, userId) => {
+      const blockedUsers = response.data.blocked_users ?? response.data.blockedUsers;
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        useAuthStore.getState().updateUser({
+          chat_settings: {
+            ...currentUser.chat_settings,
+            blocked_users: blockedUsers ?? [
+              ...(currentUser.chat_settings?.blocked_users ?? []),
+              userId,
+            ],
+          },
+        });
+      }
       queryClient.invalidateQueries({ queryKey: AUTH_KEYS.user });
     },
   });
@@ -95,7 +109,18 @@ export function useUnblockUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (userId: string) => userService.unblockUser(userId),
-    onSuccess: () => {
+    onSuccess: (_response, userId) => {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        useAuthStore.getState().updateUser({
+          chat_settings: {
+            ...currentUser.chat_settings,
+            blocked_users: (currentUser.chat_settings?.blocked_users ?? []).filter(
+              (blockedUserId) => blockedUserId !== userId
+            ),
+          },
+        });
+      }
       queryClient.invalidateQueries({ queryKey: AUTH_KEYS.user });
     },
   });

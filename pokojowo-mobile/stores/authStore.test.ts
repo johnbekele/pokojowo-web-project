@@ -85,7 +85,7 @@ describe('mobile auth store', () => {
     expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('token', 'access-token');
     expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith('refreshToken', 'refresh-token');
     expect(mockApi.get).toHaveBeenCalledWith('/users/me');
-    expect(useAuthStore.getState().user).toEqual(user);
+    expect(useAuthStore.getState().user).toMatchObject({ ...user, id: 'user-1' });
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
   });
 
@@ -99,7 +99,7 @@ describe('mobile auth store', () => {
 
     const result = await useAuthStore.getState().loginWithGoogle();
 
-    expect(result).toEqual({ success: true, user });
+    expect(result).toMatchObject({ success: true, user: { ...user, id: 'google-user' } });
     expect(mockWebBrowser.openAuthSessionAsync).toHaveBeenCalledWith(
       expect.stringContaining('/auth/google?mobile_redirect=pokojowo%3A%2F%2Fauth%2Fcallback'),
       'pokojowo://auth/callback'

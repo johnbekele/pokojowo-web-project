@@ -1,7 +1,12 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from pydantic import BaseModel
 from app.schemas.user_schema import PushTokenUpdate, UserResponse, UserUpdate
-from app.models.user import User, RoleEnum
+from app.models.user import (
+    ChatSettingsModel,
+    NotificationPreferencesModel,
+    User,
+    RoleEnum,
+)
 from app.core.dependencies import get_current_user, require_role
 from app.core.security import create_access_token, create_refresh_token
 from app.services.trust_service import trust_level as _trust_level
@@ -42,6 +47,9 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "dateOfBirth": current_user.date_of_birth,
         "gender": current_user.gender.value if current_user.gender else None,
         "bio": current_user.bio,
+        "chatSettings": current_user.chat_settings.model_dump(by_alias=True)
+        if current_user.chat_settings
+        else None,
         "notificationPreferences": current_user.notification_preferences.model_dump(by_alias=True)
         if current_user.notification_preferences
         else None,
@@ -76,7 +84,19 @@ async def update_current_user(
     current_user: User = Depends(get_current_user)
 ):
     """Update current user information"""
-    update_data = user_data.dict(exclude_unset=True)
+    update_data = user_data.model_dump(exclude_unset=True, by_alias=False)
+
+    if "notification_preferences" in update_data:
+        value = update_data.pop("notification_preferences")
+        current_user.notification_preferences = (
+            NotificationPreferencesModel.model_validate(value) if value is not None else None
+        )
+
+    if "chat_settings" in update_data:
+        value = update_data.pop("chat_settings")
+        current_user.chat_settings = (
+            ChatSettingsModel.model_validate(value) if value is not None else None
+        )
 
     dob_value = update_data.pop("date_of_birth", None)
     if dob_value:
@@ -245,7 +265,6 @@ async def get_all_users(
 
 from app.core.dependencies import require_verified
 from app.models.report import Report, ReportReasonEnum
-from app.models.user import ChatSettingsModel
 
 
 @router.post("/{user_id}/report", response_model=dict)

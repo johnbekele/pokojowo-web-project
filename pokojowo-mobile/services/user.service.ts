@@ -1,5 +1,8 @@
 import api from '@/lib/api';
-import type { User, NotificationPreferences } from '@/types/user.types';
+import type {
+  User,
+  NotificationPreferencesPayload,
+} from '@/types/user.types';
 
 export interface UserUpdateData {
   firstname?: string;
@@ -11,7 +14,8 @@ export interface UserUpdateData {
   dateOfBirth?: string; // ISO date, e.g. 1995-04-23
   gender?: string;
   bio?: string;
-  notification_preferences?: Partial<NotificationPreferences>;
+  /** Uses the API's nested camelCase aliases (notificationPreferences). */
+  notificationPreferences?: NotificationPreferencesPayload;
 }
 
 export type ReportReason =
@@ -122,7 +126,9 @@ export const userService = {
     api.post<{ message: string }>(`/users/${userId}/report`, { reason, details }),
 
   blockUser: (userId: string) =>
-    api.post<{ message: string; blocked_users: string[] }>(`/users/${userId}/block`),
+    api.post<{ message: string; blocked_users?: string[]; blockedUsers?: string[] }>(
+      `/users/${userId}/block`
+    ),
 
   unblockUser: (userId: string) =>
     api.delete<{ message: string }>(`/users/${userId}/block`),
