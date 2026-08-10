@@ -97,12 +97,43 @@
     "roomTypes": {
       "private": "Private Room",
       "shared": "Shared Room",
-      "studio": "Studio"
+      "studio": "Studio",
+      "single": "Single Room",
+      "double": "Double Room",
+      "suite": "Suite"
     },
     "buildingType": "Building Type",
+    "buildingTypes": {
+      "apartment": "Apartment",
+      "loft": "Loft",
+      "block": "Block",
+      "house": "House"
+    },
     "rentFor": "Suitable For",
+    "rentForOptions": {
+      "anyone": "Anyone",
+      "women": "Women",
+      "men": "Men",
+      "students": "Students",
+      "families": "Families",
+      "couples": "Couples"
+    },
     "maxTenants": "Maximum Tenants",
     "anyTenants": "Any number",
+    "tenantCount": {
+      "one": "1 tenant",
+      "two": "2 tenants",
+      "three": "3 tenants",
+      "fourPlus": "4+ tenants"
+    },
+    "min": "Min",
+    "max": "Max",
+    "priceUnit": "PLN/month",
+    "sizeUnit": "m²",
+    "minPrice": "0 PLN",
+    "maxPrice": "{{max}} PLN",
+    "minSize": "0 m²",
+    "maxSize": "{{max}} m²",
     "amenities": "Amenities",
     "available": "Available Now",
     "apply": "Apply Filters",

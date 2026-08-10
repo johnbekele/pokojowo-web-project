@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import i18n from './i18n';
 
 /**
  * Merge Tailwind CSS classes with clsx
@@ -16,12 +17,14 @@ export function formatDate(
   options: Intl.DateTimeFormatOptions = {}
 ): string {
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
+  if (Number.isNaN(d.getTime())) return '';
+
+  return new Intl.DateTimeFormat(i18n.language || 'en', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     ...options,
-  });
+  }).format(d);
 }
 
 /**
@@ -32,10 +35,25 @@ export function formatRelativeTime(date: string | Date): string {
   const d = new Date(date);
   const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-  if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  if (diffInSeconds < 60) return i18n.t('common:time.justNow', 'Just now');
+  if (diffInSeconds < 3600) {
+    return i18n.t('common:time.minutesAgo', {
+      count: Math.floor(diffInSeconds / 60),
+      defaultValue: '{{count}} min ago',
+    });
+  }
+  if (diffInSeconds < 86400) {
+    return i18n.t('common:time.hoursAgo', {
+      count: Math.floor(diffInSeconds / 3600),
+      defaultValue: '{{count}}h ago',
+    });
+  }
+  if (diffInSeconds < 604800) {
+    return i18n.t('common:time.daysAgo', {
+      count: Math.floor(diffInSeconds / 86400),
+      defaultValue: '{{count}}d ago',
+    });
+  }
   return formatDate(date);
 }
 

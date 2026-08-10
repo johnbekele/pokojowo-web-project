@@ -10,6 +10,7 @@
     "findMatches": "Find Matches"
   },
   "noMessages": "No messages yet",
+  "unknownUser": "Unknown user",
   "startConversation": "Send a message to start the conversation",
   "loading": "Loading chat...",
   "loadingMessages": "Loading messages...",

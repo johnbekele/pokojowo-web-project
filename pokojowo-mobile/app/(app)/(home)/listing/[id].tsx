@@ -323,7 +323,7 @@ export default function ListingDetailScreen() {
               <View className="flex-row items-center">
                 <Users size={16} color={colors.muted} />
                 <Text className="text-muted ml-1.5">
-                  Max {listing.max_tenants} {listing.max_tenants === 1 ? 'tenant' : 'tenants'}
+                  {t('detail.maxTenants', 'Max {{count}} tenants', { count: listing.max_tenants })}
                 </Text>
               </View>
             )}
@@ -331,7 +331,7 @@ export default function ListingDetailScreen() {
               <View className="flex-row items-center">
                 <Calendar size={16} color={colors.muted} />
                 <Text className="text-muted ml-1.5">
-                  From {formatDate(listing.available_from)}
+                  {t('details.available', 'Available from')} {formatDate(listing.available_from)}
                 </Text>
               </View>
             )}
@@ -370,20 +370,20 @@ export default function ListingDetailScreen() {
             </Text>
             <Card variant="outlined" padding="md">
               <View className="flex-row justify-between py-2 border-b border-border">
-                <Text className="text-muted">Building Type</Text>
+                <Text className="text-muted">{t('filters.buildingType', 'Building Type')}</Text>
                 <Text className="text-text font-medium">
-                  {listing.building_type?.replace('_', ' ') || 'N/A'}
+                  {listing.building_type?.replace('_', ' ') || t('detail.notAvailable', 'N/A')}
                 </Text>
               </View>
               {listing.floor && (
                 <View className="flex-row justify-between py-2 border-b border-border">
-                  <Text className="text-muted">Floor</Text>
+                  <Text className="text-muted">{t('details.floor', 'Floor')}</Text>
                   <Text className="text-text font-medium">{listing.floor}</Text>
                 </View>
               )}
               {listing.rent_for && (
                 <View className="flex-row justify-between py-2">
-                  <Text className="text-muted">Preferred Tenant</Text>
+                  <Text className="text-muted">{t('filters.rentFor', 'Suitable For')}</Text>
                   <Text className="text-text font-medium">{listing.rent_for}</Text>
                 </View>
               )}

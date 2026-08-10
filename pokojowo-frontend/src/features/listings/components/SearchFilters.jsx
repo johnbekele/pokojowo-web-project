@@ -37,25 +37,25 @@ import { cn } from '@/lib/utils';
 import { CITIES, districtsForCity } from '@/lib/districts';
 
 const ROOM_TYPES = [
-  { value: 'Single', label: 'Single Room', icon: '🛏️' },
-  { value: 'Double', label: 'Double Room', icon: '🛏️🛏️' },
-  { value: 'Suite', label: 'Suite', icon: '🏠' },
+  { value: 'Single', labelKey: 'filters.roomTypes.single', icon: '🛏️' },
+  { value: 'Double', labelKey: 'filters.roomTypes.double', icon: '🛏️🛏️' },
+  { value: 'Suite', labelKey: 'filters.roomTypes.suite', icon: '🏠' },
 ];
 
 const BUILDING_TYPES = [
-  { value: 'Apartment', label: 'Apartment', icon: '🏢' },
-  { value: 'Loft', label: 'Loft', icon: '🏗️' },
-  { value: 'Block', label: 'Block', icon: '🏘️' },
-  { value: 'Detached_House', label: 'House', icon: '🏡' },
+  { value: 'Apartment', labelKey: 'filters.buildingTypes.apartment', icon: '🏢' },
+  { value: 'Loft', labelKey: 'filters.buildingTypes.loft', icon: '🏗️' },
+  { value: 'Block', labelKey: 'filters.buildingTypes.block', icon: '🏘️' },
+  { value: 'Detached_House', labelKey: 'filters.buildingTypes.house', icon: '🏡' },
 ];
 
 const RENT_FOR_OPTIONS = [
-  { value: 'Open to All', label: 'Anyone', icon: '👥' },
-  { value: 'Women', label: 'Women', icon: '👩' },
-  { value: 'Man', label: 'Men', icon: '👨' },
-  { value: 'Student', label: 'Students', icon: '🎓' },
-  { value: 'Family', label: 'Families', icon: '👨‍👩‍👧' },
-  { value: 'Couple', label: 'Couples', icon: '💑' },
+  { value: 'Open to All', labelKey: 'filters.rentForOptions.anyone', icon: '👥' },
+  { value: 'Women', labelKey: 'filters.rentForOptions.women', icon: '👩' },
+  { value: 'Man', labelKey: 'filters.rentForOptions.men', icon: '👨' },
+  { value: 'Student', labelKey: 'filters.rentForOptions.students', icon: '🎓' },
+  { value: 'Family', labelKey: 'filters.rentForOptions.families', icon: '👨‍👩‍👧' },
+  { value: 'Couple', labelKey: 'filters.rentForOptions.couples', icon: '💑' },
 ];
 
 const MAX_PRICE = 10000;
@@ -251,13 +251,13 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                 </div>
                 <Label className="font-semibold text-base">{t('filters.price', 'Price Range')}</Label>
               </div>
-              <span className="text-sm text-muted-foreground">PLN/month</span>
+              <span className="text-sm text-muted-foreground">{t('filters.priceUnit', 'PLN/month')}</span>
             </div>
 
             {/* Price inputs */}
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">Min</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.min', 'Min')}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -273,7 +273,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
               </div>
               <span className="text-muted-foreground mt-5">—</span>
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">Max</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.max', 'Max')}</Label>
                 <Input
                   type="number"
                   min={localFilters.minPrice || 0}
@@ -300,8 +300,8 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                 className="touch-manipulation"
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>0 PLN</span>
-                <span>{MAX_PRICE.toLocaleString()} PLN</span>
+                <span>{t('filters.minPrice', '0 PLN')}</span>
+                <span>{t('filters.maxPrice', '{{max}} PLN', { max: MAX_PRICE.toLocaleString() })}</span>
               </div>
             </div>
           </div>
@@ -315,13 +315,13 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                 </div>
                 <Label className="font-semibold text-base">{t('filters.size', 'Room Size')}</Label>
               </div>
-              <span className="text-sm text-muted-foreground">m²</span>
+              <span className="text-sm text-muted-foreground">{t('filters.sizeUnit', 'm²')}</span>
             </div>
 
             {/* Size inputs */}
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">Min</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.min', 'Min')}</Label>
                 <Input
                   type="number"
                   min={0}
@@ -337,7 +337,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
               </div>
               <span className="text-muted-foreground mt-5">—</span>
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground mb-1 block">Max</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">{t('filters.max', 'Max')}</Label>
                 <Input
                   type="number"
                   min={localFilters.minSize || 0}
@@ -364,8 +364,8 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                 className="touch-manipulation"
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>0 m²</span>
-                <span>{MAX_SIZE} m²</span>
+                <span>{t('filters.minSize', '0 m²')}</span>
+                <span>{t('filters.maxSize', '{{max}} m²', { max: MAX_SIZE })}</span>
               </div>
             </div>
           </div>
@@ -386,7 +386,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                   onClick={() => toggleArrayFilter('roomTypes', type.value)}
                   icon={type.icon}
                 >
-                  {type.label}
+                  {t(type.labelKey)}
                 </FilterChip>
               ))}
             </div>
@@ -410,7 +410,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                   onClick={() => toggleArrayFilter('buildingTypes', type.value)}
                   icon={type.icon}
                 >
-                  {type.label}
+                  {t(type.labelKey)}
                 </FilterChip>
               ))}
             </div>
@@ -434,7 +434,7 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
                   onClick={() => toggleArrayFilter('rentFor', option.value)}
                   icon={option.icon}
                 >
-                  {option.label}
+                  {t(option.labelKey)}
                 </FilterChip>
               ))}
             </div>
@@ -488,10 +488,10 @@ export default function SearchFilters({ filters, onFiltersChange, onApply, onRes
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="any" className="h-12">{t('filters.anyTenants', 'Any number')}</SelectItem>
-                <SelectItem value="1" className="h-12">1 tenant</SelectItem>
-                <SelectItem value="2" className="h-12">2 tenants</SelectItem>
-                <SelectItem value="3" className="h-12">3 tenants</SelectItem>
-                <SelectItem value="4" className="h-12">4+ tenants</SelectItem>
+                <SelectItem value="1" className="h-12">{t('filters.tenantCount.one', '1 tenant')}</SelectItem>
+                <SelectItem value="2" className="h-12">{t('filters.tenantCount.two', '2 tenants')}</SelectItem>
+                <SelectItem value="3" className="h-12">{t('filters.tenantCount.three', '3 tenants')}</SelectItem>
+                <SelectItem value="4" className="h-12">{t('filters.tenantCount.fourPlus', '4+ tenants')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

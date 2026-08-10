@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useAuthStore from '@/stores/authStore';
 
 export default function AuthCallback() {
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { handleOAuthCallback, fetchUser } = useAuthStore();
@@ -21,7 +23,7 @@ export default function AuthCallback() {
 
         if (!token) {
           const errorMessage = searchParams.get('error');
-          throw new Error(errorMessage || 'Authentication failed');
+          throw new Error(errorMessage || t('callback.failed', 'Authentication failed'));
         }
 
         // Store tokens and fetch user
@@ -55,15 +57,15 @@ export default function AuthCallback() {
     };
 
     processCallback();
-  }, [searchParams, handleOAuthCallback, fetchUser, navigate]);
+  }, [searchParams, handleOAuthCallback, fetchUser, navigate, t]);
 
   if (error) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-destructive">Authentication Error</h2>
+          <h2 className="text-xl font-semibold text-destructive">{t('callback.errorTitle')}</h2>
           <p className="mt-2 text-muted-foreground">{error}</p>
-          <p className="mt-4 text-sm text-muted-foreground">Redirecting to login...</p>
+          <p className="mt-4 text-sm text-muted-foreground">{t('callback.redirecting')}</p>
         </div>
       </div>
     );
@@ -73,7 +75,7 @@ export default function AuthCallback() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground">Completing sign in...</p>
+        <p className="text-muted-foreground">{t('callback.completing')}</p>
       </div>
     </div>
   );
