@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query
 from pydantic import BaseModel
-from app.schemas.user_schema import UserResponse, UserUpdate
+from app.schemas.user_schema import PushTokenUpdate, UserResponse, UserUpdate
 from app.models.user import User, RoleEnum
 from app.core.dependencies import get_current_user, require_role
 from app.core.security import create_access_token, create_refresh_token
@@ -42,8 +42,32 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "dateOfBirth": current_user.date_of_birth,
         "gender": current_user.gender.value if current_user.gender else None,
         "bio": current_user.bio,
+        "notificationPreferences": current_user.notification_preferences.model_dump(by_alias=True)
+        if current_user.notification_preferences
+        else None,
         "createdAt": current_user.created_at
     }
+
+
+@router.put("/me/push-token", response_model=dict)
+async def register_push_token(
+    payload: PushTokenUpdate,
+    current_user: User = Depends(get_current_user),
+):
+    """Register or rotate the current user's Expo push token."""
+    current_user.expo_push_token = payload.expo_push_token
+    current_user.updated_at = datetime.utcnow()
+    await current_user.save()
+    return {"message": "Push token registered"}
+
+
+@router.delete("/me/push-token", response_model=dict)
+async def remove_push_token(current_user: User = Depends(get_current_user)):
+    """Stop sending push notifications to the current device token."""
+    current_user.expo_push_token = None
+    current_user.updated_at = datetime.utcnow()
+    await current_user.save()
+    return {"message": "Push token removed"}
 
 
 @router.put("/me", response_model=dict)

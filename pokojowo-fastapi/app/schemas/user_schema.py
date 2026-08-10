@@ -50,6 +50,15 @@ class UserUpdate(BaseModel):
         populate_by_name = True
 
 
+class PushTokenUpdate(BaseModel):
+    """Expo push token registered by a native client."""
+
+    expo_push_token: str = Field(..., alias="expoPushToken", min_length=1, max_length=512)
+
+    class Config:
+        populate_by_name = True
+
+
 class UserResponse(BaseModel):
     id: str = Field(..., alias="_id")
     username: str

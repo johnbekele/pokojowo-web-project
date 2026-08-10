@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import * as Notifications from 'expo-notifications';
 import { useQueryClient } from '@tanstack/react-query';
 import { registerForPushNotifications, handleNotificationResponse } from '@/lib/notifications';
 import { userService } from '@/services';
 import useAuthStore from '@/stores/authStore';
 import { NOTIFICATION_KEYS } from './useNotifications';
+import { pushNotificationsEnabled } from '@/lib/pushPreferences';
 
 /**
  * Registers for Expo push notifications after auth, syncs the token to the
@@ -15,30 +16,37 @@ export function usePushNotifications() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const registered = useRef(false);
+  const syncToken = useCallback(async (token: string | null | undefined) => {
+    if (!token) return;
+    try {
+      await userService.updatePushToken(token);
+    } catch {
+      // Permission and token acquisition still work when an older backend is deployed.
+      console.log('Push token not persisted');
+    }
+  }, []);
 
   // Register + sync token once authenticated (respecting push preference).
   useEffect(() => {
-    if (!isAuthenticated || registered.current) return;
-    const prefs = user?.notification_preferences;
-    const pushEnabled =
-      !prefs ||
-      prefs.push_new_message !== false ||
-      prefs.push_new_match !== false ||
-      prefs.push_listing_interest !== false;
-    if (!pushEnabled) return;
+    if (!isAuthenticated) {
+      registered.current = false;
+      return;
+    }
+    if (registered.current || !pushNotificationsEnabled(user?.notification_preferences)) return;
 
     registered.current = true;
     (async () => {
       const token = await registerForPushNotifications();
       if (!token) return;
-      try {
-        await userService.updatePushToken(token);
-      } catch {
-        // Backend endpoint may not exist yet; token is cached locally.
-        console.log('Push token not persisted (backend endpoint pending)');
-      }
+      await syncToken(token);
     })();
-  }, [isAuthenticated, user?.notification_preferences]);
+
+    // Expo can rotate a token while the app is installed; keep the backend current.
+    const tokenSubscription = Notifications.addPushTokenListener(({ data }) => {
+      void syncToken(data);
+    });
+    return () => tokenSubscription.remove();
+  }, [isAuthenticated, syncToken, user?.notification_preferences]);
 
   // Foreground + tap listeners.
   useEffect(() => {

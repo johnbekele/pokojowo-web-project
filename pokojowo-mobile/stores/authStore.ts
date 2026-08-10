@@ -291,6 +291,11 @@ const useAuthStore = create<AuthState>()(
         } catch {
           // Ignore logout errors
         }
+        try {
+          await api.delete('/users/me/push-token');
+        } catch {
+          // A token cleanup failure must not prevent logout.
+        }
         await get().clearAuth();
       },
 
