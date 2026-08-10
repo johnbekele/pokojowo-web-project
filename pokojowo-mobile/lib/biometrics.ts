@@ -7,28 +7,37 @@ export type BiometricType = 'fingerprint' | 'facial' | 'iris' | 'none';
  * Check if biometric authentication is available
  */
 export async function isBiometricAvailable(): Promise<boolean> {
-  const compatible = await LocalAuthentication.hasHardwareAsync();
-  const enrolled = await LocalAuthentication.isEnrolledAsync();
-  return compatible && enrolled;
+  try {
+    const compatible = await LocalAuthentication.hasHardwareAsync();
+    const enrolled = await LocalAuthentication.isEnrolledAsync();
+    return compatible && enrolled;
+  } catch {
+    // Some web/simulator builds expose the module but not the native APIs.
+    return false;
+  }
 }
 
 /**
  * Get supported biometric types
  */
 export async function getSupportedBiometricTypes(): Promise<BiometricType[]> {
-  const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-  return types.map((type) => {
-    switch (type) {
-      case LocalAuthentication.AuthenticationType.FINGERPRINT:
-        return 'fingerprint';
-      case LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION:
-        return 'facial';
-      case LocalAuthentication.AuthenticationType.IRIS:
-        return 'iris';
-      default:
-        return 'none';
-    }
-  });
+  try {
+    const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    return types.map((type) => {
+      switch (type) {
+        case LocalAuthentication.AuthenticationType.FINGERPRINT:
+          return 'fingerprint';
+        case LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION:
+          return 'facial';
+        case LocalAuthentication.AuthenticationType.IRIS:
+          return 'iris';
+        default:
+          return 'none';
+      }
+    });
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -48,9 +57,7 @@ export async function authenticateWithBiometrics(
 
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage,
-      cancelLabel: 'Cancel',
       disableDeviceFallback: false,
-      fallbackLabel: 'Use passcode',
     });
 
     if (result.success) {

@@ -78,7 +78,7 @@ export default function SettingsScreen() {
   const biometric = useBiometricSetting();
 
   const handleToggleBiometric = async (value: boolean) => {
-    const ok = await biometric.toggle(value);
+    const ok = await biometric.toggle(value, t('settings.biometricConfirm', 'Confirm biometric unlock'));
     if (!ok && value) {
       showToast({
         type: 'error',
