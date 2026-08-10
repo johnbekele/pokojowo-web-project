@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -26,47 +25,26 @@ import {
   TrustBadge,
 } from '@/components/shared/editorial';
 import useAuthStore from '@/stores/authStore';
-import useLikesStore from '@/stores/likesStore';
 import MutualMatchModal from '@/features/likes/components/MutualMatchModal';
-import api from '@/lib/api';
+import { useLikesReceived, useLikesSent, useMutualMatches } from '@/hooks/useLikes';
 import { cn } from '@/lib/utils';
 
 export default function TenantDashboard() {
   const { t } = useTranslation('matching');
   const { user } = useAuthStore();
-  const { fetchStats } = useLikesStore();
   const [activeTab, setActiveTab] = useState('matches');
 
-  const { data: likesSent, isLoading: loadingSent } = useQuery({
-    queryKey: ['likes-sent'],
-    queryFn: async () => {
-      const response = await api.get('/likes/sent');
-      return response.data;
-    },
+  const { data: likesSent, isLoading: loadingSent } = useLikesSent({
     enabled: !!user?.isProfileComplete,
   });
 
-  const { data: mutualMatches, isLoading: loadingMatches } = useQuery({
-    queryKey: ['mutual-matches'],
-    queryFn: async () => {
-      const response = await api.get('/likes/mutual');
-      return response.data;
-    },
+  const { data: mutualMatches, isLoading: loadingMatches } = useMutualMatches({
     enabled: !!user?.isProfileComplete,
   });
 
-  const { data: likesReceived, isLoading: loadingReceived } = useQuery({
-    queryKey: ['likes-received'],
-    queryFn: async () => {
-      const response = await api.get('/likes/received');
-      return response.data;
-    },
+  const { data: likesReceived, isLoading: loadingReceived } = useLikesReceived({
     enabled: !!user?.isProfileComplete,
   });
-
-  useEffect(() => {
-    if (user?.isProfileComplete) fetchStats();
-  }, [user?.isProfileComplete, fetchStats]);
 
   if (!user) {
     return (
@@ -118,7 +96,7 @@ export default function TenantDashboard() {
   }
 
   const sentList = likesSent?.likes || [];
-  const matchesList = mutualMatches?.matches || [];
+  const matchesList = mutualMatches?.mutual_matches || [];
   const receivedList = likesReceived?.likes || [];
 
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { translateExplanation } from '../utils/explanations';
@@ -13,13 +13,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '@/components/shared/UserAvatar';
 import api from '@/lib/api';
 import { cn } from '@/lib/utils';
-import useLikesStore from '@/stores/likesStore';
+import { useLikeStatus, useLikeUser, useUnlikeUser } from '@/hooks/useLikes';
+import { useToast } from '@/hooks/useToast';
 
 export default function MatchDetail() {
   const { userId } = useParams();
   const { t } = useTranslation('matching');
-  const navigate = useNavigate();
-  const { hasLiked, isMutualMatch, likeUser, unlikeUser } = useLikesStore();
+  const likeMutation = useLikeUser();
+  const unlikeMutation = useUnlikeUser();
+  const { toast } = useToast();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['match', userId],
@@ -30,17 +32,10 @@ export default function MatchDetail() {
   });
 
   // Check like status
-  const { data: likeStatus } = useQuery({
-    queryKey: ['like-status', userId],
-    queryFn: async () => {
-      const response = await api.get(`/likes/check/${userId}`);
-      return response.data;
-    },
-    enabled: !!userId,
-  });
+  const { data: likeStatus } = useLikeStatus(userId);
 
-  const isLiked = likeStatus?.i_liked || hasLiked(userId);
-  const isMutual = likeStatus?.is_mutual || isMutualMatch(userId);
+  const isLiked = Boolean(likeStatus?.i_liked);
+  const isMutual = Boolean(likeStatus?.is_mutual);
   const theyLikedMe = likeStatus?.they_liked;
 
   const [isLiking, setIsLiking] = React.useState(false);
@@ -49,10 +44,16 @@ export default function MatchDetail() {
     setIsLiking(true);
     try {
       if (isLiked) {
-        await unlikeUser(userId);
+        await unlikeMutation.mutateAsync(userId);
       } else {
-        await likeUser(userId);
+        await likeMutation.mutateAsync(userId);
       }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.detail || 'Unable to update interest.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLiking(false);
     }

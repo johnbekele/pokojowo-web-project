@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import useLikesStore from '@/stores/likesStore';
+import { useLikeStatus, useLikeUser, useUnlikeUser } from '@/hooks/useLikes';
 import { useToast } from '@/hooks/useToast';
 
 export default function LikeButton({
@@ -13,30 +13,29 @@ export default function LikeButton({
   showLabel = false,
   onMutualMatch,
 }) {
-  const { hasLiked, toggleLike, isMutualMatch } = useLikesStore();
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: likeStatus, isLoading: isChecking } = useLikeStatus(userId);
+  const likeMutation = useLikeUser();
+  const unlikeMutation = useUnlikeUser();
   const [isAnimating, setIsAnimating] = useState(false);
   const { toast } = useToast();
 
-  const liked = hasLiked(userId);
-  const mutual = isMutualMatch(userId);
+  const liked = Boolean(likeStatus?.i_liked);
+  const mutual = Boolean(likeStatus?.is_mutual);
+  const isLoading = isChecking || likeMutation.isPending || unlikeMutation.isPending;
 
   const handleToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setIsLoading(true);
     setIsAnimating(true);
+    try {
+      const data = liked
+        ? await unlikeMutation.mutateAsync(userId)
+        : await likeMutation.mutateAsync(userId);
 
-    const result = await toggleLike(userId);
-
-    setIsLoading(false);
-    setTimeout(() => setIsAnimating(false), 300);
-
-    if (result.success) {
-      if (result.data?.is_mutual) {
+      if (data?.is_mutual) {
         // Mutual connection!
-        onMutualMatch?.(result.data.mutual_match);
+        onMutualMatch?.(data.mutual_match);
         toast({
           title: "You're Connected!",
           description: 'You both showed interest. Start chatting now!',
@@ -47,12 +46,14 @@ export default function LikeButton({
           description: 'They will be notified of your interest.',
         });
       }
-    } else {
+    } catch (error) {
       toast({
         title: 'Error',
-        description: result.error,
+        description: error.response?.data?.detail || 'Unable to update interest.',
         variant: 'destructive',
       });
+    } finally {
+      setIsAnimating(false);
     }
   };
 
