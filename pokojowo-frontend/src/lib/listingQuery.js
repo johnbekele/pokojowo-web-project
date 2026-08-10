@@ -5,11 +5,23 @@
 export const MAX_PRICE = 10000;
 export const MAX_SIZE = 200;
 
-export function listingParams({ search, sort, filters = {}, bbox, zoom } = {}) {
+export function listingParams({
+  search,
+  sort,
+  filters = {},
+  bbox,
+  zoom,
+  skip,
+  limit,
+  withMeta = false,
+} = {}) {
   const params = new URLSearchParams();
 
   if (search) params.append('search', search);
   if (sort) params.append('sort', sort);
+  if (skip !== undefined && skip !== null) params.append('skip', skip);
+  if (limit !== undefined && limit !== null) params.append('limit', limit);
+  if (withMeta) params.append('with_meta', 'true');
 
   // Defaults are the full range; sending them would only slow the query down.
   if (filters.minPrice > 0) params.append('min_price', filters.minPrice);

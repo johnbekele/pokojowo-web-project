@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -49,6 +49,8 @@ import useListingInteractionStore from "@/stores/listingInteractionStore";
 import useAuthStore from "@/stores/authStore";
 
 const FALLBACK_LISTING_IMAGE = "/images/promo/modern-room.avif";
+const LISTING_PAGE_SIZE = 20;
+const DISCOVER_SCROLL_KEY = "pokojowo.discover.scroll-y";
 
 const DEFAULT_FILTERS = {
   minPrice: 0,
@@ -139,6 +141,16 @@ export default function HomeListings() {
   const { fetchBatchInterestedUsers, fetchMyLikedListings, getInterestedUsers } =
     useListingInteractionStore();
 
+  // Keep the browse context when a user opens a listing and goes back. The
+  // query cache keeps the loaded pages, while this restores the exact place
+  // in the document after the route remounts.
+  const restoredScroll = useRef(false);
+  useEffect(() => {
+    return () => {
+      sessionStorage.setItem(DISCOVER_SCROLL_KEY, String(window.scrollY));
+    };
+  }, []);
+
   // Apply a saved search from ?savedSearch=<id> once per id (deep-link target
   // for notifications and the profile "Run" button). 404 → toast + strip param.
   const appliedSavedSearch = useRef(null);
@@ -179,20 +191,63 @@ export default function HomeListings() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data: rawListings, isLoading, error, refetch } = useQuery({
+  const {
+    data: listingPages,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["listings", debouncedSearch, sortBy, filters],
-    queryFn: async () => {
-      const params = listingParams({ search: debouncedSearch, sort: sortBy, filters });
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const params = listingParams({
+        search: debouncedSearch,
+        sort: sortBy,
+        filters,
+        skip: pageParam,
+        limit: LISTING_PAGE_SIZE,
+        withMeta: true,
+      });
       const response = await api.get(`/listings/?${params.toString()}`);
-      return response.data;
+      const payload = response.data;
+      const listings = Array.isArray(payload) ? payload : payload?.listings || [];
+
+      return {
+        listings,
+        total: Array.isArray(payload) ? null : payload?.total ?? null,
+        skip: Array.isArray(payload) ? pageParam : payload?.skip ?? pageParam,
+        hasMore:
+          Array.isArray(payload)
+            ? listings.length === LISTING_PAGE_SIZE
+            : Boolean(payload?.hasMore),
+      };
     },
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.skip + lastPage.listings.length : undefined,
     // Map view fetches its own area-scoped results.
     enabled: !isMapView,
   });
 
   const listings = useMemo(() => {
-    return Array.isArray(rawListings) ? rawListings : rawListings?.listings || [];
-  }, [rawListings]);
+    return listingPages?.pages.flatMap((page) => page.listings) || [];
+  }, [listingPages]);
+
+  const totalListings = listingPages?.pages[0]?.total ?? listings.length;
+
+  useEffect(() => {
+    if (isLoading || restoredScroll.current) return;
+    const savedScroll = Number(sessionStorage.getItem(DISCOVER_SCROLL_KEY));
+    restoredScroll.current = true;
+    if (savedScroll > 0) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: savedScroll, behavior: "auto" });
+        sessionStorage.removeItem(DISCOVER_SCROLL_KEY);
+      });
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (user && listings && listings.length > 0) {
@@ -325,6 +380,10 @@ export default function HomeListings() {
           isLoading={isLoading}
           error={error}
           listings={listings}
+          totalListings={totalListings}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
           refetch={refetch}
           getInterestedUsers={getInterestedUsers}
         />
@@ -354,7 +413,17 @@ function MapViewSkeleton() {
   );
 }
 
-function ListingsGrid({ isLoading, error, listings, refetch, getInterestedUsers }) {
+function ListingsGrid({
+  isLoading,
+  error,
+  listings,
+  totalListings,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+  refetch,
+  getInterestedUsers,
+}) {
   const { t } = useTranslation("listings");
 
   return (
@@ -363,7 +432,7 @@ function ListingsGrid({ isLoading, error, listings, refetch, getInterestedUsers 
         label={
           isLoading
             ? t("results.searching", "Curating rooms")
-            : t("results.count", { count: listings?.length || 0 })
+            : t("results.count", { count: totalListings || 0 })
         }
       />
 
@@ -417,6 +486,21 @@ function ListingsGrid({ isLoading, error, listings, refetch, getInterestedUsers 
                 />
               );
             })}
+          </div>
+        )}
+
+        {!isLoading && !error && listings?.length > 0 && hasNextPage && (
+          <div className="mt-10 flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="min-w-44"
+            >
+              {isFetchingNextPage
+                ? t("results.loadingMore", "Loading more")
+                : t("results.loadMore", "Load more")}
+            </Button>
           </div>
         )}
       </EditorialSection>
