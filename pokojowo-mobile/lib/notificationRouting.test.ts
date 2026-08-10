@@ -32,4 +32,17 @@ describe('notification routing', () => {
 
     expect((instance as any).push).not.toHaveBeenCalled();
   });
+
+  it('opens the saved search from a saved-search notification', () => {
+    const instance = router();
+    routeForNotification(instance, {
+      type: 'saved_search_match',
+      data: { savedSearchId: 'search-7' },
+    } as never);
+
+    expect((instance as any).push).toHaveBeenCalledWith({
+      pathname: '/(app)/(home)',
+      params: { savedSearch: 'search-7' },
+    });
+  });
 });

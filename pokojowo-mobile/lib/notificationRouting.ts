@@ -19,7 +19,15 @@ export function routeForNotification(router: Router, n: AppNotification): void {
       break;
     }
     case 'saved_search_match': {
-      router.push('/(app)/(home)');
+      const savedSearchId = n.data?.savedSearchId;
+      if (savedSearchId) {
+        router.push({
+          pathname: '/(app)/(home)',
+          params: { savedSearch: savedSearchId },
+        } as never);
+      } else {
+        router.push('/(app)/(home)');
+      }
       break;
     }
     default:

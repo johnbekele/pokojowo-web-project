@@ -39,7 +39,8 @@
     "settings": "Settings",
     "logout": "Log Out",
     "verifyPhone": "Verify phone",
-    "landlordVerification": "Landlord verification"
+    "landlordVerification": "Landlord verification",
+    "savedSearches": "Saved Searches"
   },
   "completion": {
     "title": "Complete Your Profile",
@@ -232,6 +233,28 @@
       "title": "No saved matches yet",
       "description": "Matches you save will appear here",
       "action": "Find Flatmates"
+    }
+  },
+  "savedSearches": {
+    "title": "Saved Searches",
+    "loading": "Loading saved searches...",
+    "loadError": "Couldn't load saved searches",
+    "created": "Created {{time}}",
+    "apply": "Apply",
+    "delete": "Delete",
+    "deleteTitle": "Delete saved search?",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleted": "Saved search deleted",
+    "deleteError": "Couldn't delete saved search",
+    "updateError": "Couldn't update notifications",
+    "notificationsLabel": "Notifications for {{name}}",
+    "notificationsOn": "Notifications on",
+    "notificationsOff": "Notifications off",
+    "deleteLabel": "Delete {{name}}",
+    "empty": {
+      "title": "No saved searches yet",
+      "description": "Save your favourite filters to quickly find matching rooms.",
+      "action": "Find a room"
     }
   },
   "settings": {

@@ -95,6 +95,7 @@ export function handleNotificationResponse(
   const chatId = (data.chatId ?? data.chat_id) as string | undefined;
   const userId = (data.userId ?? data.likerId ?? data.matchedUserId) as string | undefined;
   const listingId = (data.listingId ?? data.listing_id) as string | undefined;
+  const savedSearchId = (data.savedSearchId ?? data.saved_search_id) as string | undefined;
 
   switch (data.type) {
     case 'chat':
@@ -111,7 +112,11 @@ export function handleNotificationResponse(
       if (listingId) router.push(`/(app)/(home)/listing/${listingId}`);
       break;
     case 'saved_search_match':
-      router.push('/(app)/(home)');
+      if (savedSearchId) {
+        router.push({ pathname: '/(app)/(home)', params: { savedSearch: savedSearchId } });
+      } else {
+        router.push('/(app)/(home)');
+      }
       break;
     default:
       router.push('/(app)/(profile)/notifications');

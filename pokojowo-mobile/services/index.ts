@@ -9,3 +9,4 @@ export { default as listingInteractionService } from './listingInteraction.servi
 export { default as notificationService } from './notification.service';
 export { default as profileService } from './profile.service';
 export { default as mapService } from './map.service';
+export { default as savedSearchService } from './saved-search.service';

@@ -39,7 +39,8 @@
     "settings": "Ustawienia",
     "logout": "Wyloguj się",
     "verifyPhone": "Zweryfikuj telefon",
-    "landlordVerification": "Weryfikacja wynajmującego"
+    "landlordVerification": "Weryfikacja wynajmującego",
+    "savedSearches": "Zapisane wyszukiwania"
   },
   "completion": {
     "title": "Uzupełnij profil",
@@ -232,6 +233,28 @@
       "title": "Brak zapisanych profili",
       "description": "Zapisane profile pojawią się tutaj",
       "action": "Szukaj współlokatorów"
+    }
+  },
+  "savedSearches": {
+    "title": "Zapisane wyszukiwania",
+    "loading": "Ładowanie zapisanych wyszukiwań...",
+    "loadError": "Nie udało się załadować zapisanych wyszukiwań",
+    "created": "Utworzono {{time}}",
+    "apply": "Zastosuj",
+    "delete": "Usuń",
+    "deleteTitle": "Usunąć zapisane wyszukiwanie?",
+    "deleteConfirm": "Usunąć „{{name}}”? Tej operacji nie można cofnąć.",
+    "deleted": "Zapisane wyszukiwanie usunięte",
+    "deleteError": "Nie udało się usunąć wyszukiwania",
+    "updateError": "Nie udało się zmienić powiadomień",
+    "notificationsLabel": "Powiadomienia dla {{name}}",
+    "notificationsOn": "Powiadomienia włączone",
+    "notificationsOff": "Powiadomienia wyłączone",
+    "deleteLabel": "Usuń {{name}}",
+    "empty": {
+      "title": "Brak zapisanych wyszukiwań",
+      "description": "Zapisz ulubione filtry, aby szybko znaleźć pasujące pokoje.",
+      "action": "Znajdź pokój"
     }
   },
   "settings": {

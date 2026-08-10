@@ -225,5 +225,18 @@
       "flatmates": "Współlokatorzy",
       "both": "Oba"
     }
+  },
+  "savedSearches": {
+    "saveAction": "Zapisz wyszukiwanie",
+    "defaultName": "Moje wyszukiwanie",
+    "dialogTitle": "Zapisz wyszukiwanie",
+    "dialogDescription": "Nadaj nazwę bieżącym filtrom, aby użyć ich ponownie później.",
+    "nameLabel": "Nazwa wyszukiwania",
+    "namePlaceholder": "np. Warszawa do 2500 zł",
+    "nameRequired": "Wpisz nazwę wyszukiwania",
+    "save": "Zapisz wyszukiwanie",
+    "saved": "Wyszukiwanie zapisane",
+    "saveFailed": "Nie udało się zapisać wyszukiwania",
+    "applyFailed": "Nie udało się wczytać zapisanego wyszukiwania"
   }
 }

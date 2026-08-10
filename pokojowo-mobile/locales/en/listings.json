@@ -219,5 +219,18 @@
       "flatmates": "Flatmates",
       "both": "Both"
     }
+  },
+  "savedSearches": {
+    "saveAction": "Save this search",
+    "defaultName": "My search",
+    "dialogTitle": "Save this search",
+    "dialogDescription": "Name your current filters so you can run them again later.",
+    "nameLabel": "Search name",
+    "namePlaceholder": "e.g. Warsaw under 2500",
+    "nameRequired": "Enter a name for this search",
+    "save": "Save search",
+    "saved": "Search saved",
+    "saveFailed": "Could not save search",
+    "applyFailed": "Could not load that saved search"
   }
 }
