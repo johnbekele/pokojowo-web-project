@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -30,19 +30,15 @@ import {
   ScoreRing,
   TrustBadge,
 } from '@/components/shared/editorial';
-import useLikesStore from '@/stores/likesStore';
+import { useLikeUser } from '@/hooks/useLikes';
 import api from '@/lib/api';
 
 export default function Matches() {
   const { t } = useTranslation('matching');
-  const { fetchLikesSent, likeUser } = useLikesStore();
+  const likeMutation = useLikeUser();
   const [viewMode, setViewMode] = useState('swipe');
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetchLikesSent();
-  }, [fetchLikesSent]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['matches'],
@@ -63,7 +59,12 @@ export default function Matches() {
   };
 
   const handleLike = async (userId) => {
-    await likeUser(userId);
+    try {
+      await likeMutation.mutateAsync(userId);
+    } catch {
+      // The modal has no mutation UI; keep a failed request from becoming an
+      // unhandled promise while leaving the match available to retry.
+    }
   };
 
   if (isLoading) {

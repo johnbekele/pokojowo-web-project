@@ -3,43 +3,49 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { RotateCcw, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SwipeCard from './SwipeCard';
-import useLikesStore from '@/stores/likesStore';
-import { cn } from '@/lib/utils';
+import { useLikeUser, usePassUser, useUndoPass, useUnlikeUser } from '@/hooks/useLikes';
 
 export default function SwipeStack({ matches = [], onCardClick, onEmpty }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipedCards, setSwipedCards] = useState([]);
-  const { likeUser, passUser, undoPass, unlikeUser } = useLikesStore();
+  const likeMutation = useLikeUser();
+  const passMutation = usePassUser();
+  const undoPassMutation = useUndoPass();
+  const unlikeMutation = useUnlikeUser();
 
   const currentMatches = matches.slice(currentIndex);
   const visibleCards = currentMatches.slice(0, 3);
 
   const handleSwipeLeft = useCallback((userId) => {
     // Persist the pass so the user stays hidden across reloads
-    passUser(userId);
+    passMutation.mutate(userId);
     setSwipedCards(prev => [...prev, { userId, direction: 'left' }]);
     setCurrentIndex(prev => prev + 1);
-  }, [passUser]);
+  }, [passMutation]);
 
   const handleSwipeRight = useCallback(async (userId) => {
     // Like the user
-    await likeUser(userId);
+    try {
+      await likeMutation.mutateAsync(userId);
+    } catch {
+      return;
+    }
     setSwipedCards(prev => [...prev, { userId, direction: 'right' }]);
     setCurrentIndex(prev => prev + 1);
-  }, [likeUser]);
+  }, [likeMutation]);
 
   const handleUndo = useCallback(() => {
     if (swipedCards.length > 0) {
       const last = swipedCards[swipedCards.length - 1];
       if (last.direction === 'left') {
-        undoPass(last.userId);
+        undoPassMutation.mutate(last.userId);
       } else {
-        unlikeUser(last.userId);
+        unlikeMutation.mutate(last.userId);
       }
       setSwipedCards(prev => prev.slice(0, -1));
       setCurrentIndex(prev => Math.max(0, prev - 1));
     }
-  }, [swipedCards, undoPass, unlikeUser]);
+  }, [swipedCards, undoPassMutation, unlikeMutation]);
 
   const handleReset = useCallback(() => {
     setCurrentIndex(0);

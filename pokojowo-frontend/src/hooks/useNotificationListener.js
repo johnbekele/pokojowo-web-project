@@ -14,7 +14,7 @@ export function useNotificationListener() {
   const { t } = useTranslation('common');
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { setMutualMatchData, fetchStats } = useLikesStore();
+  const { setMutualMatchData } = useLikesStore();
   const { isAuthenticated, token } = useAuthStore();
   const listenersAttached = useRef(false);
   const socketRef = useRef(null);
@@ -41,11 +41,8 @@ export function useNotificationListener() {
           variant: 'default',
         });
         // Invalidate likes queries to show new like
-        queryClient.invalidateQueries({ queryKey: ['likes-received'] });
-        queryClient.invalidateQueries({ queryKey: ['likes-stats'] });
+        queryClient.invalidateQueries({ queryKey: ['likes'] });
         queryClient.invalidateQueries({ queryKey: ['tenant-dashboard'] });
-        // Update stats in store
-        fetchStats();
         break;
 
       case 'mutual_match':
@@ -62,14 +59,9 @@ export function useNotificationListener() {
           variant: 'default',
         });
         // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['likes-received'] });
-        queryClient.invalidateQueries({ queryKey: ['likes-sent'] });
-        queryClient.invalidateQueries({ queryKey: ['mutual-matches'] });
-        queryClient.invalidateQueries({ queryKey: ['likes-stats'] });
+        queryClient.invalidateQueries({ queryKey: ['likes'] });
         queryClient.invalidateQueries({ queryKey: ['tenant-dashboard'] });
         queryClient.invalidateQueries({ queryKey: ['matches'] });
-        // Update stats in store
-        fetchStats();
         break;
 
       case 'saved_search_match':
@@ -83,7 +75,7 @@ export function useNotificationListener() {
       default:
         console.log('Unknown notification type:', data.type);
     }
-  }, [t, toast, queryClient, setMutualMatchData, fetchStats]);
+  }, [t, toast, queryClient, setMutualMatchData]);
 
   const handleUserStatus = useCallback((data) => {
     console.log('USER STATUS update:', data);

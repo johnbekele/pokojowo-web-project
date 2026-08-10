@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -23,33 +23,28 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserAvatar from '@/components/shared/UserAvatar';
-import useLikesStore from '@/stores/likesStore';
+import {
+  useLikesReceived,
+  useLikesSent,
+  useLikesStats,
+  useMutualMatches,
+} from '@/hooks/useLikes';
 import LikeButton from '../components/LikeButton';
 import SaveButton from '@/features/favorites/components/SaveButton';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function LikesPage() {
   const { t } = useTranslation('matching');
-  const {
-    likesSent,
-    likesReceived,
-    mutualMatches,
-    stats,
-    isLoading,
-    fetchLikesSent,
-    fetchLikesReceived,
-    fetchMutualMatches,
-    fetchStats,
-  } = useLikesStore();
+  const { data: sentData, isLoading: loadingSent } = useLikesSent();
+  const { data: receivedData, isLoading: loadingReceived } = useLikesReceived();
+  const { data: mutualData, isLoading: loadingMutual } = useMutualMatches();
+  const { data: stats = {}, isLoading: loadingStats } = useLikesStats();
+  const likesSent = sentData?.likes || [];
+  const likesReceived = receivedData?.likes || [];
+  const mutualMatches = mutualData?.mutual_matches || mutualData?.matches || [];
+  const isLoading = loadingSent || loadingReceived || loadingMutual || loadingStats;
 
   const [activeTab, setActiveTab] = useState('received');
-
-  useEffect(() => {
-    fetchStats();
-    fetchLikesReceived();
-    fetchLikesSent();
-    fetchMutualMatches();
-  }, [fetchStats, fetchLikesReceived, fetchLikesSent, fetchMutualMatches]);
 
   const pendingLikesReceived = likesReceived.filter(l => l.status === 'pending');
 
