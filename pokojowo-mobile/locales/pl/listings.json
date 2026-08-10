@@ -104,6 +104,7 @@
     "photoAlt": "Zdjęcie ogłoszenia w lokalizacji {{location}}",
     "perMonth": "/mies.",
     "month": "mies.",
+    "yearsOld": "{{age}} lat",
     "available": "Dostępny",
     "availableFrom": "Dostępny od {{date}}",
     "viewDetails": "Zobacz szczegóły",
@@ -171,6 +172,9 @@
     "report": "Zgłoś ogłoszenie"
   },
   "detail": {
+    "notFound": "Nie znaleziono ogłoszenia",
+    "goBack": "Wróć",
+    "shareMessage": "Zobacz to ogłoszenie: {{address}} - {{price}}/{{unit}}",
     "description": "Opis",
     "amenities": "Udogodnienia",
     "details": "Szczegóły",

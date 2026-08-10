@@ -103,6 +103,7 @@
     "photoAlt": "Listing photo in {{location}}",
     "perMonth": "/month",
     "month": "mo",
+    "yearsOld": "{{age}} years old",
     "available": "Available",
     "availableFrom": "Available from {{date}}",
     "viewDetails": "View Details",
@@ -167,6 +168,9 @@
     "report": "Report listing"
   },
   "detail": {
+    "notFound": "Listing not found",
+    "goBack": "Go back",
+    "shareMessage": "Check out this listing: {{address}} - {{price}}/{{unit}}",
     "description": "Description",
     "amenities": "Amenities",
     "details": "Details",

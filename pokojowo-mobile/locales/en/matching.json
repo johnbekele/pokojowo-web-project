@@ -54,6 +54,11 @@
   },
   "detail": {
     "title": "Profile",
+    "loading": "Loading profile...",
+    "about": "About",
+    "skip": "Skip",
+    "interested": "Interested",
+    "chat": "Chat",
     "whyMatch": "Why this match?",
     "sharedInterests": "Shared Interests",
     "sharedLanguages": "Shared Languages",

@@ -54,6 +54,11 @@
   },
   "detail": {
     "title": "Profil",
+    "loading": "Ładowanie profilu...",
+    "about": "O mnie",
+    "skip": "Pomiń",
+    "interested": "Zainteresowany/a",
+    "chat": "Czat",
     "whyMatch": "Dlaczego to dopasowanie?",
     "sharedInterests": "Wspólne zainteresowania",
     "sharedLanguages": "Wspólne języki",

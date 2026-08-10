@@ -35,13 +35,13 @@ interface MatchDetailModalProps {
 
 // Labels for score breakdown categories
 const BREAKDOWN_LABELS: Record<string, string> = {
-  budgetScore: 'Budget',
-  lifestyleScore: 'Lifestyle',
-  personalityScore: 'Personality',
-  scheduleScore: 'Schedule',
-  locationScore: 'Location',
-  preferencesScore: 'Preferences',
-  interestsScore: 'Interests',
+  budgetScore: 'breakdown.budget',
+  lifestyleScore: 'breakdown.lifestyle',
+  personalityScore: 'breakdown.personality',
+  scheduleScore: 'breakdown.schedule',
+  locationScore: 'breakdown.location',
+  preferencesScore: 'breakdown.preferences',
+  interestsScore: 'breakdown.interests',
 };
 
 // Get score color
@@ -120,7 +120,7 @@ export default function MatchDetailModal({
         .filter(([key]) => key !== 'totalScore' && BREAKDOWN_LABELS[key])
         .map(([key, value]) => ({
           key,
-          label: BREAKDOWN_LABELS[key],
+          label: t(BREAKDOWN_LABELS[key]),
           value: Math.round(value as number),
         }))
         .sort((a, b) => b.value - a.value)
@@ -133,7 +133,7 @@ export default function MatchDetailModal({
         <TouchableOpacity onPress={onClose} className="p-2 -ml-2">
           <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text className="text-lg font-semibold text-text">Profile</Text>
+        <Text className="text-lg font-semibold text-text">{t('detail.title')}</Text>
         <View className="w-10" />
       </View>
 
@@ -141,7 +141,7 @@ export default function MatchDetailModal({
         {isLoading ? (
           <View className="flex-1 items-center justify-center py-20">
             <ActivityIndicator size="large" color={colors.brand} />
-            <Text className="text-muted mt-4">Loading profile...</Text>
+            <Text className="text-muted mt-4">{t('detail.loading')}</Text>
           </View>
         ) : (
           <View className="pb-32">
@@ -173,7 +173,7 @@ export default function MatchDetailModal({
 
                 <View className="flex-row flex-wrap gap-2 mt-2">
                   {age && (
-                    <Badge variant="default">{age} years old</Badge>
+                    <Badge variant="default">{t('card.yearsOld', { age })}</Badge>
                   )}
                   {location && (
                     <View className="flex-row items-center bg-surface rounded-full px-2.5 py-1">
@@ -201,7 +201,7 @@ export default function MatchDetailModal({
             {bio && (
               <View className="px-4 mb-4">
                 <Text className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">
-                  About
+                  {t('detail.about')}
                 </Text>
                 <Text className="text-text leading-6">{bio}</Text>
               </View>
@@ -229,7 +229,7 @@ export default function MatchDetailModal({
                 <View className="flex-row items-center gap-2 mb-4">
                   <Users size={18} color={colors.text} />
                   <Text className="text-sm font-semibold text-muted uppercase tracking-wide">
-                    Flatmate Compatibility
+                    {t('detail.compatibility')}
                   </Text>
                 </View>
                 <View className="space-y-3">
@@ -260,7 +260,7 @@ export default function MatchDetailModal({
             {(explanations.positive.length > 0 || explanations.neutral.length > 0 || explanations.negative.length > 0) && (
               <View className="px-4 py-4">
                 <Text className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
-                  Why You Match
+                  {t('detail.whyYouMatch')}
                 </Text>
                 <View className="space-y-2">
                   {explanations.positive.map((exp: any, i: number) => (
@@ -289,7 +289,7 @@ export default function MatchDetailModal({
             {shared_interests.length > 0 && (
               <View className="px-4 py-4">
                 <Text className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
-                  Shared Interests
+                  {t('detail.sharedInterests')}
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {shared_interests.map((interest: string, idx: number) => (
@@ -305,7 +305,7 @@ export default function MatchDetailModal({
                 <View className="flex-row items-center gap-2 mb-3">
                   <Globe2 size={16} color={colors.muted} />
                   <Text className="text-sm font-semibold text-muted uppercase tracking-wide">
-                    Shared Languages
+                    {t('detail.sharedLanguages')}
                   </Text>
                 </View>
                 <View className="flex-row flex-wrap gap-2">
@@ -328,7 +328,7 @@ export default function MatchDetailModal({
             className="flex-1"
             icon={<X size={18} color={colors.muted} />}
           >
-            Skip
+            {t('detail.skip')}
           </Button>
           <Button
             onPress={() => { onLike?.(); onClose(); }}
@@ -336,7 +336,7 @@ export default function MatchDetailModal({
             className="flex-1"
             icon={<Heart size={18} color="white" />}
           >
-            Interested
+            {t('detail.interested')}
           </Button>
           {onMessage && (
             <Button
@@ -345,7 +345,7 @@ export default function MatchDetailModal({
               className="flex-1"
               icon={<MessageSquare size={18} color={colors.muted} />}
             >
-              Chat
+              {t('detail.chat')}
             </Button>
           )}
         </View>
