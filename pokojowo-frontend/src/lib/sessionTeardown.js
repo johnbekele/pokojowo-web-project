@@ -1,5 +1,4 @@
 import queryClient from './queryClient';
-import useFavoritesStore from '@/stores/favoritesStore';
 import useLikesStore from '@/stores/likesStore';
 import useListingInteractionStore from '@/stores/listingInteractionStore';
 import useSavedSearchStore from '@/stores/savedSearchStore';
@@ -19,7 +18,7 @@ import useSavedSearchStore from '@/stores/savedSearchStore';
 export function clearSessionData() {
   queryClient.clear();
 
-  [useFavoritesStore, useLikesStore, useListingInteractionStore, useSavedSearchStore].forEach(
+  [useLikesStore, useListingInteractionStore, useSavedSearchStore].forEach(
     (store) => store.getState().clear?.()
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -33,31 +33,26 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import UserAvatar from '@/components/shared/UserAvatar';
-import useFavoritesStore from '@/stores/favoritesStore';
+import { useRemoveSaved, useSavedMatches } from '@/hooks/useFavorites';
 import LikeButton from '@/features/likes/components/LikeButton';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function SavedMatches() {
   const { t } = useTranslation('matching');
-  const {
-    savedMatches,
-    savedCount,
-    isLoading,
-    error,
-    fetchSavedMatches,
-    removeSaved,
-  } = useFavoritesStore();
+  const { savedMatches, savedCount, isLoading, error } = useSavedMatches();
+  const removeMutation = useRemoveSaved();
+  const errorMessage = error?.response?.data?.detail || error?.message || null;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [removing, setRemoving] = useState(null);
 
-  useEffect(() => {
-    fetchSavedMatches();
-  }, [fetchSavedMatches]);
-
   const handleRemove = async (userId) => {
     setRemoving(userId);
-    await removeSaved(userId);
+    try {
+      await removeMutation.mutateAsync({ userId });
+    } catch {
+      // Keep the card usable if the server rejects a stale removal.
+    }
     setRemoving(null);
   };
 
@@ -127,10 +122,10 @@ export default function SavedMatches() {
         </div>
       </div>
 
-      {error && (
+      {errorMessage && (
         <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
           <CardContent className="py-4">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-red-600 dark:text-red-400">{errorMessage}</p>
           </CardContent>
         </Card>
       )}
