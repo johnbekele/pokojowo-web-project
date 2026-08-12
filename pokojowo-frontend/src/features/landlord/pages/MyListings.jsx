@@ -36,9 +36,10 @@ import {
 import { useToast } from '@/hooks/useToast';
 import api from '@/lib/api';
 import useAuthStore from '@/stores/authStore';
+import { formatDate } from '@/lib/utils';
 
 export default function MyListings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -239,11 +240,12 @@ export default function MyListings() {
                   <span>•</span>
                   <span>{listing.size}m²</span>
                   <span>•</span>
-                  <span>{listing.maxTenants} tenant{listing.maxTenants > 1 ? 's' : ''}</span>
+                  <span>{t('listings:card.tenants', { count: listing.maxTenants })}</span>
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Available from {new Date(listing.availableFrom).toLocaleDateString()}
+                  {t('listings:details.availableFromLabel', 'Available from')}{' '}
+                  {formatDate(listing.availableFrom, { timeZone: 'UTC' }, i18n.language)}
                 </div>
               </CardContent>
             </Card>

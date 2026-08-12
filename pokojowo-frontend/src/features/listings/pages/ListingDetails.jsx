@@ -117,9 +117,7 @@ export default function ListingDetails() {
   const sourceSite = listing.sourceSite;
   const sourceLastVerifiedAt = listing.sourceLastVerifiedAt;
   const sourceLastVerified = sourceLastVerifiedAt
-    ? new Date(sourceLastVerifiedAt).toLocaleDateString(currentLang === 'pl' ? 'pl-PL' : 'en-GB', {
-        dateStyle: 'medium',
-      })
+    ? formatDate(sourceLastVerifiedAt, { timeZone: 'UTC' }, i18n.language)
     : null;
 
   const description = getTranslatedText(listing.description, currentLang);

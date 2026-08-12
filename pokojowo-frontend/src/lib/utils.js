@@ -24,11 +24,11 @@ export function cn(...inputs) {
 /**
  * Format a date to a readable string
  */
-export function formatDate(date, options = {}) {
+export function formatDate(date, options = {}, locale) {
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return '';
 
-  const language = activeLanguage();
+  const language = locale || activeLanguage();
   return new Intl.DateTimeFormat(language, {
     year: 'numeric',
     month: 'short',
