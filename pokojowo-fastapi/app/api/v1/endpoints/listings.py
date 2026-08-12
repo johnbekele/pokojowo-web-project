@@ -803,7 +803,7 @@ async def update_listing(
     listing_id: str,
     listing_data: ListingUpdate,
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_verified)
 ):
     """Update a listing"""
     listing = await Listing.get(listing_id)
@@ -848,7 +848,7 @@ async def update_listing(
 @router.delete("/{listing_id}")
 async def delete_listing(
     listing_id: str,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(require_verified)
 ):
     """Delete a listing"""
     listing = await Listing.get(listing_id)

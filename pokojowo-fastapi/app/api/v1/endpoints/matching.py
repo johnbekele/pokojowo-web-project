@@ -13,6 +13,7 @@ from app.services.notification_service import notification_service
 from app.services.likes_service import likes_service
 from app.services.favorites_service import favorites_service
 from app.schemas.matching_schema import MatchResponse, MatchResult
+from app.core.blocking import is_blocked_between
 
 router = APIRouter()
 
@@ -281,6 +282,15 @@ async def get_match_with_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
+        )
+
+    # A blocked relationship is intentionally indistinguishable from a
+    # missing user. This prevents the compatibility endpoint from confirming
+    # that a block exists or exposing scoring data across a safety boundary.
+    if is_blocked_between(current_user, candidate):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
 
     # Run matching for single user
