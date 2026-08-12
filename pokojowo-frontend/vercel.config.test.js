@@ -41,4 +41,24 @@ describe('Vercel edge routing', () => {
   it('does not leave an example host in the deployed configuration', () => {
     expect(JSON.stringify(config)).not.toContain('REPLACE_WITH_CLOUDFRONT_DOMAIN');
   });
+
+  it('sets the security headers on every route', () => {
+    const routeHeaders = config.headers.find((rule) => rule.source === '/(.*)');
+    const headers = Object.fromEntries(
+      routeHeaders.headers.map(({ key, value }) => [key, value]),
+    );
+
+    expect(headers).toMatchObject({
+      'X-Frame-Options': 'DENY',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Strict-Transport-Security': expect.stringContaining('max-age=31536000'),
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)',
+    });
+    expect(headers['Content-Security-Policy']).toContain("default-src 'self'");
+    expect(headers['Content-Security-Policy']).toContain("frame-ancestors 'none'");
+    expect(headers['Content-Security-Policy']).toContain(
+      'https://dh3iw703m1vvi.cloudfront.net',
+    );
+  });
 });

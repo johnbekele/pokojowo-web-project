@@ -53,7 +53,7 @@ if (sentryEnabled) {
 
 /** Single hand-off point used by the web error boundaries and async callers. */
 export function reportError(error, context = {}) {
-  console.error('[pokojowo] unhandled error', error, context);
+  if (import.meta.env.DEV) console.error('[pokojowo] unhandled error');
   if (!sentryEnabled) return;
 
   Sentry.withScope((scope) => {

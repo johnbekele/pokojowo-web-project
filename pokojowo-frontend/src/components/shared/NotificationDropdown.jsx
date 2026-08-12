@@ -51,8 +51,8 @@ export default function NotificationDropdown() {
 
       setNotifications(apiNotifications);
       setHasFetched(true);
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+    } catch {
+      console.error('Failed to fetch notifications');
     } finally {
       setIsLoading(false);
     }
@@ -73,8 +73,6 @@ export default function NotificationDropdown() {
     if (!socket) return;
 
     const handleNotification = (data) => {
-      console.log('NotificationDropdown: received', data);
-
       let newNotification = null;
 
       switch (data.type) {
@@ -129,7 +127,6 @@ export default function NotificationDropdown() {
           break;
 
         default:
-          console.log('Unknown notification type:', data.type);
           return;
       }
 
@@ -159,7 +156,6 @@ export default function NotificationDropdown() {
     };
 
     const handleConnect = () => {
-      console.log('NotificationDropdown: Socket connected');
       // Refresh notifications on reconnect
       fetchNotifications();
     };
