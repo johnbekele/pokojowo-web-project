@@ -80,8 +80,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       },
       permissions: [
         'android.permission.CAMERA',
-        'android.permission.READ_EXTERNAL_STORAGE',
-        'android.permission.WRITE_EXTERNAL_STORAGE',
+        // Android 13+ gates push delivery behind this runtime permission.
+        'android.permission.POST_NOTIFICATIONS',
         'android.permission.ACCESS_FINE_LOCATION',
         'android.permission.ACCESS_COARSE_LOCATION',
         'android.permission.USE_BIOMETRIC',
