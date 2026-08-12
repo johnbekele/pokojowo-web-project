@@ -154,8 +154,8 @@ export default function ChatRoom() {
               : m
           )
         );
-      }).catch((err) => {
-        console.error('Delete failed:', err);
+      }).catch(() => {
+        console.error('Delete failed');
       });
     }
   }, [roomId, queryClient]);
@@ -205,7 +205,6 @@ export default function ChatRoom() {
     };
 
     const handleMessageDeleted = (data) => {
-      console.log('SOCKET: message_deleted received', data);
       if (data.chatId === roomId && data.messageId) {
         queryClient.setQueryData(['messages', roomId], (old = []) =>
           old.map((m) =>
@@ -246,23 +245,21 @@ export default function ChatRoom() {
       }
     };
 
-    const handleMessageSent = (data) => {
-      console.log('SOCKET: message_sent', data);
+    const handleMessageSent = () => {
       // Message already added optimistically, nothing to do
     };
 
-    const handleDeleteSuccess = (data) => {
-      console.log('SOCKET: delete_success', data);
+    const handleDeleteSuccess = () => {
+      // The optimistic UI is already up to date.
     };
 
-    const handleError = (data) => {
-      console.error('SOCKET: error', data);
+    const handleError = () => {
+      console.error('Chat socket error');
       // Could handle failed optimistic messages here if needed
     };
 
     const joinRoom = () => {
       if (socket.connected) {
-        console.log('SOCKET: joining room', roomId);
         socket.emit('join_chat', { chatId: roomId });
       }
     };
@@ -368,8 +365,8 @@ export default function ChatRoom() {
               : m
           )
         );
-      } catch (err) {
-        console.error('Send failed:', err);
+      } catch {
+        console.error('Send failed');
         // Remove optimistic message on failure
         queryClient.setQueryData(['messages', roomId], (old = []) =>
           old.filter((m) => m._id !== tempId)

@@ -21,8 +21,6 @@ export function useNotificationListener() {
 
   // Memoize handlers to prevent unnecessary re-attachments
   const handleNotification = useCallback((data) => {
-    console.log('NOTIFICATION received:', data);
-
     switch (data.type) {
       case 'new_message':
         toast({
@@ -73,28 +71,21 @@ export function useNotificationListener() {
         break;
 
       default:
-        console.log('Unknown notification type:', data.type);
+        break;
     }
   }, [t, toast, queryClient, setMutualMatchData]);
 
-  const handleUserStatus = useCallback((data) => {
-    console.log('USER STATUS update:', data);
+  const handleUserStatus = useCallback(() => {
     // Invalidate queries that might show user online status
     queryClient.invalidateQueries({ queryKey: ['chats'] });
     queryClient.invalidateQueries({ queryKey: ['chat'] });
   }, [queryClient]);
 
   const handleConnection = useCallback((data) => {
-    console.log('CONNECTION event:', data);
-    if (data.authenticated) {
-      console.log('Socket authenticated as user:', data.userId);
-    } else if (data.error) {
-      console.warn('Socket authentication failed:', data.error);
-    }
+    if (!data.authenticated && data.error) console.warn('Socket authentication failed');
   }, []);
 
   const handleNewMessage = useCallback((data) => {
-    console.log('NEW_MESSAGE received:', data);
     // Invalidate chat queries to update UI
     queryClient.invalidateQueries({ queryKey: ['chats'] });
     if (data.chatId) {
@@ -106,8 +97,6 @@ export function useNotificationListener() {
   // Attach listeners function
   const attachListeners = useCallback((socket) => {
     if (!socket || listenersAttached.current) return;
-
-    console.log('Attaching notification listeners to socket:', socket.id);
 
     socket.on('notification', handleNotification);
     socket.on('user_status', handleUserStatus);
@@ -122,8 +111,6 @@ export function useNotificationListener() {
   const detachListeners = useCallback((socket) => {
     if (!socket) return;
 
-    console.log('Detaching notification listeners from socket');
-
     socket.off('notification', handleNotification);
     socket.off('user_status', handleUserStatus);
     socket.off('connection', handleConnection);
@@ -136,7 +123,6 @@ export function useNotificationListener() {
   useEffect(() => {
     // Only proceed if authenticated
     if (!isAuthenticated || !token) {
-      console.log('Not authenticated, skipping socket listener setup');
       return;
     }
 
@@ -144,7 +130,6 @@ export function useNotificationListener() {
     let socket = getSocket();
 
     if (!socket) {
-      console.log('No socket found, attempting to connect...');
       socket = connectSocket(token);
     }
 
@@ -160,19 +145,17 @@ export function useNotificationListener() {
 
     // Also attach on connect event (for reconnections or initial connect)
     const handleConnect = () => {
-      console.log('Socket connected, attaching listeners');
       // Reset flag to allow re-attachment after reconnection
       listenersAttached.current = false;
       attachListeners(socket);
     };
 
-    const handleDisconnect = (reason) => {
-      console.log('Socket disconnected:', reason);
+    const handleDisconnect = () => {
       // Don't detach listeners - they'll be re-attached on reconnect
     };
 
-    const handleError = (error) => {
-      console.error('Socket error:', error);
+    const handleError = () => {
+      console.error('Socket error');
     };
 
     socket.on('connect', handleConnect);

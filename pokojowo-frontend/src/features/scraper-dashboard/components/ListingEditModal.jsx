@@ -84,8 +84,8 @@ export function ListingEditModal({ listing, open, onOpenChange, onSaved }) {
       });
       onSaved?.();
       onOpenChange(false);
-    } catch (error) {
-      console.error("Failed to update listing:", error);
+    } catch {
+      console.error('Failed to update listing');
     }
   };
 

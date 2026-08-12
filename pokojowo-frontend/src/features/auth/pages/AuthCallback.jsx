@@ -47,9 +47,9 @@ export default function AuthCallback() {
           // Existing user with complete profile
           navigate('/', { replace: true });
         }
-      } catch (err) {
-        console.error('OAuth callback error:', err);
-        setError(err.message);
+      } catch {
+        console.error('OAuth callback error');
+        setError(t('callback.failed'));
         setTimeout(() => {
           navigate('/login', { replace: true });
         }, 3000);
