@@ -3,6 +3,13 @@
   "italic": "fit.",
   "eyebrow": "The Matchmaker",
   "subtitle": "A short, considered shortlist — not an endless feed. Tap a card to read deeper, or swipe to keep things moving.",
+  "accessibility": {
+    "moreInfo": "View more information about {{name}}",
+    "pass": "Pass on {{name}}'s profile",
+    "like": "Like {{name}}'s profile",
+    "message": "Message {{name}}",
+    "close": "Close profile details"
+  },
   "score": {
     "label": "Compatibility",
     "excellent": "Excellent Match",

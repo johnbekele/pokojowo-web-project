@@ -23,6 +23,7 @@
   },
   "search": {
     "placeholder": "Szukaj po lokalizacji, mieście lub dzielnicy...",
+    "label": "Szukaj ogłoszeń",
     "filter": "Filtry",
     "sort": "Sortuj",
     "sortOptions": {
@@ -214,6 +215,8 @@
     "title": "Szukaj na mapie",
     "showMap": "Pokaż mapę",
     "showList": "Pokaż listę",
+    "goBack": "Wróć",
+    "openProfile": "Otwórz profil użytkownika {{name}}",
     "useMyLocation": "Użyj mojej lokalizacji",
     "locationDenied": "Brak zgody na dostęp do lokalizacji",
     "locationFailed": "Nie udało się ustalić Twojej lokalizacji",

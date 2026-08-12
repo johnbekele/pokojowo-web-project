@@ -22,6 +22,7 @@ export default function FloatingHeaderMobileFooter({
         <div className="flex overflow-hidden rounded-full border border-border">
           <button
             onClick={() => i18n.changeLanguage('en')}
+            aria-label={t('actions.languageEnglish', 'Switch language to English')}
             className={cn(
               'px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors',
               i18n.language === 'en'
@@ -33,6 +34,7 @@ export default function FloatingHeaderMobileFooter({
           </button>
           <button
             onClick={() => i18n.changeLanguage('pl')}
+            aria-label={t('actions.languagePolish', 'Switch language to Polish')}
             className={cn(
               'px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors',
               i18n.language === 'pl'

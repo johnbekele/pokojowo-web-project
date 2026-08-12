@@ -48,7 +48,12 @@
     "viewProfile": "View Profile",
     "remove": "Remove",
     "keepBrowsing": "Keep browsing",
-    "sendMessage": "Send Message"
+    "sendMessage": "Send Message",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "languageEnglish": "Switch language to English",
+    "languagePolish": "Switch language to Polish",
+    "removeImage": "Remove image {{number}}"
   },
   "unsavedChanges": "You have unsaved changes. Leave this page?",
   "validation": {
@@ -79,6 +84,11 @@
     "en": "English",
     "pl": "Polish"
   },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "system": "Use system theme"
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all read",
@@ -86,6 +96,10 @@
     "empty": "No notifications yet",
     "newMessage": "New message",
     "savedSearchMatch": "New listing matches your search"
+  },
+  "accessibility": {
+    "theme": "Change theme",
+    "notifications": "Notifications"
   },
   "time": {
     "justNow": "Just now",

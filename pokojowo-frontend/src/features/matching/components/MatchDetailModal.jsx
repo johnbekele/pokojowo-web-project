@@ -136,6 +136,7 @@ export default function MatchDetailModal({ match, isOpen, onClose, onLike, onSki
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors z-10"
+              aria-label={t('accessibility.close', 'Close profile details')}
             >
               <X className="h-5 w-5" />
             </button>

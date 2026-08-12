@@ -31,18 +31,22 @@ import { formatCurrency, cn } from '@/lib/utils';
 
 const HERO_SLIDES = [
   {
+    key: 'roommate1',
     image: '/images/promo/romm1.png',
     fallback: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1920&q=80',
   },
   {
+    key: 'room1',
     image: '/images/promo/modern-room.avif',
     fallback: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80',
   },
   {
+    key: 'roommate2',
     image: '/images/promo/Roommate-Finder.webp',
     fallback: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1920&q=80',
   },
   {
+    key: 'room2',
     image: '/images/promo/apartment-hotels.jpg',
     fallback: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1920&q=80',
   },
@@ -166,7 +170,7 @@ function HomeHero({ t, slide, setSlide, isAuthenticated, isLandlord }) {
           <MediaFrame
             src={current.image}
             fallbackSrc={current.fallback}
-            alt=""
+            alt={`${t(`hero.slides.${current.key}.title`)} — ${t(`hero.slides.${current.key}.subtitle`)}`}
             rounded="rounded-[1.75rem]"
             aspect="aspect-[4/5]"
             className="shadow-premium-lg"
@@ -178,7 +182,7 @@ function HomeHero({ t, slide, setSlide, isAuthenticated, isLandlord }) {
                 onError={(e) => {
                   if (s.fallback) e.target.src = s.fallback;
                 }}
-                alt=""
+                alt={`${t(`hero.slides.${s.key}.title`)} — ${t(`hero.slides.${s.key}.subtitle`)}`}
                 className="absolute inset-0 h-full w-full object-cover"
                 initial={false}
                 animate={{ opacity: idx === slide ? 1 : 0 }}
@@ -300,7 +304,7 @@ function PathwayCard({
       <div className="relative h-64 overflow-hidden md:h-72">
         <img
           src={image}
-          alt=""
+          alt={title}
           loading="lazy"
           onError={(e) => {
             if (fallback) e.target.src = fallback;

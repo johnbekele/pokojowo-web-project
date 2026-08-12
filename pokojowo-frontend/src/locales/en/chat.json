@@ -64,6 +64,7 @@
     "back": "Back",
     "sendMessage": "Send message",
     "messageOptions": "Message options",
-    "reply": "Reply"
+    "reply": "Reply",
+    "cancelReply": "Cancel reply"
   }
 }

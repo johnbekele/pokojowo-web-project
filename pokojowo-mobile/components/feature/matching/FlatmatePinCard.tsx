@@ -30,16 +30,25 @@ export default function FlatmatePinCard({ pin, onPress, onDismiss }: FlatmatePin
     <View className="absolute left-4 right-4 bottom-4 rounded-2xl bg-card border border-border shadow-lg">
       <TouchableOpacity
         onPress={onDismiss}
-        className="absolute -top-2 -right-2 z-10 h-7 w-7 rounded-full bg-surface border border-border items-center justify-center"
+        className="absolute -top-2 -right-2 z-10 h-11 w-11 rounded-full bg-surface border border-border items-center justify-center"
+        accessibilityRole="button"
         accessibilityLabel={t('map.dismissPin', 'Close')}
       >
         <X size={14} color={colors.text} />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={onPress} className="flex-row p-3 gap-3" activeOpacity={0.8}>
+      <TouchableOpacity
+        onPress={onPress}
+        className="flex-row p-3 gap-3"
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={t('map.openProfile', 'Open {{name}} profile', { name: pin.firstname || t('map.someone', 'A flatmate') })}
+      >
         <Image
           source={{ uri: getAvatarUrl(pin.photo, pin.userId) }}
           className="h-16 w-16 rounded-full"
+          accessible
+          accessibilityLabel={t('accessibility.profilePhoto', 'Profile photo of {{name}}', { name: pin.firstname || t('map.someone', 'A flatmate') })}
         />
         <View className="flex-1 justify-center">
           <Text className="text-text text-base font-bold">

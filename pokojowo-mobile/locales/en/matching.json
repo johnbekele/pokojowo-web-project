@@ -16,7 +16,10 @@
     "openProfileHint": "Double tap to open the profile",
     "undo": "Undo last swipe",
     "pass": "Pass on this profile",
-    "like": "Like this profile"
+    "like": "Like this profile",
+    "back": "Go back",
+    "closeFilters": "Close match filters",
+    "closeProfile": "Close profile"
   },
   "mutualMatch": {
     "title": "It's a Match!",
@@ -92,6 +95,9 @@
     "locationPlaceholder": "e.g., Warsaw, Krakow...",
     "budget": "Budget Range",
     "resultsLimit": "Results per page",
+    "scoreAtLeast": "{{score}}% or higher",
+    "resultsLimitOption": "Show {{limit}} results",
+    "openHint": "Opens filters for your matches",
     "apply": "Apply",
     "reset": "Reset"
   },

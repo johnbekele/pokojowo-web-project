@@ -1,6 +1,8 @@
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ReplyPreview({ message, onCancel, className = '' }) {
+  const { t } = useTranslation('chat');
   if (!message) return null;
 
   const truncatedContent = message.content?.length > 80
@@ -21,7 +23,7 @@ export default function ReplyPreview({ message, onCancel, className = '' }) {
         <button
           onClick={onCancel}
           className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="Cancel reply"
+          aria-label={t('accessibility.cancelReply', 'Cancel reply')}
         >
           <X size={18} />
         </button>

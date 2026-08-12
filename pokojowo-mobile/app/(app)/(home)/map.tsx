@@ -131,7 +131,12 @@ export default function ListingsMapScreen() {
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <View className="px-4 py-3 flex-row items-center gap-3">
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel={t('map.goBack', 'Go back')}
+        >
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <View className="flex-1">
@@ -146,15 +151,18 @@ export default function ListingsMapScreen() {
           </View>
         </View>
         <TouchableOpacity
-          className="bg-surface p-2.5 rounded-xl"
+          className="bg-surface p-2.5 rounded-xl min-h-[44px] min-w-[44px] items-center justify-center"
           onPress={() => setShowFilters(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('filters.title', 'Filters')}
         >
           <SlidersHorizontal size={18} color={colors.text} />
         </TouchableOpacity>
         <TouchableOpacity
-          className="bg-surface p-2.5 rounded-xl"
+          className="bg-surface p-2.5 rounded-xl min-h-[44px] min-w-[44px] items-center justify-center"
           onPress={() => router.back()}
           accessibilityLabel={t('map.showList', 'Show list')}
+          accessibilityRole="button"
         >
           <List size={18} color={colors.text} />
         </TouchableOpacity>
