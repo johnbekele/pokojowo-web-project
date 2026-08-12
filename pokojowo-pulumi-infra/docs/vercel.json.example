@@ -3,19 +3,19 @@
   "rewrites": [
     {
       "source": "/api/chat/:path*",
-      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/api/chat/:path*"
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/api/chat/:path*"
     },
     {
       "source": "/api/messages/:path*",
-      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/api/messages/:path*"
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/api/messages/:path*"
     },
     {
       "source": "/chat-socket.io/:path*",
-      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/chat-socket.io/:path*"
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/chat-socket.io/:path*"
     },
     {
       "source": "/api/:path*",
-      "destination": "https://REPLACE_WITH_CLOUDFRONT_DOMAIN/api/:path*"
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/api/:path*"
     }
   ]
 }

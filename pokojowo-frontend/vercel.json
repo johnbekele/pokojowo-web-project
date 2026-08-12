@@ -1,8 +1,25 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
+    },
+    {
+      "source": "/api/chat/:path*",
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/api/chat/:path*"
+    },
+    {
+      "source": "/api/messages/:path*",
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/api/messages/:path*"
+    },
+    {
+      "source": "/chat-socket.io/:path*",
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/chat-socket.io/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://dh3iw703m1vvi.cloudfront.net/api/:path*"
     },
     {
       "source": "/(.*)",
