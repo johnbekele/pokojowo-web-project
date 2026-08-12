@@ -7,12 +7,14 @@ from datetime import datetime
 
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.core.observability import init_sentry
 from app.core.request_context import RequestIdMiddleware
 from app.core.database import connect_to_mongo, close_mongo_connection
 from app.api.v1.api import api_router
 from app.core.socket import sio
 
 configure_logging(settings.DEBUG)
+init_sentry(settings)
 
 logger = logging.getLogger(__name__)
 

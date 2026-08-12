@@ -6,19 +6,43 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 const PRODUCTION_BACKEND_URL = 'https://dh3iw703m1vvi.cloudfront.net';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
+  const appVersion = '1.0.0';
   const apiUrl = process.env.EXPO_PUBLIC_API_URL || `${PRODUCTION_BACKEND_URL}/api`;
   const socketUrl = process.env.EXPO_PUBLIC_SOCKET_URL || PRODUCTION_BACKEND_URL;
   const chatApiUrl = process.env.EXPO_PUBLIC_CHAT_API_URL || apiUrl;
   const chatSocketUrl = process.env.EXPO_PUBLIC_CHAT_SOCKET_URL || socketUrl;
   const imageBaseUrl = process.env.EXPO_PUBLIC_IMAGE_BASE_URL || socketUrl;
   const projectId = process.env.EAS_PROJECT_ID?.trim();
+  const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN?.trim() || '';
+  const sentryEnvironment =
+    process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT?.trim() ||
+    process.env.SENTRY_ENVIRONMENT?.trim() ||
+    (process.env.NODE_ENV === 'production' ? 'production' : 'development');
+  const sentryRelease =
+    process.env.EXPO_PUBLIC_SENTRY_RELEASE?.trim() ||
+    process.env.SENTRY_RELEASE?.trim() ||
+    `pokojowo-mobile@${appVersion}`;
+  const sentryBuildPlugin: NonNullable<ExpoConfig['plugins']> = process.env.SENTRY_AUTH_TOKEN
+    ? [
+        [
+          '@sentry/react-native/expo',
+          {
+            // Organization/project are read from EAS environment variables;
+            // the auth token is never placed in the public Expo config.
+            organization: process.env.SENTRY_ORG || undefined,
+            project: process.env.SENTRY_PROJECT || undefined,
+            url: process.env.SENTRY_URL || undefined,
+          },
+        ],
+      ]
+    : [];
 
   return {
     ...config,
     name: 'Pokojowo',
     slug: 'pokojowo',
     scheme: 'pokojowo',
-    version: '1.0.0',
+    version: appVersion,
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'automatic',
@@ -100,6 +124,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       'expo-localization',
       'expo-web-browser',
       'expo-apple-authentication',
+      ...sentryBuildPlugin,
     ],
     experiments: {
       typedRoutes: true,
@@ -112,6 +137,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       imageBaseUrl,
       publicSiteUrl: process.env.EXPO_PUBLIC_SITE_URL || 'https://pokojowo.com',
       googleClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
+      sentryDsn,
+      sentryEnvironment,
+      sentryRelease,
       ...(projectId ? { eas: { projectId } } : {}),
     },
   };

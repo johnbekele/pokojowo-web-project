@@ -11,6 +11,14 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api"
     DEBUG: bool = False
 
+    # Error tracking is opt-in. Keeping the DSN unset makes local development
+    # and tests completely no-op while production can enable Sentry through
+    # environment variables without changing the image.
+    SENTRY_DSN: Optional[str] = None
+    SENTRY_ENVIRONMENT: Optional[str] = None
+    SENTRY_RELEASE: Optional[str] = None
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.0
+
     # Server settings
     HOST: str = "0.0.0.0"
     PORT: int = 3000

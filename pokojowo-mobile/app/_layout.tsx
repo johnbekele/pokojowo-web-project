@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { queryClient } from '@/lib/queryClient';
+// Side effect: installs Sentry's native/global error handlers when a DSN is set.
+import '@/lib/observability';
 // Side effect: teaches React Query to pause instead of failing while offline.
 import '@/lib/onlineManager';
 import i18n from '@/lib/i18n';

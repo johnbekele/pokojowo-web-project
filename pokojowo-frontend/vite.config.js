@@ -1,5 +1,7 @@
+/* global __dirname, process */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import path from 'path';
 
 // Dependencies grouped so that each chunk is one thing a deploy can invalidate
@@ -40,8 +42,36 @@ function chunkForModule(id) {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+export default defineConfig(({ mode }) => {
+  const sentryUploadEnabled =
+    mode === 'production' &&
+    Boolean(process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT);
+  const sentryRelease = process.env.VITE_SENTRY_RELEASE || process.env.SENTRY_RELEASE || 'pokojowo-web@1.0.0';
+
+  const plugins = [react()];
+  if (sentryUploadEnabled) {
+    plugins.push(
+      sentryVitePlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        release: {
+          name: sentryRelease,
+          inject: true,
+          create: true,
+          finalize: true,
+        },
+        sourcemaps: {
+          assets: 'dist/**',
+          filesToDeleteAfterUpload: 'dist/**/*.map',
+        },
+        telemetry: false,
+      })
+    );
+  }
+
+  return {
+  plugins,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -78,11 +108,15 @@ export default defineConfig(({ mode }) => ({
     // Publishing these serves the full readable source to anyone who opens
     // devtools on production. `vite build --mode development` still emits them
     // for debugging a real build locally.
-    sourcemap: mode !== 'production',
+    // Production maps are generated only for an authenticated Sentry upload,
+    // hidden from browsers, and deleted after upload. Without the credentials
+    // there is no map artifact to accidentally publish.
+    sourcemap: mode === 'production' ? (sentryUploadEnabled ? 'hidden' : false) : true,
     rollupOptions: {
       output: {
         manualChunks: chunkForModule,
       },
     },
   },
-}));
+  };
+});

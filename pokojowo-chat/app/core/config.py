@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
-from typing import List, Union
+from typing import List, Optional, Union
 from functools import lru_cache
 
 
@@ -9,6 +9,12 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     DEBUG: bool = False
+
+    # Error tracking is opt-in; see app.core.observability.
+    SENTRY_DSN: Optional[str] = None
+    SENTRY_ENVIRONMENT: Optional[str] = None
+    SENTRY_RELEASE: Optional[str] = None
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.0
 
     HOST: str = "0.0.0.0"
     PORT: int = 8002
