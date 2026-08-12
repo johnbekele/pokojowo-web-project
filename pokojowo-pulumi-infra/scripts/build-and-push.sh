@@ -306,8 +306,24 @@ rollback() {
   fi
 }
 
-if ! docker compose -f docker-compose.prod.yml --env-file .env pull \
-  || ! docker compose -f docker-compose.prod.yml --env-file .env up -d --remove-orphans; then
+if ! docker compose -f docker-compose.prod.yml --env-file .env pull; then
+  rollback
+  exit 1
+fi
+
+# Run versioned database migrations from the exact image being deployed before
+# replacing the live containers.  The runner records successful versions in
+# MongoDB and uses a lease, so retries and overlapping workflow runs are safe.
+# A missing/failed migration is a hard gate: do not start an image that expects
+# a schema the database does not have.
+if ! MIGRATIONS_ENABLED=1 docker compose -f docker-compose.prod.yml \
+  --env-file .env run --rm --no-deps backend python -m migrations.runner; then
+  echo "database migration failed; restoring the previous deployment" >&2
+  rollback
+  exit 1
+fi
+
+if ! docker compose -f docker-compose.prod.yml --env-file .env up -d --remove-orphans; then
   rollback
   exit 1
 fi
