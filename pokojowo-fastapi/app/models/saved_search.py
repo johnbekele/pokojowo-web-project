@@ -43,6 +43,9 @@ class SavedSearch(Document):
             # createdAt belongs in the key too — otherwise the sort is done in
             # memory after the index lookup.
             [("userId", 1), ("createdAt", -1)],
+            # Fan-out first narrows enabled searches by the listing's city and
+            # price bounds before evaluating the remaining filters in Python.
+            [("notifyEnabled", 1), ("city", 1), ("minPrice", 1), ("maxPrice", 1)],
         ]
 
     class Config:

@@ -12,6 +12,8 @@ the /discover feed would have returned for the same filters.
 """
 import asyncio
 import logging
+import re
+from time import perf_counter
 from datetime import datetime, timedelta
 
 from app.models.listing import Listing
@@ -28,6 +30,55 @@ logger = logging.getLogger(__name__)
 # Per-search throttle: at most one match notification per hour, so a burst of
 # scraped imports can't spam a user.
 SAVED_SEARCH_NOTIFY_COOLDOWN = timedelta(hours=1)
+
+
+def saved_search_candidate_query(listing: Listing) -> dict:
+    """Build the indexed candidate query for a listing fan-out.
+
+    City and price are the two high-selectivity fields that can be evaluated
+    without loading a search document.  Missing/null/empty bounds mean "no
+    constraint" and are deliberately included so legacy searches retain their
+    previous behaviour.  Remaining filters (text, districts, room/building
+    types, rent-for and offered-by) still use ``listing_matches_filters``.
+    """
+
+    clauses = [
+        {"notifyEnabled": True},
+        {
+            "$or": [
+                {"minPrice": None},
+                {"minPrice": {"$lte": listing.price}},
+            ]
+        },
+        {
+            "$or": [
+                {"maxPrice": None},
+                {"maxPrice": {"$gte": listing.price}},
+            ]
+        },
+    ]
+
+    # Listings without structured city data are legacy records whose city may
+    # only be present in the free-text address. Keep all city-constrained
+    # searches in that case so the pure predicate can apply its address
+    # fallback without false negatives.
+    if listing.city:
+        city = canonical_city(listing.city)
+        city_values = list(dict.fromkeys([listing.city, city]))
+        clauses.append(
+            {
+                "$or": [
+                    {"city": None},
+                    {"city": ""},
+                    {"city": {"$in": city_values}},
+                    # Older saved searches were not canonicalised and the
+                    # pure predicate is case-insensitive.
+                    {"city": {"$regex": f"^{re.escape(city)}$", "$options": "i"}},
+                ]
+            }
+        )
+
+    return {"$and": clauses}
 
 
 def listing_matches_filters(listing: Listing, search: SavedSearch) -> bool:
@@ -133,15 +184,19 @@ async def notify_matching_saved_searches(listing: Listing) -> None:
     the listing creation that scheduled it.
     """
     try:
+        started = perf_counter()
         owner_id = str(listing.owner_id) if listing.owner_id else None
-        searches = await SavedSearch.find({"notifyEnabled": True}).to_list()
+        searches = SavedSearch.find(saved_search_candidate_query(listing))
+        candidates = matched = 0
 
-        for search in searches:
+        async for search in searches:
+            candidates += 1
             # Never notify the owner about their own listing.
             if owner_id and search.user_id == owner_id:
                 continue
             if not listing_matches_filters(listing, search):
                 continue
+            matched += 1
 
             # Claim the cooldown atomically BEFORE sending, so concurrent
             # scraper imports of matching listings can't double-send: only the
@@ -162,6 +217,13 @@ async def notify_matching_saved_searches(listing: Listing) -> None:
                 continue
 
             await _notify_one(listing, search)
+        logger.info(
+            "saved-search fan-out listing=%s candidates=%d matched=%d elapsed_ms=%.1f",
+            getattr(listing, "id", "?"),
+            candidates,
+            matched,
+            (perf_counter() - started) * 1000,
+        )
     except Exception as e:  # noqa: BLE001 — never let notifications break inserts
         logger.error(f"Failed saved-search fan-out for listing {getattr(listing, 'id', '?')}: {e}")
 
