@@ -16,7 +16,10 @@
     "openProfileHint": "Kliknij dwukrotnie, aby otworzyć profil",
     "undo": "Cofnij ostatnie przesunięcie",
     "pass": "Pomiń ten profil",
-    "like": "Polub ten profil"
+    "like": "Polub ten profil",
+    "back": "Wróć",
+    "closeFilters": "Zamknij filtry dopasowań",
+    "closeProfile": "Zamknij profil"
   },
   "mutualMatch": {
     "title": "Masz dopasowanie!",
@@ -92,6 +95,9 @@
     "locationPlaceholder": "np. Warszawa, Kraków...",
     "budget": "Budżet",
     "resultsLimit": "Wyników na stronę",
+    "scoreAtLeast": "{{score}}% lub więcej",
+    "resultsLimitOption": "Pokaż {{limit}} wyników",
+    "openHint": "Otwiera filtry dopasowań",
     "apply": "Zastosuj",
     "reset": "Resetuj"
   },

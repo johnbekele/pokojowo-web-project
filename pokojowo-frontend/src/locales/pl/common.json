@@ -48,7 +48,12 @@
     "viewProfile": "Zobacz profil",
     "remove": "Usuń",
     "keepBrowsing": "Kontynuuj przeglądanie",
-    "sendMessage": "Wyślij wiadomość"
+    "sendMessage": "Wyślij wiadomość",
+    "showPassword": "Pokaż hasło",
+    "hidePassword": "Ukryj hasło",
+    "languageEnglish": "Przełącz język na angielski",
+    "languagePolish": "Przełącz język na polski",
+    "removeImage": "Usuń zdjęcie {{number}}"
   },
   "unsavedChanges": "Masz niezapisane zmiany. Czy na pewno chcesz opuścić tę stronę?",
   "validation": {
@@ -79,6 +84,11 @@
     "en": "Angielski",
     "pl": "Polski"
   },
+  "theme": {
+    "light": "Jasny motyw",
+    "dark": "Ciemny motyw",
+    "system": "Motyw systemowy"
+  },
   "notifications": {
     "title": "Powiadomienia",
     "markAllRead": "Oznacz jako przeczytane",
@@ -86,6 +96,10 @@
     "empty": "Brak powiadomień",
     "newMessage": "Nowa wiadomość",
     "savedSearchMatch": "Nowe ogłoszenie pasuje do Twojego wyszukiwania"
+  },
+  "accessibility": {
+    "theme": "Zmień motyw",
+    "notifications": "Powiadomienia"
   },
   "time": {
     "justNow": "Przed chwilą",

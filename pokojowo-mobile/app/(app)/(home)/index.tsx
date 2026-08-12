@@ -128,6 +128,7 @@ export default function HomeScreen() {
               value={searchQuery}
               onChangeText={setSearchQuery}
               returnKeyType="search"
+              accessibilityLabel={t('search.label', 'Search listings')}
             />
           </View>
           <TouchableOpacity
@@ -144,7 +145,7 @@ export default function HomeScreen() {
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            className="bg-surface p-3 rounded-xl"
+            className="bg-surface p-3 rounded-xl min-h-[44px] min-w-[44px] items-center justify-center"
             // Filters travel as a param so the map opens on the same search.
             onPress={() => {
               const query = encodeURIComponent(
@@ -152,6 +153,7 @@ export default function HomeScreen() {
               );
               router.push(`/(app)/(home)/map?filters=${query}`);
             }}
+            accessibilityRole="button"
             accessibilityLabel={t('map.showMap', 'Show map')}
           >
             <MapIcon size={20} color={colors.text} />

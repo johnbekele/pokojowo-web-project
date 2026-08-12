@@ -68,6 +68,7 @@
     "back": "Wstecz",
     "sendMessage": "Wyślij wiadomość",
     "messageOptions": "Opcje wiadomości",
-    "reply": "Odpowiedz"
+    "reply": "Odpowiedz",
+    "cancelReply": "Anuluj odpowiedź"
   }
 }

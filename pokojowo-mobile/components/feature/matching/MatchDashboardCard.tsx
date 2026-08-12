@@ -21,6 +21,8 @@ function StatPill({ icon, value, label, onPress }: StatPillProps) {
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
       className="flex-row items-center gap-2 bg-surface border border-border rounded-full px-3 py-2 mr-2"
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={onPress ? `${label}: ${value}` : undefined}
     >
       {icon}
       <Text className="text-text font-bold">{value}</Text>

@@ -226,6 +226,7 @@ function MatchCard({ match, onClick, index = 0 }) {
   const score = compatibility_score || 0;
   const positivePoints = explanations?.filter((e) => e.impact === 'positive').slice(0, 2) || [];
   const user = { firstname, lastname, photo };
+  const displayName = [firstname, lastname].filter(Boolean).join(' ') || t('card.unknown', 'flatmate');
 
   return (
     <motion.article
@@ -322,7 +323,11 @@ function MatchCard({ match, onClick, index = 0 }) {
           </Button>
         </Link>
         <Link to={`/chat/with/${user_id}`}>
-          <Button variant="default" size="icon" aria-label="Message">
+          <Button
+            variant="default"
+            size="icon"
+            aria-label={t('accessibility.message', { name: displayName })}
+          >
             <MessageSquare className="h-4 w-4" />
           </Button>
         </Link>

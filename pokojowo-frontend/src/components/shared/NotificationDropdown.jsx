@@ -302,6 +302,7 @@ export default function NotificationDropdown() {
           variant="ghost"
           size="icon"
           className="relative text-muted-foreground hover:text-foreground"
+          aria-label={t('accessibility.notifications', 'Notifications')}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (

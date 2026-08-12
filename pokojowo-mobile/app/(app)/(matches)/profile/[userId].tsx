@@ -70,7 +70,12 @@ export default function MatchProfileScreen() {
     return (
       <SafeAreaView className="flex-1 bg-bg">
         <View className="flex-row items-center px-4 py-3 border-b border-border">
-          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mr-3 min-h-[44px] min-w-[44px] items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.back', 'Go back')}
+          >
             <ChevronLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-text">
@@ -136,7 +141,9 @@ export default function MatchProfileScreen() {
       <View className="absolute top-12 left-4 right-4 z-10 flex-row items-center justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-black/40 items-center justify-center shadow-lg"
+          className="w-11 h-11 rounded-full bg-black/40 items-center justify-center shadow-lg"
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.back', 'Go back')}
         >
           <ChevronLeft size={24} color="#ffffff" />
         </TouchableOpacity>
@@ -150,6 +157,10 @@ export default function MatchProfileScreen() {
             source={{ uri: photoUrl }}
             style={{ width: SCREEN_WIDTH, height: 350 }}
             resizeMode="cover"
+            accessible
+            accessibilityLabel={t('accessibility.profilePhoto', 'Profile photo of {{name}}', {
+              name: user?.firstname || user?.username || t('detail.unknown', 'Unknown'),
+            })}
           />
 
           {/* Compatibility badge */}

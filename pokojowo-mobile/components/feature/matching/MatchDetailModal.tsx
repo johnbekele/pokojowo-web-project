@@ -122,7 +122,12 @@ export default function MatchDetailModal({
     <Modal visible={visible} onClose={onClose} size="full" showCloseButton={false}>
       {/* Header with close button */}
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-border">
-        <TouchableOpacity onPress={onClose} className="p-2 -ml-2">
+        <TouchableOpacity
+          onPress={onClose}
+          className="p-2 -ml-2 min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.closeProfile', 'Close profile')}
+        >
           <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-text">{t('detail.title')}</Text>
@@ -146,6 +151,8 @@ export default function MatchDetailModal({
                   className="w-28 h-28 rounded-2xl"
                   contentFit="cover"
                   transition={180}
+                  accessible
+                  accessibilityLabel={t('accessibility.profilePhoto', 'Profile photo of {{name}}', { name: firstname })}
                 />
                 {/* Score badge */}
                 <View

@@ -75,7 +75,12 @@ export default function FavoritesScreen() {
     <SafeAreaView className="flex-1 bg-surface" edges={['top']}>
       {/* Header */}
       <View className="flex-row items-center px-4 py-3 border-b border-border bg-bg">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mr-3 min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel={t('actions.back', 'Go back')}
+        >
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-text">

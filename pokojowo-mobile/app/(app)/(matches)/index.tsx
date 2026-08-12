@@ -177,8 +177,11 @@ export default function MatchesScreen() {
             </Text>
           </View>
           <TouchableOpacity
-            className="bg-surface p-3 rounded-lg relative"
+            className="bg-surface p-3 rounded-lg relative min-h-[44px] min-w-[44px] items-center justify-center"
             onPress={() => setShowFiltersModal(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('filters.title', 'Match filters')}
+            accessibilityHint={t('filters.openHint', 'Opens filters for your matches')}
           >
             <SlidersHorizontal size={20} color={colors.muted} />
             {activeFilterCount > 0 && (

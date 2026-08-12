@@ -221,7 +221,8 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "exit": "Exit",
-    "more": "More options"
+    "more": "More options",
+    "close": "Close"
   },
   "edit": {
     "title": "Edit Profile",

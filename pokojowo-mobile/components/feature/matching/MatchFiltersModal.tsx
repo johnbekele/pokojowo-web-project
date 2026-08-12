@@ -66,7 +66,12 @@ export default function MatchFiltersModal({
               {t('filters.title', 'Match Filters')}
             </Text>
           </View>
-          <TouchableOpacity onPress={onClose} className="p-1">
+          <TouchableOpacity
+            onPress={onClose}
+            className="p-1 min-h-[44px] min-w-[44px] items-center justify-center"
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.closeFilters', 'Close filters')}
+          >
             <X size={24} color={colors.muted} />
           </TouchableOpacity>
         </View>
@@ -116,6 +121,9 @@ export default function MatchFiltersModal({
                       ? 'bg-brand'
                       : 'bg-surface'
                   }`}
+                  accessibilityRole="radio"
+                  accessibilityLabel={score === 0 ? t('filters.anyScore', 'Any score') : t('filters.scoreAtLeast', '{{score}}% or higher', { score })}
+                  accessibilityState={{ selected: localFilters.minScore === score }}
                 >
                   <Text
                     className={`font-medium ${
@@ -143,6 +151,7 @@ export default function MatchFiltersModal({
               placeholder={t('filters.locationPlaceholder', 'e.g., Warsaw, Krakow...')}
               placeholderTextColor={colors.muted}
               value={localFilters.location || ''}
+              accessibilityLabel={t('filters.location', 'Location')}
               onChangeText={(text) =>
                 setLocalFilters((prev) => ({
                   ...prev,
@@ -167,6 +176,9 @@ export default function MatchFiltersModal({
                       ? 'bg-brand'
                       : 'bg-surface'
                   }`}
+                  accessibilityRole="radio"
+                  accessibilityLabel={t('filters.resultsLimitOption', 'Show {{limit}} results', { limit })}
+                  accessibilityState={{ selected: localFilters.limit === limit }}
                 >
                   <Text
                     className={`font-medium ${

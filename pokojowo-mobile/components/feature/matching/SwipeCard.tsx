@@ -63,7 +63,9 @@ export default function SwipeCard({ match, style }: SwipeCardProps) {
           contentFit="cover"
           transition={180}
           accessibilityRole="image"
-          accessibilityLabel={t('accessibility.profilePhoto', 'Flatmate profile photo')}
+          accessibilityLabel={t('accessibility.profilePhoto', 'Profile photo of {{name}}', {
+            name: user.firstname || user.username || t('detail.unknown', 'Unknown'),
+          })}
         />
 
       {/* Gradient overlay */}

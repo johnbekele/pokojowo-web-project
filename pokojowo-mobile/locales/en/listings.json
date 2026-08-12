@@ -23,6 +23,7 @@
   },
   "search": {
     "placeholder": "Search by location, city, or neighborhood...",
+    "label": "Search listings",
     "filter": "Filters",
     "sort": "Sort by",
     "sortOptions": {
@@ -210,6 +211,8 @@
     "title": "Map search",
     "showMap": "Show map",
     "showList": "Show list",
+    "goBack": "Go back",
+    "openProfile": "Open {{name}} profile",
     "useMyLocation": "Use my location",
     "locationDenied": "Location permission denied",
     "locationFailed": "Could not get your location",

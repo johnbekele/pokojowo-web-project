@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { MessageSquare, X, Check, AlertCircle } from 'lucide-react';
 import {
@@ -20,6 +21,7 @@ import api from '@/lib/api';
  * Two portraits face each other with a quiet score halo between them.
  */
 export default function MutualMatchModal() {
+  const { t } = useTranslation('common');
   const { showMutualMatchModal, mutualMatchUser, closeMutualMatchModal } = useLikesStore();
   const { user: currentUser } = useAuthStore();
 
@@ -58,7 +60,7 @@ export default function MutualMatchModal() {
         <button
           onClick={closeMutualMatchModal}
           className="absolute right-3 top-3 z-10 rounded-full p-1.5 bg-surface-paper/80 text-foreground hover:bg-surface-paper transition-colors"
-          aria-label="Close"
+          aria-label={t('actions.close', 'Close')}
         >
           <X className="h-4 w-4" />
         </button>

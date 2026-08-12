@@ -36,7 +36,12 @@ export default function CreateListingScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       {/* Header */}
       <View className="flex-row items-center px-4 py-3 border-b border-border">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mr-3 min-h-[44px] min-w-[44px] items-center justify-center"
+          accessibilityRole="button"
+          accessibilityLabel={t('actions.back', 'Go back')}
+        >
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-text">{t('create.title', 'Create Listing')}</Text>
@@ -46,6 +51,8 @@ export default function CreateListingScreen() {
         <TouchableOpacity
           onPress={() => router.push('/(app)/(profile)/verify-phone')}
           className="flex-row items-center gap-2 bg-warning/10 border-b border-warning/30 px-4 py-3"
+          accessibilityRole="button"
+          accessibilityLabel={t('create.verifyRequired', 'Verify your email to publish listings.')}
         >
           <ShieldAlert size={18} color={colors.warning} />
           <Text className="flex-1 text-sm text-text">

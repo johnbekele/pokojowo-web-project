@@ -3,6 +3,13 @@
   "italic": "naprawdę pasują.",
   "eyebrow": "Swat",
   "subtitle": "Krótka, starannie dobrana lista — nie nieskończony feed. Stuknij kartę, by przeczytać więcej, albo przesuń, by ruszyć dalej.",
+  "accessibility": {
+    "moreInfo": "Zobacz więcej informacji o profilu {{name}}",
+    "pass": "Pomiń profil użytkownika {{name}}",
+    "like": "Polub profil użytkownika {{name}}",
+    "message": "Napisz do użytkownika {{name}}",
+    "close": "Zamknij szczegóły profilu"
+  },
   "score": {
     "label": "Kompatybilność",
     "excellent": "Doskonałe dopasowanie",

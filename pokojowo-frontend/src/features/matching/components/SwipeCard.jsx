@@ -45,6 +45,7 @@ export default function SwipeCard({
 
   const score = Math.round(compatibility_score || 0);
   const user = { firstname, lastname, photo };
+  const displayName = [firstname, lastname].filter(Boolean).join(' ') || t('card.unknown', 'flatmate');
   const positivePoints = explanations?.filter((e) => e.impact === 'positive').slice(0, 2) || [];
 
   const handleDragEnd = (_, info) => {
@@ -157,7 +158,7 @@ export default function SwipeCard({
                 e.stopPropagation();
                 onCardClick?.(match);
               }}
-              aria-label="More info"
+              aria-label={t('accessibility.moreInfo', { name: displayName })}
             >
               <Info className="h-4 w-4" />
             </button>
@@ -228,7 +229,7 @@ export default function SwipeCard({
               e.stopPropagation();
               handleButtonSwipe('left');
             }}
-            aria-label="Pass"
+            aria-label={t('accessibility.pass', { name: displayName })}
           >
             <X className="h-5 w-5" />
           </motion.button>
@@ -241,7 +242,7 @@ export default function SwipeCard({
               e.stopPropagation();
               handleButtonSwipe('right');
             }}
-            aria-label="Like"
+            aria-label={t('accessibility.like', { name: displayName })}
           >
             <ThumbsUp className="h-6 w-6" />
           </motion.button>

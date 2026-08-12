@@ -29,6 +29,9 @@ export default function MapLayerToggle({ value, onChange }: MapLayerToggleProps)
             key={option.id}
             onPress={() => onChange(option.id)}
             className={cn('px-4 py-2 rounded-full', selected && 'bg-brand')}
+            accessibilityRole="radio"
+            accessibilityLabel={option.label}
+            accessibilityState={{ selected }}
           >
             <Text
               className={cn(

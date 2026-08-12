@@ -315,6 +315,7 @@ function StatTile({ icon, value, label, tone = 'paper' }) {
 }
 
 function PersonCard({ user, userId, score, showChat, status, isNew, index = 0 }) {
+  const { t } = useTranslation('common');
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -372,7 +373,7 @@ function PersonCard({ user, userId, score, showChat, status, isNew, index = 0 })
         </Link>
         {showChat && (
           <Link to={`/chat/with/${userId}`}>
-            <Button size="icon" aria-label="Message">
+            <Button size="icon" aria-label={t('actions.sendMessage', 'Send Message')}>
               <MessageSquare className="h-4 w-4" />
             </Button>
           </Link>

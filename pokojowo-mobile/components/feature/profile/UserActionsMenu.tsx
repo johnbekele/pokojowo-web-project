@@ -96,7 +96,8 @@ export default function UserActionsMenu({ userId, onBlocked }: UserActionsMenuPr
     <>
       <TouchableOpacity
         onPress={() => setMenuOpen(true)}
-        className="w-10 h-10 rounded-full bg-black/40 items-center justify-center"
+        className="w-11 h-11 rounded-full bg-black/40 items-center justify-center"
+        accessibilityRole="button"
         accessibilityLabel={t('profile:actions.more', 'More options')}
       >
         <MoreVertical size={22} color="#ffffff" />
@@ -120,6 +121,8 @@ export default function UserActionsMenu({ userId, onBlocked }: UserActionsMenuPr
                 setReportOpen(true);
               }}
               className="flex-row items-center py-4"
+              accessibilityRole="button"
+              accessibilityLabel={t('profile:report.action', 'Report user')}
             >
               <Flag size={20} color={colors.text} />
               <Text className="ml-3 text-base text-text">
@@ -132,6 +135,8 @@ export default function UserActionsMenu({ userId, onBlocked }: UserActionsMenuPr
             <TouchableOpacity
               onPress={isBlocked ? handleUnblock : handleBlock}
               className="flex-row items-center py-4"
+              accessibilityRole="button"
+              accessibilityLabel={isBlocked ? t('profile:block.unblock', 'Unblock user') : t('profile:block.action', 'Block user')}
             >
               {isBlocked ? (
                 <ShieldOff size={20} color={colors.text} />
@@ -156,7 +161,12 @@ export default function UserActionsMenu({ userId, onBlocked }: UserActionsMenuPr
               <Text className="text-lg font-bold text-text">
                 {t('profile:report.title', 'Report user')}
               </Text>
-              <TouchableOpacity onPress={() => setReportOpen(false)} className="p-1">
+              <TouchableOpacity
+                onPress={() => setReportOpen(false)}
+                className="p-1 min-h-[44px] min-w-[44px] items-center justify-center"
+                accessibilityRole="button"
+                accessibilityLabel={t('common:actions.close', 'Close')}
+              >
                 <X size={22} color={colors.muted} />
               </TouchableOpacity>
             </View>
@@ -170,6 +180,8 @@ export default function UserActionsMenu({ userId, onBlocked }: UserActionsMenuPr
                 disabled={isReporting}
                 onPress={() => handleReport(reason)}
                 className="py-4 border-b border-border"
+                accessibilityRole="button"
+                accessibilityLabel={t(`profile:report.reasons.${reason}`, reason)}
               >
                 <Text className="text-base text-text">
                   {t(`profile:report.reasons.${reason}`, reason)}
