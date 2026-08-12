@@ -192,6 +192,12 @@ VITE_API_BASE_URL=http://backend:3000/api
 VITE_SOCKET_URL=http://backend:3000
 ```
 
+## Observability and privacy
+
+Sentry setup, release/source-map configuration, alerting, and the required
+subprocessor privacy notice are documented in [docs/observability.md](docs/observability.md)
+and [docs/privacy-policy.md](docs/privacy-policy.md).
+
 ## Features
 
 ### User Roles
