@@ -49,11 +49,14 @@ manually from the `main` branch. The workflow uses the repository secrets
 EC2, S3, and CloudFront resources through AWS, and tags images with the tested
 commit SHA. It does not require the Pulumi passphrase in GitHub Actions.
 
-The SSM rollout waits for both containers' local health endpoints and restores
-the previous Compose/image configuration if either service fails to become
-healthy. A second health gate verifies the backend through CloudFront. When
-production environment files are not present in the checkout (the normal CI
-case), the deploy preserves the environment files already on the EC2 host.
+The SSM rollout pulls both immutable images, runs the versioned MongoDB
+migration runner from the backend image, and only then replaces the live
+containers. A failed migration or health gate restores the previous
+Compose/image configuration. Migrations are recorded in the `_schema_migrations`
+collection and guarded by a lease so retries are safe. A second health gate
+verifies the backend through CloudFront. When production environment files are
+not present in the checkout (the normal CI case), the deploy preserves the
+environment files already on the EC2 host.
 
 ## Notes
 
