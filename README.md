@@ -198,6 +198,10 @@ Sentry setup, release/source-map configuration, alerting, and the required
 subprocessor privacy notice are documented in [docs/observability.md](docs/observability.md)
 and [docs/privacy-policy.md](docs/privacy-policy.md).
 
+Production variable locations, required integrations, rotation guidance, and
+post-deploy verification are documented in
+[docs/production-environment.md](docs/production-environment.md).
+
 ## Features
 
 ### User Roles
