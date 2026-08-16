@@ -1,79 +1,79 @@
 # ===========================================
 # FastAPI and Server (Performance Optimized)
 # ===========================================
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
 gunicorn==21.2.0
-uvloop==0.19.0
-httptools==0.6.1
-python-multipart==0.0.6
+uvloop==0.22.1
+httptools==0.8.0
+python-multipart==0.0.32
 
 # Faster JSON serialization
-orjson==3.9.12
+orjson==3.11.9
 
 # ===========================================
 # Database (Connection Pooling Optimized)
 # ===========================================
-motor==3.3.2
+motor==3.7.1
 beanie==1.24.0
-pymongo==4.6.1
+pymongo==4.17.0
 
 # ===========================================
 # Authentication & Security
 # ===========================================
-python-jose[cryptography]==3.4.0
+python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.1.2
-pyjwt==2.8.0
+pyjwt==2.13.0
 
 # ===========================================
 # OAuth
 # ===========================================
-authlib==1.6.9
-httpx==0.26.0
-itsdangerous==2.1.2
+authlib==1.7.2
+httpx==0.28.1
+itsdangerous==2.2.0
 
 # ===========================================
 # Email
 # ===========================================
 aiosmtplib==3.0.1
-email-validator==2.1.0
+email-validator==2.3.0
 
 # ===========================================
 # WebSocket/Socket.IO
 # ===========================================
-python-socketio==5.11.0
+python-socketio==5.16.4
 aiofiles==23.2.1
 
 # ===========================================
 # Google AI (Gemini)
 # ===========================================
-google-generativeai==0.3.2
+google-generativeai==0.8.6
 
 # ===========================================
 # File uploads
 # ===========================================
 python-magic==0.4.27
 pillow==10.2.0
-boto3==1.34.144
+boto3==1.43.70
 
 # ===========================================
 # Caching (Redis support for production)
 # ===========================================
-aiocache==0.12.2
+aiocache==0.12.3
 redis==5.0.1
 
 # ===========================================
 # Core Utils
 # ===========================================
-pydantic==2.5.3
-pydantic-settings==2.1.0
-python-dotenv==1.2.1
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-dotenv==1.2.2
 
 # ===========================================
 # Monitoring & Logging (Production)
 # ===========================================
 structlog==24.1.0
-twilio==9.4.3
+twilio==9.11.0
 cachetools==5.5.1
 sentry-sdk[fastapi]==2.67.1
