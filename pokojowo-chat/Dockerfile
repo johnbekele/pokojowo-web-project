@@ -1,4 +1,4 @@
-FROM python:3.11-slim as builder
+FROM python:3.14-slim as builder
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libffi-dev \
@@ -8,7 +8,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-FROM python:3.11-slim as production
+FROM python:3.14-slim as production
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
